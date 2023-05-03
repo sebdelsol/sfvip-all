@@ -10,7 +10,7 @@ _CONFIG_DIR = Path(_CONFIG_DIR) if _CONFIG_DIR else Path(os.getenv("APPDATA")) /
 
 
 class CONFIG(Loader, path=_CONFIG_DIR / "Proxy.json"):
-    title = "svfip proxy"
+    title = "svfip all"
     player = "sfvip player.exe"
     config_dir = str(_CONFIG_DIR.resolve())
 
