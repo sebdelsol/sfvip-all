@@ -1,0 +1,37 @@
+{
+    // pylint
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": [
+        "--enable=F,E,W,R,C", // show Fatal, Error, Warning, Refactor, Convention
+        "--good-names-rgxs=^[_a-z][_a-z0-9]?$",
+        "--disable=missing-module-docstring",
+        "--disable=missing-class-docstring",
+        "--disable=missing-function-docstring",
+        "--disable=too-many-instance-attributes",
+        "--disable=too-few-public-methods",
+        "--disable=line-too-long",
+        "--disable=use-dict-literal",
+        "--load-plugins=pylint.extensions.no_self_use"
+    ],
+    // black
+    "python.formatting.provider": "none",
+    "black-formatter.args": [
+        "--line-length=115"
+    ],
+    // isort 
+    "isort.args": [
+        "--profile", "black"
+    ],
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        },
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    // hide pycache
+    "files.exclude": {
+        "**/__pycache__": true
+    }
+}
