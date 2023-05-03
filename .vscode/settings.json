@@ -8,10 +8,9 @@
         "--disable=missing-module-docstring",
         "--disable=missing-class-docstring",
         "--disable=missing-function-docstring",
-        "--disable=too-many-instance-attributes",
-        "--disable=too-few-public-methods",
-        "--disable=line-too-long",
         "--disable=use-dict-literal",
+        "--disable=line-too-long",
+        "--disable=too-few-public-methods",
         "--load-plugins=pylint.extensions.no_self_use"
     ],
     // black

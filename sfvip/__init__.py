@@ -130,7 +130,7 @@ class Player:
     @staticmethod
     def _get_from_user(config: type[CONFIG]) -> Optional[str]:
         ui = UI(config.title)
-        ui.showinfo(f"PLease find {Player.name}")
+        ui.showinfo(f"Please find {Player.name}")
         while True:
             if player := ui.find_file(Player.name, Player._pattern):
                 return player

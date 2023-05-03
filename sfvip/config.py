@@ -2,7 +2,7 @@ import os
 import winreg
 from pathlib import Path
 
-from .tools import Loader, RegKey, Serializer
+from sfvip.tools import Loader, RegKey, Serializer
 
 # find the svfip config directory in the registry or the env vars
 _CONFIG_DIR = RegKey.value_by_name(winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir")
