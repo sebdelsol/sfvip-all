@@ -1,5 +1,4 @@
 __pycache__/
-build/
-dist/
+installer/
 *.spec
 *version.txt
