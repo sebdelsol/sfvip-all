@@ -6,5 +6,5 @@ class Github:
 class Build:
     main = "sfvip_all.py"
     name = "Svfip All"
-    version = "1.1"
+    version = "1.1.1"
     dir = "build"

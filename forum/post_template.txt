@@ -1,0 +1,19 @@
+[B][SIZE=18px]{name}[/SIZE][/B][SIZE=18px] verzija [B]{version}[/B][/SIZE]
+[HR][/HR]
+[LIST]
+[*]Arhivirajte [URL='https://github.com/{github_path}/raw/master/{zip_link}'][B]ovde[/B][/URL].
+[*]Dnevnik promena [URL='https://github.com/{github_path}/blob/master/build/changelog.txt'][B]ovde[/B][/URL].
+[*]Github spremište [URL='https://github.com/{github_path}'][B]ovde[/B][/URL] (dodajte ⭐ ako vam odgovara).
+[/LIST]
+
+[I]
+In English:
+
+[B][SIZE=18px]{name}[/SIZE][/B][SIZE=18px] version [B]{version}[/B][/SIZE]
+[HR][/HR]
+[LIST]
+[*]Archive [URL='https://github.com/{github_path}/raw/master/{zip_link}'][B]here[/B][/URL].
+[*]Changelog [URL='https://github.com/{github_path}/blob/master/build/changelog.txt'][B]here[/B][/URL].
+[*]Github repositery [URL='https://github.com/{github_path}'][B]here[/B][/URL] (add a ⭐ if you like it).
+[/LIST]
+[/I]
