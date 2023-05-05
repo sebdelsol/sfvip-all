@@ -13,9 +13,9 @@ sfvip_player = Player()
 if sfvip_player.valid():
     build = build_config.Build
     installer_dir = f"{build.dir}/installer"
-    Path(installer_dir).mkdir(parents=True, exist_ok=True)
     version_txt = str(Path(f"{installer_dir}/{build.name} version.txt").resolve())
 
+    Path(installer_dir).mkdir(parents=True, exist_ok=True)
     pyinstaller_versionfile.create_versionfile(
         output_file=version_txt,
         version=build.version,
@@ -37,24 +37,28 @@ if sfvip_player.valid():
             "--version-file", version_txt,
             "--distpath", f"{installer_dir}/dist",
             "--workpath", f"{installer_dir}/build",
-            "--specpath", installer_dir
+            "--specpath", installer_dir,
+            # "--clean",
         ]
         # fmt: on
     )
 
     print("Create the archive")
     zip_name = f"{build.dir}/{build.name} {build.version}"
-    zip_type = "zip"
-    shutil.make_archive(zip_name, zip_type, f"{installer_dir}/dist")
+    zip_format = "zip"
+    shutil.make_archive(zip_name, zip_format, f"{installer_dir}/dist/{build.name}")
 
-    print("Update README.md")
-    readme_template = Path("readme/README_template.md").read_text(encoding="utf-8")
-    github = build_config.Github
-    github_path = f"{github.owner}/{github.repo}"
-    readme_txt = readme_template.format(
+    # build readme.md & a post
+    template_format = dict(
         name=build.name,
         version=build.version,
-        github_path=github_path,
-        zip=quote(f"{zip_name}.{zip_type}"),
+        github_path=f"{build_config.Github.owner}/{build_config.Github.repo}",
+        zip_link=quote(f"{zip_name}.{zip_format}"),
     )
-    Path("README.md").write_text(readme_txt, encoding="utf-8")
+
+    def template_to_file(src: str, dst: str):
+        template = Path(src).read_text(encoding="utf-8")
+        Path(dst).write_text(template.format(**template_format), encoding="utf-8")
+
+    template_to_file("readme/README_template.md", "README.md")
+    template_to_file("forum/post_template.txt", f"forum/post_{build.version}.txt")
