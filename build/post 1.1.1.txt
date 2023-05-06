@@ -1,0 +1,19 @@
+[B][SIZE=18px]Svfip All[/SIZE][/B][SIZE=18px] verzija [B]1.1.1[/B][/SIZE]
+[HR][/HR]
+[LIST]
+[*]Arhivirajte [URL='https://github.com/sebdelsol/sfvip-all/raw/master/build/Svfip%20All%201.1.1.zip'][B]ovde[/B][/URL].
+[*]Dnevnik promena [URL='https://github.com/sebdelsol/sfvip-all/blob/master/build/changelog.txt'][B]ovde[/B][/URL].
+[*]Github spremište [URL='https://github.com/sebdelsol/sfvip-all'][B]ovde[/B][/URL] (dodajte ⭐ ako vam odgovara).
+[/LIST]
+
+[I]
+In English:
+
+[B][SIZE=18px]Svfip All[/SIZE][/B][SIZE=18px] version [B]1.1.1[/B][/SIZE]
+[HR][/HR]
+[LIST]
+[*]Archive [URL='https://github.com/sebdelsol/sfvip-all/raw/master/build/Svfip%20All%201.1.1.zip'][B]here[/B][/URL].
+[*]Changelog [URL='https://github.com/sebdelsol/sfvip-all/blob/master/build/changelog.txt'][B]here[/B][/URL].
+[*]Github repositery [URL='https://github.com/sebdelsol/sfvip-all'][B]here[/B][/URL] (add a ⭐ if you like it).
+[/LIST]
+[/I]

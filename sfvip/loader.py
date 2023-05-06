@@ -6,12 +6,14 @@ from types import ModuleType
 from typing import IO
 
 
-def bundled() -> bool:
-    """launched by pyinstaller exe ?"""
-    return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+def _is_bundled() -> bool:
+    """launched by either pyinstaller or nuitka ?"""
+    is_pyinstaller = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+    is_nuitka = "__compiled__" in globals()
+    return is_pyinstaller or is_nuitka
 
 
-class ConfigLoader:
+class Loader:
     """load & save as json a py module populated with str, int or pure class"""
 
     def __init__(self, config: ModuleType, path: Path) -> None:
@@ -37,7 +39,7 @@ class ConfigLoader:
             self.save()
 
     def _raise_if_newer(self) -> None:
-        if not bundled():
+        if not _is_bundled():
             if getmtime(self._config.__file__) > getmtime(self._path):
                 raise FileNotFoundError
 

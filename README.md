@@ -1,10 +1,11 @@
-# Svfip All
+# <img src="ressources/Sfvip%20All.png" width="40" align="center"> Svfip All
 [![Version](https://img.shields.io/badge/Version-1.1.1-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/Svfip%20All%201.1.1.zip)
 
 **Svfip All** wraps **Sfvip Player** with a proxy that inserts an "All" category into _Vod_ and _Series_.  
 **So you can easily browse the entire catalog**.
 
-![All](readme/all.PNG)
+<img src="ressources/all.PNG" width="350">
+
 ## Run
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
 - Download it [**from here**](https://github.com/sebdelsol/sfvip-all/raw/master/build/Svfip%20All%201.1.1.zip) & unzip[^1].

@@ -19,13 +19,13 @@ from proxy.http.responses import okResponse
 import build_config as BUILD_CONFIG
 import sfvip_all_config as CONFIG
 
-from .loader import ConfigLoader
+from .loader import Loader
 from .regkey import RegKey
 from .ui import UI
 
 CONFIG_DIR = RegKey.value_by_name(winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir")
 CONFIG_DIR = Path(CONFIG_DIR) if CONFIG_DIR else Path(os.getenv("APPDATA")) / "SFVIP-Player"
-CONFIG_LOADER = ConfigLoader(CONFIG, CONFIG_DIR / "Sfvip All.json")
+CONFIG_LOADER = Loader(CONFIG, CONFIG_DIR / "Sfvip All.json")
 CONFIG_LOADER.update_from_json()
 
 
