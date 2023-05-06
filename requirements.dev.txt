@@ -1,2 +1,4 @@
+nuitka
+pillow
 pyinstaller
 pyinstaller-versionfile
