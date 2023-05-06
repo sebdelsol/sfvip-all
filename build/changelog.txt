@@ -1,5 +1,6 @@
 [1.1.1]
-* better builder, change repo structure
+* change repo structure
+* smaller dist
 
 [1.1]
 * clean svip player database as soon as possible 

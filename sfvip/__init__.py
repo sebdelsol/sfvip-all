@@ -165,7 +165,7 @@ class Player:
 
     @staticmethod
     def _get_from_user() -> Optional[str]:
-        ui = UI(f"{BUILD_CONFIG.name} v{BUILD_CONFIG.version}")
+        ui = UI(f"{BUILD_CONFIG.Build.name} v{BUILD_CONFIG.Build.version}")
         ui.showinfo(f"Please find {Player._name}")
         while True:
             if player := ui.find_file(Player._name, Player._pattern):

@@ -38,7 +38,7 @@ if sfvip_player.valid():
             "--distpath", f"{installer_dir}/dist",
             "--workpath", f"{installer_dir}/build",
             "--specpath", installer_dir,
-            # "--clean",
+            "--clean",
         ]
         # fmt: on
     )
