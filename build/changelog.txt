@@ -1,3 +1,6 @@
+[1.1.2]
+* use noitka for the distribution (executable & archive)
+
 [1.1.1]
 * change repo structure
 * smaller dist
