@@ -17,7 +17,7 @@ _or_ [**Zip**](https://github.com/{github_path}/raw/master/{archive_link}).
 
 Check [build_config.py](https://github.com/{github_path}/blob/master/build_config.py),
 create the environment and build:
-```
+```console
 python -m venv .sfvip
 .sfvip\scripts\activate
 pip install -r requirements.txt

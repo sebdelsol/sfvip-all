@@ -17,7 +17,7 @@ _or_ [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfv
 
 Check [build_config.py](https://github.com/sebdelsol/sfvip-all/blob/master/build_config.py),
 create the environment and build:
-```
+```console
 python -m venv .sfvip
 .sfvip\scripts\activate
 pip install -r requirements.txt
