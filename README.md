@@ -1,24 +1,28 @@
-# <img src="ressources/Sfvip%20All.png" width="40" align="center"> Svfip All
-[![Version](https://img.shields.io/badge/Version-1.1.1-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/Svfip%20All%201.1.1.zip)
+# <img src="ressources/Sfvip%20All.png" width="40" align="center"> Sfvip All
+[![Version](https://img.shields.io/badge/Version-1.1.2-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfvip%20All.exe)
 
-**Svfip All** wraps **Sfvip Player** with a proxy that inserts an "All" category into _Vod_ and _Series_.  
-**So you can easily browse the entire catalog**.
+***Sfvip All*** wraps ***Sfvip Player*** with a proxy that inserts an "All" category into _Vod_ and _Series_.  
+So you can easily **search your entire catalog**.
 
 <img src="ressources/all.PNG" width="350">
 
 ## Run
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
-- Download it [**from here**](https://github.com/sebdelsol/sfvip-all/raw/master/build/Svfip%20All%201.1.1.zip) & unzip[^1].
-- Launch **`Svfip All.exe`**[^2].
 
+Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfvip%20All.exe)[^1]
+_or_ [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfvip%20All.zip).  
+<sub>_You must have launched **Sfvip Player** at least once before._</sub>
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
-- `python -m venv .sfvip`
-- `.sfvip\scripts\activate`
-- `pip install -r requirements.txt`
-- `pip install -r requirements.dev.txt`
-- Check [build_config.py](https://github.com/sebdelsol/sfvip-all/blob/master/build_config.py).
-- `python -m build`
 
-[^1]: _The archive might be removed by MS defender due to this [bug](https://github.com/pyinstaller/pyinstaller/issues/5854)._
-[^2]: _You must have launched **Sfvip Player** at least once before_
+Check [build_config.py](https://github.com/sebdelsol/sfvip-all/blob/master/build_config.py),
+create the environment and build:
+```
+python -m venv .sfvip
+.sfvip\scripts\activate
+pip install -r requirements.txt
+pip install -r requirements.dev.txt
+python -m build
+```
+
+[^1]: _The executable might be a little slow to start since it uncompresses all embedded Python's dependencies._

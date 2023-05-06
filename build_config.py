@@ -6,6 +6,6 @@ class Github:
 class Build:
     ico = "ressources/Sfvip All.png"
     main = "sfvip_all.py"
-    name = "Svfip All"
-    version = "1.1.1"
+    name = "Sfvip All"
+    version = "1.1.2"
     dir = "build"

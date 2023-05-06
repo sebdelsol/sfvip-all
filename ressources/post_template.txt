@@ -1,19 +1,6 @@
-[B][SIZE=18px]{name}[/SIZE][/B][SIZE=18px] verzija [B]{version}[/B][/SIZE]
+[B][SIZE=20px]{name}[/B][/SIZE] {version}
+[SIZE=10px][I]Pretražite ceo katalog / Search your whole catalog[/I][/SIZE]
 [HR][/HR]
-[LIST]
-[*]Arhivirajte [URL='https://github.com/{github_path}/raw/master/{archive_link}'][B]ovde[/B][/URL].
-[*]Dnevnik promena [URL='https://github.com/{github_path}/blob/master/build/changelog.txt'][B]ovde[/B][/URL].
-[*]Github spremište [URL='https://github.com/{github_path}'][B]ovde[/B][/URL] (dodajte ⭐ ako vam odgovara).
-[/LIST]
-
-[I]
-In English:
-
-[B][SIZE=18px]{name}[/SIZE][/B][SIZE=18px] version [B]{version}[/B][/SIZE]
+[URL='https://github.com/{github_path}/raw/master/{exe_link}'][B]Exe[/B][/URL] - [URL='https://github.com/{github_path}/raw/master/{archive_link}'][B]Zip[/B][/URL] - [URL='https://github.com/{github_path}/blob/master/build/changelog.txt'][B]Changelog[/B][/URL] - [URL='https://github.com/{github_path}'][B]Github[/B][/URL]  
 [HR][/HR]
-[LIST]
-[*]Archive [URL='https://github.com/{github_path}/raw/master/{archive_link}'][B]here[/B][/URL].
-[*]Changelog [URL='https://github.com/{github_path}/blob/master/build/changelog.txt'][B]here[/B][/URL].
-[*]Github repositery [URL='https://github.com/{github_path}'][B]here[/B][/URL] (add a ⭐ if you like it).
-[/LIST]
-[/I]
+[SIZE=10px]Dodajte ⭐ ako vam odgovara / Add a ⭐ if you like it[/SIZE]
