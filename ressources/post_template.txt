@@ -3,4 +3,4 @@
 [HR][/HR]
 [URL='https://github.com/{github_path}/raw/master/{exe_link}'][B]Exe[/B][/URL] - [URL='https://github.com/{github_path}/raw/master/{archive_link}'][B]Zip[/B][/URL] - [URL='https://github.com/{github_path}/blob/master/build/changelog.txt'][B]Changelog[/B][/URL] - [URL='https://github.com/{github_path}'][B]Github[/B][/URL]  
 [HR][/HR]
-[SIZE=10px]Dodajte ⭐ ako vam odgovara / Add a ⭐ if you like it[/SIZE]
+[SIZE=10px][I]Dodajte ⭐ ako vam odgovara / Add a ⭐ if you like it[/I][/SIZE]

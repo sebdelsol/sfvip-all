@@ -37,7 +37,8 @@ class Plugin(HttpProxyBasePlugin):
     _query_attr = {httpMethods.POST: "body", httpMethods.GET: "path"}
     _all_category_query = f"&category_id={CONFIG.AllCat.id}".encode()
     _all_category_json = dict(category_id=str(CONFIG.AllCat.id), category_name=CONFIG.AllCat.name, parent_id=0)
-    _is_categories_query = re.compile(f"get_({'|'.join(CONFIG.AllCat.inject)})_categories".encode()).search
+    _re_in_what_to_inject = "|".join(re.escape(what) for what in CONFIG.AllCat.inject)
+    _is_categories_query = re.compile(f"get_({_re_in_what_to_inject})_categories".encode()).search
 
     def handle_client_request(self, request: HttpParser) -> Optional[HttpParser]:
         if request.path and Plugin._api_query in request.path:
