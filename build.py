@@ -7,30 +7,31 @@ from urllib.parse import quote
 from build_config import Build, Github
 
 installer_dir = f"{Build.dir}/installer"
-nuitka_cmd = [
-    f"{sys.executable}",
-    "-m",
-    "nuitka",
-    "--enable-plugin=tk-inter",
-    "--disable-console",
-    "--standalone",
-    "--onefile",
-    "--follow-imports",
-    f"--windows-icon-from-ico={Build.ico}",
-    f"--windows-file-version={Build.version}",
-    f"--output-dir={installer_dir}",
-    "-o",
-    f"{Build.name}.exe",
-    Build.main,
-]
-subprocess.run(nuitka_cmd, check=False)
+# fmt: off
+subprocess.run(
+    [
+        f"{sys.executable}", "-m", "nuitka",
+        "--enable-plugin=tk-inter",
+        "--disable-console",
+        "--follow-imports",
+        "--standalone",
+        "--onefile",
+        f"--windows-file-version={Build.version}",
+        f"--windows-icon-from-ico={Build.ico}",
+        f"--output-dir={installer_dir}",
+        "-o", f"{Build.name}.exe",
+        Build.main,
+    ],
+    check=True,
+)
+# fmt: on
 
 print("Create the archive")
 built_name = f"{Build.dir}/{Build.version}/{Build.name}"
 shutil.make_archive(built_name, "zip", f"{installer_dir}/{Build.main[:-3]}.dist")
 shutil.copy(f"{installer_dir}/{Build.name}.exe", f"{built_name}.exe")
 
-# create readme.md & a post
+print("Update readme.md and create a forum post")
 template_format = dict(
     name=Build.name,
     version=Build.version,
