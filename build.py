@@ -8,17 +8,16 @@ from urllib.parse import quote
 from build_config import Build, Github
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--readme", action="store_true", help="update readme and post only")
-update_distribution = not parser.parse_args().readme
+parser.add_argument("--readme-only", action="store_true", help="update readme and post only")
+update_distribution = not parser.parse_args().readme_only
 
 installer_dir = f"{Build.dir}/installer"
 built_name = f"{Build.dir}/{Build.version}/{Build.name}"
 
 if update_distribution:
-    nuitka = sys.executable, "-m", "nuitka"
     subprocess.run(
         [
-            *nuitka,
+            *(sys.executable, "-m", "nuitka"),  # run nuitka
             f"--windows-file-version={Build.version}",
             f"--windows-icon-from-ico={Build.ico}",
             f"--output-filename={Build.name}.exe",
@@ -35,11 +34,12 @@ if update_distribution:
         ],
         check=True,
     )
-    print("Create archive & exe")
+    print(f"Compress {Build.name}.zip")
     shutil.copy(f"{installer_dir}/{Build.name}.exe", f"{built_name}.exe")
     shutil.make_archive(built_name, "zip", f"{installer_dir}/{Build.main[:-3]}.dist")
 
-print("Create readme.md & a forum post")
+# Create readme.md & forum post
+print("Create readme & forum post")
 template_format = dict(
     github_path=f"{Github.owner}/{Github.repo}",
     archive_link=quote(f"{built_name}.zip"),
