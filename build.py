@@ -6,39 +6,39 @@ from urllib.parse import quote
 
 from build_config import Build, Github
 
+nuitka = sys.executable, "-m", "nuitka"
 installer_dir = f"{Build.dir}/installer"
-# fmt: off
 subprocess.run(
     [
-        f"{sys.executable}", "-m", "nuitka",
-        "--enable-plugin=tk-inter",
+        *nuitka,
+        f"--windows-file-version={Build.version}",
+        f"--windows-icon-from-ico={Build.ico}",
+        f"--output-filename={Build.name}.exe",
+        f"--output-dir={installer_dir}",
+        "--assume-yes-for-downloads",  # download dependency walker, ccache, and gcc
+        "--enable-plugin=tk-inter",  # needed for tkinter
         "--disable-console",
         "--follow-imports",
         "--standalone",
         "--onefile",
-        f"--windows-file-version={Build.version}",
-        f"--windows-icon-from-ico={Build.ico}",
-        f"--output-dir={installer_dir}",
-        "-o", f"{Build.name}.exe",
         Build.main,
     ],
     check=True,
 )
-# fmt: on
 
-print("Create the archive")
+print("Create archive & exe")
 built_name = f"{Build.dir}/{Build.version}/{Build.name}"
 shutil.make_archive(built_name, "zip", f"{installer_dir}/{Build.main[:-3]}.dist")
 shutil.copy(f"{installer_dir}/{Build.name}.exe", f"{built_name}.exe")
 
-print("Update readme.md and create a forum post")
+print("Create readme.md & a forum post")
 template_format = dict(
-    name=Build.name,
-    version=Build.version,
     github_path=f"{Github.owner}/{Github.repo}",
     archive_link=quote(f"{built_name}.zip"),
     exe_link=quote(f"{built_name}.exe"),
     ico_link=quote(Build.ico),
+    version=Build.version,
+    name=Build.name,
 )
 
 

@@ -34,8 +34,9 @@
         "**/__pycache__": true
     },
     // env
-    "python.envFile": "${workspaceFolder}/.sfvip/",
+    "python.envFile": "${workspaceFolder}/.sfvip/", 
     "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
     // https://github.com/microsoft/tsdoc/issues/253#issuecomment-1536531668
     "json.validate.enable": false
 }

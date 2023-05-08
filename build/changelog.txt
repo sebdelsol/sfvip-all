@@ -9,4 +9,4 @@
 * clean svip player database as soon as possible 
 
 [1.0]
-* find and wraps sfvip player with aproxy to add an All category in Vod and Series
+* find and wrap sfvip player with a proxy to add an All category in Vod and Series

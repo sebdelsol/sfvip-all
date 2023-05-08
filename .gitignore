@@ -1,5 +1,3 @@
-.sfvip/
 __pycache__/
 installer/
-*.spec
-*version.txt
+.sfvip/
