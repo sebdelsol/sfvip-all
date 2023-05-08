@@ -1,4 +1,3 @@
-import http.client
 import json
 import os
 import re
@@ -6,8 +5,10 @@ import subprocess
 import time
 import winreg
 from contextlib import contextmanager
+from http.client import HTTPResponse
 from pathlib import Path
 from typing import IO, Callable, Iterator, Optional
+from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 import proxy
@@ -29,7 +30,6 @@ CONFIG_LOADER = Loader(CONFIG, CONFIG_DIR / "Sfvip All.json")
 CONFIG_LOADER.update_from_json()
 
 
-# can't use a local class declared @runtime : it can't be pickled by multiprocessing
 class Plugin(HttpProxyBasePlugin):
     """proxy.py plugin that injects the all category"""
 
@@ -40,6 +40,19 @@ class Plugin(HttpProxyBasePlugin):
     _re_in_what_to_inject = "|".join(re.escape(what) for what in CONFIG.AllCat.inject)
     _is_categories_query = re.compile(f"get_({_re_in_what_to_inject})_categories".encode()).search
 
+    @staticmethod
+    def _get_categories(request: HttpParser) -> Optional[list]:
+        try:
+            # pylint: disable=protected-access
+            with urlopen(str(request._url), request.body, timeout=CONFIG.Proxy.timeout) as resp:
+                resp: HTTPResponse
+                if resp.status == 200:
+                    if isinstance(categories := json.loads(resp.read()), list):
+                        return categories
+        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError):
+            pass
+        return None
+
     def handle_client_request(self, request: HttpParser) -> Optional[HttpParser]:
         if request.path and Plugin._api_query in request.path:
             query_attr = Plugin._query_attr[request.method]
@@ -48,37 +61,36 @@ class Plugin(HttpProxyBasePlugin):
                 # turn an all category query into a whole catalog query
                 setattr(request, query_attr, query.replace(Plugin._all_category_query, b""))
             elif Plugin._is_categories_query(query):
-                # send a response with the all category injected
-                # pylint: disable=protected-access
-                with urlopen(str(request._url), request.body, timeout=CONFIG.Proxy.timeout) as resp:
-                    resp: http.client.HTTPResponse
-                    if resp.status == 200:
-                        resp_json = [Plugin._all_category_json] + json.loads(resp.read())
-                        self.client.queue(
-                            okResponse(
-                                headers={b"Content-Type": b"application/json"},
-                                content=json.dumps(resp_json).encode(),
-                            )
+                # queue a response with the all category injected
+                if categories := self._get_categories(request):
+                    categories.insert(0, Plugin._all_category_json)
+                    self.client.queue(
+                        okResponse(
+                            headers={b"Content-Type": b"application/json"},
+                            content=json.dumps(categories).encode(),
+                            conn_close=True,
                         )
+                    )
+                    return None  # our response has already been queued
         return request
 
 
 class Proxy(proxy.Proxy):
-    """multiprocess proxy, automatically find an available port"""
+    """proxy using our Plugin"""
 
     _buf_size = str(CONFIG.Proxy.buf_size_in_MB * 1024**2)
-    # fmt: off
-    _proxy_opts = (
-        "--timeout", str(CONFIG.Proxy.timeout),
-        "--log-level", CONFIG.Proxy.log_level,
-        "--client-recvbuf-size", _buf_size,
-        "--server-recvbuf-size", _buf_size,
-        "--max-sendbuf-size", _buf_size,
-        "--num-acceptors", "1",  # prevent shutdown lock
-    )  # fmt: on
+    _options = (
+        *("--timeout", str(CONFIG.Proxy.timeout)),
+        *("--log-level", CONFIG.Proxy.log_level),
+        *("--client-recvbuf-size", _buf_size),  # for video streaming
+        *("--server-recvbuf-size", _buf_size),
+        *("--max-sendbuf-size", _buf_size),
+        *("--num-acceptors", "1"),  # prevent shutdown lock
+        *("--port", "0"),  # port allocated by the proxy.Proxy kernel
+    )
 
     def __init__(self) -> None:
-        super().__init__(Proxy._proxy_opts, port=0, plugins=[Plugin])
+        super().__init__(Proxy._options, plugins=[Plugin])
 
 
 class Users:
@@ -180,7 +192,7 @@ class Player:
             return player.exists() and player.is_file() and player.match(Player._pattern)
         return False
 
-    def open(self) -> subprocess.Popen:
+    def run(self) -> subprocess.Popen:
         return subprocess.Popen([self.player_path])
 
 
@@ -189,5 +201,5 @@ def run():
     if sfvip_player.valid():
         with Proxy() as sfvip_proxy:
             with Users().set_proxy(sfvip_proxy.flags.port) as restore_proxy:
-                with sfvip_player.open():
+                with sfvip_player.run():
                     restore_proxy()
