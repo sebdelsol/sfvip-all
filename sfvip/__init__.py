@@ -36,12 +36,12 @@ class Plugin(HttpProxyBasePlugin):
     _api_query = b"player_api.php?"
     _query_attr = {httpMethods.POST: "body", httpMethods.GET: "path"}
     _all_category_query = f"&category_id={CONFIG.AllCat.id}".encode()
+    _inject_in_re = "|".join(re.escape(what) for what in CONFIG.AllCat.inject)
+    _is_categories_query = re.compile(f"get_({_inject_in_re})_categories".encode()).search
     _all_category_json = dict(category_id=str(CONFIG.AllCat.id), category_name=CONFIG.AllCat.name, parent_id=0)
-    _re_in_what_to_inject = "|".join(re.escape(what) for what in CONFIG.AllCat.inject)
-    _is_categories_query = re.compile(f"get_({_re_in_what_to_inject})_categories".encode()).search
 
     @staticmethod
-    def _get_categories(request: HttpParser) -> Optional[list]:
+    def _request_categories(request: HttpParser) -> Optional[list]:
         try:
             # pylint: disable=protected-access
             with urlopen(str(request._url), request.body, timeout=CONFIG.Proxy.timeout) as resp:
@@ -62,7 +62,7 @@ class Plugin(HttpProxyBasePlugin):
                 setattr(request, query_attr, query.replace(Plugin._all_category_query, b""))
             elif Plugin._is_categories_query(query):
                 # queue a response with the all category injected
-                if categories := self._get_categories(request):
+                if categories := self._request_categories(request):
                     categories.insert(0, Plugin._all_category_json)
                     self.client.queue(
                         okResponse(
@@ -85,7 +85,7 @@ class Proxy(proxy.Proxy):
         *("--client-recvbuf-size", _buf_size),  # for video streaming
         *("--server-recvbuf-size", _buf_size),
         *("--max-sendbuf-size", _buf_size),
-        *("--num-acceptors", "1"),  # prevent shutdown lock
+        *("--num-acceptors", "1"),  # avoid deadlock (https://github.com/abhinavsingh/proxy.py/pull/1199)
         *("--port", "0"),  # port allocated by the proxy.Proxy kernel
     )
 

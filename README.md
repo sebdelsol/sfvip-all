@@ -1,7 +1,7 @@
 # <img src="ressources/Sfvip%20All.png" width="40" align="center"> Sfvip All
 [![Version](https://img.shields.io/badge/Version-1.1.2-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfvip%20All.exe)
 
-***Sfvip All*** wraps ***Sfvip Player*** with a proxy that inserts an "All" category into _Vod_ and _Series_.  
+***Sfvip All*** wraps ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** with a proxy that inserts an "All" category into _Vod_ and _Series_.  
 So you can easily **search your entire catalog**.
 
 <img src="ressources/all.PNG" width="350">
