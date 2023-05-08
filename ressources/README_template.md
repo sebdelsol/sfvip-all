@@ -1,7 +1,7 @@
 # <img src="{ico_link}" width="40" align="center"> {name}
 [![Version](https://img.shields.io/badge/Version-{version}-informational)](https://github.com/{github_path}/raw/master/{exe_link})
 
-***{name}*** wraps ***Sfvip Player*** with a proxy that inserts an "All" category into _Vod_ and _Series_.  
+***{name}*** wraps ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** with a proxy that inserts an "All" category into _Vod_ and _Series_.  
 So you can easily **search your entire catalog**.
 
 <img src="ressources/all.PNG" width="350">

@@ -1,3 +1,4 @@
+import argparse
 import shutil
 import subprocess
 import sys
@@ -6,30 +7,37 @@ from urllib.parse import quote
 
 from build_config import Build, Github
 
-nuitka = sys.executable, "-m", "nuitka"
-installer_dir = f"{Build.dir}/installer"
-subprocess.run(
-    [
-        *nuitka,
-        f"--windows-file-version={Build.version}",
-        f"--windows-icon-from-ico={Build.ico}",
-        f"--output-filename={Build.name}.exe",
-        f"--output-dir={installer_dir}",
-        "--assume-yes-for-downloads",  # download dependency walker, ccache, and gcc
-        "--enable-plugin=tk-inter",  # needed for tkinter
-        "--disable-console",
-        "--follow-imports",
-        "--standalone",
-        "--onefile",
-        Build.main,
-    ],
-    check=True,
-)
+parser = argparse.ArgumentParser()
+parser.add_argument("--readme", action="store_true", help="update readme and post only")
+update_distribution = not parser.parse_args().readme
 
-print("Create archive & exe")
+installer_dir = f"{Build.dir}/installer"
 built_name = f"{Build.dir}/{Build.version}/{Build.name}"
-shutil.make_archive(built_name, "zip", f"{installer_dir}/{Build.main[:-3]}.dist")
-shutil.copy(f"{installer_dir}/{Build.name}.exe", f"{built_name}.exe")
+
+if update_distribution:
+    nuitka = sys.executable, "-m", "nuitka"
+    subprocess.run(
+        [
+            *nuitka,
+            f"--windows-file-version={Build.version}",
+            f"--windows-icon-from-ico={Build.ico}",
+            f"--output-filename={Build.name}.exe",
+            f"--output-dir={installer_dir}",
+            "--assume-yes-for-downloads",  # download dependency walker, ccache, and gcc
+            "--enable-plugin=tk-inter",  # needed for tkinter
+            "--prefer-source-code",
+            "--python-flag=-OO",
+            "--disable-console",
+            "--follow-imports",
+            "--standalone",
+            "--onefile",
+            Build.main,
+        ],
+        check=True,
+    )
+    print("Create archive & exe")
+    shutil.copy(f"{installer_dir}/{Build.name}.exe", f"{built_name}.exe")
+    shutil.make_archive(built_name, "zip", f"{installer_dir}/{Build.main[:-3]}.dist")
 
 print("Create readme.md & a forum post")
 template_format = dict(
