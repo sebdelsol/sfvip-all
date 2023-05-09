@@ -12,10 +12,10 @@ So you can easily **search your entire catalog**.
 Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfvip%20All.exe)
 _or_ [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfvip%20All.zip).  
 <sub>_You must have launched **Sfvip Player** at least once before._</sub>  
-<sub>_The standalone **Exe** might be a little slow to start since it uncompresses all embedded Python's dependencies._</sub>
+<sub>_The standalone **Exe** might be a little slow to start since it unzips its Python's dependencies._</sub>
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
-[![Code style](https://img.shields.io/badge/Code%20Style-Black-000000)](https://github.com/psf/black)
+[![Code](https://img.shields.io/badge/Code-Black-000000)](https://github.com/psf/black)
 
 Check [build_config.py](https://github.com/sebdelsol/sfvip-all/blob/master/build_config.py),
 create the environment and build:
