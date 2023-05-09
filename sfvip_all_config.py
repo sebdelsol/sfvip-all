@@ -3,9 +3,9 @@ class Player:
 
 
 class Proxy:
-    buf_size_in_MB = 16
+    buf_size_in_MB = 2
     log_level = "ERROR"
-    timeout = 30
+    timeout = 10
 
 
 class AllCat:
