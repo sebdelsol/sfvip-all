@@ -83,12 +83,19 @@ class Proxy(proxy.Proxy):
         *("--client-recvbuf-size", _buf_size),  # for video streaming
         *("--server-recvbuf-size", _buf_size),
         *("--max-sendbuf-size", _buf_size),
-        *("--num-acceptors", "1"),  # avoid deadlock (https://github.com/abhinavsingh/proxy.py/pull/1199)
+        *("--num-acceptors", "2"),  # do not tax the os
         *("--port", "0"),  # port allocated by the proxy.Proxy kernel
     )
 
     def __init__(self) -> None:
         super().__init__(Proxy._options, plugins=[Plugin])
+
+    # override to avoid deadlock
+    def shutdown(self) -> None:
+        for acceptor in self.acceptors.acceptors:
+            acceptor.terminate()
+        if self.listeners:
+            self.listeners.shutdown()
 
 
 class Users:
