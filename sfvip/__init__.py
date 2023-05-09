@@ -31,7 +31,7 @@ CONFIG_LOADER.update_from_json()
 
 
 class Plugin(HttpProxyBasePlugin):
-    """proxy.py plugin that injects the all category"""
+    """proxy.py plugin to inject the all category"""
 
     _api_query = b"player_api.php?"
     _query_attr = {httpMethods.POST: "body", httpMethods.GET: "path"}
@@ -46,9 +46,8 @@ class Plugin(HttpProxyBasePlugin):
             # pylint: disable=protected-access
             with urlopen(str(request._url), request.body, timeout=CONFIG.Proxy.timeout) as resp:
                 resp: HTTPResponse
-                if resp.status == 200:
-                    if isinstance(categories := json.loads(resp.read()), list):
-                        return categories
+                if resp.status == 200 and isinstance(categories := json.loads(resp.read()), list):
+                    return categories
         except (HTTPError, URLError, TimeoutError, json.JSONDecodeError):
             pass
         return None
@@ -61,17 +60,16 @@ class Plugin(HttpProxyBasePlugin):
                 # turn an all category query into a whole catalog query
                 setattr(request, query_attr, query.replace(Plugin._all_category_query, b""))
             elif Plugin._is_categories_query(query):
-                # queue a response with the all category injected
                 if categories := self._request_categories(request):
-                    categories.insert(0, Plugin._all_category_json)
+                    # queue a response with the all category injected @ first
                     self.client.queue(
                         okResponse(
                             headers={b"Content-Type": b"application/json"},
-                            content=json.dumps(categories).encode(),
+                            content=json.dumps((Plugin._all_category_json, *categories)).encode(),
                             conn_close=True,
                         )
                     )
-                    return None  # our response has already been queued
+                    return None  # no upstream request needed
         return request
 
 

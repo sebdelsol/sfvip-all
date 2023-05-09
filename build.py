@@ -7,6 +7,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from build_config import Build, Github
+from sfvip_all_config import AllCat
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--readme-only", action="store_true", help="update readme and post only")
@@ -42,12 +43,14 @@ if update_dist:
 # Create readme.md & forum post
 print("Create readme & forum post")
 template_format = dict(
+    inject=" and ".join(f"_{what.capitalize()}_" for what in AllCat.inject),
     github_path=f"{Github.owner}/{Github.repo}",
     archive_link=quote(f"{dist_name}.zip"),
     exe_link=quote(f"{dist_name}.exe"),
     ico_link=quote(Build.ico),
     version=Build.version,
     name=Build.name,
+    all=AllCat.name,
 )
 
 
