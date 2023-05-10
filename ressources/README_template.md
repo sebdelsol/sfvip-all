@@ -12,7 +12,7 @@ So you can easily **search your entire catalog**.
 Download the [**Exe**](https://github.com/{github_path}/raw/master/{exe_link})
 or [**Zip**](https://github.com/{github_path}/raw/master/{archive_link}).  
 <sub>_You must have launched **Sfvip Player** at least once before._</sub>  
-<sub>_The standalone **Exe** might be a little slow to start since it unzips its Python environment._</sub>
+<sub>_The standalone **Exe** might be a little slow to start at first._</sub>
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
