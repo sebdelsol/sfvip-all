@@ -1,5 +1,6 @@
 if __name__ == "__main__":
-    # not need for feeze_support with noitka
+    import sfvip_all_config as Config
+    from build_config import Build
     from sfvip import run
 
-    run()
+    run(Config, f"{Build.name} v{Build.version}")
