@@ -20,13 +20,13 @@ if update_dist:
     subprocess.run(
         [
             *(sys.executable, "-m", "nuitka"),  # run nuitka
+            f"--onefile-tempdir-spec=%CACHE_DIR%/{Build.name} {Build.version}",
             f"--windows-file-version={Build.version}",
             f"--windows-icon-from-ico={Build.ico}",
             f"--output-filename={Build.name}.exe",
             f"--output-dir={dist_temp}",
             "--assume-yes-for-downloads",  # download dependency walker, ccache, and gcc
             "--enable-plugin=tk-inter",  # needed for tkinter
-            "--prefer-source-code",
             "--python-flag=-OO",
             "--disable-console",
             "--follow-imports",

@@ -6,11 +6,11 @@ So you can easily **search your entire catalog**.
 <img src="ressources/all.PNG" width="350">
 
 ## Download
-[![Version](https://img.shields.io/badge/Version-1.1.2-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfvip%20All.exe)
+[![Version](https://img.shields.io/badge/Version-1.1.3-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.3/Sfvip%20All.exe)
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
 
-Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfvip%20All.exe)
-or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.2/Sfvip%20All.zip).  
+Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.3/Sfvip%20All.exe)
+or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.3/Sfvip%20All.zip).  
 <sub>_You must have launched **Sfvip Player** at least once before._</sub>  
 <sub>_The standalone **Exe** might be a little slow to start since it unzips its Python environment._</sub>
 ## Build

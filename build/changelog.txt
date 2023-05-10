@@ -1,3 +1,6 @@
+[1.1.3]
+* use mitmproxy instead of proxy.py : bigger distrib but lighter and faster runtime
+
 [1.1.2]
 * use noitka for the distribution (executable & archive)
 
