@@ -1,0 +1,2 @@
+class SfvipError(Exception):
+    pass

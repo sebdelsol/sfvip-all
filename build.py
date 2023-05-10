@@ -17,12 +17,14 @@ dist_temp = f"{Build.dir}/temp"
 dist_name = f"{Build.dir}/{Build.version}/{Build.name}"
 
 if update_dist:
+    cache_dir = f"%CACHE_DIR%/{Build.name} {Build.version}"
     subprocess.run(
         [
             *(sys.executable, "-m", "nuitka"),  # run nuitka
-            f"--onefile-tempdir-spec=%CACHE_DIR%/{Build.name} {Build.version}",
+            f"--force-stderr-spec={cache_dir}/error.log",
             f"--windows-file-version={Build.version}",
             f"--windows-icon-from-ico={Build.ico}",
+            f"--onefile-tempdir-spec={cache_dir}",
             f"--output-filename={Build.name}.exe",
             f"--output-dir={dist_temp}",
             "--assume-yes-for-downloads",  # download dependency walker, ccache, and gcc

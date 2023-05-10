@@ -9,6 +9,7 @@ from typing import Callable, Self
 from sfvip_all_config import Player as ConfigPlayer
 
 from .config import Loader
+from .exceptions import SfvipError
 from .regkey import RegKey
 
 
@@ -29,8 +30,11 @@ class Users:
                 config_player.config_dir = config_dir
                 config_loader.save()
 
+        if not self._dir_exists(config_dir):
+            raise SfvipError("No config dir found")
         self._database = Path(config_dir) / "Database.json"
-        self.valid = self._database.is_file()
+        if not self._database.is_file():
+            raise SfvipError("No users database found")
         self._accessed_time = None
 
     @staticmethod
@@ -46,17 +50,16 @@ class Users:
         return path.suffix in Users._playlist_ext or path.is_file()
 
     def _set_proxy(self, proxy_url: str) -> None:
-        if self.valid:
-            with self._database.open("r", encoding=Users._encoding) as f:
-                users = json.load(f)
-            if users := [user for user in users if not self._is_playlist(user)]:
-                for user in users:
-                    user["HttpProxy"] = proxy_url
-                with self._database.open("w", encoding=Users._encoding) as f:
-                    json.dump(users, f, indent=2, separators=(",", ":"))
+        with self._database.open("r", encoding=Users._encoding) as f:
+            users = json.load(f)
+        if users := [user for user in users if not self._is_playlist(user)]:
+            for user in users:
+                user["HttpProxy"] = proxy_url
+            with self._database.open("w", encoding=Users._encoding) as f:
+                json.dump(users, f, indent=2, separators=(",", ":"))
 
     def restore_proxy(self, timeout: int = 5) -> None:
-        if self.valid and self._accessed_time:
+        if self._accessed_time:
 
             def wait(condition: Callable[[], bool]) -> Callable[[], bool]:
                 def loop() -> bool:

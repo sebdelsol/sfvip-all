@@ -6,6 +6,7 @@ from typing import Optional
 from sfvip_all_config import Player as ConfigPlayer
 
 from .config import Loader
+from .exceptions import SfvipError
 from .regkey import RegKey
 from .ui import UI
 
@@ -20,7 +21,8 @@ class Player:
     def __init__(self, config_loader: Loader, config_player: type[ConfigPlayer], app_name: str) -> None:
         self.app_name = app_name
         self._path = self._get_path(config_loader, config_player, app_name)
-        self.valid = self._valid(self._path)
+        if not self._valid(self._path):
+            raise SfvipError("No player found")
 
     @staticmethod
     def _valid(path: str) -> bool:
