@@ -20,6 +20,7 @@ class Loader:
         return self._path.open(mode=mode, encoding="utf-8")
 
     def save(self):
+        self._path.parent.mkdir(parents=True, exist_ok=True)
         with self._open("w") as f:
             json.dump(self._dict_from(self._config), f, indent=2)
 
@@ -27,7 +28,7 @@ class Loader:
         with self._open("r") as f:
             self._map_dict_to(json.load(f), self._config)
 
-    def update_from_json(self) -> None:
+    def update(self) -> None:
         try:
             self._raise_if_newer()
             self.load()

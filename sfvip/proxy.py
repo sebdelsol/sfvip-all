@@ -23,7 +23,7 @@ class _AddOn:
 
     @staticmethod
     def _is_api_request(request: http.Request) -> bool:
-        return bool("player_api.php?" in request.path)
+        return "player_api.php?" in request.path
 
     @staticmethod
     def _response_json(response: http.Response) -> Optional[Any]:

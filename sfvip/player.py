@@ -19,23 +19,36 @@ class Player:
 
     def __init__(self, config_loader: Loader, config_player: type[ConfigPlayer], app_name: str) -> None:
         self.app_name = app_name
-        self.player_path = config_player.path
-        if not self.valid():
-            self.player_path = self._path_from_regkey()
-            if not self.valid():
-                self.player_path = self._path_from_user()
-            if self.valid() and self.player_path != config_player.path:
-                config_player.path = self.player_path
-                config_loader.save()
+        self._path = self._get_path(config_loader, config_player, app_name)
+        self.valid = self._valid(self._path)
 
     @staticmethod
-    def _path_from_regkey() -> Optional[str]:
+    def _valid(path: str) -> bool:
+        if path:
+            path: Path = Path(path)
+            return path.is_file() and path.match(Player._pattern)
+        return False
+
+    def _get_path(self, config_loader: Loader, config_player: type[ConfigPlayer], app_name: str) -> Optional[str]:
+        path = config_player.path
+        if not self._valid(path):
+            path = self._get_path_from_regkey()
+            if not self._valid(path):
+                path = self._get_path_from_user(app_name)
+            if self._valid(path) and path != config_player.path:
+                config_player.path = path
+                config_loader.save()
+        return path
+
+    @staticmethod
+    def _get_path_from_regkey() -> Optional[str]:
         if name := RegKey.name_by_value(*Player._regkey, Player._name):
             return ".".join(name.split(".")[:-1])
         return None
 
-    def _path_from_user(self) -> Optional[str]:
-        ui = UI(self.app_name)
+    @staticmethod
+    def _get_path_from_user(app_name: str) -> Optional[str]:
+        ui = UI(app_name)
         ui.showinfo(f"Please find {Player._name}")
         while True:
             if player := ui.find_file(Player._name, Player._pattern):
@@ -43,11 +56,5 @@ class Player:
             if not ui.askretry(message=f"{Player._name} not found, try again ?"):
                 return None
 
-    def valid(self) -> bool:
-        if self.player_path:
-            player: Path = Path(self.player_path)
-            return player.exists() and player.is_file() and player.match(Player._pattern)
-        return False
-
     def run(self) -> subprocess.Popen:
-        return subprocess.Popen([self.player_path])
+        return subprocess.Popen([self._path])
