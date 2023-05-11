@@ -1,3 +1,4 @@
+import os
 import subprocess
 import winreg
 from pathlib import Path
@@ -12,7 +13,7 @@ from .ui import UI
 
 
 class Player:
-    """find and check sfvip player"""
+    """find & run sfvip player"""
 
     _name = "sfvip player"
     _pattern = "*sf*vip*player*.exe"
@@ -45,7 +46,7 @@ class Player:
     @staticmethod
     def _get_path_from_regkey() -> Optional[str]:
         if name := RegKey.name_by_value(*Player._regkey, Player._name):
-            return ".".join(name.split(".")[:-1])
+            return os.path.splitext(name)[0]
         return None
 
     @staticmethod

@@ -9,6 +9,10 @@ def _launched_by_noitka() -> bool:
     return "__compiled__" in globals()
 
 
+class ModuleIsNewer(Exception):
+    pass
+
+
 class Loader:
     """load & save as json a py module populated with str, int or pure class"""
 
@@ -30,15 +34,15 @@ class Loader:
 
     def update(self) -> None:
         try:
-            self._raise_if_newer()
+            self._raise_on_newer_module()
             self.load()
-        except (json.JSONDecodeError, FileNotFoundError):
+        except (json.JSONDecodeError, FileNotFoundError, ModuleIsNewer):
             self.save()
 
-    def _raise_if_newer(self) -> None:
+    def _raise_on_newer_module(self) -> None:
         if not _launched_by_noitka():
             if getmtime(self._config.__file__) > getmtime(self._path):
-                raise FileNotFoundError
+                raise ModuleIsNewer
 
     def _dict_from(self, config: type) -> dict:
         return {

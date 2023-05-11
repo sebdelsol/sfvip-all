@@ -6,9 +6,10 @@ import sfvip_all_config as Config
 from .config import Loader
 from .player import Player
 from .proxy import Proxy
-from .users import Users
+from .users import UsersDatabase, UsersProxies
 
-# TODO proxy fowarding
+# TODO proxy fowarding (upstream mode)
+# TODO try nuitka with msvc & clang
 # TODO test standalone
 
 
@@ -17,9 +18,10 @@ def run(config: Config, app_name: str):
     config_loader = Loader(config, config_json)
     config_loader.update()
 
-    sfvip_player = Player(config_loader, config.Player, app_name)
-    with Proxy(config.AllCat) as sfvip_proxy:
-        with Users(config_loader, config.Player).set_proxy(sfvip_proxy.port) as sfvip_users:
-            with sfvip_player.run():
-                sfvip_users: Users
-                sfvip_users.restore_proxy()
+    player = Player(config_loader, config.Player, app_name)
+    users_database = UsersDatabase(config_loader, config.Player)
+    users_proxies = UsersProxies(users_database)
+    with Proxy(config.AllCat, users_proxies.upstream) as proxy:
+        with users_proxies.set(proxy.port):
+            with player.run():
+                users_proxies.restore_after_being_accessed()
