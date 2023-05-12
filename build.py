@@ -10,13 +10,15 @@ from build_config import Build, Github
 from sfvip_all_config import AllCat
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--readme-only", action="store_true", help="update readme and post only")
-update_dist = not parser.parse_args().readme_only
+parser.add_argument("--nobuild", action="store_true", help="update readme and post only")
+parser.add_argument("--clang", action="store_true", help="build with clang")
 
 dist_temp = f"{Build.dir}/temp"
 dist_name = f"{Build.dir}/{Build.version}/{Build.name}"
 
-if update_dist:
+if not parser.parse_args().nobuild:  # update dist ?
+    clang = parser.parse_args().clang
+    compiler = "--clang" if clang else "--mingw64"  # pylint: disable=invalid-name
     cache_dir = f"%CACHE_DIR%/{Build.name} {Build.version}"
     subprocess.run(
         [
@@ -31,9 +33,9 @@ if update_dist:
             "--enable-plugin=tk-inter",  # needed for tkinter
             "--python-flag=-OO",
             "--disable-console",
-            "--follow-imports",
             "--standalone",
             "--onefile",
+            compiler,
             Build.main,
         ],
         check=True,
@@ -42,7 +44,6 @@ if update_dist:
     shutil.make_archive(dist_name, "zip", f"{dist_temp}/{os.path.splitext(Build.main)[0]}.dist")
     shutil.copy(f"{dist_temp}/{Build.name}.exe", f"{dist_name}.exe")
 
-# Create readme.md & forum post
 print("Create readme & forum post")
 template_format = dict(
     inject=" and ".join(f"_{what.capitalize()}_" for what in AllCat.inject),
