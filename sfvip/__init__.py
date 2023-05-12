@@ -9,7 +9,6 @@ from .proxy import Proxy
 from .users import UsersDatabase, UsersProxies
 
 # TODO proxy fowarding (upstream mode)
-# TODO try nuitka with msvc & clang
 # TODO test standalone
 
 

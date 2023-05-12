@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "components": [
+    "Microsoft.VisualStudio.Component.CoreEditor",
+    "Microsoft.VisualStudio.Workload.CoreEditor",
+    "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+    "Microsoft.VisualStudio.Component.VC.Llvm.ClangToolset",
+    "Microsoft.VisualStudio.Component.VC.Llvm.Clang",
+    "Component.IncredibuildMenu",
+    "Microsoft.VisualStudio.Component.Windows10SDK.20348",
+    "Microsoft.Component.VC.Runtime.UCRTSDK"
+  ]
+}
