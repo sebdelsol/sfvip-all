@@ -11,7 +11,7 @@ from mitmproxy.tools.dump import DumpMaster
 
 from sfvip_all_config import AllCat
 
-from .users import User, Users
+from .users import Users
 
 
 class _AddOn:
@@ -82,22 +82,18 @@ class Proxies:
             sock.bind(("localhost", 0))
             return sock.getsockname()[1]
 
-    async def _run(self, master_init: threading.Event, user: User):
-        port = self._find_port()
-        self.by_upstreams[user.HttpProxy] = f"http://127.0.0.1:{port}"
-        opts = dict(listen_port=port)
-        if user.HttpProxy:  # forward to upstream proxy
-            opts |= dict(mode=(f"upstream:{user.HttpProxy}",))
-        opts = options.Options(**opts)
+    async def _run(self, master_init: threading.Event, port: int, upstream_proxy: str):
+        mode = f"upstream:{upstream_proxy}" if upstream_proxy else "regular"
+        opts = options.Options(listen_port=port, ssl_insecure=True, mode=(mode,))
         master = DumpMaster(opts, with_termlog=False, with_dumper=False)
         master.addons.add(self._addon)
         self._masters.append(master)
         master_init.set()
         await master.run()
 
-    def _launch_for(self, user: User) -> None:
+    def _launch(self, port: int, upstream_proxy: str) -> None:
         master_init = threading.Event()
-        target, *args = asyncio.run, self._run(master_init, user)
+        target, *args = asyncio.run, self._run(master_init, port, upstream_proxy)
         threading.Thread(target=target, args=args).start()
         master_init.wait()
 
@@ -105,7 +101,9 @@ class Proxies:
         for user in self._users:
             # launch only one mitmdump by upstream proxy
             if user.HttpProxy not in self.by_upstreams:
-                self._launch_for(user)
+                port = self._find_port()
+                self.by_upstreams[user.HttpProxy] = f"http://127.0.0.1:{port}"
+                self._launch(port, user.HttpProxy)
         return self
 
     def __exit__(self, *_) -> None:
