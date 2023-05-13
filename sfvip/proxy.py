@@ -53,7 +53,6 @@ class _AddOn:
             self._remove_query_key(flow.request, "category_id")
 
     def response(self, flow: http.HTTPFlow) -> None:
-        print(flow.request.pretty_url, flow.request.query)
         action = self._api_query(flow.request, "action")
         if action is not None and self._is_action_get_categories(action):
             if categories := self._response_json(flow.response):
@@ -73,7 +72,7 @@ class Proxies:
 
     def __init__(self, all_cat: type[AllCat], users: Users) -> None:
         self._users = users
-        self._all_cat = all_cat
+        self._addon = _AddOn(all_cat)
         self._masters: list[DumpMaster] = []
         self.by_upstreams: dict[str, str] = {}
 
@@ -87,12 +86,11 @@ class Proxies:
         port = self._find_port()
         self.by_upstreams[user.HttpProxy] = f"http://127.0.0.1:{port}"
         opts = dict(listen_port=port)
-        if user.HttpProxy:
-            # forward to upstream proxy
+        if user.HttpProxy:  # forward to upstream proxy
             opts |= dict(mode=(f"upstream:{user.HttpProxy}",))
         opts = options.Options(**opts)
         master = DumpMaster(opts, with_termlog=False, with_dumper=False)
-        master.addons.add(_AddOn(self._all_cat))
+        master.addons.add(self._addon)
         self._masters.append(master)
         master_init.set()
         await master.run()
