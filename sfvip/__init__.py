@@ -9,9 +9,8 @@ from .proxy import Proxies
 from .users import UsersDatabase, UsersProxies
 
 # TODO test standalone
-# TODO watchdog users !
-# TODO m3u playlist
-# TODO test async vs sync
+# TODO watchdog users (do not overwrite changed field eg. method)
+# TODO handle m3u playlist ?
 
 
 def run(config: Config, app_name: str):

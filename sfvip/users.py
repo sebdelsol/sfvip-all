@@ -51,7 +51,6 @@ class User(SimpleNamespace):
 
     def __init__(self, **kwargs: str) -> None:
         # pylint: disable=invalid-name
-        self.Name: str
         self.Address: str
         self.HttpProxy: str
         super().__init__(**kwargs)
@@ -132,7 +131,6 @@ class UsersProxies:
     def _set(self, proxies: dict[str, str]) -> None:
         # check database has been changed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # do not overwrite other changed fields (eg method) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # print("set", proxies)
         for user in self.users_to_set:
             if user.HttpProxy in proxies:
                 user.HttpProxy = proxies[user.HttpProxy]
