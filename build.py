@@ -10,14 +10,15 @@ from build_config import Build, Github
 from sfvip_all_config import AllCat
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--nobuild", action="store_true", help="update readme and post only")
+parser.add_argument("--readme", action="store_true", help="update readme and post only")
 parser.add_argument("--clang", action="store_true", help="build with clang")
+args = parser.parse_args()
 
 dist_temp = f"{Build.dir}/temp"
 dist_name = f"{Build.dir}/{Build.version}/{Build.name}"
 
-if not parser.parse_args().nobuild:  # update dist ?
-    clang = parser.parse_args().clang
+if not args.readme:  # only readme ?
+    clang = args.clang
     compiler = "--clang" if clang else "--mingw64"  # pylint: disable=invalid-name
     cache_dir = f"%CACHE_DIR%/{Build.name} {Build.version}"
     subprocess.run(

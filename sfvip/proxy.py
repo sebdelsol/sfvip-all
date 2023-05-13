@@ -6,24 +6,22 @@ import threading
 from typing import Any, Optional, Self
 
 from mitmproxy import http, options
-from mitmproxy.connection import Server
 from mitmproxy.coretypes.multidict import MultiDictView
-from mitmproxy.net.server_spec import ServerSpec, parse
 from mitmproxy.tools.dump import DumpMaster
 
 from sfvip_all_config import AllCat
+
+from .users import User, Users
 
 
 class _AddOn:
     """mitmproxy addon to inject the all category"""
 
-    def __init__(self, all_cat: type[AllCat], upstream_proxies: dict, current_upstream_proxy: ServerSpec) -> None:
+    def __init__(self, all_cat: type[AllCat]) -> None:
         inject_in_re = "|".join(re.escape(what) for what in all_cat.inject)
         self._is_action_get_categories = re.compile(f"get_({inject_in_re})_categories").search
         self._all_cat_id = str(all_cat.id)
         self._all_cat_json = dict(category_id=str(all_cat.id), category_name=all_cat.name, parent_id=0)
-        self.current_upstream_proxy = current_upstream_proxy
-        self.upstream_proxies = upstream_proxies
 
     @staticmethod
     def _is_api_request(request: http.Request) -> bool:
@@ -48,24 +46,14 @@ class _AddOn:
     def _api_query(self, request: http.Request, key: str) -> Optional[str]:
         return self._query(request).get(key, None) if self._is_api_request(request) else None
 
-    def requestheaders(self, flow: http.HTTPFlow):
-        if self.current_upstream_proxy:
-            # switch the upstream proxy when a new api url is detected
-            host = f"{flow.request.scheme}://{flow.request.host_header}"
-            if address := self.upstream_proxies.get(host, self.current_upstream_proxy):
-                if flow.server_conn.via != address:
-                    if flow.server_conn.timestamp_start is not None:
-                        flow.server_conn = Server(address=flow.server_conn.address)
-                    flow.server_conn.via = address
-                    self.current_upstream_proxy = address
-
-    async def request(self, flow: http.HTTPFlow) -> None:
+    def request(self, flow: http.HTTPFlow) -> None:
         category_id = self._api_query(flow.request, "category_id")
         if category_id is not None and category_id == self._all_cat_id:
             # turn an all category query into a whole catalog query
             self._remove_query_key(flow.request, "category_id")
 
-    async def response(self, flow: http.HTTPFlow) -> None:
+    def response(self, flow: http.HTTPFlow) -> None:
+        print(flow.request.pretty_url, flow.request.query)
         action = self._api_query(flow.request, "action")
         if action is not None and self._is_action_get_categories(action):
             if categories := self._response_json(flow.response):
@@ -74,18 +62,20 @@ class _AddOn:
                     categories = self._all_cat_json, *categories
                     flow.response.text = json.dumps(categories)
 
-    async def responseheaders(self, flow: http.HTTPFlow):
+    def responseheaders(self, flow: http.HTTPFlow):
         """all reponses are streamed except the api requests"""
         if not self._is_api_request(flow.request):
             flow.response.stream = True
 
 
-class Proxy:
-    def __init__(self, all_cat: type[AllCat], upstream_proxies: Optional[dict] = None) -> None:
-        self.upstream_proxies = upstream_proxies
-        self.all_cat = all_cat
-        self.master = None
-        self.port = None
+class Proxies:
+    """launch a mitmdump for each upstream proxies (no upstream proxy count as one)"""
+
+    def __init__(self, all_cat: type[AllCat], users: Users) -> None:
+        self._users = users
+        self._all_cat = all_cat
+        self._masters: list[DumpMaster] = []
+        self.by_upstreams: dict[str, str] = {}
 
     @staticmethod
     def _find_port() -> int:
@@ -93,31 +83,33 @@ class Proxy:
             sock.bind(("localhost", 0))
             return sock.getsockname()[1]
 
-    async def _start(self, master_init: threading.Event):
-        self.port = self._find_port()
-        opts = dict(listen_port=self.port)
-
-        if self.upstream_proxies:
-            url = list(self.upstream_proxies.values())[0]  # first upstream proxy url
-            opts |= dict(mode=(f"upstream:{url}",))
-            upstream_proxies = {host: parse(url, "http") for host, url in self.upstream_proxies.items()}
-            current_upstream_proxy = parse(url, "http")
-        else:
-            upstream_proxies = {}
-            current_upstream_proxy = None
-
+    async def _run(self, master_init: threading.Event, user: User):
+        port = self._find_port()
+        self.by_upstreams[user.HttpProxy] = f"http://127.0.0.1:{port}"
+        opts = dict(listen_port=port)
+        if user.HttpProxy:
+            # forward to upstream proxy
+            opts |= dict(mode=(f"upstream:{user.HttpProxy}",))
         opts = options.Options(**opts)
-        self.master = DumpMaster(opts, with_termlog=False, with_dumper=False)
-        self.master.addons.add(_AddOn(self.all_cat, upstream_proxies, current_upstream_proxy))
+        master = DumpMaster(opts, with_termlog=False, with_dumper=False)
+        master.addons.add(_AddOn(self._all_cat))
+        self._masters.append(master)
         master_init.set()
-        await self.master.run()
+        await master.run()
 
-    def __enter__(self) -> Self:
+    def _launch_for(self, user: User) -> None:
         master_init = threading.Event()
-        target, *args = asyncio.run, self._start(master_init)
+        target, *args = asyncio.run, self._run(master_init, user)
         threading.Thread(target=target, args=args).start()
         master_init.wait()
+
+    def __enter__(self) -> Self:
+        for user in self._users:
+            # launch only one mitmdump by upstream proxy
+            if user.HttpProxy not in self.by_upstreams:
+                self._launch_for(user)
         return self
 
     def __exit__(self, *_) -> None:
-        self.master.shutdown()
+        for master in self._masters:
+            master.shutdown()
