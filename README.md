@@ -38,7 +38,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 <img src="ressources/VS.png">  
 
-### Update only ***readme***
+### Update ***readme*** only
 ```console
-python -m build --nobuild
+python -m build --readme
 ```
