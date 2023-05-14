@@ -10,6 +10,9 @@ from .users import UsersDatabase, UsersProxies
 
 # TODO test standalone
 # TODO watchdog users (do not overwrite changed field eg. method)
+# TODO system wide lock on database set and read by sfvip player
+# TODO multiprocessing mitmdump
+# TODO use barrier instead of event in Proxies
 # TODO handle m3u playlist ?
 
 
