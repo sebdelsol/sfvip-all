@@ -5,7 +5,7 @@ import sfvip_all_config as Config
 
 from .config import Loader
 from .player import Player
-from .proxy import Proxies
+from .proxies import Proxies
 from .users import UsersDatabase, UsersProxies
 
 # TODO test standalone
