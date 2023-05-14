@@ -137,7 +137,7 @@ class UsersProxies:
         self._database.save()
 
     @contextmanager
-    def set(self, proxies_by_upstreams: dict) -> None:
+    def set(self, proxies_by_upstreams: dict) -> Callable[[], None]:
         self._set(proxies_by_upstreams)
         proxies_to_restore = {proxy: upstream for upstream, proxy in proxies_by_upstreams.items()}
 
