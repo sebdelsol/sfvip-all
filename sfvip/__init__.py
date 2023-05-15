@@ -9,10 +9,7 @@ from .proxies import Proxies
 from .users import UsersDatabase, UsersProxies
 
 # TODO test standalone
-# TODO watchdog users (do not overwrite changed field eg. method)
-# TODO system wide lock on database set and read by sfvip player
-# TODO multiprocessing mitmdump
-# TODO use barrier instead of event in Proxies
+# TODO multiprocessing mitmdump, use barrier
 # TODO handle m3u playlist ?
 
 
@@ -23,8 +20,8 @@ def run(config: Config, app_name: str):
 
     player = Player(config_loader, config.Player, app_name)
     users_database = UsersDatabase(config_loader, config.Player)
-    users_proxies = UsersProxies(users_database)
-    with Proxies(config.AllCat, users_proxies.users_to_set) as proxies:
+    users_proxies = UsersProxies(users_database, app_name)
+    with Proxies(config.AllCat, users_proxies.upstreams) as proxies:
         with users_proxies.set(proxies.by_upstreams) as restore_proxies:
             with player.run():
                 restore_proxies()
