@@ -19,10 +19,11 @@ or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.3/Sfvip
 [![dist](https://img.shields.io/badge/Dist-Nuitka-lightgrey)](https://nuitka.net/)
 ![sloc](https://tokei.rs/b1/github/sebdelsol/sfvip-all?category=code)
 
-Check [**build config**](build_config.py) and create the environment:
+Check [**build config**](build_config.py) and create a clean environment:
 ```console
 python -m venv .sfvip
 .sfvip\scripts\activate
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r requirements.dev.txt
 ```

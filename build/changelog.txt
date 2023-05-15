@@ -1,7 +1,9 @@
 [1.1.3]
-* faster by using of mitmproxy instead of proxy.py
-* faster with clang build
-* forward to users proxies
+* reduce proxies overhead by using:
+    - mitmproxy instead of proxy.py
+    - subprocesses for proxies
+    - clang to build
+* forward to accounts proxies
 * error log in cachedir
 
 [1.1.2]
