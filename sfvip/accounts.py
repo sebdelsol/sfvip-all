@@ -79,12 +79,11 @@ class _AccountList(list[_Account]):
 class _Database:
     """load & save accounts' database"""
 
-    _encoding = "utf-8"
     _regkey_config_dir = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
     _default_config_dir = Path(os.getenv("APPDATA")) / "SFVIP-Player"
 
     def __init__(self) -> None:
-        self._database: Optional[_Database] = None
+        self._database: Optional[Path] = None
         database = self._config_dir() / "Database.json"
         if database.is_file():
             self._database = database
@@ -98,19 +97,6 @@ class _Database:
             config_dir = str(_Database._default_config_dir.resolve())
         return Path(config_dir)
 
-    def load(self) -> None:
-        if self._database:
-            with self._database.open("r", encoding=_Database._encoding) as f:
-                self.accounts.load(f)
-            self._update_atime()
-
-    @_retry_if_exception(PermissionError, timeout=5)
-    def save(self) -> None:
-        if self._database:
-            with self._database.open("w", encoding=_Database._encoding) as f:
-                self.accounts.dump(f)
-            self._update_atime()
-
     def _update_atime(self) -> None:
         self._atime = self._database.stat().st_atime
 
@@ -118,6 +104,19 @@ class _Database:
         if self._database:
             return self._database.stat().st_atime > self._atime
         return True
+
+    def _open(self, mode: str, op_on_file: Callable[[IO], None]) -> None:
+        if self._database:
+            with self._database.open(mode, encoding="utf-8") as f:
+                op_on_file(f)
+            self._update_atime()
+
+    def load(self) -> None:
+        self._open("r", self.accounts.load)
+
+    @_retry_if_exception(PermissionError, timeout=5)
+    def save(self) -> None:
+        self._open("w", self.accounts.dump)
 
 
 class Accounts:

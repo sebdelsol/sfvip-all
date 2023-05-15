@@ -15,8 +15,7 @@ from sfvip_all_config import AllCat
 class _AddOn:
     """mitmproxy addon to inject the all category"""
 
-    # def __init__(self, all_cat: type[AllCat]) -> None:
-    def __init__(self, all_cat) -> None:
+    def __init__(self, all_cat: type[AllCat]) -> None:
         inject_in_re = "|".join(re.escape(what) for what in all_cat.inject)
         self._is_action_get_categories = re.compile(f"get_({inject_in_re})_categories").search
         self._all_cat_id = str(all_cat.id)
@@ -67,7 +66,7 @@ class _AddOn:
 
 
 class Proxy(multiprocessing.Process):
-    """run a mitmdump in a process"""
+    """run mitmdump in a process"""
 
     def __init__(self, all_cat: type[AllCat], port: int, upstream: str) -> None:
         self._stop = multiprocessing.Event()

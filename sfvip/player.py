@@ -7,9 +7,12 @@ from typing import Optional
 from sfvip_all_config import Player as ConfigPlayer
 
 from .config import Loader
-from .exceptions import SfvipError
 from .regkey import RegKey
 from .ui import UI
+
+
+class SfvipError(Exception):
+    pass
 
 
 class Player:
@@ -17,11 +20,24 @@ class Player:
 
     _name = "sfvip player"
     _pattern = "*sf*vip*player*.exe"
-    _regkey = winreg.HKEY_CLASSES_ROOT, r"Local Settings\Software\Microsoft\Windows\Shell\MuiCache"
+    _regkey_search = (
+        (
+            RegKey.name_by_value,
+            winreg.HKEY_CLASSES_ROOT,
+            r"Local Settings\Software\Microsoft\Windows\Shell\MuiCache",
+            lambda found: [os.path.splitext(found)[0]],
+        ),
+        (
+            RegKey.search_name_contains,
+            winreg.HKEY_CURRENT_USER,
+            r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store",
+            lambda found: found,
+        ),
+    )
 
-    def __init__(self, config_loader: Loader, config_player: type[ConfigPlayer], app_name: str) -> None:
+    def __init__(self, config_player: type[ConfigPlayer], config_loader: Loader, app_name: str) -> None:
         self.app_name = app_name
-        self._path = self._get_path(config_loader, config_player, app_name)
+        self._path = self._get_path(config_player, config_loader, app_name)
         if not self._valid(self._path):
             raise SfvipError("No player found")
 
@@ -32,11 +48,13 @@ class Player:
             return path.is_file() and path.match(Player._pattern)
         return False
 
-    def _get_path(self, config_loader: Loader, config_player: type[ConfigPlayer], app_name: str) -> Optional[str]:
+    def _get_path(self, config_player: type[ConfigPlayer], config_loader: Loader, app_name: str) -> Optional[str]:
         path = config_player.path
         if not self._valid(path):
-            path = self._get_path_from_regkey()
-            if not self._valid(path):
+            for path in self._get_paths_from_regkey():
+                if self._valid(path):
+                    break
+            else:
                 path = self._get_path_from_user(app_name)
             if self._valid(path) and path != config_player.path:
                 config_player.path = path
@@ -44,10 +62,11 @@ class Player:
         return path
 
     @staticmethod
-    def _get_path_from_regkey() -> Optional[str]:
-        if name := RegKey.name_by_value(*Player._regkey, Player._name):
-            return os.path.splitext(name)[0]
-        return None
+    def _get_paths_from_regkey() -> list[str]:
+        for search, hkey, key, apply in Player._regkey_search:
+            if found := search(hkey, key, Player._name):
+                return apply(found)
+        return []
 
     @staticmethod
     def _get_path_from_user(app_name: str) -> Optional[str]:
