@@ -19,6 +19,16 @@ class RegKey:
     @staticmethod
     def value_by_name(hkey: winreg.HKEYType, path: str, name: str) -> Optional[Any]:
         with suppress(WindowsError, FileNotFoundError), winreg.OpenKey(hkey, path) as k:
-            value, _ = winreg.QueryValueEx(k, name)
+            value = winreg.QueryValueEx(k, name)[0]
             return value
         return None
+
+    @staticmethod
+    def search_name_contains(hkey: winreg.HKEYType, path: str, substring: str) -> list[str]:
+        names = []
+        with suppress(WindowsError), winreg.OpenKey(hkey, path) as key:
+            for i in itertools.count():
+                name = winreg.EnumValue(key, i)[0]
+                if substring in name:
+                    names.append(name)
+        return names
