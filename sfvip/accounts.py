@@ -5,14 +5,10 @@ import winreg
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
-from typing import IO, Callable
+from typing import IO, Callable, Optional
 
 from pyparsing import Any
 
-from sfvip_all_config import Player as ConfigPlayer
-
-from .config import Loader
-from .exceptions import SfvipError
 from .mutex import NamedMutex
 from .regkey import RegKey
 
@@ -87,48 +83,48 @@ class _Database:
     _regkey_config_dir = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
     _default_config_dir = Path(os.getenv("APPDATA")) / "SFVIP-Player"
 
-    def __init__(self, config_loader: Loader, config_player: type[ConfigPlayer]) -> None:
-        self._database = self._config_dir(config_loader, config_player) / "Database.json"
-        if not self._database.is_file():
-            raise SfvipError("No accounts database found")
-        self._atime = self._database.stat().st_atime
+    def __init__(self) -> None:
+        self._database: Optional[_Database] = None
+        database = self._config_dir() / "Database.json"
+        if database.is_file():
+            self._database = database
+            self._atime = self._database.stat().st_atime
         self.accounts = _AccountList()
 
     @staticmethod
-    def _config_dir(config_loader: Loader, config_player: type[ConfigPlayer]) -> Path:
-        config_dir = config_player.config_dir
+    def _config_dir() -> Path:
+        config_dir = RegKey.value_by_name(*_Database._regkey_config_dir)
         if not _dir_exists(config_dir):
-            config_dir = RegKey.value_by_name(*_Database._regkey_config_dir)
-            if not _dir_exists(config_dir):
-                config_dir = str(_Database._default_config_dir.resolve())
-            if _dir_exists(config_dir) and config_dir != config_player.config_dir:
-                config_player.config_dir = config_dir
-                config_loader.save()
+            config_dir = str(_Database._default_config_dir.resolve())
         return Path(config_dir)
 
     def load(self) -> None:
-        with self._database.open("r", encoding=_Database._encoding) as f:
-            self.accounts.load(f)
-        self._update_atime()
+        if self._database:
+            with self._database.open("r", encoding=_Database._encoding) as f:
+                self.accounts.load(f)
+            self._update_atime()
 
     @_retry_if_exception(PermissionError, timeout=5)
     def save(self) -> None:
-        with self._database.open("w", encoding=_Database._encoding) as f:
-            self.accounts.dump(f)
-        self._update_atime()
+        if self._database:
+            with self._database.open("w", encoding=_Database._encoding) as f:
+                self.accounts.dump(f)
+            self._update_atime()
 
     def _update_atime(self) -> None:
         self._atime = self._database.stat().st_atime
 
     def has_been_externally_accessed(self) -> bool:
-        return self._database.stat().st_atime > self._atime
+        if self._database:
+            return self._database.stat().st_atime > self._atime
+        return True
 
 
 class Accounts:
     """modify & restore accounts proxies"""
 
-    def __init__(self, config_loader: Loader, config_player: type[ConfigPlayer], app_name: str) -> None:
-        self._database = _Database(config_loader, config_player)
+    def __init__(self, app_name: str) -> None:
+        self._database = _Database()
         self._database.load()
         self._mutex = NamedMutex(app_name)
         self.upstream_proxies = {account.HttpProxy for account in self._accounts_to_set_proxies}

@@ -1,5 +1,4 @@
 class Player:
-    config_dir = None
     path = None
 
 
