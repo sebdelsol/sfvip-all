@@ -48,8 +48,8 @@ def _dir_exists(path: str) -> bool:
     return False
 
 
-class User(SimpleNamespace):
-    """a sfvip user"""
+class _Account(SimpleNamespace):
+    """a sfvip account"""
 
     _playlist_ext = ".m3u", ".m3u8"
 
@@ -61,27 +61,27 @@ class User(SimpleNamespace):
 
     def is_playlist(self) -> bool:
         path = Path(self.Address)
-        return path.suffix in User._playlist_ext or path.is_file()
+        return path.suffix in _Account._playlist_ext or path.is_file()
 
 
-class Users(list[User]):
-    """list of Users with json load & dump"""
+class _AccountList(list[_Account]):
+    """list of Accounts with json load & dump"""
 
     class _Encoder(json.JSONEncoder):
         # pylint: disable=arguments-renamed
-        def default(self, user: User) -> dict:
-            return user.__dict__
+        def default(self, account: _Account) -> dict:
+            return account.__dict__
 
     def load(self, f: IO) -> None:
         self.clear()
-        self.extend(json.load(f, object_hook=lambda user_dict: User(**user_dict)))
+        self.extend(json.load(f, object_hook=lambda account_dict: _Account(**account_dict)))
 
     def dump(self, f: IO) -> None:
-        json.dump(self, f, cls=Users._Encoder, indent=2, separators=(",", ":"))
+        json.dump(self, f, cls=_AccountList._Encoder, indent=2, separators=(",", ":"))
 
 
-class UsersDatabase:
-    """load & save users' database"""
+class _Database:
+    """load & save accounts' database"""
 
     _encoding = "utf-8"
     _regkey_config_dir = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
@@ -90,31 +90,31 @@ class UsersDatabase:
     def __init__(self, config_loader: Loader, config_player: type[ConfigPlayer]) -> None:
         self._database = self._config_dir(config_loader, config_player) / "Database.json"
         if not self._database.is_file():
-            raise SfvipError("No users database found")
+            raise SfvipError("No accounts database found")
         self._atime = self._database.stat().st_atime
-        self.users = Users()
+        self.accounts = _AccountList()
 
     @staticmethod
     def _config_dir(config_loader: Loader, config_player: type[ConfigPlayer]) -> Path:
         config_dir = config_player.config_dir
         if not _dir_exists(config_dir):
-            config_dir = RegKey.value_by_name(*UsersDatabase._regkey_config_dir)
+            config_dir = RegKey.value_by_name(*_Database._regkey_config_dir)
             if not _dir_exists(config_dir):
-                config_dir = str(UsersDatabase._default_config_dir.resolve())
+                config_dir = str(_Database._default_config_dir.resolve())
             if _dir_exists(config_dir) and config_dir != config_player.config_dir:
                 config_player.config_dir = config_dir
                 config_loader.save()
         return Path(config_dir)
 
     def load(self) -> None:
-        with self._database.open("r", encoding=UsersDatabase._encoding) as f:
-            self.users.load(f)
+        with self._database.open("r", encoding=_Database._encoding) as f:
+            self.accounts.load(f)
         self._update_atime()
 
     @_retry_if_exception(PermissionError, timeout=5)
     def save(self) -> None:
-        with self._database.open("w", encoding=UsersDatabase._encoding) as f:
-            self.users.dump(f)
+        with self._database.open("w", encoding=_Database._encoding) as f:
+            self.accounts.dump(f)
         self._update_atime()
 
     def _update_atime(self) -> None:
@@ -124,46 +124,46 @@ class UsersDatabase:
         return self._database.stat().st_atime > self._atime
 
 
-class UsersProxies:
-    """modify & restore users proxies"""
+class Accounts:
+    """modify & restore accounts proxies"""
 
-    def __init__(self, database: UsersDatabase, app_name: str) -> None:
-        database.load()
-        self._database = database
-        self.upstreams = {user.HttpProxy for user in self._users_to_set}
+    def __init__(self, config_loader: Loader, config_player: type[ConfigPlayer], app_name: str) -> None:
+        self._database = _Database(config_loader, config_player)
+        self._database.load()
         self._mutex = NamedMutex(app_name)
+        self.upstream_proxies = {account.HttpProxy for account in self._accounts_to_set_proxies}
 
     @property
-    def _users_to_set(self) -> Users:
+    def _accounts_to_set_proxies(self) -> _AccountList:
         """don't handle m3u playlists"""
-        return Users(user for user in self._database.users if not user.is_playlist())
+        return _AccountList(account for account in self._database.accounts if not account.is_playlist())
 
-    def _set(self, proxies: dict[str, str]) -> None:
+    def _set_proxies(self, proxies: dict[str, str]) -> None:
         self._database.load()
-        for user in self._users_to_set:
-            if user.HttpProxy in proxies:
-                user.HttpProxy = proxies[user.HttpProxy]
+        for account in self._accounts_to_set_proxies:
+            if account.HttpProxy in proxies:
+                account.HttpProxy = proxies[account.HttpProxy]
         self._database.save()
 
     @contextmanager
-    def set(self, proxies_by_upstreams: dict[str, str]) -> Callable[[], None]:
+    def set_proxies(self, proxies_by_upstreams: dict[str, str]) -> Callable[[], None]:
         """
-        set users proxies & provide a function to restore those
-        don't mess with the database till we have restored users proxies
+        set accounts proxies & provide a function to restore those
+        don't mess with the database till we have restored accounts proxies
         """
         self._mutex.acquire()
-        self._set(proxies_by_upstreams)
+        self._set_proxies(proxies_by_upstreams)
         proxies_to_restore = {proxy: upstream for upstream, proxy in proxies_by_upstreams.items()}
 
         @_retry_if_exception(NotAccessedYet, timeout=5)
         def restore_after_being_accessed() -> None:
             if not self._database.has_been_externally_accessed():
                 raise NotAccessedYet("retry")
-            self._set(proxies_to_restore)
+            self._set_proxies(proxies_to_restore)
             self._mutex.release()
 
         try:
             yield restore_after_being_accessed
         finally:
             with self._mutex:
-                self._set(proxies_to_restore)
+                self._set_proxies(proxies_to_restore)
