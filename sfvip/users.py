@@ -7,34 +7,38 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import IO, Callable
 
+from pyparsing import Any
+
 from sfvip_all_config import Player as ConfigPlayer
 
 from .config import Loader
 from .exceptions import SfvipError
+from .mutex import NamedMutex
 from .regkey import RegKey
-
-FuncNoRet = Callable[..., None]
-Exceptions = type[Exception] | tuple[type[Exception]]
 
 
 class NotAccessedYet(Exception):
     pass
 
 
-def _retry_if_exception(exceptions: Exceptions, timeout: int) -> Callable[[FuncNoRet], FuncNoRet]:
-    def decorator_retry(func) -> FuncNoRet:
-        def wrapper_retry(*args, **kwargs) -> None:
+TFunc = Callable[..., Any]
+TExceptions = type[Exception] | tuple[type[Exception]]
+
+
+def _retry_if_exception(exceptions: TExceptions, timeout: int) -> Callable[[TFunc], TFunc]:
+    def decorator(func) -> TFunc:
+        def wrapper(*args, **kwargs) -> Any:
             start = time.perf_counter()
             while time.perf_counter() - start <= timeout:
                 try:
-                    func(*args, **kwargs)
-                    break
+                    return func(*args, **kwargs)
                 except exceptions:
                     time.sleep(0.1)
+            return None
 
-        return wrapper_retry
+        return wrapper
 
-    return decorator_retry
+    return decorator
 
 
 def _dir_exists(path: str) -> bool:
@@ -80,7 +84,7 @@ class UsersDatabase:
     """load & save users' database"""
 
     _encoding = "utf-8"
-    _regkey = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
+    _regkey_config_dir = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
     _default_config_dir = Path(os.getenv("APPDATA")) / "SFVIP-Player"
 
     def __init__(self, config_loader: Loader, config_player: type[ConfigPlayer]) -> None:
@@ -94,7 +98,7 @@ class UsersDatabase:
     def _config_dir(config_loader: Loader, config_player: type[ConfigPlayer]) -> Path:
         config_dir = config_player.config_dir
         if not _dir_exists(config_dir):
-            config_dir = RegKey.value_by_name(*UsersDatabase._regkey)
+            config_dir = RegKey.value_by_name(*UsersDatabase._regkey_config_dir)
             if not _dir_exists(config_dir):
                 config_dir = str(UsersDatabase._default_config_dir.resolve())
             if _dir_exists(config_dir) and config_dir != config_player.config_dir:
@@ -123,21 +127,31 @@ class UsersDatabase:
 class UsersProxies:
     """modify & restore users proxies"""
 
-    def __init__(self, database: UsersDatabase) -> None:
+    def __init__(self, database: UsersDatabase, app_name: str) -> None:
         database.load()
         self._database = database
-        self.users_to_set = Users(user for user in database.users if not user.is_playlist())
+        self.upstreams = {user.HttpProxy for user in self._users_to_set}
+        self._mutex = NamedMutex(app_name)
+
+    @property
+    def _users_to_set(self) -> Users:
+        """don't handle m3u playlists"""
+        return Users(user for user in self._database.users if not user.is_playlist())
 
     def _set(self, proxies: dict[str, str]) -> None:
-        # check database has been changed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # do not overwrite other changed fields (eg method) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        for user in self.users_to_set:
+        self._database.load()
+        for user in self._users_to_set:
             if user.HttpProxy in proxies:
                 user.HttpProxy = proxies[user.HttpProxy]
         self._database.save()
 
     @contextmanager
-    def set(self, proxies_by_upstreams: dict) -> Callable[[], None]:
+    def set(self, proxies_by_upstreams: dict[str, str]) -> Callable[[], None]:
+        """
+        set users proxies & provide a function to restore those
+        don't mess with the database till we have restored users proxies
+        """
+        self._mutex.acquire()
         self._set(proxies_by_upstreams)
         proxies_to_restore = {proxy: upstream for upstream, proxy in proxies_by_upstreams.items()}
 
@@ -146,9 +160,10 @@ class UsersProxies:
             if not self._database.has_been_externally_accessed():
                 raise NotAccessedYet("retry")
             self._set(proxies_to_restore)
+            self._mutex.release()
 
         try:
             yield restore_after_being_accessed
         finally:
-            # better safe than sorry
-            self._set(proxies_to_restore)
+            with self._mutex:
+                self._set(proxies_to_restore)
