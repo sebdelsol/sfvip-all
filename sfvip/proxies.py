@@ -39,6 +39,8 @@ class Proxies:
                 proxy = Proxy(self._all_cat, port, upstream)
                 self._proxies.append(proxy)
                 proxy.start()
+        for proxy in self._proxies:
+            proxy.wait_for_init_done()
         return proxies_by_upstreams
 
     def __exit__(self, *_) -> None:
