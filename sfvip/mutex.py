@@ -1,5 +1,6 @@
 import ctypes
 from ctypes import wintypes
+from typing import Self
 
 _CreateMutex = ctypes.windll.kernel32.CreateMutexW
 _CreateMutex.argtypes = [wintypes.LPCVOID, wintypes.BOOL, wintypes.LPCWSTR]
@@ -21,7 +22,7 @@ _CloseHandle.restype = wintypes.BOOL
 class NamedMutex:
     """A named, system-wide mutex that can be acquired and released."""
 
-    def __init__(self, name, acquired=False):
+    def __init__(self, name: str, acquired: bool = False) -> None:
         self.name = name
         self.acquired = acquired
         ret = _CreateMutex(None, False, name)
@@ -31,7 +32,7 @@ class NamedMutex:
         if acquired:
             self.acquire()
 
-    def acquire(self, timeout=None):
+    def acquire(self, timeout: None | int | float = None) -> bool:
         if timeout is None:
             timeout = 0xFFFFFFFF  # Wait forever (INFINITE)
         else:
@@ -45,13 +46,13 @@ class NamedMutex:
             return False
         raise ctypes.WinError()
 
-    def release(self):
+    def release(self) -> None:
         ret = _ReleaseMutex(self.handle)
         if not ret:
             raise ctypes.WinError()
         self.acquired = False
 
-    def close(self):
+    def close(self) -> None:
         if self.handle is None:  # Already closed
             return
         ret = _CloseHandle(self.handle)
@@ -61,14 +62,14 @@ class NamedMutex:
 
     __del__ = close
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.name!r}, acquired={self.acquired})"
 
     __str__ = __repr__
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.acquire()
         return self
 
-    def __exit__(self, *_):
+    def __exit__(self, *_) -> None:
         self.release()
