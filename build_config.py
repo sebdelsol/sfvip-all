@@ -4,6 +4,7 @@ class Github:
 
 
 class Build:
+    splash = "ressources/Sfvip All.png"
     ico = "ressources/Sfvip All.png"
     main = "sfvip_all.py"
     name = "Sfvip All"

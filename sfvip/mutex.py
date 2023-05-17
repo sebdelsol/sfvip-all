@@ -18,54 +18,46 @@ _CloseHandle = ctypes.windll.kernel32.CloseHandle
 _CloseHandle.argtypes = [wintypes.HANDLE]
 _CloseHandle.restype = wintypes.BOOL
 
+_INFINITE = 0xFFFFFFFF
+
 
 class NamedMutex:
     """A named, system-wide mutex that can be acquired and released."""
 
-    def __init__(self, name: str, acquired: bool = False) -> None:
-        self.name = name
-        self.acquired = acquired
-        ret = _CreateMutex(None, False, name)
-        if not ret:
+    def __init__(self, name: str) -> None:
+        self._acquired = False
+        if not (ret := _CreateMutex(None, False, name)):
             raise ctypes.WinError()
-        self.handle = ret
-        if acquired:
-            self.acquire()
+        self._handle = ret
+
+    @property
+    def aquired(self) -> bool:
+        return self._acquired
 
     def acquire(self, timeout: None | int | float = None) -> bool:
-        if timeout is None:
-            timeout = 0xFFFFFFFF  # Wait forever (INFINITE)
-        else:
-            timeout = int(round(timeout * 1000))
-        ret = _WaitForSingleObject(self.handle, timeout)
+        timeout = _INFINITE if timeout is None else int(round(timeout * 1000))
+        ret = _WaitForSingleObject(self._handle, timeout)
         if ret in (0, 0x80):
-            self.acquired = True
+            self._acquired = True
             return True
         if ret == 0x102:  # Timeout
-            self.acquired = False
+            self._acquired = False
             return False
         raise ctypes.WinError()
 
     def release(self) -> None:
-        ret = _ReleaseMutex(self.handle)
-        if not ret:
+        if not _ReleaseMutex(self._handle):
             raise ctypes.WinError()
-        self.acquired = False
+        self._acquired = False
 
     def close(self) -> None:
-        if self.handle is None:  # Already closed
+        if self._handle is None:  # Already closed
             return
-        ret = _CloseHandle(self.handle)
-        if not ret:
+        if not _CloseHandle(self._handle):
             raise ctypes.WinError()
-        self.handle = None
+        self._handle = None
 
     __del__ = close
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.name!r}, acquired={self.acquired})"
-
-    __str__ = __repr__
 
     def __enter__(self) -> Self:
         self.acquire()
