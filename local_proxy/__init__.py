@@ -33,7 +33,7 @@ def _minimum_addons():
     ]
 
 
-class _AddOn:
+class _SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
     def __init__(self, all_cat: type[AllCat]) -> None:
@@ -86,16 +86,16 @@ class _AddOn:
             flow.response.stream = True
 
 
-class Proxy(multiprocessing.Process):
+class LocalProxy(multiprocessing.Process):
     """run mitmdump in a process"""
 
     def __init__(self, all_cat: type[AllCat], port: int, upstream: str) -> None:
         self._init_done = multiprocessing.Event()
         self._stop = multiprocessing.Event()
-        self._all_cat = all_cat
-        self._port = port
         self._upstream = upstream
+        self._all_cat = all_cat
         self._master = None
+        self._port = port
         super().__init__()
 
     def run(self) -> None:
@@ -105,11 +105,12 @@ class Proxy(multiprocessing.Process):
             opts = options.Options(listen_port=self._port, ssl_insecure=True, mode=(mode,))
             self._master = master = Master(opts, event_loop=loop)
             master.addons.add(*_minimum_addons())
-            master.addons.add(_AddOn(self._all_cat))
+            master.addons.add(_SfVipAddOn(self._all_cat))
             threading.Thread(target=self._wait_for_stop).start()
         finally:
             self._init_done.set()
-        loop.run_until_complete(master.run())
+        if master:
+            loop.run_until_complete(master.run())
 
     def _wait_for_stop(self) -> None:
         self._stop.wait()

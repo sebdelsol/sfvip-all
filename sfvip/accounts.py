@@ -1,7 +1,5 @@
 import json
-import os
 import time
-import winreg
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
@@ -10,7 +8,6 @@ from typing import IO, Callable, Optional
 from pyparsing import Any
 
 from .mutex import NamedMutex
-from .regkey import RegKey
 
 
 class NotAccessedYet(Exception):
@@ -35,13 +32,6 @@ def _retry_if_exception(exceptions: TExceptions, timeout: int) -> Callable[[TFun
         return wrapper
 
     return decorator
-
-
-def _dir_exists(path: str) -> bool:
-    if path:
-        path: Path = Path(path)
-        return path.is_dir()
-    return False
 
 
 class _Account(SimpleNamespace):
@@ -79,37 +69,28 @@ class _AccountList(list[_Account]):
 class _Database:
     """load & save accounts' database"""
 
-    _regkey_config_dir = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
-    _default_config_dir = Path(os.getenv("APPDATA")) / "SFVIP-Player"
-
-    def __init__(self) -> None:
+    def __init__(self, config_dir: Path) -> None:
         self._database: Optional[Path] = None
-        database = self._config_dir() / "Database.json"
+        database = config_dir / "Database.json"
         if database.is_file():
             self._database = database
-            self._atime = self._database.stat().st_atime
+            self._own_atime = self._atime
         self.accounts = _AccountList()
 
-    @staticmethod
-    def _config_dir() -> Path:
-        config_dir = RegKey.value_by_name(*_Database._regkey_config_dir)
-        if not _dir_exists(config_dir):
-            config_dir = str(_Database._default_config_dir.resolve())
-        return Path(config_dir)
-
-    def _update_atime(self) -> None:
-        self._atime = self._database.stat().st_atime
+    @property
+    def _atime(self) -> float:
+        return self._database.stat().st_atime
 
     def has_been_externally_accessed(self) -> bool:
         if self._database:
-            return self._database.stat().st_atime > self._atime
+            return self._atime > self._own_atime
         return True
 
     def _open(self, mode: str, op_on_file: Callable[[IO], None]) -> None:
         if self._database:
             with self._database.open(mode, encoding="utf-8") as f:
                 op_on_file(f)
-            self._update_atime()
+            self._own_atime = self._atime
 
     def load(self) -> None:
         self._open("r", self.accounts.load)
@@ -122,8 +103,8 @@ class _Database:
 class Accounts:
     """modify & restore accounts proxies"""
 
-    def __init__(self, app_name: str) -> None:
-        self._database = _Database()
+    def __init__(self, app_name: str, config_dir: Path) -> None:
+        self._database = _Database(config_dir)
         self._database.load()
         self._mutex = NamedMutex(app_name)
         self.upstream_proxies = {account.HttpProxy for account in self._accounts_to_set_proxies}
@@ -136,29 +117,28 @@ class Accounts:
     def _set_proxies(self, proxies: dict[str, str]) -> None:
         self._database.load()
         for account in self._accounts_to_set_proxies:
-            if account.HttpProxy in proxies:
-                account.HttpProxy = proxies[account.HttpProxy]
+            account.HttpProxy = proxies.get(account.HttpProxy, account.HttpProxy)
         self._database.save()
 
     @contextmanager
-    def set_proxies(self, proxies_by_upstreams: dict[str, str]) -> Callable[[], None]:
+    def set_proxies(self, local_proxies_by_upstreams: dict[str, str]) -> Callable[[], None]:
         """
         set accounts proxies & provide a function to restore those
         don't mess with the database till we have restored accounts proxies
         """
         self._mutex.acquire()
-        self._set_proxies(proxies_by_upstreams)
-        proxies_to_restore = {proxy: upstream for upstream, proxy in proxies_by_upstreams.items()}
+        self._set_proxies(local_proxies_by_upstreams)
+        undo = {v: k for k, v in local_proxies_by_upstreams.items()}
 
         @_retry_if_exception(NotAccessedYet, timeout=5)
         def restore_after_being_accessed() -> None:
             if not self._database.has_been_externally_accessed():
                 raise NotAccessedYet("retry")
-            self._set_proxies(proxies_to_restore)
+            self._set_proxies(undo)
             self._mutex.release()
 
         try:
             yield restore_after_being_accessed
         finally:
             with self._mutex:
-                self._set_proxies(proxies_to_restore)
+                self._set_proxies(undo)

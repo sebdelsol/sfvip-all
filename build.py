@@ -25,6 +25,7 @@ if not args.nobuild:
     subprocess.run(
         [
             *(sys.executable, "-m", "nuitka"),  # run nuitka
+            f"--include-data-file={Build.splash}={Build.splash}",
             f"--force-stderr-spec={cache_dir}/error.log",
             f"--windows-file-version={Build.version}",
             f"--windows-icon-from-ico={Build.ico}",

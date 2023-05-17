@@ -13,7 +13,7 @@ class ModuleIsNewer(Exception):
     pass
 
 
-class Loader:
+class ConfigLoader:
     """load & save as json a py module populated with str, int or pure class"""
 
     def __init__(self, config: ModuleType, path: Path) -> None:
