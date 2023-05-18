@@ -102,6 +102,7 @@ class LocalProxy(multiprocessing.Process):
         try:
             loop = asyncio.get_event_loop()
             mode = f"upstream:{self._upstream}" if self._upstream else "regular"
+            # do not verify upstream server SSL/TLS certificates.
             opts = options.Options(listen_port=self._port, ssl_insecure=True, mode=(mode,))
             self._master = master = Master(opts, event_loop=loop)
             master.addons.add(*_minimum_addons())

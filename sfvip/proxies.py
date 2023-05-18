@@ -2,7 +2,7 @@ import socket
 from typing import Self
 from urllib.parse import urlparse
 
-from local_proxy import LocalProxy
+from proxy import LocalProxy
 from sfvip_all_config import AllCat
 
 

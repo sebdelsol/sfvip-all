@@ -14,6 +14,7 @@ So you can easily **search your entire catalog**.
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 ![sloc](https://tokei.rs/b1/github/sebdelsol/sfvip-all?category=lines)  
+
 _Check [**build config**](build_config.py)._
 ### Create an environment
 ```console
