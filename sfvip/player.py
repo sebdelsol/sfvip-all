@@ -5,9 +5,6 @@ import winreg
 from pathlib import Path
 from typing import Optional
 
-from sfvip_all_config import Player as ConfigPlayer
-
-from .config_loader import ConfigLoader
 from .regkey import RegKey
 from .ui import UI, Rect
 
@@ -18,6 +15,14 @@ class SfvipError(Exception):
 
 class Player:
     """find & run sfvip player"""
+
+    class ConfigDir:
+        _regkey = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
+        _default = Path(os.getenv("APPDATA")) / "SFVIP-Player"
+
+        def __init__(self) -> None:
+            path = RegKey.value_by_name(*Player.ConfigDir._regkey)
+            self.path = Path(path) if path and Path(path).is_dir() else Player.ConfigDir._default
 
     _name = "sfvip player"
     _pattern = "*sf*vip*player*.exe"
@@ -36,19 +41,18 @@ class Player:
         ),
     )
 
-    class ConfigDir:
-        _regkey = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
-        _default = Path(os.getenv("APPDATA")) / "SFVIP-Player"
+    def __init__(self, player_path: Optional[str], ui: UI) -> None:
+        if not self._valid(player_path):
+            for path in self._get_paths_from_regkey():
+                if self._valid(path):
+                    player_path = path
+                    break
+            else:
+                player_path = self._get_path_from_user(ui)
+            if not self._valid(player_path):
+                raise SfvipError("Player not found")
 
-        def __init__(self) -> None:
-            path = RegKey.value_by_name(*Player.ConfigDir._regkey)
-            self.path = Path(path) if path and Path(path).is_dir() else Player.ConfigDir._default
-
-    def __init__(self, config_player: type[ConfigPlayer], config_loader: ConfigLoader, ui: UI) -> None:
-        self._ui = ui
-        self._path = self._get_path(config_player, config_loader)
-        if not self._valid(self._path):
-            raise SfvipError("No player found")
+        self.path = player_path
         self.config_dir = Player.ConfigDir().path
 
     @property
@@ -68,19 +72,6 @@ class Player:
             return path.is_file() and path.match(Player._pattern)
         return False
 
-    def _get_path(self, config_player: type[ConfigPlayer], config_loader: ConfigLoader) -> Optional[str]:
-        path = config_player.path
-        if not self._valid(path):
-            for path in self._get_paths_from_regkey():
-                if self._valid(path):
-                    break
-            else:
-                path = self._get_path_from_user()
-            if self._valid(path) and path != config_player.path:
-                config_player.path = path
-                config_loader.save()
-        return path
-
     @staticmethod
     def _get_paths_from_regkey() -> list[str]:
         for search, hkey, key, apply in Player._regkey_search:
@@ -88,13 +79,14 @@ class Player:
                 return apply(found)
         return []
 
-    def _get_path_from_user(self) -> Optional[str]:
-        self._ui.showinfo(f"Please find {Player._name.capitalize()}")
+    @staticmethod
+    def _get_path_from_user(ui: UI) -> Optional[str]:
+        ui.showinfo(f"Please find {Player._name.capitalize()}")
         while True:
-            if player := self._ui.find_file(Player._name, Player._pattern):
+            if player := ui.find_file(Player._name, Player._pattern):
                 return player
-            if not self._ui.askretry(message=f"{Player._name.capitalize()} not found, try again ?"):
+            if not ui.askretry(message=f"{Player._name.capitalize()} not found, try again ?"):
                 return None
 
     def run(self) -> subprocess.Popen:
-        return subprocess.Popen([self._path])
+        return subprocess.Popen([self.path])
