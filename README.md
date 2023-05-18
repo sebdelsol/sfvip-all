@@ -4,8 +4,8 @@ So you can easily **search your entire catalog**.
 
 <img src="ressources/all.png">
 
-## Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.3/Sfvip%20All.exe) or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.3/Sfvip%20All.zip)
-[![Version](https://img.shields.io/badge/Version-1.1.3-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.3/Sfvip%20All.exe)
+## Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.4/Sfvip%20All.exe) or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.4/Sfvip%20All.zip)
+[![Version](https://img.shields.io/badge/Version-1.1.4-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.4/Sfvip%20All.exe)
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)  
 <sub>_Launch **Sfvip Player** at least once before so **Sfvip All** could automatically find the player._</sub>  

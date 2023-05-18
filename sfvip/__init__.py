@@ -11,8 +11,6 @@ from .mutex import SystemWideMutex
 from .player import Player
 from .ui import UI
 
-# TODO rename standalone exe results in multiprocessing unable to launch sfvip all.exe
-
 
 def run():
     config_file = Path(os.getenv("APPDATA")) / Build.name / "Config.json"

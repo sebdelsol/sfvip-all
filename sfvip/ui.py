@@ -26,6 +26,9 @@ class Rect(namedtuple("rect", "x y w h", defaults=[None] * 4)):
     def center_for(self, w: int, h: int) -> Self:
         return Rect(self.x + (self.w - w) * 0.5, self.y + (self.h - h) * 0.5, w, h)
 
+    def to_geometry(self) -> str:
+        return f"{self.w}x{self.h}+{self.x:.0f}+{self.y:.0f}"
+
 
 class UI:
     """tk without a mainloop"""
@@ -43,20 +46,18 @@ class UI:
             """show in the middle of rect"""
             if rect.valid():
                 screen = Rect(0, 0, self._root.winfo_screenwidth(), self._root.winfo_screenheight())
-                rect = rect.keep_in(screen)
-                rect = rect.center_for(self._image.width(), self._image.height())
-                self._root.geometry(f"{rect.w}x{rect.h}+{rect.x:.0f}+{rect.y:.0f}")
+                geom = rect.keep_in(screen).center_for(self._image.width(), self._image.height()).to_geometry()
+                self._root.geometry(geom)
             else:
                 self._root.eval("tk::PlaceWindow . Center")
             tk.Label(self._root, bg=UI.Splash._bg, image=self._image).pack()
-            self._root.attributes("-transparentcolor", UI.Splash._bg, "-topmost", True)
-            self._root.attributes("-alpha", 1.0)
+            self._root.attributes("-transparentcolor", UI.Splash._bg, "-topmost", True, "-alpha", 1.0)
             self._root.overrideredirect(True)
             self._root.deiconify()
             self._root.update()
 
         def hide(self, fade_duration: float = 0.5) -> None:
-            """BLOCKING fade out, use when everything else is done"""
+            """BLOCKING fade out for fade_duration, use when everything else is done"""
             if fade_duration > 0:
                 dalpha = UI.Splash._fade_dt / fade_duration
                 while (alpha := self._root.attributes("-alpha") - dalpha) > 0:
