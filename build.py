@@ -26,7 +26,8 @@ if not args.nobuild:
         [
             *(sys.executable, "-m", "nuitka"),  # run nuitka
             f"--include-data-file={Build.splash}={Build.splash}",
-            f"--force-stderr-spec={cache_dir}/error.log",
+            f"--force-stderr-spec={cache_dir}/__ERROR.log",
+            f"--force-stdout-spec={cache_dir}/__LOG.log",
             f"--windows-file-version={Build.version}",
             f"--windows-icon-from-ico={Build.ico}",
             f"--onefile-tempdir-spec={cache_dir}",
