@@ -1,33 +1,30 @@
 import json
 import time
-from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 from typing import IO, Callable, Optional
-
-from pyparsing import Any
-
-from .mutex import NamedMutex
 
 
 class NotAccessedYet(Exception):
     pass
 
 
-TFunc = Callable[..., Any]
+TFuncNone = Callable[..., None]
+TFuncBool = Callable[..., bool]
 TExceptions = type[Exception] | tuple[type[Exception]]
 
 
-def _retry_if_exception(exceptions: TExceptions, timeout: int) -> Callable[[TFunc], TFunc]:
-    def decorator(func) -> TFunc:
-        def wrapper(*args, **kwargs) -> Any:
+def _retry_if_exception(exceptions: TExceptions, timeout: int) -> Callable[[TFuncNone], TFuncBool]:
+    def decorator(func: TFuncNone) -> TFuncBool:
+        def wrapper(*args, **kwargs) -> bool:
             start = time.perf_counter()
             while time.perf_counter() - start <= timeout:
                 try:
-                    return func(*args, **kwargs)
+                    func(*args, **kwargs)
+                    return True
                 except exceptions:
                     time.sleep(0.1)
-            return None
+            return False
 
         return wrapper
 
@@ -103,10 +100,9 @@ class _Database:
 class Accounts:
     """modify & restore accounts proxies"""
 
-    def __init__(self, app_name: str, config_dir: Path) -> None:
+    def __init__(self, config_dir: Path) -> None:
         self._database = _Database(config_dir)
         self._database.load()
-        self._mutex = NamedMutex(app_name)
         self.upstream_proxies = {account.HttpProxy for account in self._accounts_to_set_proxies}
 
     @property
@@ -114,31 +110,16 @@ class Accounts:
         """don't handle m3u playlists"""
         return _AccountList(account for account in self._database.accounts if not account.is_playlist())
 
-    def _set_proxies(self, proxies: dict[str, str]) -> None:
+    def set_proxies(self, proxies: dict[str, str]) -> dict[str, str]:
+        """set proxies and provide a reverse dict to restore the proxies"""
         self._database.load()
         for account in self._accounts_to_set_proxies:
             account.HttpProxy = proxies.get(account.HttpProxy, account.HttpProxy)
         self._database.save()
+        # to restore what's been set
+        return {v: k for k, v in proxies.items()}
 
-    @contextmanager
-    def set_proxies(self, local_proxies_by_upstreams: dict[str, str]) -> Callable[[], None]:
-        """
-        set accounts proxies & provide a function to restore those
-        don't mess with the database till we have restored accounts proxies
-        """
-        self._mutex.acquire()
-        self._set_proxies(local_proxies_by_upstreams)
-        undo = {v: k for k, v in local_proxies_by_upstreams.items()}
-
-        @_retry_if_exception(NotAccessedYet, timeout=5)
-        def restore_after_being_accessed() -> None:
-            if not self._database.has_been_externally_accessed():
-                raise NotAccessedYet("retry")
-            self._set_proxies(undo)
-            self._mutex.release()
-
-        try:
-            yield restore_after_being_accessed
-        finally:
-            with self._mutex:
-                self._set_proxies(undo)
+    @_retry_if_exception(NotAccessedYet, timeout=5)
+    def wait_being_read(self) -> None:
+        if not self._database.has_been_externally_accessed():
+            raise NotAccessedYet("retry")

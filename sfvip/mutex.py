@@ -21,17 +21,19 @@ _CloseHandle.restype = wintypes.BOOL
 _INFINITE = 0xFFFFFFFF
 
 
-class NamedMutex:
-    """A named, system-wide mutex that can be acquired and released."""
+class SystemWideMutex:
+    """A system-wide mutex"""
 
-    def __init__(self, name: str) -> None:
-        self._acquired = False
+    def __init__(self, name: str, acquire: bool = False) -> None:
         if not (ret := _CreateMutex(None, False, name)):
             raise ctypes.WinError()
         self._handle = ret
+        self._acquired = acquire
+        if acquire:
+            self.acquire()
 
     @property
-    def aquired(self) -> bool:
+    def acquired(self) -> bool:
         return self._acquired
 
     def acquire(self, timeout: None | int | float = None) -> bool:
