@@ -15,6 +15,9 @@ if "__compiled__" in globals():
         sys.argv[0] = str(exe.resolve())
 
 if __name__ == "__main__":
+    from build_config import Build
     from sfvip import run
+    from sfvip.ui import UI
 
-    run()
+    ui = UI(Build.name, Build.splash)
+    ui.in_thread(run, ui, Build.name)
