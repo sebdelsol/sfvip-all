@@ -23,6 +23,9 @@ class Rect(namedtuple("rect", "x y w h", defaults=[None] * 4)):
             min(self.y + self.h, rect.h) - self.y,
         )
 
+    def center_for(self, w: int, h: int) -> Self:
+        return Rect(self.x + (self.w - w) * 0.5, self.y + (self.h - h) * 0.5, w, h)
+
 
 class UI:
     """tk without a mainloop"""
@@ -41,9 +44,8 @@ class UI:
             if rect.valid():
                 screen = Rect(0, 0, self._root.winfo_screenwidth(), self._root.winfo_screenheight())
                 rect = rect.keep_in(screen)
-                w, h = self._image.width(), self._image.height()
-                x, y = rect.x + (rect.w - w) * 0.5, rect.y + (rect.h - h) * 0.5
-                self._root.geometry(f"{w}x{h}+{x:.0f}+{y:.0f}")
+                rect = rect.center_for(self._image.width(), self._image.height())
+                self._root.geometry(f"{rect.w}x{rect.h}+{rect.x:.0f}+{rect.y:.0f}")
             else:
                 self._root.eval("tk::PlaceWindow . Center")
             tk.Label(self._root, bg=UI.Splash._bg, image=self._image).pack()
@@ -67,7 +69,6 @@ class UI:
         root.withdraw()
         self.splash = UI.Splash(root, splash_path)
         root.wm_iconphoto(True, self.splash._image)
-
         self._title = title
 
     def showinfo(self, message: str) -> None:
