@@ -1,19 +1,26 @@
 import threading
 import tkinter as tk
-from collections import namedtuple
 from pathlib import Path
 from tkinter import filedialog, messagebox
-from typing import Callable, Self
+from typing import Any, Callable, NamedTuple, Self
 
 
-class Rect(namedtuple("rect", "x y w h", defaults=[None] * 4)):
+# class Rect(namedtuple("rect", "x y w h", defaults=[None] * 4)):
+class Rect(NamedTuple):
+    _default = float("inf")
+    x: float = _default
+    y: float = _default
+    w: float = _default
+    h: float = _default
+
     def valid(self) -> bool:
-        return all(attr is not None for attr in self)
+        # pylint: disable=not-an-iterable
+        return all(attr != Rect._default for attr in self)
 
     @classmethod
-    def from_dict_keys(cls: type[Self], dct: dict, *keys: str) -> Self:
+    def from_dict_keys(cls: type[Self], dct: dict[str, float], *keys: str) -> Self:
         assert len(keys) == 4
-        return cls(*(dct.get(attr) for attr in keys))
+        return cls(*(dct.get(attr, Rect._default) for attr in keys))
 
     def keep_in(self, rect: Self) -> Self:
         return Rect(
@@ -33,7 +40,7 @@ class Rect(namedtuple("rect", "x y w h", defaults=[None] * 4)):
 class UI(tk.Tk):
     """basic UI with a tk mainloop, the app has to run in a thread"""
 
-    def __init__(self, app_name: str, splash_path) -> None:
+    def __init__(self, app_name: str, splash_path: str) -> None:
         super().__init__()
         self.withdraw()
         file = Path(__file__).parent.parent / splash_path
@@ -78,7 +85,7 @@ class UI(tk.Tk):
 
         self.splash = Splash
 
-    def in_thread(self, target: Callable[..., None], *args) -> None:
+    def in_thread(self, target: Callable[..., None], *args: Any) -> None:
         """
         run the target function in a thread,
         handle the mainloop and quit ui when done
@@ -98,9 +105,9 @@ class UI(tk.Tk):
     def showinfo(self, message: str) -> None:
         messagebox.showinfo(self.app_name, message=message)
 
-    def find_file(self, name: str, pattern: str) -> None:
+    def find_file(self, name: str, pattern: str) -> str:
         title = f"{self.app_name}: Find {name}"
         return filedialog.askopenfilename(title=title, filetypes=[(name, pattern)])
 
-    def askretry(self, message: str) -> None:
+    def askretry(self, message: str) -> bool:
         return messagebox.askretrycancel(self.app_name, message=message)

@@ -1,8 +1,11 @@
 import json
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
-from typing import IO, Callable, Optional
+from typing import IO, Any, Callable, Iterator, Optional
+
+from loader.mutex import SystemWideMutex
 
 
 class NotAccessedYet(Exception):
@@ -16,7 +19,7 @@ TExceptions = type[Exception] | tuple[type[Exception]]
 
 def _retry_if_exception(exceptions: TExceptions, timeout: int) -> Callable[[TFuncNone], TFuncBool]:
     def decorator(func: TFuncNone) -> TFuncBool:
-        def wrapper(*args, **kwargs) -> bool:
+        def wrapper(*args: Any, **kwargs: Any) -> bool:
             start = time.perf_counter()
             while time.perf_counter() - start <= timeout:
                 try:
@@ -52,14 +55,14 @@ class _AccountList(list[_Account]):
 
     class _Encoder(json.JSONEncoder):
         # pylint: disable=arguments-renamed
-        def default(self, account: _Account) -> dict:
-            return account.__dict__
+        def default(self, o: _Account) -> dict[str, str]:
+            return o.__dict__
 
-    def load(self, f: IO) -> None:
+    def load(self, f: IO[str]) -> None:
         self.clear()
-        self.extend(json.load(f, object_hook=lambda account_dict: _Account(**account_dict)))
+        self.extend(json.load(f, object_hook=lambda dct: _Account(**dct)))
 
-    def dump(self, f: IO) -> None:
+    def dump(self, f: IO[str]) -> None:
         json.dump(self, f, cls=_AccountList._Encoder, indent=2, separators=(",", ":"))
 
 
@@ -73,17 +76,20 @@ class _Database:
             self._database = database
             self._own_atime = self._atime
         self.accounts = _AccountList()
+        self.lock = SystemWideMutex(f"file lock for {self._database}")
 
     @property
     def _atime(self) -> float:
-        return self._database.stat().st_atime
+        if self._database:
+            return self._database.stat().st_atime
+        return float("inf")
 
     def has_been_externally_accessed(self) -> bool:
         if self._database:
             return self._atime > self._own_atime
         return True
 
-    def _open(self, mode: str, op_on_file: Callable[[IO], None]) -> None:
+    def _open(self, mode: str, op_on_file: Callable[[IO[str]], None]) -> None:
         if self._database:
             with self._database.open(mode, encoding="utf-8") as f:
                 op_on_file(f)
@@ -102,6 +108,8 @@ class Accounts:
 
     def __init__(self, config_dir: Path) -> None:
         self._database = _Database(config_dir)
+        # need to lock the database till the proxies have been restored
+        self._database.lock.acquire()
         self._database.load()
         self.upstream_proxies = {account.HttpProxy for account in self._accounts_to_set_proxies}
 
@@ -110,16 +118,30 @@ class Accounts:
         """don't handle m3u playlists"""
         return _AccountList(account for account in self._database.accounts if not account.is_playlist())
 
-    def set_proxies(self, proxies: dict[str, str]) -> dict[str, str]:
-        """set proxies and provide a reverse dict to restore the proxies"""
+    def _set_proxies(self, proxies: dict[str, str]) -> None:
         self._database.load()
         for account in self._accounts_to_set_proxies:
             account.HttpProxy = proxies.get(account.HttpProxy, account.HttpProxy)
         self._database.save()
-        # to restore what's been set
-        return {v: k for k, v in proxies.items()}
 
     @_retry_if_exception(NotAccessedYet, timeout=5)
-    def wait_being_read(self) -> None:
+    def _wait_being_read(self) -> None:
         if not self._database.has_been_externally_accessed():
             raise NotAccessedYet("retry")
+
+    @contextmanager
+    def set_proxies(self, proxies: dict[str, str]) -> Iterator[Callable[[], None]]:
+        """set proxies and provide a method to restore the proxies"""
+        self._set_proxies(proxies)
+        restore = {v: k for k, v in proxies.items()}
+
+        def restore_after_being_read() -> None:
+            self._wait_being_read()
+            self._set_proxies(restore)
+            self._database.lock.release()
+
+        try:
+            yield restore_after_being_read
+        finally:
+            with self._database.lock:
+                self._set_proxies(restore)

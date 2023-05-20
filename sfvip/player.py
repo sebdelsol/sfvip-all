@@ -18,7 +18,7 @@ class Player:
 
     class ConfigDir:
         _regkey = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
-        _default = Path(os.getenv("APPDATA")) / "SFVIP-Player"
+        _default = Path(os.environ["APPDATA"]) / "SFVIP-Player"
 
         def __init__(self) -> None:
             path = RegKey.value_by_name(*Player.ConfigDir._regkey)
@@ -66,10 +66,10 @@ class Player:
         return Rect()
 
     @staticmethod
-    def _valid(path: str) -> bool:
+    def _valid(path: Optional[str]) -> bool:
         if path:
-            path: Path = Path(path)
-            return path.is_file() and path.match(Player._pattern)
+            _path: Path = Path(path)
+            return _path.is_file() and _path.match(Player._pattern)
         return False
 
     @staticmethod
@@ -88,5 +88,7 @@ class Player:
             if not ui.askretry(message=f"{Player._name.capitalize()} not found, try again ?"):
                 return None
 
-    def run(self) -> subprocess.Popen:
-        return subprocess.Popen([self.path])
+    def run(self) -> subprocess.Popen[bytes]:
+        if self.path:
+            return subprocess.Popen([self.path])
+        raise SfvipError("No player")

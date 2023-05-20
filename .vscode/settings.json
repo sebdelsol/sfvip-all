@@ -13,6 +13,8 @@
         "--disable=too-few-public-methods",
         "--load-plugins=pylint.extensions.no_self_use"
     ],
+    // type checking
+    "python.analysis.typeCheckingMode": "basic",
     // black
     "python.formatting.provider": "none",
     "black-formatter.args": [
