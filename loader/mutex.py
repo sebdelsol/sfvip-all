@@ -1,6 +1,6 @@
 import ctypes
 from ctypes import wintypes
-from typing import Self
+from typing import Optional, Self
 
 _CreateMutex = ctypes.windll.kernel32.CreateMutexW
 _CreateMutex.argtypes = [wintypes.LPCVOID, wintypes.BOOL, wintypes.LPCWSTR]
@@ -24,33 +24,24 @@ _INFINITE = 0xFFFFFFFF
 class SystemWideMutex:
     """A system-wide mutex"""
 
-    def __init__(self, name: str, acquire: bool = False) -> None:
+    def __init__(self, name: str) -> None:
+        name = name.replace("\\", " ")
         if not (ret := _CreateMutex(None, False, name)):
             raise ctypes.WinError()
         self._handle = ret
-        self._acquired = acquire
-        if acquire:
-            self.acquire()
 
-    @property
-    def acquired(self) -> bool:
-        return self._acquired
-
-    def acquire(self, timeout: None | int | float = None) -> bool:
+    def acquire(self, timeout: Optional[float] = None) -> bool:
         timeout = _INFINITE if timeout is None else int(round(timeout * 1000))
         ret = _WaitForSingleObject(self._handle, timeout)
         if ret in (0, 0x80):
-            self._acquired = True
             return True
         if ret == 0x102:  # Timeout
-            self._acquired = False
             return False
         raise ctypes.WinError()
 
     def release(self) -> None:
         if not _ReleaseMutex(self._handle):
             raise ctypes.WinError()
-        self._acquired = False
 
     def close(self) -> None:
         if self._handle is None:  # Already closed

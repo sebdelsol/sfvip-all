@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from build_config import Build, Github
-from sfvip_all_config import AllCat
+from sfvip_all_config import DefaultAppConfig
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--nobuild", "--readme", action="store_true", help="update readme and post only")
@@ -52,14 +52,14 @@ if not args.nobuild:
 
 print("Create readme & forum post")
 template_format = dict(
-    inject=" and ".join(f"_{what.capitalize()}_" for what in AllCat.inject),
+    inject=" and ".join(f"_{what.capitalize()}_" for what in DefaultAppConfig.all_cat.inject),
     github_path=f"{Github.owner}/{Github.repo}",
     archive_link=quote(f"{dist_name}.zip"),
     exe_link=quote(f"{dist_name}.exe"),
     ico_link=quote(Build.ico),
     version=Build.version,
     name=Build.name,
-    all=AllCat.name,
+    all=DefaultAppConfig.all_cat.name,
 )
 
 

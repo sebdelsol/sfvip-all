@@ -2,14 +2,13 @@ import socket
 from typing import Self
 from urllib.parse import urlparse
 
-from proxy import LocalProxy
-from sfvip_all_config import AllCat
+from proxy import AllCat, LocalProxy
 
 
 class LocalProxies:
     """start a local proxy for each upstream proxies (no upstream proxy count as one)"""
 
-    def __init__(self, all_cat: type[AllCat], upstreams: set[str]) -> None:
+    def __init__(self, all_cat: AllCat, upstreams: set[str]) -> None:
         self._all_cat = all_cat
         self._upstreams = upstreams
         self._proxies: list[LocalProxy] = []

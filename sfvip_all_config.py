@@ -1,8 +1,12 @@
-class Player:
-    path = None
+from loader import Loader
 
 
-class AllCat:
-    inject = ("series", "vod")
-    name = "All"
-    id = 0
+# pylint: disable=invalid-name
+class DefaultAppConfig(Loader):
+    class player:
+        path: str | None = None
+
+    class all_cat:
+        inject: tuple[str, ...] = "series", "vod"
+        name: str = "All"
+        id: int = 0

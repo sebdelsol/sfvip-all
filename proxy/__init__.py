@@ -3,7 +3,7 @@ import json
 import multiprocessing
 import re
 import threading
-from typing import Any, Optional
+from typing import Any, Optional, Protocol
 
 from mitmproxy import http, options
 from mitmproxy.addons import (
@@ -17,7 +17,11 @@ from mitmproxy.addons import (
 from mitmproxy.coretypes.multidict import MultiDictView
 from mitmproxy.master import Master
 
-from sfvip_all_config import AllCat
+
+class AllCat(Protocol):
+    inject: tuple[str, ...]
+    name: str
+    id: int
 
 
 # warning: use only the needed addons,
@@ -36,7 +40,7 @@ def _minimum_addons():
 class _SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
-    def __init__(self, all_cat: type[AllCat]) -> None:
+    def __init__(self, all_cat: AllCat) -> None:
         inject_in_re = "|".join(re.escape(what) for what in all_cat.inject)
         self._is_action_get_categories = re.compile(f"get_({inject_in_re})_categories").search
         self._all_cat_id = str(all_cat.id)
@@ -74,7 +78,7 @@ class _SfVipAddOn:
     def response(self, flow: http.HTTPFlow) -> None:
         action = self._get_query_key(flow.request, "action")
         if action is not None and self._is_action_get_categories(action):
-            if categories := self._response_json(flow.response):
+            if flow.response and (categories := self._response_json(flow.response)):
                 if isinstance(categories, list):
                     # response with the all category injected @ first
                     categories = self._all_cat_json, *categories
@@ -83,13 +87,14 @@ class _SfVipAddOn:
     def responseheaders(self, flow: http.HTTPFlow) -> None:
         """all reponses are streamed except the api requests"""
         if not self._is_api_request(flow.request):
-            flow.response.stream = True
+            if flow.response:
+                flow.response.stream = True
 
 
 class LocalProxy(multiprocessing.Process):
     """run mitmdump in a process"""
 
-    def __init__(self, all_cat: type[AllCat], port: int, upstream: str) -> None:
+    def __init__(self, all_cat: AllCat, port: int, upstream: str) -> None:
         self._init_done = multiprocessing.Event()
         self._stop = multiprocessing.Event()
         self._upstream = upstream
