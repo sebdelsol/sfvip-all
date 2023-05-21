@@ -13,7 +13,7 @@ So you can easily **search your entire catalog**.
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://tokei.rs/b1/github/{github_path}?category=lines)  
+![sloc](https://img.shields.io/badge/Loc-{loc}-informational)
 
 _Check [**build config**](build_config.py)._
 ### Create an environment

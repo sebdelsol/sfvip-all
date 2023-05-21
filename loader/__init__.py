@@ -48,9 +48,8 @@ class Loader:
     def _raise_if_im_newer(self) -> None:
         if not _launched_by_noitka():
             module_file = sys.modules[self.__module__].__file__
-            if module_file:
-                if getmtime(module_file) > getmtime(self._path):
-                    raise ModuleIsNewer
+            if module_file and getmtime(module_file) > getmtime(self._path):
+                raise ModuleIsNewer
 
     @staticmethod
     def _public_items_only(dct: dict[str, Any]) -> Iterator[tuple[str, Any]]:
