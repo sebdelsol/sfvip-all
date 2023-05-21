@@ -12,7 +12,11 @@ class LocalProxies:
         self._all_cat = all_cat
         self._upstreams = upstreams
         self._proxies: list[LocalProxy] = []
-        self.by_upstreams: dict[str, str] = {}
+        self._by_upstreams: dict[str, str] = {}
+
+    @property
+    def by_upstreams(self) -> dict[str, str]:
+        return self._by_upstreams
 
     @staticmethod
     def _find_port(excluded_ports: set[int]) -> int:
@@ -29,7 +33,7 @@ class LocalProxies:
         for upstream in self._upstreams:
             port = self._find_port(excluded_ports)
             excluded_ports.add(port)
-            self.by_upstreams[upstream] = f"http://127.0.0.1:{port}"
+            self._by_upstreams[upstream] = f"http://127.0.0.1:{port}"
             proxy = LocalProxy(self._all_cat, port, upstream)
             self._proxies.append(proxy)
             proxy.start()

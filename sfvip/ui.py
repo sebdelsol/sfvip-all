@@ -84,7 +84,7 @@ class UI(tk.Tk):
 
         self.splash = Splash
 
-    def in_thread(self, target: Callable[..., None], *args: Any) -> None:
+    def in_thread(self, target: Callable[..., None], *args: Any, **kwargs: Any) -> None:
         """
         run the target function in a thread,
         handle the mainloop and quit ui when done
@@ -92,7 +92,7 @@ class UI(tk.Tk):
 
         def _run():
             try:
-                target(*args)
+                target(*args, **kwargs)
             finally:
                 self.after(0, self.quit)
 
