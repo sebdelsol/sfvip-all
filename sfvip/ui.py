@@ -5,7 +5,6 @@ from tkinter import filedialog, messagebox
 from typing import Any, Callable, NamedTuple, Self
 
 
-# class Rect(namedtuple("rect", "x y w h", defaults=[None] * 4)):
 class Rect(NamedTuple):
     _default = float("inf")
     x: float = _default

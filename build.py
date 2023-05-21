@@ -51,15 +51,25 @@ if not args.nobuild:
         shutil.copy(f"{dist_temp}/{Build.name}.exe", f"{dist_name}.exe")
 
 print("Create readme & forum post")
+loc = subprocess.run(
+    [
+        "powershell",
+        "(git ls-files -- '*.py' | %{ ((Get-Content -Path $_) -notmatch '^\\s*$').Length } | measure -Sum).Sum",
+    ],
+    check=False,
+    capture_output=True,
+)
+
 template_format = dict(
     inject=" and ".join(f"_{what.capitalize()}_" for what in DefaultAppConfig.all_cat.inject),
     github_path=f"{Github.owner}/{Github.repo}",
     archive_link=quote(f"{dist_name}.zip"),
     exe_link=quote(f"{dist_name}.exe"),
+    all=DefaultAppConfig.all_cat.name,
     ico_link=quote(Build.ico),
     version=Build.version,
     name=Build.name,
-    all=DefaultAppConfig.all_cat.name,
+    loc=int(loc.stdout),
 )
 
 
