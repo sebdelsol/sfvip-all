@@ -17,12 +17,12 @@ class ModuleIsNewer(Exception):
 
 
 class Loader:
-    """load & save as json a py module populated with str, int or pure class"""
+    """load & save as json a pure nested class"""
 
     def __init__(self, path: Path) -> None:
         self._path = path
         self._file_lock = SystemWideMutex(f"file lock for {path}")
-        # each nested classes is turned into a SimpleNamespace attached to self
+        # turn all config nested classes into SimpleNamespace instance attributes
         self._to_simplenamespace(self, self.__class__.__dict__)
 
     def _open(self, mode: str) -> IO[str]:
@@ -52,7 +52,7 @@ class Loader:
                 raise ModuleIsNewer
 
     @staticmethod
-    def _public_items_only(dct: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+    def _public_only(dct: dict[str, Any]) -> Iterator[tuple[str, Any]]:
         for k, v in dct.items():
             if not k.startswith("_"):
                 yield k, v
@@ -60,11 +60,11 @@ class Loader:
     def _dict_from(self, config: Self | SimpleNamespace) -> dict[str, Any]:
         return {
             k: self._dict_from(obj) if isinstance(obj, SimpleNamespace) else obj
-            for k, obj in self._public_items_only(config.__dict__)
+            for k, obj in self._public_only(config.__dict__)
         }
 
     def _map_dict_to(self, config: Self | SimpleNamespace, dct: dict[str, Any]) -> None:
-        for k, v in self._public_items_only(dct):
+        for k, v in self._public_only(dct):
             if hasattr(config, k):
                 if isinstance(v, dict) and isinstance(obj := getattr(config, k), SimpleNamespace):
                     self._map_dict_to(obj, cast(dict[str, Any], v))
@@ -72,7 +72,7 @@ class Loader:
                     setattr(config, k, v)
 
     def _to_simplenamespace(self, config: Self | SimpleNamespace, dct: dict[str, Any]) -> None:
-        for k, v in self._public_items_only(dct):
+        for k, v in self._public_only(dct):
             if isinstance(v, type):
                 self._to_simplenamespace(obj := SimpleNamespace(), dict(v.__dict__))
                 setattr(config, k, obj)

@@ -74,26 +74,26 @@ class _Database:
         database = config_dir / "Database.json"
         if database.is_file():
             self._database = database
-            self._own_atime = self._atime
+            self._own_atime = self.atime
         self.accounts = _AccountList()
         self.lock = SystemWideMutex(f"file lock for {self._database}")
 
     @property
-    def _atime(self) -> float:
+    def atime(self) -> float:
         if self._database:
             return self._database.stat().st_atime
         return float("inf")
 
     def has_been_externally_accessed(self) -> bool:
         if self._database:
-            return self._atime > self._own_atime
+            return self.atime > self._own_atime
         return True
 
     def _open(self, mode: str, op_on_file: Callable[[IO[str]], None]) -> None:
         if self._database:
             with self._database.open(mode, encoding="utf-8") as f:
                 op_on_file(f)
-            self._own_atime = self._atime
+            self._own_atime = self.atime
 
     def load(self) -> None:
         self._open("r", self.accounts.load)
@@ -111,7 +111,11 @@ class Accounts:
         # need to lock the database till the proxies have been restored
         self._database.lock.acquire()
         self._database.load()
-        self.upstream_proxies = {account.HttpProxy for account in self._accounts_to_set_proxies}
+        self._upstreams = {account.HttpProxy for account in self._accounts_to_set_proxies}
+
+    @property
+    def upstreams(self) -> set[str]:
+        return self._upstreams
 
     @property
     def _accounts_to_set_proxies(self) -> _AccountList:

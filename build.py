@@ -68,12 +68,12 @@ template_format = dict(
     all=DefaultAppConfig.all_cat.name,
     ico_link=quote(Build.ico),
     version=Build.version,
-    name=Build.name,
     loc=int(loc.stdout),
+    name=Build.name,
 )
 
 
-def template_to_file(src: str, dst: str):
+def template_to_file(src: str, dst: str) -> None:
     template = Path(src).read_text(encoding="utf-8")
     Path(dst).write_text(template.format(**template_format), encoding="utf-8")
 
