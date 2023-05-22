@@ -16,7 +16,7 @@ class ModuleIsNewer(Exception):
     pass
 
 
-class Loader:
+class ConfigLoader:
     """load & save as json a pure nested class"""
 
     def __init__(self, path: Path) -> None:

@@ -5,7 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import IO, Any, Callable, Iterator, Optional
 
-from loader.mutex import SystemWideMutex
+from config_loader.mutex import SystemWideMutex
 
 
 class NotAccessedYet(Exception):

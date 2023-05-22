@@ -2,7 +2,8 @@ import socket
 from typing import Self
 from urllib.parse import urlparse
 
-from proxy import AllCat, LocalProxy
+from mitm_proxy import MitmLocalProxy, Mode
+from mitm_proxy.sfvip import AllCat, SfVipAddOn
 
 
 class LocalProxies:
@@ -11,8 +12,8 @@ class LocalProxies:
     def __init__(self, all_cat: AllCat, upstreams: set[str]) -> None:
         self._all_cat = all_cat
         self._upstreams = upstreams
-        self._proxies: list[LocalProxy] = []
         self._by_upstreams: dict[str, str] = {}
+        self._mitm_proxy: MitmLocalProxy | None = None
 
     @property
     def by_upstreams(self) -> dict[str, str]:
@@ -27,20 +28,29 @@ class LocalProxies:
                 if port not in excluded_ports:
                     return port
 
+    @staticmethod
+    def _ports_from(urls: set[str]) -> set[int]:
+        def _port(url: str) -> int | None:
+            try:
+                return urlparse(url).port
+            except ValueError:
+                return None
+
+        return {port for url in urls if (port := _port(url)) is not None}
+
     def __enter__(self) -> Self:
-        """launch only one local proxy per upstream proxy"""
-        excluded_ports = {port for url in self._upstreams if isinstance(port := urlparse(url).port, int)}
-        for upstream in self._upstreams:
-            port = self._find_port(excluded_ports)
-            excluded_ports.add(port)
-            self._by_upstreams[upstream] = f"http://127.0.0.1:{port}"
-            proxy = LocalProxy(self._all_cat, port, upstream)
-            self._proxies.append(proxy)
-            proxy.start()
-        for proxy in self._proxies:
-            proxy.wait_for_init_done()
+        if self._upstreams:
+            modes: list[Mode] = []
+            excluded_ports = self._ports_from(self._upstreams)
+            for upstream in self._upstreams:
+                port = self._find_port(excluded_ports)
+                excluded_ports.add(port)
+                modes.append(Mode(port=port, upstream=upstream))
+                self._by_upstreams[upstream] = f"http://127.0.0.1:{port}"
+            self._mitm_proxy = MitmLocalProxy(SfVipAddOn(self._all_cat), modes)
+            self._mitm_proxy.start()
         return self
 
     def __exit__(self, *_) -> None:
-        for proxy in self._proxies:
-            proxy.stop()
+        if self._mitm_proxy:
+            self._mitm_proxy.stop()

@@ -1,21 +1,10 @@
-import asyncio
+# use separate named package to reduce what's imported by multiproccessing
 import json
-import multiprocessing
 import re
-import threading
 from typing import Any, Optional, Protocol
 
-from mitmproxy import http, options
-from mitmproxy.addons import (
-    core,
-    disable_h2c,
-    dns_resolver,
-    next_layer,
-    proxyserver,
-    tlsconfig,
-)
+from mitmproxy import http
 from mitmproxy.coretypes.multidict import MultiDictView
-from mitmproxy.master import Master
 
 
 class AllCat(Protocol):
@@ -24,20 +13,7 @@ class AllCat(Protocol):
     id: int
 
 
-# warning: use only the needed addons,
-# if any issues use addons.default_addons() instead
-def _minimum_addons():
-    return [
-        core.Core(),
-        disable_h2c.DisableH2C(),
-        proxyserver.Proxyserver(),
-        dns_resolver.DnsResolver(),
-        next_layer.NextLayer(),
-        tlsconfig.TlsConfig(),
-    ]
-
-
-class _SfVipAddOn:
+class SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
     def __init__(self, all_cat: AllCat) -> None:
@@ -89,43 +65,3 @@ class _SfVipAddOn:
         if not self._is_api_request(flow.request):
             if flow.response:
                 flow.response.stream = True
-
-
-class LocalProxy(multiprocessing.Process):
-    """run mitmdump in a process"""
-
-    def __init__(self, all_cat: AllCat, port: int, upstream: str) -> None:
-        self._init_done = multiprocessing.Event()
-        self._stop = multiprocessing.Event()
-        self._upstream = upstream
-        self._all_cat = all_cat
-        self._master = None
-        self._port = port
-        super().__init__()
-
-    def run(self) -> None:
-        try:
-            loop = asyncio.get_event_loop()
-            mode = f"upstream:{self._upstream}" if self._upstream else "regular"
-            # do not verify upstream server SSL/TLS certificates.
-            opts = options.Options(listen_port=self._port, ssl_insecure=True, mode=(mode,))
-            self._master = master = Master(opts, event_loop=loop)
-            master.addons.add(*_minimum_addons())
-            master.addons.add(_SfVipAddOn(self._all_cat))
-            threading.Thread(target=self._wait_for_stop).start()
-        finally:
-            self._init_done.set()
-        if master:
-            loop.run_until_complete(master.run())
-
-    def _wait_for_stop(self) -> None:
-        self._stop.wait()
-        if self._master:
-            self._master.shutdown()
-
-    def wait_for_init_done(self) -> None:
-        self._init_done.wait()
-
-    def stop(self) -> None:
-        self._stop.set()
-        self.join()

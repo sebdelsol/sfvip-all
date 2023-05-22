@@ -1,8 +1,8 @@
-from loader import Loader
+from config_loader import ConfigLoader
 
 
 # pylint: disable=invalid-name
-class DefaultAppConfig(Loader):
+class DefaultAppConfig(ConfigLoader):
     class player:
         path: str | None = None
 
