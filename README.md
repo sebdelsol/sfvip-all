@@ -13,7 +13,7 @@ So you can easily **search your entire catalog**.
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-687-informational)
+![sloc](https://img.shields.io/badge/Loc-693-informational)
 
 _Check [**build config**](build_config.py)._
 ### Create an environment
@@ -39,3 +39,8 @@ python -m build --clang
 You'll need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](ressources/.vsconfig):
 
 <img src="ressources/VS.png">
+
+### Upgrade dependencies
+```console
+python -m upgrade
+```
