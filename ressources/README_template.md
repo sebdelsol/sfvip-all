@@ -39,3 +39,8 @@ python -m build --clang
 You'll need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](ressources/.vsconfig):
 
 <img src="ressources/VS.png">
+
+### Upgrade dependencies
+```console
+python -m upgrade
+```

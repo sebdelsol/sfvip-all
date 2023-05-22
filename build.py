@@ -9,6 +9,7 @@ from urllib.parse import quote
 from build_config import Build, Github
 from sfvip_all_config import DefaultAppConfig
 
+# pylint: disable=invalid-name
 parser = argparse.ArgumentParser()
 parser.add_argument("--nobuild", "--readme", action="store_true", help="update readme and post only")
 parser.add_argument("--noexe", action="store_true", help="create only a zip (faster)")
@@ -19,9 +20,10 @@ dist_temp = f"{Build.dir}/temp"
 dist_name = f"{Build.dir}/{Build.version}/{Build.name}"
 
 if not args.nobuild:
-    compiler = "--clang" if args.clang else "--mingw64"  # pylint: disable=invalid-name
-    onefile = () if args.noexe else ("--onefile",)  # pylint: disable=invalid-name
+    compiler = "--clang" if args.clang else "--mingw64"
+    onefile = () if args.noexe else ("--onefile",)
     cache_dir = f"%CACHE_DIR%/{Build.name} {Build.version}"
+    # need a development version of Nuitka because of https://github.com/Nuitka/Nuitka/issues/2234
     subprocess.run(
         [
             *(sys.executable, "-m", "nuitka"),  # run nuitka
@@ -33,8 +35,9 @@ if not args.nobuild:
             f"--onefile-tempdir-spec={cache_dir}",
             f"--output-filename={Build.name}.exe",
             f"--output-dir={dist_temp}",
-            "--assume-yes-for-downloads",  # download dependency walker, ccache, and gcc
-            "--enable-plugin=tk-inter",  # needed for tkinter
+            "--assume-yes-for-downloads",
+            # needed for tkinter
+            "--enable-plugin=tk-inter",
             "--python-flag=-OO",
             "--disable-console",
             "--standalone",
@@ -51,11 +54,14 @@ if not args.nobuild:
         shutil.copy(f"{dist_temp}/{Build.name}.exe", f"{dist_name}.exe")
 
 print("Create readme & forum post")
+get_py_files = "git ls-files -- '*.py'"
+count_non_blank_lines = "%{ ((Get-Content -Path $_) -notmatch '^\\s*$').Length }"
 loc = subprocess.run(
     [
         "powershell",
-        "(git ls-files -- '*.py' | %{ ((Get-Content -Path $_) -notmatch '^\\s*$').Length } | measure -Sum).Sum",
+        f"({get_py_files} | {count_non_blank_lines} | measure -Sum).Sum",
     ],
+    text=True,
     check=False,
     capture_output=True,
 )
