@@ -2,8 +2,9 @@ import json
 import os
 import subprocess
 import winreg
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Optional
+from typing import Iterator, Optional, cast
 
 from .regkey import RegKey
 from .ui import UI, Rect
@@ -13,16 +14,33 @@ class SfvipError(Exception):
     pass
 
 
+class PlayerLogs:
+    def __init__(self, path: Path) -> None:
+        self._path = path
+
+    def get_last_time_msg(self) -> tuple[float, str] | None:
+        logs = [file for file in self._path.iterdir() if file.match("Log-*.txt")]
+        logs.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        if logs:
+            log = logs[0]
+            with log.open("r") as f:
+                lines = f.readlines()
+            if len(lines) >= 2:
+                return log.stat().st_mtime, lines[-2]
+        return None
+
+
+class _PlayerConfigDir:
+    _regkey = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
+    _default = Path(os.environ["APPDATA"]) / "SFVIP-Player"
+
+    def __init__(self) -> None:
+        path = RegKey.value_by_name(*_PlayerConfigDir._regkey)
+        self.path = Path(path) if path and Path(path).is_dir() else _PlayerConfigDir._default
+
+
 class Player:
     """find & run sfvip player"""
-
-    class ConfigDir:
-        _regkey = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
-        _default = Path(os.environ["APPDATA"]) / "SFVIP-Player"
-
-        def __init__(self) -> None:
-            path = RegKey.value_by_name(*Player.ConfigDir._regkey)
-            self.path = Path(path) if path and Path(path).is_dir() else Player.ConfigDir._default
 
     _name = "sfvip player"
     _pattern = "*sf*vip*player*.exe"
@@ -52,16 +70,18 @@ class Player:
             if not self._valid(player_path):
                 raise SfvipError("Player not found")
 
-        self.path = player_path
-        self.config_dir = Player.ConfigDir().path
+        self.path: str = cast(str, player_path)
+        self.config_dir = _PlayerConfigDir().path
+        self.logs = PlayerLogs(Path(self.path).parent)
+        self._proc: subprocess.Popen[bytes] | None = None
 
     @property
     def rect(self):
         player_config = self.config_dir / "Config.json"
         if player_config.is_file():
             with player_config.open("r") as f:
-                config: dict = json.load(f)
-            if not config.get("IsMaximized"):
+                config = json.load(f)
+            if isinstance(config, dict) and not config.get("IsMaximized"):
                 return Rect.from_dict_keys(config, "Left", "Top", "Width", "Height")
         return Rect()
 
@@ -88,7 +108,14 @@ class Player:
             if not ui.askretry(message=f"{Player._name.capitalize()} not found, try again ?"):
                 return None
 
-    def run(self) -> subprocess.Popen[bytes]:
-        if self.path:
-            return subprocess.Popen([self.path])
-        raise SfvipError("No player")
+    @contextmanager
+    def run(self) -> Iterator[subprocess.Popen[bytes]]:
+        if not self.path:
+            raise SfvipError("No player")
+        with subprocess.Popen([self.path]) as self._proc:
+            yield self._proc
+        self._proc = None
+
+    def stop(self) -> None:
+        if self._proc:
+            self._proc.terminate()

@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 from contextlib import contextmanager
 from pathlib import Path
@@ -6,6 +7,9 @@ from types import SimpleNamespace
 from typing import IO, Any, Callable, Iterator, Optional
 
 from config_loader.mutex import SystemWideMutex
+
+from .player import Player
+from .watch import WatchFile
 
 
 class NotAccessedYet(Exception):
@@ -77,6 +81,7 @@ class _Database:
             self._own_atime = self.atime
         self.accounts = _AccountList()
         self.lock = SystemWideMutex(f"file lock for {self._database}")
+        self.watch = WatchFile(self._database)
 
     @property
     def atime(self) -> float:
@@ -95,6 +100,7 @@ class _Database:
                 op_on_file(f)
             self._own_atime = self.atime
 
+    @_retry_if_exception(json.decoder.JSONDecodeError, timeout=1)
     def load(self) -> None:
         self._open("r", self.accounts.load)
 
@@ -106,16 +112,18 @@ class _Database:
 class Accounts:
     """modify & restore accounts proxies"""
 
-    def __init__(self, config_dir: Path) -> None:
-        self._database = _Database(config_dir)
+    def __init__(self, player: Player, relaunch: threading.Event) -> None:
+        self._player = player
+        self._database = _Database(player.config_dir)
+        self._player_logs = player.logs
         # need to lock the database till the proxies have been restored
         self._database.lock.acquire()
-        self._database.load()
-        self._upstreams = {account.HttpProxy for account in self._accounts_to_set_proxies}
+        self._relaunch = relaunch
 
     @property
     def upstreams(self) -> set[str]:
-        return self._upstreams
+        self._database.load()
+        return {account.HttpProxy for account in self._accounts_to_set_proxies}
 
     @property
     def _accounts_to_set_proxies(self) -> _AccountList:
@@ -139,13 +147,35 @@ class Accounts:
         self._set_proxies(proxies)
         restore = {v: k for k, v in proxies.items()}
 
+        def on_modified() -> None:
+            if log := self._player_logs.get_last_time_msg():
+                timestamp, msg = log
+                # account changed by sfvip player after the watch has started
+                if "Edit User Account" in msg and timestamp > self._database.watch.started_time:
+                    with self._database.lock:
+                        # save before restoring
+                        upstreams = self.upstreams
+                        self._set_proxies(restore)
+                        # to avoid recursion
+                        self._database.watch.started_time = self._database.atime
+                    # check there's no new proxies
+                    if not upstreams.issubset(restore.keys()):
+                        # debounce
+                        self._database.watch.set_callback(None)
+                        self._relaunch.set()
+                        # needs to be at the very end to finish before entering the finally below
+                        self._player.stop()
+
         def restore_after_being_read() -> None:
             self._wait_being_read()
             self._set_proxies(restore)
             self._database.lock.release()
+            self._database.watch.set_callback(on_modified)
+            self._database.watch.start()
 
         try:
             yield restore_after_being_read
         finally:
+            self._database.watch.stop()
             with self._database.lock:
                 self._set_proxies(restore)

@@ -119,9 +119,9 @@ class Upgrader:
                 break
 
             key = input(
-                f"{Stl.title('> q')}{Stl.low('uit')} "
-                f"{Stl.low('or')} {Stl.title('#')} "
-                f"{Stl.low('?')} {Stl.title()}"
+                f"{Stl.title('> q')}{Stl.low('uit')}"
+                f" {Stl.low('or')} {Stl.title('#')}"
+                f" {Stl.low('?')} {Stl.title()}"
             )
             if key == "q":
                 print()

@@ -8,5 +8,5 @@ class Build:
     ico = "ressources/Sfvip All.png"
     main = "sfvip_all.py"
     name = "Sfvip All"
-    version = "1.1.4"
+    version = "1.1.5"
     dir = "build"
