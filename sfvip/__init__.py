@@ -1,9 +1,14 @@
+import threading
+from typing import Any
+
 from sfvip_all_config import DefaultAppConfig
 
 from .accounts import Accounts
 from .player import Player
 from .proxies import LocalProxies
 from .ui import UI
+
+# TODO proper log
 
 
 def sfvip(app_config: DefaultAppConfig, app_name: str, app_splash: str) -> None:
@@ -15,12 +20,18 @@ def sfvip(app_config: DefaultAppConfig, app_name: str, app_splash: str) -> None:
         app_config.save()
 
     def _run() -> None:
-        ui.splash.show(player.rect)
-        accounts = Accounts(player.config_dir)
-        with LocalProxies(app_config.all_cat, accounts.upstreams) as proxies:
-            with accounts.set_proxies(proxies.by_upstreams) as restore_accounts_proxies:
-                with player.run():
-                    restore_accounts_proxies()
-                    ui.splash.hide()
+        relaunch = threading.Event()
+        relaunch.set()
+        while relaunch.is_set():
+            relaunch.clear()
+            ui.splash.show(player.rect)
+            accounts = Accounts(player, relaunch)
+            with LocalProxies(app_config.all_cat, accounts.upstreams) as proxies:
+                with accounts.set_proxies(proxies.by_upstreams) as restore_accounts_proxies:
+                    with player.run():
+                        restore_accounts_proxies()
+                        ui.splash.hide()
+            # if relaunch.is_set():
+            #     ui.showinfo("need to relaunch to handle new proxies")
 
     ui.in_thread(_run)

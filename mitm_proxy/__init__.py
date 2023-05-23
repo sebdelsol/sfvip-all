@@ -14,6 +14,7 @@ from mitmproxy.addons import (
     tlsconfig,
 )
 from mitmproxy.master import Master
+from mitmproxy.net import server_spec
 
 
 # warning: use only the needed addons,
@@ -45,10 +46,18 @@ class Mode(NamedTuple):
     upstream: str
 
 
+def validate_upstream(url: str) -> bool:
+    try:
+        server_spec.parse(url, default_scheme="http")
+        return True
+    except ValueError:
+        return False
+
+
 class MitmLocalProxy(multiprocessing.Process):
     """run mitmdump in a process"""
 
-    def __init__(self, addon: _AddOn, modes: list[Mode]) -> None:
+    def __init__(self, addon: _AddOn, modes: set[Mode]) -> None:
         self._stop = multiprocessing.Event()
         self._addon = addon
         self._modes = modes

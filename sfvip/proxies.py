@@ -1,8 +1,8 @@
 import socket
 from typing import Self
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlsplit, urlunsplit
 
-from mitm_proxy import MitmLocalProxy, Mode
+from mitm_proxy import MitmLocalProxy, Mode, validate_upstream
 from mitm_proxy.sfvip import AllCat, SfVipAddOn
 
 
@@ -38,17 +38,29 @@ class LocalProxies:
 
         return {port for url in urls if (port := _port(url)) is not None}
 
+    @staticmethod
+    def _fix_upstream(url: str) -> str | None:
+        if not url or url.isspace():
+            return ""
+        url = urlunsplit(urlsplit(url)).replace("///", "//")
+        if validate_upstream(url):
+            return url
+        return None
+
     def __enter__(self) -> Self:
         if self._upstreams:
-            modes: list[Mode] = []
+            modes: set[Mode] = set()
             excluded_ports = self._ports_from(self._upstreams)
             for upstream in self._upstreams:
-                port = self._find_port(excluded_ports)
-                excluded_ports.add(port)
-                modes.append(Mode(port=port, upstream=upstream))
-                self._by_upstreams[upstream] = f"http://127.0.0.1:{port}"
-            self._mitm_proxy = MitmLocalProxy(SfVipAddOn(self._all_cat), modes)
-            self._mitm_proxy.start()
+                upstream_fixed = self._fix_upstream(upstream)
+                if upstream_fixed is not None:
+                    port = self._find_port(excluded_ports)
+                    excluded_ports.add(port)
+                    modes.add(Mode(port=port, upstream=upstream_fixed))
+                    self._by_upstreams[upstream] = f"http://127.0.0.1:{port}"
+            if modes:
+                self._mitm_proxy = MitmLocalProxy(SfVipAddOn(self._all_cat), modes)
+                self._mitm_proxy.start()
         return self
 
     def __exit__(self, *_) -> None:

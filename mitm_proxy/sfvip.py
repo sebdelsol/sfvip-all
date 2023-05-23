@@ -20,7 +20,11 @@ class SfVipAddOn:
         inject_in_re = "|".join(re.escape(what) for what in all_cat.inject)
         self._is_action_get_categories = re.compile(f"get_({inject_in_re})_categories").search
         self._all_cat_id = str(all_cat.id)
-        self._all_cat_json = dict(category_id=str(all_cat.id), category_name=all_cat.name, parent_id=0)
+        self._all_cat_json = dict(
+            category_id=str(all_cat.id),
+            category_name=all_cat.name,
+            parent_id=0,
+        )
 
     @staticmethod
     def _is_api_request(request: http.Request) -> bool:
