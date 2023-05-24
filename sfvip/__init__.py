@@ -8,8 +8,6 @@ from .player import Player
 from .proxies import LocalProxies
 from .ui import UI
 
-# TODO proper log
-
 
 def sfvip(app_config: DefaultAppConfig, app_name: str, app_splash: str) -> None:
     app_config.update()

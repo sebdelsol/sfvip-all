@@ -5,15 +5,15 @@
   and auto relaunch if needed.
 
 ## 1.1.4
-* Exe can be renamed (fix nuitka multiprocessing).
+* **Exe** can be renamed (fix nuitka multiprocessing).
 * Accounts proxies correctly restored when launching a lot of Sfvip All in a row.
 * Splash screen (useful when there're a lot of proxies to launch).
 
 ## 1.1.3
 * Reduce proxies overhead by using:
-    - mitmproxy instead of proxy.py,
-    - subprocesses for proxies,
-    - Clang to build.
+    - **mitmproxy** instead of proxy.py,
+    - Subprocesses for proxies,
+    - **Clang** to build.
 * Forward to the original accounts proxies.
 * _Error log_ in cachedir.
 

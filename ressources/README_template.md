@@ -7,7 +7,10 @@ So you can easily **search your entire catalog**.
 ## Download the [**Exe**](https://github.com/{github_path}/raw/master/{exe_link}) or [**Zip**](https://github.com/{github_path}/raw/master/{archive_link})
 [![Version](https://img.shields.io/badge/Version-{version}-informational)](https://github.com/{github_path}/raw/master/{exe_link})
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
-[![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)  
+[![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)
+
+_Check the [**Changelog**](build/changelog.md)._
+
 <sub>_Launch **Sfvip Player** at least once before so **Sfvip All** could automatically find the player._</sub>  
 <sub>_The standalone **Sfvip All.exe** might be a little slow to start its first run._</sub>
 ## Build

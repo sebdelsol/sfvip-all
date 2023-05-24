@@ -1,9 +1,12 @@
+import logging
 import time
 from pathlib import Path
 from typing import Callable
 
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
+
+logger = logging.getLogger(__name__)
 
 CallbackT = Callable[[], None]
 
@@ -17,6 +20,7 @@ class WatchFile:
             event_handler.on_modified = self._on_modified
             self._observer = Observer()
             self._observer.schedule(event_handler, path.parent, recursive=False)
+            logger.info("watch file: %s", path)
         self.started_time: float = float("inf")
 
     def _on_modified(self, event):  # pylint: disable=unused-argument
