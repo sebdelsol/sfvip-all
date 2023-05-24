@@ -1,41 +1,18 @@
 import json
+import logging
 import threading
-import time
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
-from typing import IO, Any, Callable, Iterator, Optional
+from typing import IO, Callable, Iterator
 
-from config_loader.mutex import SystemWideMutex
+from mutex import SystemWideMutex
 
-from .player import Player
+from .player import Player, PlayerConfigDirFile
+from .retry import retry_if_exception
 from .watch import WatchFile
 
-
-class NotAccessedYet(Exception):
-    pass
-
-
-TFuncNone = Callable[..., None]
-TFuncBool = Callable[..., bool]
-TExceptions = type[Exception] | tuple[type[Exception]]
-
-
-def _retry_if_exception(exceptions: TExceptions, timeout: int) -> Callable[[TFuncNone], TFuncBool]:
-    def decorator(func: TFuncNone) -> TFuncBool:
-        def wrapper(*args: Any, **kwargs: Any) -> bool:
-            start = time.perf_counter()
-            while time.perf_counter() - start <= timeout:
-                try:
-                    func(*args, **kwargs)
-                    return True
-                except exceptions:
-                    time.sleep(0.1)
-            return False
-
-        return wrapper
-
-    return decorator
+logger = logging.getLogger(__name__)
 
 
 class _Account(SimpleNamespace):
@@ -58,7 +35,6 @@ class _AccountList(list[_Account]):
     """list of Accounts with json load & dump"""
 
     class _Encoder(json.JSONEncoder):
-        # pylint: disable=arguments-renamed
         def default(self, o: _Account) -> dict[str, str]:
             return o.__dict__
 
@@ -70,43 +46,43 @@ class _AccountList(list[_Account]):
         json.dump(self, f, cls=_AccountList._Encoder, indent=2, separators=(",", ":"))
 
 
+class NotExternallyAccessedYet(Exception):
+    pass
+
+
 class _Database:
     """load & save accounts' database"""
 
-    def __init__(self, config_dir: Path) -> None:
-        self._database: Optional[Path] = None
-        database = config_dir / "Database.json"
-        if database.is_file():
-            self._database = database
-            self._own_atime = self.atime
+    def __init__(self) -> None:
+        self._database = PlayerConfigDirFile("Database.json")
+        self._accessed_by_me = self.atime
         self.accounts = _AccountList()
         self.lock = SystemWideMutex(f"file lock for {self._database}")
         self.watch = WatchFile(self._database)
+        if self._database.is_file():
+            logger.info("accounts file: %s", self._database)
+        else:
+            logger.warning("no accounts file")
 
     @property
     def atime(self) -> float:
-        if self._database:
+        if self._database.is_file():
             return self._database.stat().st_atime
         return float("inf")
 
-    def has_been_externally_accessed(self) -> bool:
-        if self._database:
-            return self.atime > self._own_atime
-        return True
+    @retry_if_exception(NotExternallyAccessedYet, timeout=5)
+    def wait_being_read(self) -> None:
+        if self._database.is_file():
+            if self.atime <= self._accessed_by_me:
+                raise NotExternallyAccessedYet("retry")
 
-    def _open(self, mode: str, op_on_file: Callable[[IO[str]], None]) -> None:
-        if self._database:
-            with self._database.open(mode, encoding="utf-8") as f:
-                op_on_file(f)
-            self._own_atime = self.atime
-
-    @_retry_if_exception(json.decoder.JSONDecodeError, timeout=1)
     def load(self) -> None:
-        self._open("r", self.accounts.load)
+        self._database.open_and_do("r", self.accounts.load)
+        self._accessed_by_me = self.atime
 
-    @_retry_if_exception(PermissionError, timeout=5)
     def save(self) -> None:
-        self._open("w", self.accounts.dump)
+        self._database.open_and_do("w", self.accounts.dump)
+        self._accessed_by_me = self.atime
 
 
 class Accounts:
@@ -114,7 +90,7 @@ class Accounts:
 
     def __init__(self, player: Player, relaunch: threading.Event) -> None:
         self._player = player
-        self._database = _Database(player.config_dir)
+        self._database = _Database()
         self._player_logs = player.logs
         # need to lock the database till the proxies have been restored
         self._database.lock.acquire()
@@ -130,36 +106,40 @@ class Accounts:
         """don't handle m3u playlists"""
         return _AccountList(account for account in self._database.accounts if not account.is_playlist())
 
-    def _set_proxies(self, proxies: dict[str, str]) -> None:
-        self._database.load()
-        for account in self._accounts_to_set_proxies:
-            account.HttpProxy = proxies.get(account.HttpProxy, account.HttpProxy)
-        self._database.save()
-
-    @_retry_if_exception(NotAccessedYet, timeout=5)
-    def _wait_being_read(self) -> None:
-        if not self._database.has_been_externally_accessed():
-            raise NotAccessedYet("retry")
+    def _set_proxies(self, proxies: dict[str, str], msg: str) -> None:
+        with self._database.lock:
+            self._database.load()
+            for account in self._accounts_to_set_proxies:
+                if account.HttpProxy in proxies:
+                    logger.info(
+                        "%s proxy: %s",
+                        msg,
+                        f"'{account.HttpProxy}' -> '{proxies[account.HttpProxy]}'",
+                    )
+                    account.HttpProxy = proxies[account.HttpProxy]
+            self._database.save()
 
     @contextmanager
     def set_proxies(self, proxies: dict[str, str]) -> Iterator[Callable[[], None]]:
         """set proxies and provide a method to restore the proxies"""
-        self._set_proxies(proxies)
+        self._set_proxies(proxies, "set")
         restore = {v: k for k, v in proxies.items()}
 
         def on_modified() -> None:
-            if log := self._player_logs.get_last_time_msg():
+            if log := self._player_logs.get_last_timestamp_and_msg():
                 timestamp, msg = log
                 # account changed by sfvip player after the watch has started
                 if "Edit User Account" in msg and timestamp > self._database.watch.started_time:
                     with self._database.lock:
                         # save before restoring
                         upstreams = self.upstreams
-                        self._set_proxies(restore)
+                        logger.info("accounts proxies have been externally modified")
+                        self._set_proxies(restore, "restore")
                         # to avoid recursion
                         self._database.watch.started_time = self._database.atime
-                    # check there's no new proxies
+                    # check there're no new proxies
                     if not upstreams.issubset(restore.keys()):
+                        logger.info("need to restart the player")
                         # debounce
                         self._database.watch.set_callback(None)
                         self._relaunch.set()
@@ -167,9 +147,11 @@ class Accounts:
                         self._player.stop()
 
         def restore_after_being_read() -> None:
-            self._wait_being_read()
-            self._set_proxies(restore)
+            self._database.wait_being_read()
+            self._set_proxies(restore, "restore")
+            # we can now safely release the databse
             self._database.lock.release()
+            # and start the watch
             self._database.watch.set_callback(on_modified)
             self._database.watch.start()
 
@@ -177,5 +159,4 @@ class Accounts:
             yield restore_after_being_read
         finally:
             self._database.watch.stop()
-            with self._database.lock:
-                self._set_proxies(restore)
+            self._set_proxies(restore, "restore")

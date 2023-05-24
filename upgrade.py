@@ -1,59 +1,55 @@
 import json
 import msvcrt
+import os
 import subprocess
 import sys
-from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable, Iterator, NamedTuple, Protocol
 
-from colorama import Fore, Style
+from colorama import Fore, Style, just_fix_windows_console
+
+just_fix_windows_console()
 
 
-class Stl:
-    @staticmethod
-    def _style(txt, style):
-        reset = Style.RESET_ALL if txt else ""
-        return f"{style}{txt or ''}{reset}"
-
-    @staticmethod
-    def title(txt=None):
-        return Stl._style(txt, f"{Fore.GREEN}{Style.BRIGHT}")
+class Color:
+    class ToStyle(Protocol):  # to handle hint for the callable default paramater
+        def __call__(self, txt: str = "") -> str:
+            ...
 
     @staticmethod
-    def high(txt=None):
-        return Stl._style(txt, Fore.YELLOW)
+    def _use_style(style: str) -> ToStyle:
+        return lambda txt="": f"{style}{txt}{Style.RESET_ALL}" if txt else style
 
-    @staticmethod
-    def low(txt=None):
-        return Stl._style(txt, Fore.CYAN)
+    _use_style = _use_style.__func__
 
-    @staticmethod
-    def warn(txt=None):
-        return Stl._style(txt, f"{Fore.RED}{Style.BRIGHT}")
+    title = _use_style(Fore.GREEN + Style.BRIGHT)
+    warn = _use_style(Fore.RED + Style.BRIGHT)
+    high = _use_style(Fore.YELLOW)
+    low = _use_style(Fore.CYAN)
 
 
-def cols(sequence, key):
-    txts = [key(obj) for obj in sequence]
+class Pckg(NamedTuple):
+    req: str
+    name: str
+    version: str
+
+
+def format_columns(sequence: list[Pckg], key_to_str: Callable[[Pckg], str]) -> Iterator[str]:
+    txts = [key_to_str(pckg) for pckg in sequence]
     len_txt = len(max(txts, key=len))
     for txt in txts:
         yield f"{txt: <{len_txt + 1}}"
 
 
-def line_clear():
+def line_clear() -> None:
     print("\x1b[2K", end="")
 
 
-@dataclass
-class Pckg:
-    req: Path
-    name: str
-    version: str
-
-
 class Upgrader:
-    pip_install = sys.executable, "-m", "pip", "install", "-U"
+    pip_install = sys.executable, "-m", "pip", "install", "-U", "--require-virtualenv"
 
     @staticmethod
-    def _install(*options):
+    def _install(*options: str) -> None:
         with subprocess.Popen(
             [*Upgrader.pip_install, *options],
             stdout=subprocess.PIPE,
@@ -62,20 +58,23 @@ class Upgrader:
             text=True,
         ) as proc:
             if proc.stdout:
+                width, _ = os.get_terminal_size()
                 for line in proc.stdout:
                     line_clear()
                     if "error" in line.lower():
-                        print(Stl.warn(line.replace("\n", "")))
+                        print(Color.warn(line.replace("\n", "")))
                     else:
-                        print(line.replace("\n", "\r"), end="")
+                        line = line.replace("\n", "")[:width]
+                        print(f"{line}\r", end="")
             line_clear()
 
-    def _to_upgrade(self, req_file) -> list[Pckg]:
-        print(Stl.title("Check upgrade for"), Stl.high(req_file))
+    def _to_upgrade(self, req_file: str) -> list[Pckg]:
+        print(Color.title("Check upgrade for"), Color.high(req_file))
 
-        report_file = Path(f"{req_file}.json")
+        report_file = f"{req_file}.json"
         self._install("--dry-run", "-r", req_file, "--report", report_file)
 
+        report_file = Path(report_file)
         if report_file.exists():
             with open(report_file, mode="r", encoding="utf8") as f:
                 report = json.load(f)
@@ -89,21 +88,21 @@ class Upgrader:
         return []
 
     @staticmethod
-    def _show_upgrade(to_upgrade: list[Pckg]):
+    def _show_upgrade(to_upgrade: list[Pckg]) -> int:
         if (n := len(to_upgrade)) > 0:
             print()
-            print(Stl.title("Upgrade"))
+            print(Color.title("Upgrade"))
             for i, (name, version, req) in enumerate(
                 zip(
-                    cols(to_upgrade, key=lambda pckg: Stl.high(pckg.name)),
-                    cols(to_upgrade, key=lambda pckg: Stl.warn(pckg.version)),
-                    cols(to_upgrade, key=lambda pckg: Stl.low(pckg.req)),
+                    format_columns(to_upgrade, key_to_str=lambda pckg: Color.high(pckg.name)),
+                    format_columns(to_upgrade, key_to_str=lambda pckg: Color.warn(pckg.version)),
+                    format_columns(to_upgrade, key_to_str=lambda pckg: Color.low(pckg.req)),
                 )
             ):
-                print(Stl.title(f" {i + 1}."), name, version, Stl.low("from"), req)
+                print(Color.title(f" {i + 1}."), name, version, Color.low("from"), req)
         return n
 
-    def install_for(self, *req_files):
+    def install_for(self, *req_files: str) -> None:
         # flush the input buffer
         while msvcrt.kbhit():
             msvcrt.getch()
@@ -115,13 +114,12 @@ class Upgrader:
 
             if n == 0:
                 print()
-                print(Stl.title("Nothing to upgrade"))
+                print(Color.title("Nothing to upgrade"))
                 break
 
             key = input(
-                f"{Stl.title('> q')}{Stl.low('uit')}"
-                f" {Stl.low('or')} {Stl.title('#')}"
-                f" {Stl.low('?')} {Stl.title()}"
+                f"{Color.title('> q')}{Color.low('uit')} {Color.low('or')} "
+                f"{Color.title('#')} {Color.low('?')} {Color.title()}"
             )
             if key == "q":
                 print()
@@ -131,14 +129,14 @@ class Upgrader:
                 pckg = to_upgrade[i]
                 print()
                 print(
-                    Stl.title("Install"),
-                    Stl.high(pckg.name),
-                    Stl.warn(pckg.version),
+                    Color.title("Install"),
+                    Color.high(pckg.name),
+                    Color.warn(pckg.version),
                 )
                 self._install(pckg.name)
                 to_upgrade.remove(pckg)
 
-        print(Stl.warn("Exit"))
+        print(Color.warn("Exit"))
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import IO, Any, Iterator, Self, cast
 
-from .mutex import SystemWideMutex
+from mutex import SystemWideMutex
 
 
 def _launched_by_noitka() -> bool:

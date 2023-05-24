@@ -7,13 +7,16 @@ So you can easily **search your entire catalog**.
 ## Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.5/Sfvip%20All.exe) or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.5/Sfvip%20All.zip)
 [![Version](https://img.shields.io/badge/Version-1.1.5-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.5/Sfvip%20All.exe)
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
-[![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)  
+[![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)
+
+_Check the [**Changelog**](build/changelog.md)._
+
 <sub>_Launch **Sfvip Player** at least once before so **Sfvip All** could automatically find the player._</sub>  
 <sub>_The standalone **Sfvip All.exe** might be a little slow to start its first run._</sub>
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-934-informational)
+![sloc](https://img.shields.io/badge/Loc-1006-informational)
 
 _Check [**build config**](build_config.py)._
 ### Create an environment

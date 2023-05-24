@@ -1,5 +1,6 @@
 # use separate named package to reduce what's imported by multiproccessing
 import asyncio
+import logging
 import multiprocessing
 import threading
 from typing import NamedTuple, Protocol
@@ -15,6 +16,9 @@ from mitmproxy.addons import (
 )
 from mitmproxy.master import Master
 from mitmproxy.net import server_spec
+
+logger = logging.getLogger(__name__)
+logging.getLogger("mitmproxy.proxy.server").setLevel(logging.WARNING)
 
 
 # warning: use only the needed addons,
@@ -69,11 +73,12 @@ class MitmLocalProxy(multiprocessing.Process):
         return f"{proxy}@{mode.port}"
 
     def run(self) -> None:
-        loop = asyncio.get_event_loop()
         # launch one proxy per mode
         modes = [self._mitm_mode(mode) for mode in self._modes]
+        logger.info("mimtproxy modes: %s", " - ".join(modes))
         # do not verify upstream server SSL/TLS certificates
         opts = options.Options(ssl_insecure=True, mode=modes)
+        loop = asyncio.get_event_loop()
         master = Master(opts, event_loop=loop)
         master.addons.add(self._addon, *_minimum_addons())
 
@@ -87,3 +92,4 @@ class MitmLocalProxy(multiprocessing.Process):
     def stop(self) -> None:
         self._stop.set()
         self.join()
+        logger.info("mimtproxy stopped")
