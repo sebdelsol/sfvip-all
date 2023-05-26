@@ -8,6 +8,9 @@ from .player import Player
 from .proxies import LocalProxies
 from .ui import UI
 
+# TODO validate config fields
+# TODO check no number in exe name
+
 
 def sfvip(app_config: DefaultAppConfig, app_name: str, app_splash: str) -> None:
     app_config.update()
@@ -24,7 +27,7 @@ def sfvip(app_config: DefaultAppConfig, app_name: str, app_splash: str) -> None:
             relaunch.clear()
             ui.splash.show(player.rect)
             accounts = Accounts(player, relaunch)
-            with LocalProxies(app_config.all_cat, accounts.upstreams) as proxies:
+            with LocalProxies(app_config.all_category, accounts.upstreams) as proxies:
                 with accounts.set_proxies(proxies.by_upstreams) as restore_accounts_proxies:
                     with player.run():
                         restore_accounts_proxies()

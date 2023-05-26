@@ -1,5 +1,5 @@
 # <img src="{ico_link}" width="40" align="center"> {name}
-***{name}*** wraps ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** with a proxy that inserts an _{all}_ category into {inject}.  
+***{name}*** wraps ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** with a proxy that inserts an _All_ category into _Live_, _Series_ and _Vod_.  
 So you can easily **search your entire catalog**.
 
 <img src="ressources/all.png">
