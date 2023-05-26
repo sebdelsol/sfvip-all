@@ -10,6 +10,8 @@ from mutex import SystemWideMutex
 
 logger = logging.getLogger(__name__)
 
+# TODO check files existence & types on save
+
 
 class ConfigLoader:
     """
@@ -40,12 +42,12 @@ class ConfigLoader:
         logger.info("config loaded from %s", self._path)
 
     def update(self) -> None:
-        try:
-            if not self._im_newer():
+        if not self._im_newer():
+            try:
                 self.load()
-        except (json.JSONDecodeError, FileNotFoundError):
-            pass
-        self.save()  # save always to potentially fix the config file
+            except (json.JSONDecodeError, FileNotFoundError):
+                pass
+        self.save()  # always save to fix the config file
 
     def _im_newer(self) -> bool:
         if "__compiled__" in globals():  # launched as an exe build by nuitka ?

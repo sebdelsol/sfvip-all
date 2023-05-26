@@ -15,12 +15,12 @@ class WatchFile:
     def __init__(self, path: Path | None) -> None:
         self._observer = None
         self._callback: CallbackT | None
+        self._path = path
         if path:
             event_handler = PatternMatchingEventHandler(patterns=(path.name,))
             event_handler.on_modified = self._on_modified  # type: ignore
             self._observer = Observer()
             self._observer.schedule(event_handler, path.parent, recursive=False)
-            logger.info("watch file: %s", path)
         self.started_time: float = float("inf")
 
     def _on_modified(self, _):
@@ -32,6 +32,7 @@ class WatchFile:
 
     def start(self) -> None:
         if self._observer:
+            logger.info("watch started on %s", self._path)
             self.started_time = time.time()
             self._observer.start()
 
@@ -39,3 +40,4 @@ class WatchFile:
         if self._observer and self._observer.is_alive():
             self._observer.stop()
             self._observer.join()
+            logger.info("watch stopped on %s", self._path)

@@ -65,7 +65,7 @@ class SfVipAddOn:
 
     @staticmethod
     def _log(msg: str, panel: Panel, action: str) -> None:
-        txt = "%s category '%s' (id='%s') in response to '%s' api request"
+        txt = "%s category %s - id=%s - %s requested"
         logger.info(txt, msg, panel.all_category_name, panel.all_category_id, action)
 
     @staticmethod
@@ -96,17 +96,15 @@ class SfVipAddOn:
                 if action in self._categories_panel:
                     categories = self._response_json(flow.response)
                     if isinstance(categories, list):
-                        # response with the all category injected @ first
+                        # response with the all category injected @ the beginning
                         panel = self._categories_panel[action]
                         panel.all_category_id = self._unused_category_id(categories)
-                        categories.insert(
-                            0,
-                            dict(
-                                category_id=panel.all_category_id,
-                                category_name=panel.all_category_name,
-                                parent_id=0,
-                            ),
+                        all_category = dict(
+                            category_id=panel.all_category_id,
+                            category_name=panel.all_category_name,
+                            parent_id=0,
                         )
+                        categories.insert(0, all_category)
                         flow.response.text = json.dumps(categories)
                         self._log("inject", panel, action)
 

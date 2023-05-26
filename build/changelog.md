@@ -1,7 +1,8 @@
 ## 1.1.6
-* Fix ***Zip*** that wasn't launching (because of the log files added in 1.1.5)
-* ***All*** category is added in ***live*** too for older version of _sfvip player_.
+* ***All*** category is added in ***live*** panel for older version of _sfvip player_.
+* Fix ***Zip*** launcher broken with 1.1.5.
 * Config loader validates its fields types.
+* Logs are in the ***Exe*** directory.
 
 ## 1.1.5
 * Proper logging.
@@ -16,17 +17,17 @@
 
 ## 1.1.3
 * Reduce proxies overhead by using:
-    - ***mitmproxy*** instead of proxy.py,
+    - ***Mitmproxy*** instead of proxy.py,
     - Subprocesses for proxies,
     - ***Clang*** to build.
 * Forward to the original accounts proxies.
-* _Error log_ in cachedir.
+* _Error log_ available.
 
 ## 1.1.2
-* Faster by using ***noitka*** for the distribution (executable & archive).
+* Faster with ***Nuitka*** build for the distribution.
 
 ## 1.1.1
-* Change repo structure.
+* Change repository structure.
 * Smaller distribution.
 
 ## 1.1
