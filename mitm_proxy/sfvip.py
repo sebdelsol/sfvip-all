@@ -1,4 +1,4 @@
-# use separate named package to reduce what's imported by multiproccessing
+# use separate named package to reduce what's imported by multiprocessing
 import json
 import logging
 from dataclasses import dataclass
