@@ -4,6 +4,7 @@ import os
 import subprocess
 import winreg
 from contextlib import contextmanager
+from functools import cache
 from pathlib import Path
 from typing import IO, Any, Callable, Iterator, Optional, Self
 
@@ -18,26 +19,25 @@ class SfvipError(Exception):
     pass
 
 
-class PlayerConfigDirFile(type(Path())):
-    """any file player in config dir (searched only once)"""
-
+class _PlayerConfigDir:
     _regkey = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
     _default = Path(os.environ["APPDATA"]) / "SFVIP-Player"
-    _configdir: Optional[Path] = None
+
+    @classmethod
+    @cache
+    def path(cls) -> Path:
+        for path in RegKey.value_by_name(*cls._regkey), cls._default:
+            if path and (path := Path(path)).is_dir():
+                logger.info("player config dir: %s", path)
+                return path
+        raise SfvipError("Player config dir not found")
+
+
+class PlayerConfigDirFile(type(Path())):
+    """any file in player config dir"""
 
     def __new__(cls, filename: str) -> Self:  # pylint: disable=arguments-differ
-        def valid_dir(path: Path | str | None) -> bool:
-            return bool(path and Path(path).is_dir())
-
-        # check configdir (found only once and stored as a class attribute)
-        if not valid_dir(cls._configdir):
-            for path in RegKey.value_by_name(*cls._regkey), cls._default:
-                if valid_dir(path):
-                    cls._configdir = Path(path)  # type: ignore
-                    break
-            else:
-                raise SfvipError("Player config dir not found")
-        return super().__new__(cls, cls._configdir / filename)  # type: ignore
+        return super().__new__(cls, _PlayerConfigDir.path() / filename)
 
     @retry_if_exception(json.decoder.JSONDecodeError, PermissionError, timeout=1)
     def open_and_do(self, mode: str, do: Callable[[IO[str]], None]) -> Any:
@@ -76,9 +76,9 @@ class PlayerLogs:
         if config and isinstance(config, dict):
             config["IsLogging"] = True
             if config_file.save(config):
-                logger.info("set player loggin on")
+                logger.info("set player logging on")
                 return
-        logger.warning("can't set player loggin on")
+        logger.warning("can't set player logging on")
 
     def get_last_timestamp_and_msg(self) -> tuple[float, str] | None:
         """get before last line in the last log file"""

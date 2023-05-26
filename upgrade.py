@@ -11,7 +11,7 @@ from colorama import Fore, Style, just_fix_windows_console
 just_fix_windows_console()
 
 
-class Color:
+class Stl:
     class ToStyle(Protocol):  # to handle hint for the callable default paramater
         def __call__(self, txt: str = "") -> str:
             ...
@@ -35,8 +35,8 @@ class Pckg(NamedTuple):
     url: str | None
 
 
-def format_columns(sequence: list[Pckg], key_to_str: Callable[[Pckg], str]) -> Iterator[str]:
-    txts = [key_to_str(pckg) for pckg in sequence]
+def format_columns(pckgs: list[Pckg], key_to_str: Callable[[Pckg], str]) -> Iterator[str]:
+    txts = [key_to_str(pckg) for pckg in pckgs]
     len_txt = len(max(txts, key=len))
     for txt in txts:
         yield f"{txt: <{len_txt + 1}}"
@@ -63,14 +63,14 @@ class Upgrader:
                 for line in proc.stdout:
                     # line_clear()
                     if "error" in line.lower():
-                        print(Color.warn(line.replace("\n", "")))
+                        print(Stl.warn(line.replace("\n", "")))
                     else:
                         line = line.replace("\n", "")[:width]
                         print(f"{line}\r", end="")
             line_clear()
 
     def _to_upgrade(self, req_file: str) -> list[Pckg]:
-        print(Color.title("Check upgrade for"), Color.high(req_file))
+        print(Stl.title("Check upgrade for"), Stl.high(req_file))
 
         report_file = f"{req_file}.json"
         self._install("--dry-run", "-r", req_file, "--report", report_file)
@@ -97,15 +97,15 @@ class Upgrader:
     def _show_upgrade(to_upgrade: list[Pckg]) -> int:
         if (n := len(to_upgrade)) > 0:
             print()
-            print(Color.title("Upgrade"))
+            print(Stl.title("Upgrade"))
             for i, (name, version, req) in enumerate(
                 zip(
-                    format_columns(to_upgrade, key_to_str=lambda pckg: Color.high(pckg.name)),
-                    format_columns(to_upgrade, key_to_str=lambda pckg: Color.warn(pckg.version)),
-                    format_columns(to_upgrade, key_to_str=lambda pckg: Color.low(pckg.req)),
+                    format_columns(to_upgrade, key_to_str=lambda pckg: Stl.high(pckg.name)),
+                    format_columns(to_upgrade, key_to_str=lambda pckg: Stl.warn(pckg.version)),
+                    format_columns(to_upgrade, key_to_str=lambda pckg: Stl.low(pckg.req)),
                 )
             ):
-                print(Color.title(f" {i + 1}."), name, version, Color.low("from"), req)
+                print(Stl.title(f" {i + 1}."), name, version, Stl.low("from"), req)
         return n
 
     def install_for(self, *req_files: str) -> None:
@@ -120,13 +120,14 @@ class Upgrader:
 
             if n == 0:
                 print()
-                print(Color.title("Nothing to upgrade"))
+                print(Stl.title("Nothing to upgrade"))
                 break
 
             key = input(
-                f"{Color.title('> q')}{Color.low('uit')} {Color.low('or')} "
-                f"{Color.title('#')} {Color.low('?')} {Color.title()}"
+                f"{Stl.title('> q')}{Stl.low('uit')} {Stl.low('or')} "
+                f"{Stl.title('#')} {Stl.low('?')} {Stl.title()}"
             )
+
             if key == "q":
                 print()
                 break
@@ -135,14 +136,14 @@ class Upgrader:
                 pckg = to_upgrade[i]
                 print()
                 print(
-                    Color.title("Install"),
-                    Color.high(pckg.name),
-                    Color.warn(pckg.version),
+                    Stl.title("Install"),
+                    Stl.high(pckg.name),
+                    Stl.warn(pckg.version),
                 )
                 self._install(pckg.url or pckg.name)
                 to_upgrade.remove(pckg)
 
-        print(Color.warn("Exit"))
+        print(Stl.warn("Exit"))
 
 
 if __name__ == "__main__":

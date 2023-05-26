@@ -30,10 +30,10 @@ if __name__ == "__main__":
         app_config = DefaultAppConfig(app_config_file)
         sfvip(app_config, Build.name, Build.splash)
 
-    logging.info("main process")
+    logging.info("main process started")
     run()
     remove_old_logs(keep=6)
-    logging.info("clean exit")
+    logging.info("main process exit")
 
 else:
-    logging.info("2nd process")
+    logging.info("proxies process started")
