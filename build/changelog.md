@@ -1,6 +1,7 @@
 ## 1.1.6
 * Fix ***Zip*** that wasn't launching (because of the log files added in 1.1.5)
 * ***All*** category is added in ***live*** too for older version of _sfvip player_.
+* Config loader validates its fields types.
 
 ## 1.1.5
 * Proper logging.

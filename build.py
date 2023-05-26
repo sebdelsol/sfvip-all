@@ -1,6 +1,5 @@
 import argparse
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -8,6 +7,8 @@ from pathlib import Path
 from urllib.parse import quote
 
 from build_config import Build, Github
+
+# import re
 
 # pylint: disable=invalid-name
 parser = argparse.ArgumentParser()

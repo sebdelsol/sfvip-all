@@ -4,7 +4,7 @@ import sys
 from os.path import getmtime
 from pathlib import Path
 from types import SimpleNamespace
-from typing import IO, Any, Iterator, Self, cast
+from typing import IO, Any, Iterator, Self, cast, get_type_hints
 
 from mutex import SystemWideMutex
 
@@ -12,7 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigLoader:
-    """load & save as json a pure nested class"""
+    """
+    load & save as json a pure nested class in a module
+    validate types @ load
+    note: all fields starting with _ are removed
+    """
 
     def __init__(self, path: Path) -> None:
         self._path = path
@@ -67,12 +71,17 @@ class ConfigLoader:
                 if isinstance(v, dict) and isinstance(obj := getattr(config, k), SimpleNamespace):
                     self._map_dict_to(obj, cast(dict[str, Any], v))
                 else:
-                    setattr(config, k, v)
+                    # check hint if available
+                    hint = get_type_hints(config).get(k) if hasattr(config, "__annotations__") else None
+                    if not hint or isinstance(v, hint):
+                        setattr(config, k, v)
 
     def _to_simplenamespace(self, config: Self | SimpleNamespace, dct: dict[str, Any]) -> None:
         for k, v in self._public_only(dct):
             if isinstance(v, type):
                 self._to_simplenamespace(obj := SimpleNamespace(), dict(v.__dict__))
                 setattr(config, k, obj)
+                # add hints
+                obj.__annotations__ = get_type_hints(v)
             else:
                 setattr(config, k, v)
