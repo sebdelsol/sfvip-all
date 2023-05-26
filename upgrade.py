@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Callable, Iterator, NamedTuple, Protocol
+from typing import Callable, Iterable, Iterator, NamedTuple, Protocol, cast
 
 from colorama import Fore, Style, just_fix_windows_console
 
@@ -32,6 +32,7 @@ class Pckg(NamedTuple):
     req: str
     name: str
     version: str
+    url: str | None
 
 
 def format_columns(sequence: list[Pckg], key_to_str: Callable[[Pckg], str]) -> Iterator[str]:
@@ -60,7 +61,7 @@ class Upgrader:
             if proc.stdout:
                 width, _ = os.get_terminal_size()
                 for line in proc.stdout:
-                    line_clear()
+                    # line_clear()
                     if "error" in line.lower():
                         print(Color.warn(line.replace("\n", "")))
                     else:
@@ -81,8 +82,13 @@ class Upgrader:
             report_file.unlink()
 
             return [
-                Pckg(req=req_file, name=data["name"], version=data["version"])
-                for pckg in report["install"]
+                Pckg(
+                    req=req_file,
+                    name=data["name"],
+                    version=data["version"],
+                    url=pckg.get("download_info", {}).get("url"),
+                )
+                for pckg in cast(Iterable[dict], report["install"])
                 if (data := pckg.get("metadata"))
             ]
         return []
@@ -133,7 +139,7 @@ class Upgrader:
                     Color.high(pckg.name),
                     Color.warn(pckg.version),
                 )
-                self._install(pckg.name)
+                self._install(pckg.url or pckg.name)
                 to_upgrade.remove(pckg)
 
         print(Color.warn("Exit"))
