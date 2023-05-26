@@ -1,4 +1,5 @@
 import json
+import logging
 import sys
 from os.path import getmtime
 from pathlib import Path
@@ -7,13 +8,7 @@ from typing import IO, Any, Iterator, Self, cast
 
 from mutex import SystemWideMutex
 
-
-def _launched_by_noitka() -> bool:
-    return "__compiled__" in globals()
-
-
-class ModuleIsNewer(Exception):
-    pass
+logger = logging.getLogger(__name__)
 
 
 class ConfigLoader:
@@ -33,23 +28,26 @@ class ConfigLoader:
         self._path.parent.mkdir(parents=True, exist_ok=True)
         with self._open("w") as f:
             json.dump(self._dict_from(self), f, indent=2)
+        logger.info("config saved to %s", self._path)
 
     def load(self) -> None:
         with self._open("r") as f:
             self._map_dict_to(self, json.load(f))
+        logger.info("config loaded from %s", self._path)
 
     def update(self) -> None:
         try:
-            self._raise_if_im_newer()
-            self.load()
-        except (json.JSONDecodeError, FileNotFoundError, ModuleIsNewer):
-            self.save()
+            if not self._im_newer():
+                self.load()
+        except (json.JSONDecodeError, FileNotFoundError):
+            pass
+        self.save()  # save always to potentially fix the config file
 
-    def _raise_if_im_newer(self) -> None:
-        if not _launched_by_noitka():
-            module_file = sys.modules[self.__module__].__file__
-            if module_file and getmtime(module_file) > getmtime(self._path):
-                raise ModuleIsNewer
+    def _im_newer(self) -> bool:
+        if "__compiled__" in globals():  # launched as an exe build by nuitka ?
+            return False
+        module_file = sys.modules[self.__module__].__file__
+        return bool(module_file and getmtime(module_file) > getmtime(self._path))
 
     @staticmethod
     def _public_only(dct: dict[str, Any]) -> Iterator[tuple[str, Any]]:

@@ -59,7 +59,7 @@ class PlayerConfigFile(PlayerConfigDirFile):
         return self.open_and_do("r", json.load)
 
     def save(self, config: dict[str, Any]) -> bool:
-        def dump(f: IO) -> bool:
+        def dump(f: IO[str]) -> bool:
             json.dump(config, f, indent=2, separators=(",", ":"))
             return True
 
@@ -115,7 +115,6 @@ class _PlayerPath:
 
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
         if not self._valid_exe(player_path):
-            logger.info("search player")
             for search_method in self._get_paths_from_regkey, self._get_path_from_user:
                 if player_path := search_method(ui):
                     break

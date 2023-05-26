@@ -17,13 +17,13 @@ class WatchFile:
         self._callback: CallbackT | None
         if path:
             event_handler = PatternMatchingEventHandler(patterns=(path.name,))
-            event_handler.on_modified = self._on_modified
+            event_handler.on_modified = self._on_modified  # type: ignore
             self._observer = Observer()
             self._observer.schedule(event_handler, path.parent, recursive=False)
             logger.info("watch file: %s", path)
         self.started_time: float = float("inf")
 
-    def _on_modified(self, event):  # pylint: disable=unused-argument
+    def _on_modified(self, _):
         if self._callback:
             self._callback()
 

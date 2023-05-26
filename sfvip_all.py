@@ -5,6 +5,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 if __name__ == "__main__":
     # faster startup for the 2nd process
     import os
+    import sys
     from pathlib import Path
 
     from build_config import Build
@@ -12,9 +13,9 @@ if __name__ == "__main__":
     from sfvip_all_config import DefaultAppConfig
 
     def remove_old_logs(keep: int) -> None:
-        path = Path(os.environ["LOCALAPPDATA"]) / f"{Build.name} {Build.version}"
-        if path.is_dir():
-            logs = [file for file in path.iterdir() if file.match("*.log")]
+        if "__compiled__" in globals():  # launched as an exe build by nuitka ?
+            path = Path(sys.argv[0]).parent
+            logs = [file for file in path.iterdir() if file.match(f"{Build.name} - *.log")]
             if len(logs) > keep:
                 logs.sort(key=lambda f: f.stat().st_mtime, reverse=True)
                 logging.info("keep the last %d logs", keep)

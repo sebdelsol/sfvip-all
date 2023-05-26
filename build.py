@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -7,7 +8,6 @@ from pathlib import Path
 from urllib.parse import quote
 
 from build_config import Build, Github
-from sfvip_all_config import DefaultAppConfig
 
 # pylint: disable=invalid-name
 parser = argparse.ArgumentParser()
@@ -22,18 +22,15 @@ dist_name = f"{Build.dir}/{Build.version}/{Build.name}"
 if not args.nobuild:
     compiler = "--clang" if args.clang else "--mingw64"
     onefile = () if args.noexe else ("--onefile",)
-    cache_dir = f"%CACHE_DIR%/{Build.name} {Build.version}"
     # need a development version of Nuitka because of https://github.com/Nuitka/Nuitka/issues/2234
     subprocess.run(
         [
             *(sys.executable, "-m", "nuitka"),  # run nuitka
+            f"--force-stderr-spec=%PROGRAM%/../{Build.name} - %TIME%.log",
             f"--include-data-file={Build.splash}={Build.splash}",
-            f"--force-stderr-spec={cache_dir}/%TIME%.log",
-            # nuitka bug ?
-            # f"--force-stdout-spec={cache_dir}/%TIME%.log",
+            f"--onefile-tempdir-spec=%CACHE_DIR%/{Build.name}",
             f"--windows-file-version={Build.version}",
             f"--windows-icon-from-ico={Build.ico}",
-            f"--onefile-tempdir-spec={cache_dir}",
             f"--output-filename={Build.name}.exe",
             f"--output-dir={dist_temp}",
             "--assume-yes-for-downloads",
@@ -68,11 +65,9 @@ loc = subprocess.run(
 )
 
 template_format = dict(
-    inject=" and ".join(f"_{what.capitalize()}_" for what in DefaultAppConfig.all_cat.inject),
     github_path=f"{Github.owner}/{Github.repo}",
     archive_link=quote(f"{dist_name}.zip"),
     exe_link=quote(f"{dist_name}.exe"),
-    all=DefaultAppConfig.all_cat.name,
     ico_link=quote(Build.ico),
     version=Build.version,
     loc=int(loc.stdout),
@@ -80,10 +75,29 @@ template_format = dict(
 )
 
 
-def template_to_file(src: str, dst: str) -> None:
+def template_to_file(src: str, dst: str | Path, **kwargs: str) -> None:
     template = Path(src).read_text(encoding="utf-8")
-    Path(dst).write_text(template.format(**template_format), encoding="utf-8")
+    _template_format = template_format | kwargs
+    Path(dst).write_text(template.format(**_template_format), encoding="utf-8")
 
 
 template_to_file("ressources/README_template.md", "README.md")
 template_to_file("ressources/post_template.txt", f"{Build.dir}/{Build.version}/post.txt")
+
+# print("create redirection for older versions")
+# for file in Path(Build.dir).rglob("*.[ze][ix][pe]"):
+#     if Path(dist_temp) not in file.parents:
+#         if not (".actual" in file.stem or Build.version in str(file.parent)):
+#             actual = file.with_stem(f"{file.stem}.actual")
+#             if not actual.exists():
+#                 shutil.copy(file, actual)
+#             version = re.findall(r"(\d+(\.\d+)*)", str(file))
+#             if version:
+#                 print(file, version)
+#                 template_to_file(
+#                     "ressources/redirection_template.md",
+#                     file,
+#                     actual_type=actual.suffix[1:].capitalize(),
+#                     actual_version=version[0][0],
+#                     actual_file=str(actual.parent).replace("\\", "/") + quote(actual.name),
+#                 )

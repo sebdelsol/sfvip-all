@@ -1,11 +1,11 @@
 # <img src="ressources/Sfvip%20All.png" width="40" align="center"> Sfvip All
-***Sfvip All*** wraps ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** with a proxy that inserts an _All_ category into _Series_ and _Vod_.  
+***Sfvip All*** wraps ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** with a proxy that inserts an _All_ category into _Live_, _Series_ and _Vod_.  
 So you can easily **search your entire catalog**.
 
 <img src="ressources/all.png">
 
-## Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.5/Sfvip%20All.exe) or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.5/Sfvip%20All.zip)
-[![Version](https://img.shields.io/badge/Version-1.1.5-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.5/Sfvip%20All.exe)
+## Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.6/Sfvip%20All.exe) or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.6/Sfvip%20All.zip)
+[![Version](https://img.shields.io/badge/Version-1.1.6-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.6/Sfvip%20All.exe)
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)
 
@@ -16,7 +16,7 @@ _Check the [**Changelog**](build/changelog.md)._
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-1006-informational)
+![sloc](https://img.shields.io/badge/Loc-1065-informational)
 
 _Check [**build config**](build_config.py)._
 ### Create an environment

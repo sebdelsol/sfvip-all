@@ -6,7 +6,6 @@ class DefaultAppConfig(ConfigLoader):
     class player:
         path: str | None = None
 
-    class all_cat:
-        inject: tuple[str, ...] = "series", "vod"
+    class all_category:
         name: str = "All"
-        id: int = 0
+        inject_in_live: bool = True
