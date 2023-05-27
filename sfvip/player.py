@@ -14,8 +14,10 @@ from .ui import UI, Rect
 
 logger = logging.getLogger(__name__)
 
+# TODO watch PLayerConfigFile
 
-class SfvipError(Exception):
+
+class PlayerError(Exception):
     pass
 
 
@@ -30,7 +32,7 @@ class _PlayerConfigDir:
             if path and (path := Path(path)).is_dir():
                 logger.info("player config dir: %s", path)
                 return path
-        raise SfvipError("Player config dir not found")
+        raise PlayerError("Sfvip Player configuration directory not found")
 
 
 class PlayerConfigDirFile(type(Path())):
@@ -69,9 +71,8 @@ class PlayerConfigFile(PlayerConfigDirFile):
 class PlayerLogs:
     """find and get player logs"""
 
-    def __init__(self, player_path: str) -> None:
+    def __init__(self, config_file: PlayerConfigFile, player_path: str) -> None:
         self._path = Path(player_path).parent
-        config_file = PlayerConfigFile()
         config = config_file.load()
         if config and isinstance(config, dict):
             config["IsLogging"] = True
@@ -119,8 +120,9 @@ class _PlayerPath:
                 if player_path := search_method(ui):
                     break
             else:
-                raise SfvipError("Player not found")
+                raise PlayerError("Sfvip Player not found")
         self.path: str = player_path  # it's been found # type: ignore
+        logger.info("player: %s", self.path)
 
     @staticmethod
     def _valid_exe(path: Path | str | None) -> bool:
@@ -148,14 +150,14 @@ class Player:
     """run the player"""
 
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
+        self._config_file = PlayerConfigFile()
         self.path = _PlayerPath(player_path, ui).path
-        self.logs = PlayerLogs(self.path)
+        self.logs = PlayerLogs(self._config_file, self.path)
         self._proc: subprocess.Popen[bytes] | None = None
-        logger.info("player: %s", self.path)
 
     @property
     def rect(self):
-        if config := PlayerConfigFile().load():
+        if config := self._config_file.load():
             if isinstance(config, dict) and not config.get("IsMaximized"):
                 return Rect.from_dict_keys(config, "Left", "Top", "Width", "Height")
         return Rect()
@@ -163,7 +165,7 @@ class Player:
     @contextmanager
     def run(self) -> Iterator[subprocess.Popen[bytes]]:
         if not self.path:
-            raise SfvipError("No player")
+            raise PlayerError("No Sfvip Player to launch")
         with subprocess.Popen([self.path]) as self._proc:
             logger.info("player started")
             yield self._proc
