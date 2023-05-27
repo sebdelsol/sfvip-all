@@ -10,13 +10,11 @@ from mutex import SystemWideMutex
 
 logger = logging.getLogger(__name__)
 
-# TODO check files existence & types on save
-
 
 class ConfigLoader:
     """
     load & save as json a pure nested class in a module
-    validate types @ load
+    validate types @ save and load
     note: all fields starting with _ are removed
     """
 
@@ -62,28 +60,42 @@ class ConfigLoader:
                 yield k, v
 
     def _dict_from(self, config: Self | SimpleNamespace) -> dict[str, Any]:
-        return {
-            k: self._dict_from(obj) if isinstance(obj, SimpleNamespace) else obj
-            for k, obj in self._public_only(config.__dict__)
-        }
+        """recursively get a dict from SimpleNamespace with fields validation and default fallback"""
+        dct = {}
+        for name, obj in self._public_only(config.__dict__):
+            if hasattr(config, name):
+                if isinstance(obj, SimpleNamespace):
+                    dct[name] = self._dict_from(obj)
+                else:
+                    # check typing hint if available
+                    hint = get_type_hints(config).get(name) if hasattr(config, "__annotations__") else None
+                    if not hint or isinstance(obj, hint):
+                        dct[name] = obj
+                    else:
+                        dct[name] = config.__defaults__[name]  # type: ignore
+        return dct
 
     def _map_dict_to(self, config: Self | SimpleNamespace, dct: dict[str, Any]) -> None:
-        for k, v in self._public_only(dct):
-            if hasattr(config, k):
-                if isinstance(v, dict) and isinstance(obj := getattr(config, k), SimpleNamespace):
-                    self._map_dict_to(obj, cast(dict[str, Any], v))
+        """recursively map a dict to SimpleNamespace with fields validation and default fallback"""
+        for name, obj in self._public_only(dct):
+            if hasattr(config, name):
+                if isinstance(obj, dict) and isinstance(ns := getattr(config, name), SimpleNamespace):
+                    self._map_dict_to(ns, cast(dict[str, Any], obj))
                 else:
                     # check hint if available
-                    hint = get_type_hints(config).get(k) if hasattr(config, "__annotations__") else None
-                    if not hint or isinstance(v, hint):
-                        setattr(config, k, v)
+                    hint = get_type_hints(config).get(name) if hasattr(config, "__annotations__") else None
+                    if not hint or isinstance(obj, hint):
+                        setattr(config, name, obj)
 
     def _to_simplenamespace(self, config: Self | SimpleNamespace, dct: dict[str, Any]) -> None:
-        for k, v in self._public_only(dct):
-            if isinstance(v, type):
-                self._to_simplenamespace(obj := SimpleNamespace(), dict(v.__dict__))
-                setattr(config, k, obj)
-                # add hints
-                obj.__annotations__ = get_type_hints(v)
+        """recursively turn class into SimpleNamespace with typing hints & default values"""
+        for name, obj in self._public_only(dct):
+            if isinstance(obj, type):
+                self._to_simplenamespace(ns := SimpleNamespace(), dict(obj.__dict__))
+                setattr(config, name, ns)
+                # add typing hints
+                ns.__annotations__ = obj.__annotations__
             else:
-                setattr(config, k, v)
+                setattr(config, name, obj)
+        # add defaults values
+        config.__defaults__ = dict(self._public_only(config.__dict__))  # type: ignore

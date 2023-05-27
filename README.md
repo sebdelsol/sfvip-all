@@ -11,12 +11,12 @@ So you can easily **search your entire catalog**.
 
 _Check the [**Changelog**](build/changelog.md)._
 
-<sub>_Launch **Sfvip Player** at least once before so **Sfvip All** could automatically find the player._</sub>  
-<sub>_The standalone **Sfvip All.exe** might be a little slow to start its first run._</sub>
+<sub>_**Sfvip Player** should have been launched at least once._</sub>  
+<sub>_**Sfvip All.exe** might be slow to start its first run._</sub>
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-1075-informational)
+![sloc](https://img.shields.io/badge/Loc-1089-informational)
 
 _Check [**build config**](build_config.py)._
 ### Create an environment
