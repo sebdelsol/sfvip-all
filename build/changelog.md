@@ -2,7 +2,7 @@
 * ***All*** category is added in ***live*** panel for older version of _sfvip player_.
 * Fix ***Zip*** launcher broken with 1.1.5.
 * Config loader validates its fields types.
-* Logs are in the ***Exe*** directory.
+* Logs easier found in the ***Exe*** directory.
 
 ## 1.1.5
 * Proper logging.
