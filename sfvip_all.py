@@ -3,7 +3,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 
 if __name__ == "__main__":
-    # faster startup for the 2nd process
+    # reduce what's imported in the 2nd process
     import os
     import sys
     from pathlib import Path

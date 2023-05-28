@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Callable, Iterable, Iterator, NamedTuple, Protocol, cast
+from typing import Callable, Iterable, Iterator, NamedTuple, Optional, Protocol, cast
 
 from colorama import Fore, Style, just_fix_windows_console
 
@@ -32,7 +32,7 @@ class Pckg(NamedTuple):
     req: str
     name: str
     version: str
-    url: str | None
+    url: Optional[str]
 
 
 def format_columns(pckgs: list[Pckg], key_to_str: Callable[[Pckg], str]) -> Iterator[str]:

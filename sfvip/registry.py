@@ -4,7 +4,7 @@ from contextlib import suppress
 from typing import Any, Optional
 
 
-class RegKey:
+class Registry:
     """find stuff in the registry"""
 
     @staticmethod

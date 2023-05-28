@@ -1,4 +1,4 @@
-# use separate named package to reduce what's imported by multiproccessing
+# use a separate named package to reduce what's imported by multiproccessing
 import asyncio
 import logging
 import multiprocessing
@@ -50,6 +50,10 @@ class Mode(NamedTuple):
     port: int
     upstream: str
 
+    def to_mitm(self):
+        proxy = f"upstream:{self.upstream}" if self.upstream else "regular"
+        return f"{proxy}@{self.port}"
+
 
 def validate_upstream(url: str) -> bool:
     try:
@@ -68,14 +72,9 @@ class MitmLocalProxy(multiprocessing.Process):
         self._modes = modes
         super().__init__()
 
-    @staticmethod
-    def _mitm_mode(mode: Mode):
-        proxy = f"upstream:{mode.upstream}" if mode.upstream else "regular"
-        return f"{proxy}@{mode.port}"
-
     def run(self) -> None:
         # launch one proxy per mode
-        modes = [self._mitm_mode(mode) for mode in self._modes]
+        modes = [mode.to_mitm() for mode in self._modes]
         logger.info("mimtproxy start with mode(s): %s", " - ".join(modes))
         # do not verify upstream server SSL/TLS certificates
         opts = options.Options(ssl_insecure=True, mode=modes)

@@ -11,17 +11,13 @@ class Rect(NamedTuple):
     y: float = _default
     w: float = _default
     h: float = _default
+    maximized: bool = False
 
     def valid(self) -> bool:
         # pylint: disable=not-an-iterable
         return all(attr != Rect._default for attr in self)
 
-    @classmethod
-    def from_dict_keys(cls: type[Self], dct: dict[str, float], *keys: str) -> Self:
-        assert len(keys) == 4
-        return cls(*(dct.get(attr, Rect._default) for attr in keys))
-
-    def keep_in(self, rect: Self) -> Self:
+    def kept_in(self, rect: Self) -> Self:
         return Rect(
             max(self.x, rect.x),
             max(self.y, rect.y),
@@ -29,7 +25,7 @@ class Rect(NamedTuple):
             min(self.y + self.h, rect.h) - self.y,
         )
 
-    def center_for(self, w: int, h: int) -> Self:
+    def centered_for(self, w: int, h: int) -> Self:
         return Rect(self.x + (self.w - w) * 0.5, self.y + (self.h - h) * 0.5, w, h)
 
     def to_geometry(self) -> str:
@@ -43,7 +39,7 @@ class UI(tk.Tk):
         super().__init__()
         self.withdraw()
         file = Path(__file__).parent.parent / splash_path
-        image = self._image = tk.PhotoImage(file=file)
+        image = tk.PhotoImage(file=file)
         self._image = image  # keep a reference for tk
         self.wm_iconphoto(True, image)
         self.app_name = app_name
@@ -57,12 +53,12 @@ class UI(tk.Tk):
             @staticmethod
             def show(rect: Rect) -> None:
                 """show in the middle of rect"""
-                if rect.valid():
+                if rect.valid() and not rect.maximized:
                     screen = Rect(0, 0, self.winfo_screenwidth(), self.winfo_screenheight())
-                    geom = rect.keep_in(screen).center_for(image.width(), image.height()).to_geometry()
-                    self.geometry(geom)
+                    rect = rect.kept_in(screen).centered_for(image.width(), image.height())
+                    self.geometry(rect.to_geometry())
                 else:
-                    self.eval("tk::PlaceWindow . Center")
+                    self.after(0, self.eval, "tk::PlaceWindow . Center")
                 tk.Label(self, bg=Splash._bg, image=image).pack()
                 self.attributes("-transparentcolor", Splash._bg, "-topmost", True, "-alpha", 1.0)
                 self.overrideredirect(True)
@@ -73,18 +69,18 @@ class UI(tk.Tk):
                 """fade out and withdraw"""
                 dalpha = Splash._fade_dt_ms / fade_duration_ms if fade_duration_ms > 0 else 1.0
 
-                def _hide() -> None:
+                def fade() -> None:
                     if (alpha := self.attributes("-alpha") - dalpha) > 0:
                         self.attributes("-alpha", alpha)
-                        self.after(Splash._fade_dt_ms, _hide)
+                        self.after(Splash._fade_dt_ms, fade)
                     else:
                         self.withdraw()
 
-                _hide()
+                fade()
 
         self.splash = Splash
 
-    def in_thread(self, target: Callable[..., None], *args: Any, **kwargs: Any) -> None:
+    def run_in_thread(self, target: Callable[..., None], *args: Any, **kwargs: Any) -> None:
         """
         run the target function in a thread,
         handle the mainloop and quit ui when done
