@@ -1,16 +1,13 @@
 import json
 import logging
-import threading
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 from typing import IO, Callable, Iterator
 
-from mutex import SystemWideMutex
-
-from .player import Player, PlayerConfigDirFile
+from .player import PlayerLogs
+from .player.config import PlayerDatabase
 from .retry import retry_if_exception
-from .watch import WatchFile
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +19,7 @@ class _Account(SimpleNamespace):
 
     def __init__(self, **kwargs: str) -> None:
         # pylint: disable=invalid-name
+        self.Name: str
         self.Address: str
         self.HttpProxy: str
         super().__init__(**kwargs)
@@ -54,11 +52,11 @@ class _Database:
     """load & save accounts' database"""
 
     def __init__(self) -> None:
-        self._database = PlayerConfigDirFile("Database.json")
+        self._database = PlayerDatabase()
         self._accessed_by_me = self.atime
         self.accounts = _AccountList()
-        self.lock = SystemWideMutex(f"file lock for {self._database}")
-        self.watch = WatchFile(self._database)
+        self.lock = self._database._lock
+        self.watcher = self._database.get_watcher()
         if self._database.is_file():
             logger.info("accounts file: %s", self._database)
         else:
@@ -88,13 +86,11 @@ class _Database:
 class Accounts:
     """modify & restore accounts proxies"""
 
-    def __init__(self, player: Player, relaunch: threading.Event) -> None:
-        self._player = player
+    def __init__(self, player_logs: PlayerLogs) -> None:
         self._database = _Database()
-        self._player_logs = player.logs
+        self._player_logs = player_logs
         # need to lock the database till the proxies have been restored
         self._database.lock.acquire()
-        self._relaunch = relaunch
 
     @property
     def upstreams(self) -> set[str]:
@@ -111,52 +107,39 @@ class Accounts:
             self._database.load()
             for account in self._accounts_to_set_proxies:
                 if account.HttpProxy in proxies:
-                    logger.info(
-                        "%s proxy: %s",
-                        msg,
-                        f"'{account.HttpProxy}' -> '{proxies[account.HttpProxy]}'",
-                    )
-                    account.HttpProxy = proxies[account.HttpProxy]
+                    proxy = proxies[account.HttpProxy]
+                    logger.info("%s '%s' proxy: %s", msg, account.Name, f"'{account.HttpProxy}' -> '{proxy}'")
+                    account.HttpProxy = proxy
             self._database.save()
 
     @contextmanager
-    def set_proxies(self, proxies: dict[str, str]) -> Iterator[Callable[[], None]]:
+    def set_proxies(self, proxies: dict[str, str]) -> Iterator[Callable[[Callable[[], None]], None]]:
         """set proxies and provide a method to restore the proxies"""
         self._set_proxies(proxies, "set")
         restore = {v: k for k, v in proxies.items()}
 
-        def on_modified() -> None:
+        def on_modified(player_stop_and_relaunch: Callable[[], None]) -> None:
             if log := self._player_logs.get_last_timestamp_and_msg():
                 timestamp, msg = log
-                # account changed by sfvip player after the watch has started
-                if "Edit User Account" in msg and timestamp > self._database.watch.started_time:
-                    with self._database.lock:
-                        # save before restoring
-                        upstreams = self.upstreams
-                        logger.info("accounts proxies have been externally modified")
-                        self._set_proxies(restore, "restore")
-                        # to avoid recursion
-                        self._database.watch.started_time = self._database.atime
+                # account changed by sfvip player after the watcher has started
+                if "Edit User Account" in msg and timestamp > self._database.watcher.started_time:
+                    logger.info("accounts proxies have been externally modified")
+                    upstreams = self.upstreams
+                    self._set_proxies(restore, "restore")
                     # check there're no new proxies
                     if not upstreams.issubset(restore.keys()):
-                        logger.info("need to restart the player")
-                        # debounce
-                        self._database.watch.set_callback(None)
-                        self._relaunch.set()
-                        # needs to be at the very end to finish before entering the finally below
-                        self._player.stop()
+                        player_stop_and_relaunch()
 
-        def restore_after_being_read() -> None:
+        def restore_after_being_read(player_stop_and_relaunch: Callable[[], None]) -> None:
             self._database.wait_being_read()
             self._set_proxies(restore, "restore")
-            # we can now safely release the databse
+            # we can now safely release the database ans start the watcher
             self._database.lock.release()
-            # and start the watch
-            self._database.watch.set_callback(on_modified)
-            self._database.watch.start()
+            self._database.watcher.add_callback(on_modified, player_stop_and_relaunch)
+            self._database.watcher.start()
 
         try:
             yield restore_after_being_read
         finally:
-            self._database.watch.stop()
+            self._database.watcher.stop()
             self._set_proxies(restore, "restore")

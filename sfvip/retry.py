@@ -1,11 +1,13 @@
 import time
 from typing import Any, Callable
 
-TFunc = Callable[..., Any]
+_TFunc = Callable[..., Any]
 
 
-def retry_if_exception(*exceptions: type[Exception], timeout: int) -> Callable[[TFunc], TFunc]:
-    def decorator(func: TFunc) -> TFunc:
+def retry_if_exception(*exceptions: type[Exception], timeout: int) -> Callable[[_TFunc], _TFunc]:
+    """decorator for retrying when exceptions occur till timeout"""
+
+    def decorator(func: _TFunc) -> _TFunc:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             start = time.perf_counter()
             while time.perf_counter() - start <= timeout:

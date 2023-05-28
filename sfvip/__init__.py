@@ -1,6 +1,3 @@
-import threading
-from typing import Any
-
 from sfvip_all_config import DefaultAppConfig
 
 from .accounts import Accounts
@@ -18,22 +15,17 @@ def sfvip(app_config: DefaultAppConfig, app_name: str, app_splash: str) -> None:
             app_config.player.path = player.path
             app_config.save()
 
-        def _run() -> None:
-            relaunch = threading.Event()
-            relaunch.set()
-            while relaunch.is_set():
-                relaunch.clear()
-                ui.splash.show(player.rect)
-                accounts = Accounts(player, relaunch)
+        def main() -> None:
+            while player.do_launch():
+                ui.splash.show(player.position.rect)
+                accounts = Accounts(player.logs)
                 with LocalProxies(app_config.all_category, accounts.upstreams) as proxies:
                     with accounts.set_proxies(proxies.by_upstreams) as restore_accounts_proxies:
                         with player.run():
-                            restore_accounts_proxies()
+                            restore_accounts_proxies(player.stop_and_relaunch)
                             ui.splash.hide()
-                # if relaunch.is_set():
-                #     ui.showinfo("need to relaunch to handle new proxies")
 
-        ui.in_thread(_run)
+        ui.run_in_thread(main)
 
     except PlayerError as err:
         ui.showinfo(f"{err}.\n\nPlease launch Sfvip Player at least once !")

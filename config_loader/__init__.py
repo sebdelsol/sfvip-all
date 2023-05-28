@@ -11,6 +11,12 @@ from mutex import SystemWideMutex
 logger = logging.getLogger(__name__)
 
 
+def _public_only(dct: dict[str, Any]) -> Iterator[tuple[str, Any]]:
+    for k, v in dct.items():
+        if not k.startswith("_"):
+            yield k, v
+
+
 class ConfigLoader:
     """
     load & save as json a pure nested class in a module
@@ -53,16 +59,10 @@ class ConfigLoader:
         module_file = sys.modules[self.__module__].__file__
         return bool(module_file and getmtime(module_file) > getmtime(self._path))
 
-    @staticmethod
-    def _public_only(dct: dict[str, Any]) -> Iterator[tuple[str, Any]]:
-        for k, v in dct.items():
-            if not k.startswith("_"):
-                yield k, v
-
     def _dict_from(self, config: Self | SimpleNamespace) -> dict[str, Any]:
         """recursively get a dict from SimpleNamespace with fields validation and default fallback"""
         dct = {}
-        for name, obj in self._public_only(config.__dict__):
+        for name, obj in _public_only(config.__dict__):
             if hasattr(config, name):
                 if isinstance(obj, SimpleNamespace):
                     dct[name] = self._dict_from(obj)
@@ -77,7 +77,7 @@ class ConfigLoader:
 
     def _map_dict_to(self, config: Self | SimpleNamespace, dct: dict[str, Any]) -> None:
         """recursively map a dict to SimpleNamespace with fields validation and default fallback"""
-        for name, obj in self._public_only(dct):
+        for name, obj in _public_only(dct):
             if hasattr(config, name):
                 if isinstance(obj, dict) and isinstance(ns := getattr(config, name), SimpleNamespace):
                     self._map_dict_to(ns, cast(dict[str, Any], obj))
@@ -88,8 +88,8 @@ class ConfigLoader:
                         setattr(config, name, obj)
 
     def _to_simplenamespace(self, config: Self | SimpleNamespace, dct: dict[str, Any]) -> None:
-        """recursively turn class into SimpleNamespace with typing hints & default values"""
-        for name, obj in self._public_only(dct):
+        """recursively turn a class into SimpleNamespace with typing hints & default values"""
+        for name, obj in _public_only(dct):
             if isinstance(obj, type):
                 self._to_simplenamespace(ns := SimpleNamespace(), dict(obj.__dict__))
                 setattr(config, name, ns)
@@ -98,4 +98,4 @@ class ConfigLoader:
             else:
                 setattr(config, name, obj)
         # add defaults values
-        config.__defaults__ = dict(self._public_only(config.__dict__))  # type: ignore
+        config.__defaults__ = dict(_public_only(config.__dict__))  # type: ignore
