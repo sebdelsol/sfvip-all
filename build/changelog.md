@@ -1,8 +1,9 @@
 ## 1.1.6
-* ***All*** category is added in ***live*** panel for older version of _sfvip player_.
 * Fix ***Zip*** launcher broken with 1.1.5.
 * Config loader validates its fields types.
 * Logs easier found in the ***Exe*** directory.
+* Windows position is preserved when an auto relaunch occurs.
+* ***All*** category added in ***live*** panel for older version of _sfvip player_.
 
 ## 1.1.5
 * Proper logging.

@@ -17,7 +17,7 @@ def sfvip(app_config: DefaultAppConfig, app_name: str, app_splash: str) -> None:
 
         def main() -> None:
             while player.do_launch():
-                ui.splash.show(player.position.rect)
+                ui.splash.show(player.rect)
                 accounts = Accounts(player.logs)
                 with LocalProxies(app_config.all_category, accounts.upstreams) as proxies:
                     with accounts.set_proxies(proxies.by_upstreams) as restore_accounts_proxies:

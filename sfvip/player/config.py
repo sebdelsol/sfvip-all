@@ -2,11 +2,12 @@ import json
 import logging
 import os
 import winreg
+from contextlib import contextmanager
 from functools import cache
 from pathlib import Path
-from typing import IO, Any, Callable, Optional, Self
+from typing import IO, Any, Callable, Iterator, Optional, Self
 
-from mutex import SystemWideMutex
+from win import SystemWideMutex
 
 from ..registry import Registry
 from ..retry import retry_if_exception
@@ -42,6 +43,11 @@ class _PlayerConfigDir:
         return FileWatcher(_PlayerConfigDir.path() / filename)
 
 
+@contextmanager
+def _dummy_lock() -> Iterator[None]:
+    yield
+
+
 class PlayerConfigDirFile(type(Path())):
     """a player config file, opened with a system wide lock, watcher available"""
 
@@ -61,7 +67,8 @@ class PlayerConfigDirFile(type(Path())):
     @retry_if_exception(json.decoder.JSONDecodeError, PermissionError, timeout=1)
     def open_and_do(self, mode: str, do: Callable[[IO[str]], None]) -> Any:
         if self.is_file():
-            with self._lock:
+            # lock saving only
+            with self._lock if mode == "w" else _dummy_lock():
                 with self.open(mode, encoding="utf-8") as f:
                     return do(f)
         return None
@@ -78,12 +85,11 @@ class PlayerConfig(PlayerConfigDirFile):
                 return config
         return None
 
-    def save(self, config: dict) -> bool:
-        def dump(f: IO[str]) -> bool:
+    def save(self, config: dict) -> None:
+        def dump(f: IO[str]) -> None:
             json.dump(config, f, indent=2, separators=(",", ":"))
-            return True
 
-        return self.open_and_do("w", dump)
+        self.open_and_do("w", dump)
 
 
 class PlayerDatabase(PlayerConfigDirFile):

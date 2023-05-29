@@ -23,7 +23,6 @@ dist_name = f"{Build.dir}/{Build.version}/{Build.name}"
 if not args.nobuild:
     compiler = "--clang" if args.clang else "--mingw64"
     onefile = () if args.noexe else ("--onefile",)
-    # need a development version of Nuitka because of https://github.com/Nuitka/Nuitka/issues/2234
     subprocess.run(
         [
             *(sys.executable, "-m", "nuitka"),  # run nuitka
@@ -31,6 +30,7 @@ if not args.nobuild:
             f"--include-data-file={Build.splash}={Build.splash}",
             f"--onefile-tempdir-spec=%CACHE_DIR%/{Build.name}",
             f"--windows-file-version={Build.version}",
+            f"--windows-company-name={Build.company}",
             f"--windows-icon-from-ico={Build.ico}",
             f"--output-filename={Build.name}.exe",
             f"--output-dir={dist_temp}",
