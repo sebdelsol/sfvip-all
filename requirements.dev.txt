@@ -1,2 +1,2 @@
-imageio
-nuitka @ https://github.com/Nuitka/Nuitka/archive/factory.zip
+imageio>=2.30.0
+nuitka>=1.6

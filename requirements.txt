@@ -1,2 +1,2 @@
-mitmproxy
-watchdog
+mitmproxy>=9.0.1
+watchdog>=3.0.0

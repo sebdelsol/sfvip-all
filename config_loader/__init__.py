@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import IO, Any, Iterator, Self, cast, get_type_hints
 
-from mutex import SystemWideMutex
+from win import SystemWideMutex
 
 logger = logging.getLogger(__name__)
 
