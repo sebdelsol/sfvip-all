@@ -61,7 +61,7 @@ class Upgrader:
             if proc.stdout:
                 width, _ = os.get_terminal_size()
                 for line in proc.stdout:
-                    # line_clear()
+                    line_clear()
                     if "error" in line.lower():
                         print(Stl.warn(line.replace("\n", "")))
                     else:

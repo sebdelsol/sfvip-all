@@ -3,7 +3,7 @@ from typing import Optional, Self
 from urllib.parse import urlparse, urlsplit, urlunsplit
 
 from mitm_proxy import MitmLocalProxy, Mode, validate_upstream
-from mitm_proxy.sfvip import AllCategory, SfVipAddOn
+from mitm_proxy.sfvip_addon import AllCategory, SfVipAddOn
 
 
 def _find_port(excluded_ports: set[int]) -> int:

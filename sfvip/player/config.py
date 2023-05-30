@@ -5,7 +5,7 @@ from functools import cache
 from pathlib import Path
 from typing import IO, Any, Callable, Optional, Self
 
-from win import SystemWideMutex
+from winapi import SystemWideMutex
 
 from ..registry import Registry
 from ..retry import retry_if_exception

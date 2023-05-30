@@ -18,7 +18,7 @@ _CloseHandle = ctypes.windll.kernel32.CloseHandle
 _CloseHandle.argtypes = [HANDLE]
 _CloseHandle.restype = BOOL
 
-_INFINITE = 0xFFFFFFFF
+TIMEOUT_INFINITE = 0xFFFFFFFF
 
 
 class SystemWideMutex:
@@ -31,7 +31,7 @@ class SystemWideMutex:
         self._handle = ret
 
     def acquire(self, timeout: Optional[float] = None) -> bool:
-        timeout = _INFINITE if timeout is None else int(round(timeout * 1000))
+        timeout = TIMEOUT_INFINITE if timeout is None else int(round(timeout * 1000))
         ret = _WaitForSingleObject(self._handle, timeout)
         if ret in (0, 0x80):
             return True

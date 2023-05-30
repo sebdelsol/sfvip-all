@@ -74,9 +74,9 @@ class SfVipAddOn:
                 all_category_name=all_category.name,
             )
 
-        panels = [get_panel("vod"), get_panel("series", streams=False)]
+        panels = get_panel("vod"), get_panel("series", streams=False)
         if all_category.inject_in_live:
-            panels.append(get_panel("live"))
+            panels = *panels, get_panel("live")
         self._category_panel = {panel.get_category: panel for panel in panels}
         self._categories_panel = {panel.get_categories: panel for panel in panels}
 
@@ -110,8 +110,7 @@ class SfVipAddOn:
                         flow.response.text = json.dumps(categories)
                         _log("inject", panel, action)
 
-    # pylint: disable=no-self-use
-    def responseheaders(self, flow: http.HTTPFlow) -> None:
+    def responseheaders(self, flow: http.HTTPFlow) -> None:  # pylint: disable=no-self-use
         """all reponses are streamed except the api requests"""
         if not _is_api_request(flow.request):
             if flow.response:

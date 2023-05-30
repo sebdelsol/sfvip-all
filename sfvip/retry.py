@@ -6,6 +6,7 @@ _TFunc = Callable[..., Any]
 
 def retry_if_exception(*exceptions: type[Exception], timeout: int) -> Callable[[_TFunc], _TFunc]:
     """decorator for retrying when exceptions occur till timeout"""
+    _sleep_second = 0.1
 
     def decorator(func: _TFunc) -> _TFunc:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -14,7 +15,7 @@ def retry_if_exception(*exceptions: type[Exception], timeout: int) -> Callable[[
                 try:
                     return func(*args, **kwargs)
                 except exceptions:
-                    time.sleep(0.1)
+                    time.sleep(_sleep_second)
             return None
 
         return wrapper
