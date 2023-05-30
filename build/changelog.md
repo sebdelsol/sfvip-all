@@ -1,39 +1,35 @@
 ## 1.1.6
-* Fix ***Zip*** launcher broken with 1.1.5.
-* ***Config All.json*** is safe to tamper with.
-* ***Logs*** are to be found in the ***Exe*** directory.
-* Player position is preserved when an auto relaunch occurs.
-* Handle change of _Config Location_ in Sfvip Player Settings.
-* ***All*** category added in ***live*** panel for older version of _sfvip player_.
+* Enforce _Sfvip Player_ logging setting to stay on for proper change detection.
+* _All_ category added in _live_ for older version of _sfvip player_.
+* Handle change of _Config Location_ in _Sfvip Player_ settings.
+* Player position is preserved when a relaunch occurs.
+* _Logs_ are to be found in the _Exe_ directory.
+* _'Config All.json'_ is safe to tamper with.
+* Fix _Zip_ launcher broken by 1.1.5.
 
 ## 1.1.5
+* Restore accounts proxies when changed by the user and relaunch if needed.
+* Validate accounts proxies which is not done by _Sfvip Player_.
 * Proper logging.
-* Validate accounts proxies.
-* Restore accounts proxies when changed by sfvip player 
-  and auto relaunch if needed.
 
 ## 1.1.4
-* The ***Exe*** can be renamed (fix nuitka multiprocessing).
-* Accounts proxies correctly restored when launching a lot of Sfvip All in a row.
-* Splash screen (useful when there're a lot of proxies to launch).
+* Accounts proxies properly restored when launching a lot of _Sfvip Player_ in a row.
+* Splash screen because the player is sometimes way too long to launch.
+* The _Exe_ can be renamed.
 
 ## 1.1.3
-* Reduce proxies overhead by using:
-    - ***Mitmproxy*** instead of proxy.py,
-    - Subprocesses for proxies,
-    - ***Clang*** to build.
-* Forward to the original accounts proxies.
-* _Error log_ available.
+* Barely any proxy overhead by using _mitmproxy_, _clang_, and subprocesses.
+* Forward to the accounts proxies.
+* _Error logs_ available.
 
 ## 1.1.2
-* Faster with ***Nuitka*** build for the distribution.
+* Way faster thanks to _Nuitka_ build.
 
 ## 1.1.1
-* Change repository structure.
 * Smaller distribution.
 
 ## 1.1
-* Clean _Svip Player_ database as soon as possible.
+* _Svip Player_ proxies are restored ASAP.
 
 ## 1.0
-* Find and wraps _Sfvip Player_ with a proxy to add an All category in Vod and Series.
+* Find and wraps _Sfvip Player_ with a proxy to add an _All_ category in _vod_ and _series_.

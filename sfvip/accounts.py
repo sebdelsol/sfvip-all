@@ -44,12 +44,11 @@ class _AccountList(list[_Account]):
         json.dump(self, f, cls=_AccountList._Encoder, indent=2, separators=(",", ":"))
 
 
-class NotExternallyAccessedYet(Exception):
-    pass
-
-
 class _Database:
     """load & save accounts' database"""
+
+    class _NotExternallyAccessedYet(Exception):
+        pass
 
     def __init__(self) -> None:
         self._database = PlayerDatabase()
@@ -68,11 +67,11 @@ class _Database:
             return self._database.stat().st_atime
         return float("inf")
 
-    @retry_if_exception(NotExternallyAccessedYet, timeout=5)
+    @retry_if_exception(_NotExternallyAccessedYet, timeout=5)
     def wait_being_read(self) -> None:
         if self._database.is_file():
             if self.atime <= self._accessed_by_me:
-                raise NotExternallyAccessedYet("retry")
+                raise _Database._NotExternallyAccessedYet("retry")
 
     def load(self) -> None:
         self._database.open_and_do("r", self.accounts.load)
@@ -86,6 +85,8 @@ class _Database:
 class Accounts:
     """modify & restore accounts proxies"""
 
+    _edited_log = "Edit User Account"
+
     def __init__(self, player_logs: PlayerLogs) -> None:
         self._database = _Database()
         self._player_logs = player_logs
@@ -95,17 +96,17 @@ class Accounts:
     @property
     def upstreams(self) -> set[str]:
         self._database.load()
-        return {account.HttpProxy for account in self._accounts_to_set_proxies}
+        return {account.HttpProxy for account in self._accounts_to_set}
 
     @property
-    def _accounts_to_set_proxies(self) -> _AccountList:
+    def _accounts_to_set(self) -> _AccountList:
         """don't handle m3u playlists"""
         return _AccountList(account for account in self._database.accounts if not account.is_playlist())
 
     def _set_proxies(self, proxies: dict[str, str], msg: str) -> None:
         with self._database.lock:
             self._database.load()
-            for account in self._accounts_to_set_proxies:
+            for account in self._accounts_to_set:
                 if account.HttpProxy in proxies:
                     proxy = proxies[account.HttpProxy]
                     logger.info("%s '%s' proxy: %s", msg, account.Name, f"'{account.HttpProxy}' -> '{proxy}'")
@@ -116,24 +117,23 @@ class Accounts:
     def set_proxies(self, proxies: dict[str, str]) -> Iterator[Callable[[Callable[[], None]], None]]:
         """set proxies and provide a method to restore the proxies"""
         self._set_proxies(proxies, "set")
-        restore = {v: k for k, v in proxies.items()}
+        restore_proxies = {v: k for k, v in proxies.items()}
         known_proxies = sum(proxies.items(), ())
 
         def on_modified(player_stop_and_relaunch: Callable[[], None]) -> None:
-            if log := self._player_logs.get_last_timestamp_and_msg():
-                timestamp, msg = log
-                # an account has been changed by the user after the watcher has started ?
-                if "Edit User Account" in msg and timestamp > self._database.watcher.modified_time:
+            if log := self._player_logs.get_last():
+                # an account has been changed by the user ?
+                if log.timestamp > self._database.watcher.modified_time and Accounts._edited_log in log.msg:
                     logger.info("accounts proxies have been externally modified")
                     upstreams = self.upstreams  # saved for checking new proxies
-                    self._set_proxies(restore, "restore")
+                    self._set_proxies(restore_proxies, "restore")
                     if not upstreams.issubset(known_proxies):  # new proxies ?
                         player_stop_and_relaunch()
 
         def restore_after_being_read(player_stop_and_relaunch: Callable[[], None]) -> None:
             self._database.wait_being_read()
-            self._set_proxies(restore, "restore")
-            # we can now safely release the database ans start the watcher
+            self._set_proxies(restore_proxies, "restore")
+            # we can now safely release the database and start the watcher
             self._database.lock.release()
             self._database.watcher.add_callback(on_modified, player_stop_and_relaunch)
             self._database.watcher.start()
@@ -142,4 +142,4 @@ class Accounts:
             yield restore_after_being_read
         finally:
             self._database.watcher.stop()
-            self._set_proxies(restore, "restore")
+            self._set_proxies(restore_proxies, "restore")

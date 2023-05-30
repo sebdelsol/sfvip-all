@@ -9,7 +9,7 @@ from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 from watchdog.observers.api import BaseObserver
 
-from win import wait_for_registry_change
+from winapi import wait_for_registry_change
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,8 @@ class _CallbackFileWatcher(NamedTuple):
 
 
 class FileWatcher:
+    _debounce_ms = 100
+
     def __init__(self, path: Optional[Path]) -> None:
         self._observer: Optional[BaseObserver] = None
         self._callbacks: set[_CallbackFileWatcher] = set()
@@ -43,12 +45,12 @@ class FileWatcher:
 
     def _on_modified(self, _):
         # debounce and avoid recursion if any callback modify the watched file
-        if time.time() > self._modified_time + 0.1:
+        assert self._path
+        if time.time() > self._modified_time + FileWatcher._debounce_ms * 0.001:
             logger.info("watched file %s modified", self._path)
             for callback in self._callbacks:
                 callback()
-            if self._path:
-                self._modified_time = self._path.stat().st_mtime
+            self._modified_time = self._path.stat().st_mtime
 
     def add_callback(self, callback: FileWatcherCallbackFunc, *args: Any):
         self._callbacks.add(_CallbackFileWatcher(callback, args))

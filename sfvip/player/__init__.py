@@ -6,10 +6,9 @@ import time
 import winreg
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable, Iterator, Optional
+from typing import Callable, Iterator, NamedTuple, Optional
 
-from win import get_rect_for_pid
-from win.mutex import SystemWideMutex
+from winapi import SystemWideMutex, get_rect_for_pid
 
 from ..registry import Registry
 from ..ui import UI, Rect
@@ -21,12 +20,16 @@ logger = logging.getLogger(__name__)
 
 
 class PlayerLogs:
-    """get player logs"""
+    """get player last log"""
+
+    class Log(NamedTuple):
+        timestamp: float
+        msg: str
 
     def __init__(self, player_path: str) -> None:
         self._player_dir = Path(player_path).parent
 
-    def get_last_timestamp_and_msg(self) -> Optional[tuple[float, str]]:
+    def get_last(self) -> Optional["PlayerLogs.Log"]:
         """get before last line in the last log file"""
         logs = [file for file in self._player_dir.iterdir() if file.match("Log-*.txt")]
         if logs:
@@ -35,12 +38,12 @@ class PlayerLogs:
             with log.open("r") as f:
                 lines = f.readlines()
             if len(lines) >= 2:
-                return log.stat().st_mtime, lines[-2]
+                return PlayerLogs.Log(log.stat().st_mtime, lines[-2])
         return None
 
 
 class _PlayerLogSetting(PlayerConfig):
-    """force player logging, watch for change"""
+    """force player logging, watch for a change"""
 
     _key = "IsLogging"
 
@@ -73,9 +76,11 @@ class _PlayerLogSetting(PlayerConfig):
 
 
 class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
+    """watch for a change of the player config dir setting"""
+
     def _on_modified(self, value: str, player_stop_and_relaunch: Callable[[], None]) -> None:
         logger.info("Player config dir has changed to %s", value)
-        self.has_changed()
+        self.has_changed()  # clear the relevant caches
         player_stop_and_relaunch()
 
     def watch(self, player_stop_and_relaunch: Callable[[], None]) -> RegistryWatcher:
@@ -85,6 +90,8 @@ class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
 
 
 class _PlayerRect(PlayerConfig):
+    """load & save the player's window position"""
+
     _keys = "Left", "Top", "Width", "Height", "IsMaximized"
 
     @property
@@ -136,11 +143,11 @@ class _PlayerPath:
         return bool(path and (_path := Path(path)).is_file() and _path.match(_PlayerPath._pattern))
 
     def _get_paths_from_registry(self, _) -> Optional[str]:
-        for search_method, hkey, key, handle_found in _PlayerPath._registry_search:
-            if found := search_method(hkey, key, _PlayerPath._name):
-                for path in handle_found(found):
-                    if self._valid_exe(path):
-                        return path
+        for search_method, hkey, path, handle_found in _PlayerPath._registry_search:
+            if found := search_method(hkey, path, _PlayerPath._name):
+                for player in handle_found(found):
+                    if self._valid_exe(player):
+                        return player
         return None
 
     def _get_path_from_user(self, ui: UI) -> Optional[str]:
@@ -154,7 +161,7 @@ class _PlayerPath:
 
 
 class _Launcher:
-    """handle relaunch"""
+    """handle player's relaunch"""
 
     def __init__(self) -> None:
         self._launch = True
@@ -162,7 +169,8 @@ class _Launcher:
 
     def want_to_launch(self) -> bool:
         launch = self._launch
-        self._launch = False  # won't launch next time except if explitcitly set
+        # won't launch next time except if explitcitly set
+        self._launch = False
         return launch
 
     def set_relaunch(self, rect: Optional[tuple[int, int, int, int]]) -> None:
@@ -227,7 +235,8 @@ class Player:
                 logger.info("player stopped")
 
     def stop_and_relaunch(self) -> None:
-        time.sleep(1)  # give time to be stopped if it's been initiated by the user
+        # give time to the player to stop if it's been initiated by the user
+        time.sleep(1)
         with self._process_lock:
             if self._process:
                 if self._process.poll() is None:  # still running ?
