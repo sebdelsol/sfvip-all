@@ -25,7 +25,7 @@ def sfvip(app_config: DefaultAppConfig, app_name: str, app_splash: str) -> None:
                             restore_accounts_proxies(player.stop_and_relaunch)
                             ui.splash.hide()
 
-        ui.run_in_thread(main)
+        ui.run_in_thread(main, PlayerError)
 
     except PlayerError as err:
         ui.showinfo(f"{err}.\n\nPlease launch Sfvip Player at least once !")

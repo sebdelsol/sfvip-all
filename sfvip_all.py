@@ -26,8 +26,10 @@ if __name__ == "__main__":
                         pass
 
     def run() -> None:
-        app_config_file = Path(os.environ["APPDATA"]) / Build.name / "Config.json"
-        app_config = DefaultAppConfig(app_config_file)
+        # use a different file name than sfvip player just in case
+        app_config_json = "Config All.json"
+        app_config_json = Path(os.environ["APPDATA"]) / Build.name / app_config_json
+        app_config = DefaultAppConfig(app_config_json)
         sfvip(app_config, Build.name, Build.splash)
 
     logging.info("main process started")

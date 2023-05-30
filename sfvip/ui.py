@@ -2,7 +2,7 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox
-from typing import Any, Callable, NamedTuple, Self
+from typing import Callable, NamedTuple, Self
 
 
 class Rect(NamedTuple):
@@ -80,15 +80,19 @@ class UI(tk.Tk):
 
         self.splash = Splash
 
-    def run_in_thread(self, target: Callable[..., None], *args: Any, **kwargs: Any) -> None:
+    def run_in_thread(self, target: Callable[..., None], exception: type[Exception]) -> None:
         """
         run the target function in a thread,
         handle the mainloop and quit ui when done
         """
 
+        exceptions = []
+
         def _run():
             try:
-                target(*args, **kwargs)
+                target()
+            except exception as err:
+                exceptions.append(err)
             finally:
                 self.after(0, self.quit)
 
@@ -96,6 +100,8 @@ class UI(tk.Tk):
         thread.start()
         self.mainloop()
         thread.join()
+        if exceptions:
+            raise exceptions[0]
 
     def showinfo(self, message: str) -> None:
         messagebox.showinfo(self.app_name, message=message)

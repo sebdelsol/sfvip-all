@@ -46,11 +46,11 @@ class ConfigLoader:
         logger.info("config loaded from %s", self._path)
 
     def update(self) -> None:
-        if not self._im_newer():
-            try:
+        try:
+            if not self._im_newer():
                 self.load()
-            except (json.JSONDecodeError, FileNotFoundError):
-                pass
+        except (json.JSONDecodeError, FileNotFoundError):
+            pass
         self.save()  # always save to fix the config file
 
     def _im_newer(self) -> bool:
