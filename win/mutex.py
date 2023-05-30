@@ -1,22 +1,22 @@
 import ctypes
-from ctypes import wintypes
+from ctypes.wintypes import BOOL, DWORD, HANDLE, LPCVOID, LPCWSTR
 from typing import Optional, Self
 
 _CreateMutex = ctypes.windll.kernel32.CreateMutexW
-_CreateMutex.argtypes = [wintypes.LPCVOID, wintypes.BOOL, wintypes.LPCWSTR]
-_CreateMutex.restype = wintypes.HANDLE
+_CreateMutex.argtypes = [LPCVOID, BOOL, LPCWSTR]
+_CreateMutex.restype = HANDLE
 
 _WaitForSingleObject = ctypes.windll.kernel32.WaitForSingleObject
-_WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
-_WaitForSingleObject.restype = wintypes.DWORD
+_WaitForSingleObject.argtypes = [HANDLE, DWORD]
+_WaitForSingleObject.restype = DWORD
 
 _ReleaseMutex = ctypes.windll.kernel32.ReleaseMutex
-_ReleaseMutex.argtypes = [wintypes.HANDLE]
-_ReleaseMutex.restype = wintypes.BOOL
+_ReleaseMutex.argtypes = [HANDLE]
+_ReleaseMutex.restype = BOOL
 
 _CloseHandle = ctypes.windll.kernel32.CloseHandle
-_CloseHandle.argtypes = [wintypes.HANDLE]
-_CloseHandle.restype = wintypes.BOOL
+_CloseHandle.argtypes = [HANDLE]
+_CloseHandle.restype = BOOL
 
 _INFINITE = 0xFFFFFFFF
 

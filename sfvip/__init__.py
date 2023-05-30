@@ -6,26 +6,26 @@ from .proxies import LocalProxies
 from .ui import UI
 
 
-def sfvip(app_config: DefaultAppConfig, app_name: str, app_splash: str) -> None:
-    app_config.update()
-    ui = UI(app_name, app_splash)
+def sfvip(config: DefaultAppConfig, name: str, splash: str) -> None:
+    config.update()
+    ui = UI(name, splash)
     try:
-        player = Player(app_config.player.path, ui)
-        if app_config.player.path != player.path:
-            app_config.player.path = player.path
-            app_config.save()
+        player = Player(config.player.path, ui)
+        if config.player.path != player.path:
+            config.player.path = player.path
+            config.save()
 
         def main() -> None:
-            while player.do_launch():
+            while player.want_to_launch():
                 ui.splash.show(player.rect)
                 accounts = Accounts(player.logs)
-                with LocalProxies(app_config.all_category, accounts.upstreams) as proxies:
+                with LocalProxies(config.all_category, accounts.upstreams) as proxies:
                     with accounts.set_proxies(proxies.by_upstreams) as restore_accounts_proxies:
                         with player.run():
                             restore_accounts_proxies(player.stop_and_relaunch)
                             ui.splash.hide()
 
-        ui.run_in_thread(main, PlayerError)
+        ui.run_in_thread(PlayerError, main)
 
     except PlayerError as err:
         ui.showinfo(f"{err}.\n\nPlease launch Sfvip Player at least once !")

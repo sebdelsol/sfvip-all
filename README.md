@@ -16,7 +16,7 @@ _Check the [**Changelog**](build/changelog.md)._
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-1206-informational)
+![sloc](https://img.shields.io/badge/Loc-1346-informational)
 
 _Check [**build config**](build_config.py)._
 ### Create an environment

@@ -1,8 +1,9 @@
 ## 1.1.6
 * Fix ***Zip*** launcher broken with 1.1.5.
-* Config loader validates its fields types.
-* Logs easier found in the ***Exe*** directory.
-* Windows position is preserved when an auto relaunch occurs.
+* ***Config All.json*** is safe to tamper with.
+* ***Logs*** are to be found in the ***Exe*** directory.
+* Player position is preserved when an auto relaunch occurs.
+* Handle change of _Config Location_ in Sfvip Player Settings.
 * ***All*** category added in ***live*** panel for older version of _sfvip player_.
 
 ## 1.1.5
@@ -32,7 +33,7 @@
 * Smaller distribution.
 
 ## 1.1
-* Clean _svip player_ database as soon as possible.
+* Clean _Svip Player_ database as soon as possible.
 
 ## 1.0
-* Find and wraps _sfvip player_ with a proxy to add an All category in Vod and Series.
+* Find and wraps _Sfvip Player_ with a proxy to add an All category in Vod and Series.

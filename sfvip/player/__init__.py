@@ -13,56 +13,11 @@ from win.mutex import SystemWideMutex
 
 from ..registry import Registry
 from ..ui import UI, Rect
-from .config import PlayerConfig
+from ..watchers import FileWatcher, RegistryWatcher
+from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .exception import PlayerError
 
 logger = logging.getLogger(__name__)
-
-
-class _PlayerRect(PlayerConfig):
-    _keys = "Left", "Top", "Width", "Height", "IsMaximized"
-
-    @property
-    def rect(self) -> Rect:
-        if config := self.load():
-            return Rect(*(config[key] for key in _PlayerRect._keys))
-        return Rect()
-
-    def set(self, rect: Rect) -> None:
-        if rect.valid():
-            if config := self.load():
-                for key, value in zip(_PlayerRect._keys, rect):
-                    config[key] = value
-                self.save(config)
-
-
-# TODO fix _PlayerForceLogging._on_modified not relaunching with several instance of sfvip
-
-
-class _PlayerForceLogging(PlayerConfig):
-    """force player logging, watch for change"""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._switch_on()
-
-    def _switch_on(self) -> bool:
-        if config := self.load():
-            if config.get("IsLogging") is not True:
-                config["IsLogging"] = True
-                self.save(config)
-                return True
-        return False
-
-    def _on_modified(self, player_stop_and_relaunch) -> None:
-        if self._switch_on():
-            logger.info("Player logging had to be switched on after a change")
-            player_stop_and_relaunch()
-
-    def watch(self, player_stop_and_relaunch: Callable[[], None]):
-        watcher = self.get_watcher()
-        watcher.add_callback(self._on_modified, player_stop_and_relaunch)
-        return watcher
 
 
 class PlayerLogs:
@@ -82,6 +37,68 @@ class PlayerLogs:
             if len(lines) >= 2:
                 return log.stat().st_mtime, lines[-2]
         return None
+
+
+class _PlayerLogSetting(PlayerConfig):
+    """force player logging, watch for change"""
+
+    _key = "IsLogging"
+
+    def __init__(self) -> None:
+        super().__init__()
+        with self._lock:
+            if config := self.load():
+                if config.get(_PlayerLogSetting._key) is False:
+                    logger.info("Force player logging setting to on")
+                    config[_PlayerLogSetting._key] = True
+                    self.save(config)
+
+    def _is_off(self) -> bool:
+        with self._lock:
+            if config := self.load():
+                return config.get(_PlayerLogSetting._key) is False
+        return False
+
+    def _on_modified(self, player_stop_and_relaunch: Callable[[], None]) -> None:
+        # do not modify the config file
+        # to avoid other sfvip instance to miss the change
+        if self._is_off():
+            logger.info("Player logging setting has been switched off")
+            player_stop_and_relaunch()
+
+    def watch(self, player_stop_and_relaunch: Callable[[], None]) -> FileWatcher:
+        watcher = self.get_watcher()
+        watcher.add_callback(self._on_modified, player_stop_and_relaunch)
+        return watcher
+
+
+class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
+    def _on_modified(self, value: str, player_stop_and_relaunch: Callable[[], None]) -> None:
+        logger.info("Player config dir has changed to %s", value)
+        self.has_changed()
+        player_stop_and_relaunch()
+
+    def watch(self, player_stop_and_relaunch: Callable[[], None]) -> RegistryWatcher:
+        assert self._watcher is not None
+        self._watcher.set_callback(self._on_modified, player_stop_and_relaunch)
+        return self._watcher
+
+
+class _PlayerRect(PlayerConfig):
+    _keys = "Left", "Top", "Width", "Height", "IsMaximized"
+
+    @property
+    def rect(self) -> Rect:
+        if config := self.load():
+            return Rect(*(config[key] for key in _PlayerRect._keys))
+        return Rect()
+
+    def set(self, rect: Rect) -> None:
+        if rect.valid():
+            if config := self.load():
+                for key, value in zip(_PlayerRect._keys, rect):
+                    config[key] = value
+                self.save(config)
 
 
 class _PlayerPath:
@@ -143,9 +160,9 @@ class _Launcher:
         self._launch = True
         self._rect: Optional[Rect] = None
 
-    def do_launch(self) -> bool:
+    def want_to_launch(self) -> bool:
         launch = self._launch
-        self._launch = False  # won't launch next except if explitcitly set
+        self._launch = False  # won't launch next time except if explitcitly set
         return launch
 
     def set_relaunch(self, rect: Optional[tuple[int, int, int, int]]) -> None:
@@ -165,43 +182,49 @@ class Player:
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
         self.path = _PlayerPath(player_path, ui).path
         self.logs = PlayerLogs(self.path)
-        self._rect = _PlayerRect()
-        self._force_logging = _PlayerForceLogging()
+        self._rect: Optional[_PlayerRect] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._process_lock = threading.Lock()
         self._launcher = _Launcher()
 
-    def do_launch(self) -> bool:
-        return self._launcher.do_launch()
+    def want_to_launch(self) -> bool:
+        launch = self._launcher.want_to_launch()
+        if launch:
+            self._rect = _PlayerRect()
+        return launch
 
     @property
     def rect(self) -> Rect:
-        return self._launcher.rect if self._launcher.rect else self._rect.rect
+        if self._launcher.rect:
+            return self._launcher.rect
+        assert self._rect is not None
+        return self._rect.rect
 
     @contextmanager
     def run(self) -> Iterator[None]:
-        if not self.path:
-            raise PlayerError("No Sfvip Player to launch")
+        assert self.path is not None
+        assert self._rect is not None
 
         set_rect_lock = None
-        if self._launcher.rect:
-            # prevent another instance of sfvip to run before its position has been set
+        if self._rect and self._launcher.rect:
+            # prevent another instance of sfvip to run
+            # before the player position has been set
             set_rect_lock = SystemWideMutex("set player rect lock")
             set_rect_lock.acquire()
             self._rect.set(self._launcher.rect)
 
-        with self._force_logging.watch(self.stop_and_relaunch):
-            with subprocess.Popen([self.path]) as self._process:
-                logger.info("player started")
-                if set_rect_lock:
-                    # give time to the player to read its config
-                    time.sleep(0.5)
-                    set_rect_lock.release()
-                yield
-
-            with self._process_lock:
-                self._process = None
-            logger.info("player stopped")
+        with _PlayerLogSetting().watch(self.stop_and_relaunch):
+            with _PlayerConfigDirSetting().watch(self.stop_and_relaunch):
+                with subprocess.Popen([self.path]) as self._process:
+                    logger.info("player started")
+                    if set_rect_lock:
+                        # give time to the player to read its config
+                        time.sleep(0.5)
+                        set_rect_lock.release()
+                    yield
+                with self._process_lock:
+                    self._process = None
+                logger.info("player stopped")
 
     def stop_and_relaunch(self) -> None:
         time.sleep(1)  # give time to be stopped if it's been initiated by the user
@@ -210,5 +233,5 @@ class Player:
                 if self._process.poll() is None:  # still running ?
                     rect = get_rect_for_pid(self._process.pid)
                     self._process.terminate()
-                    logger.info("restart the player")
                     self._launcher.set_relaunch(rect)
+                    logger.info("restart the player")

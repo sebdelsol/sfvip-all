@@ -117,16 +117,17 @@ class Accounts:
         """set proxies and provide a method to restore the proxies"""
         self._set_proxies(proxies, "set")
         restore = {v: k for k, v in proxies.items()}
+        known_proxies = sum(proxies.items(), ())
 
         def on_modified(player_stop_and_relaunch: Callable[[], None]) -> None:
             if log := self._player_logs.get_last_timestamp_and_msg():
                 timestamp, msg = log
-                # an account has changed after the watcher has started ?
-                if "Edit User Account" in msg and timestamp > self._database.watcher.started_time:
+                # an account has been changed by the user after the watcher has started ?
+                if "Edit User Account" in msg and timestamp > self._database.watcher.modified_time:
                     logger.info("accounts proxies have been externally modified")
                     upstreams = self.upstreams  # saved for checking new proxies
                     self._set_proxies(restore, "restore")
-                    if not upstreams.issubset(restore.keys()):  # new proxies ?
+                    if not upstreams.issubset(known_proxies):  # new proxies ?
                         player_stop_and_relaunch()
 
         def restore_after_being_read(player_stop_and_relaunch: Callable[[], None]) -> None:
