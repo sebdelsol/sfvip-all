@@ -1,17 +1,15 @@
 import json
 import logging
-import os
 import winreg
-from contextlib import contextmanager
 from functools import cache
 from pathlib import Path
-from typing import IO, Any, Callable, Iterator, Optional, Self
+from typing import IO, Any, Callable, Optional, Self
 
 from win import SystemWideMutex
 
 from ..registry import Registry
 from ..retry import retry_if_exception
-from ..watcher import FileWatcher
+from ..watchers import FileWatcher, RegistryWatcher
 from .exception import PlayerError
 
 logger = logging.getLogger(__name__)
@@ -21,15 +19,14 @@ class _PlayerConfigDir:
     """cached player config dir, provide system wide locks and watchers for its files"""
 
     _from_registry = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
-    _default = Path(os.environ["APPDATA"]) / "SFVIP-Player"
 
     @classmethod
     @cache
     def path(cls) -> Path:
-        for path in Registry.value_by_name(*cls._from_registry), cls._default:
-            if path and (path := Path(path)).is_dir():
-                logger.info("player config dir: %s", path)
-                return path
+        path = Registry.value_by_name(*cls._from_registry)
+        if path and (path := Path(path)).is_dir():
+            logger.info("player config dir: %s", path)
+            return path
         raise PlayerError("Sfvip Player configuration directory not found")
 
     @classmethod
@@ -42,10 +39,30 @@ class _PlayerConfigDir:
     def watcher_for(cls, filename: str) -> FileWatcher:
         return FileWatcher(_PlayerConfigDir.path() / filename)
 
+    @classmethod
+    def clear_all_caches(cls) -> None:
+        # pylint: disable=no-member
+        cls.path.cache_clear()
+        cls.lock_for.cache_clear()
+        cls.watcher_for.cache_clear()
 
-@contextmanager
-def _dummy_lock() -> Iterator[None]:
-    yield
+
+class PlayerConfigDirSettingWatcher:
+    """registry watcher of the player config dir"""
+
+    _watcher_sigleton: Optional[RegistryWatcher] = None
+
+    def __init__(self) -> None:
+        if PlayerConfigDirSettingWatcher._watcher_sigleton is None:
+            try:
+                PlayerConfigDirSettingWatcher._watcher_sigleton = RegistryWatcher(*_PlayerConfigDir._from_registry)
+            except FileNotFoundError as err:
+                raise PlayerError("Sfvip Player configuration directory not found") from err
+        self._watcher = self._watcher_sigleton
+
+    @staticmethod
+    def has_changed() -> None:
+        _PlayerConfigDir.clear_all_caches()
 
 
 class PlayerConfigDirFile(type(Path())):
@@ -67,8 +84,7 @@ class PlayerConfigDirFile(type(Path())):
     @retry_if_exception(json.decoder.JSONDecodeError, PermissionError, timeout=1)
     def open_and_do(self, mode: str, do: Callable[[IO[str]], None]) -> Any:
         if self.is_file():
-            # lock saving only
-            with self._lock if mode == "w" else _dummy_lock():
+            with self._lock:
                 with self.open(mode, encoding="utf-8") as f:
                     return do(f)
         return None
