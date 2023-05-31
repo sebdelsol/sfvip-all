@@ -85,7 +85,7 @@ class _Database:
 class Accounts:
     """modify & restore accounts proxies"""
 
-    _edited_log = "Edit User Account"
+    _edited_account_log = "Edit User Account"
 
     def __init__(self, player_logs: PlayerLogs) -> None:
         self._database = _Database()
@@ -120,10 +120,10 @@ class Accounts:
         restore_proxies = {v: k for k, v in proxies.items()}
         known_proxies = sum(proxies.items(), ())
 
-        def on_modified(player_stop_and_relaunch: Callable[[], None]) -> None:
+        def on_modified(last_modified: float, player_stop_and_relaunch: Callable[[], None]) -> None:
             if log := self._player_logs.get_last():
                 # an account has been changed by the user ?
-                if log.timestamp > self._database.watcher.modified_time and Accounts._edited_log in log.msg:
+                if log.timestamp > last_modified and Accounts._edited_account_log in log.msg:
                     logger.info("accounts proxies have been externally modified")
                     upstreams = self.upstreams  # saved for checking new proxies
                     self._set_proxies(restore_proxies, "restore")

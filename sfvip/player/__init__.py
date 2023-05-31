@@ -6,7 +6,7 @@ import time
 import winreg
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable, Iterator, NamedTuple, Optional
+from typing import Any, Callable, Iterator, NamedTuple, Optional
 
 from winapi import SystemWideMutex, get_rect_for_pid
 
@@ -62,7 +62,7 @@ class _PlayerLogSetting(PlayerConfig):
                 return config.get(_PlayerLogSetting._key) is False
         return False
 
-    def _on_modified(self, player_stop_and_relaunch: Callable[[], None]) -> None:
+    def _on_modified(self, _, player_stop_and_relaunch: Callable[[], None]) -> None:
         # do not modify the config file
         # to avoid other sfvip instance to miss the change
         if self._is_off():
@@ -85,7 +85,7 @@ class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
 
     def watch(self, player_stop_and_relaunch: Callable[[], None]) -> RegistryWatcher:
         assert self._watcher is not None
-        self._watcher.set_callback(self._on_modified, player_stop_and_relaunch)
+        self._watcher.add_callback(self._on_modified, player_stop_and_relaunch)
         return self._watcher
 
 
