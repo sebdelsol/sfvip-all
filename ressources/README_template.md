@@ -16,10 +16,9 @@ So you can easily **search your entire catalog**.
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-{loc}-informational)  
+![sloc](https://img.shields.io/badge/Loc-{loc}-informational)
 
-**Check [_build config_](build_config.py).**  
-**Everything that follows should be done in the _.sfvip_ environment.**
+**Check [_build config_](build_config.py).**
 ### Create the environment
 ```console
 python -m venv .sfvip
@@ -28,6 +27,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r requirements.dev.txt
 ```
+Everything that follows should be done in the ***.sfvip environment***.
 ### Upgrade dependencies
 ```console
 python -m upgrade
