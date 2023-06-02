@@ -4,8 +4,8 @@ So you can easily **search your entire catalog**.
 
 <img src="ressources/all.png">
 
-## Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.6/Sfvip%20All.exe) or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.6/Sfvip%20All.zip)
-[![Version](https://img.shields.io/badge/Version-1.1.6-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.6/Sfvip%20All.exe)
+## Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.7/Sfvip%20All.exe) or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.7/Sfvip%20All.zip)
+[![Version](https://img.shields.io/badge/Version-1.1.7-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.7/Sfvip%20All.exe)
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)
 
@@ -16,7 +16,7 @@ So you can easily **search your entire catalog**.
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-1357-informational)
+![sloc](https://img.shields.io/badge/Loc-1583-informational)
 
 **Check [_build config_](build_config.py).**
 ### Create the environment

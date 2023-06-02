@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 from urllib.parse import quote
 
+from PIL import Image
+
 from build_config import Build, Github
 
 # import re
@@ -20,6 +22,9 @@ args = parser.parse_args()
 dist_temp = f"{Build.dir}/temp"
 dist_name = f"{Build.dir}/{Build.version}/{Build.name}"
 
+print("Create logo")
+Image.open(Build.Logo.use).resize(Build.Logo.size).save(Build.Logo.path)
+
 if not args.nobuild:
     compiler = "--clang" if args.clang else "--mingw64"
     onefile = () if args.noexe else ("--onefile",)
@@ -27,6 +32,7 @@ if not args.nobuild:
         [
             *(sys.executable, "-m", "nuitka"),  # run nuitka
             f"--force-stderr-spec=%PROGRAM%/../{Build.name} - %TIME%.log",
+            f"--include-data-file={Build.Logo.path}={Build.Logo.path}",
             f"--include-data-file={Build.splash}={Build.splash}",
             f"--onefile-tempdir-spec=%CACHE_DIR%/{Build.name}",
             f"--windows-file-version={Build.version}",

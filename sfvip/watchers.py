@@ -10,7 +10,10 @@ from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 from watchdog.observers.api import BaseObserver
 
+import winapi
 from winapi import wait_for_registry_change
+
+from .ui import Rect
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +39,9 @@ ANY_PARAMETERS = ParamSpec("ANY_PARAMETERS")
 
 
 class _CallbackFileWatcher(NamedTuple):
-    _FileWatcherCallbackFunc = Callable[Concatenate[float, ANY_PARAMETERS], None]
+    _CallbackFunc = Callable[Concatenate[float, ANY_PARAMETERS], None]
 
-    func: _FileWatcherCallbackFunc
+    func: _CallbackFunc
     args: tuple[Any]
 
     def __call__(self, last_modified: float) -> None:
@@ -64,7 +67,7 @@ class FileWatcher(StartStopContextManager):
                     callback(self._last_modified)
             self._last_modified = self._path.stat().st_mtime
 
-    def add_callback(self, callback: _CallbackFileWatcher._FileWatcherCallbackFunc, *args: Any) -> None:
+    def add_callback(self, callback: _CallbackFileWatcher._CallbackFunc, *args: Any) -> None:
         self._callbacks.add(_CallbackFileWatcher(callback, args))
 
     def start(self) -> None:
@@ -87,9 +90,9 @@ class FileWatcher(StartStopContextManager):
 
 
 class _CallbackRegWatcher(NamedTuple):
-    _RegWatcherCallbackFunc = Callable[Concatenate[Any, ANY_PARAMETERS], None]
+    _CallbackFunc = Callable[Concatenate[Any, ANY_PARAMETERS], None]
 
-    func: _RegWatcherCallbackFunc
+    func: _CallbackFunc
     args: tuple[Any]
 
     def __call__(self, value: Any) -> None:
@@ -109,7 +112,7 @@ class _Key(NamedTuple):
 
 
 class RegistryWatcher(StartStopContextManager):
-    _timeout_ms = 100
+    _timeout_ms = 500
 
     def __init__(self, hkey: int, path: str, name: str) -> None:
         self._key = _Key(hkey, path, name)
@@ -117,7 +120,7 @@ class RegistryWatcher(StartStopContextManager):
         self._running: threading.Event = threading.Event()
         self._callbacks: set[_CallbackRegWatcher] = set()
 
-    def add_callback(self, callback: _CallbackRegWatcher._RegWatcherCallbackFunc, *args: Any) -> None:
+    def add_callback(self, callback: _CallbackRegWatcher._CallbackFunc, *args: Any) -> None:
         self._callbacks.add(_CallbackRegWatcher(callback, args))
 
     def start(self) -> None:
@@ -144,3 +147,48 @@ class RegistryWatcher(StartStopContextManager):
                         current_value = value
                         for callback in self._callbacks:
                             callback(value)
+
+
+class _CallbackWindowWatcher(NamedTuple):
+    _CallbackFunc = Callable[[Rect, bool, bool], None]
+
+    func: _CallbackFunc
+
+    def __call__(self, rect: Rect, iconic: bool, no_border: bool) -> None:
+        self.func(rect, iconic, no_border)
+
+
+class WindowWatcher(StartStopContextManager):
+    def __init__(self, pid: int, name: str) -> None:
+        self._pid = pid
+        self._name = name
+        self._init_done = threading.Event()
+        self._event_loop = winapi.EventLoop()
+        self._thread: Optional[threading.Thread] = None
+        self._callback: Optional[_CallbackWindowWatcher] = None
+
+    def _hook_event(self, hwnd: winapi.HWND) -> None:
+        if self._callback:
+            self._callback(Rect(*winapi.get_rect(hwnd)), winapi.is_minimized(hwnd), winapi.has_no_border(hwnd))
+
+    def _hook(self):
+        with winapi.Hook(self._pid, winapi.EVENT_OBJECT_LOCATIONCHANGE, self._hook_event):
+            self._init_done.set()
+            self._event_loop.start()
+
+    def set_callback(self, callback: _CallbackWindowWatcher._CallbackFunc) -> None:
+        self._callback = _CallbackWindowWatcher(callback)
+
+    def start(self) -> None:
+        self._thread = threading.Thread(target=self._hook)
+        self._init_done.clear()
+        self._thread.start()
+        self._init_done.wait()
+        logger.info("watch started on %s Window", self._name)
+
+    def stop(self):
+        if self._thread:
+            self._event_loop.stop()
+            self._thread.join()
+            logger.info("watch stopped on %s Window", self._name)
+            self._callback = None
