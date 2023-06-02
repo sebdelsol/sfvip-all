@@ -1,3 +1,7 @@
+## 1.1.7
+* _Sfvip All_ logo sticks in the top left corner of _Sfvip Player_: Mouse hover on it to get proxies informations.
+* A lot of bug fixes.
+
 ## 1.1.6
 * Enforce _Sfvip Player_ logging setting to stay on for proper change detection.
 * _All_ category added in _live_ for older version of _sfvip player_.

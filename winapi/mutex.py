@@ -2,23 +2,25 @@ import ctypes
 from ctypes.wintypes import BOOL, DWORD, HANDLE, LPCVOID, LPCWSTR
 from typing import Optional, Self
 
-_CreateMutex = ctypes.windll.kernel32.CreateMutexW
+_kernel32 = ctypes.windll.kernel32
+
+_CreateMutex = _kernel32.CreateMutexW
 _CreateMutex.argtypes = [LPCVOID, BOOL, LPCWSTR]
 _CreateMutex.restype = HANDLE
 
-_WaitForSingleObject = ctypes.windll.kernel32.WaitForSingleObject
+_WaitForSingleObject = _kernel32.WaitForSingleObject
 _WaitForSingleObject.argtypes = [HANDLE, DWORD]
 _WaitForSingleObject.restype = DWORD
 
-_ReleaseMutex = ctypes.windll.kernel32.ReleaseMutex
+_ReleaseMutex = _kernel32.ReleaseMutex
 _ReleaseMutex.argtypes = [HANDLE]
 _ReleaseMutex.restype = BOOL
 
-_CloseHandle = ctypes.windll.kernel32.CloseHandle
+_CloseHandle = _kernel32.CloseHandle
 _CloseHandle.argtypes = [HANDLE]
 _CloseHandle.restype = BOOL
 
-TIMEOUT_INFINITE = 0xFFFFFFFF
+_TIMEOUT_INFINITE = 0xFFFFFFFF
 
 
 class SystemWideMutex:
@@ -31,7 +33,7 @@ class SystemWideMutex:
         self._handle = ret
 
     def acquire(self, timeout: Optional[float] = None) -> bool:
-        timeout = TIMEOUT_INFINITE if timeout is None else int(round(timeout * 1000))
+        timeout = _TIMEOUT_INFINITE if timeout is None else int(round(timeout * 1000))
         ret = _WaitForSingleObject(self._handle, timeout)
         if ret in (0, 0x80):
             return True

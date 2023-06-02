@@ -8,6 +8,7 @@ from typing import IO, Callable, Iterator
 from .player import PlayerLogs
 from .player.config import PlayerDatabase
 from .retry import retry_if_exception
+from .ui import UI
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +104,13 @@ class Accounts:
         """don't handle m3u playlists"""
         return _AccountList(account for account in self._database.accounts if not account.is_playlist())
 
+    def _set_ui_infos(self, proxies: dict[str, str], ui: UI) -> None:
+        infos = []
+        for account in self._accounts_to_set:
+            if account.HttpProxy in proxies:
+                infos.append([account.Name, proxies[account.HttpProxy], account.HttpProxy])
+        ui.infos.set(infos)
+
     def _set_proxies(self, proxies: dict[str, str], msg: str) -> None:
         with self._database.lock:
             self._database.load()
@@ -114,8 +122,9 @@ class Accounts:
             self._database.save()
 
     @contextmanager
-    def set_proxies(self, proxies: dict[str, str]) -> Iterator[Callable[[Callable[[], None]], None]]:
+    def set_proxies(self, proxies: dict[str, str], ui: UI) -> Iterator[Callable[[Callable[[], None]], None]]:
         """set proxies and provide a method to restore the proxies"""
+        self._set_ui_infos(proxies, ui)
         self._set_proxies(proxies, "set")
         restore_proxies = {v: k for k, v in proxies.items()}
         known_proxies = sum(proxies.items(), ())

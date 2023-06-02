@@ -9,5 +9,10 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.1.6"
+    version = "1.1.7"
     dir = "build"
+
+    class Logo:
+        use = "ressources/Sfvip All.png"
+        path = "ressources/logo.png"
+        size = 31, 31

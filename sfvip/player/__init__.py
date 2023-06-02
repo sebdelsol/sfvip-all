@@ -8,11 +8,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Callable, Iterator, NamedTuple, Optional
 
-from winapi import SystemWideMutex, get_rect_for_pid
+from winapi import SystemWideMutex
 
 from ..registry import Registry
 from ..ui import UI, Rect
-from ..watchers import FileWatcher, RegistryWatcher
+from ..watchers import FileWatcher, RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .exception import PlayerError
 
@@ -92,7 +92,7 @@ class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
 class _PlayerRect(PlayerConfig):
     """load & save the player's window position"""
 
-    _keys = "Left", "Top", "Width", "Height", "IsMaximized"
+    _keys = "Left", "Top", "Width", "Height"
 
     @property
     def rect(self) -> Rect:
@@ -173,9 +173,9 @@ class _Launcher:
         self._launch = False
         return launch
 
-    def set_relaunch(self, rect: Optional[tuple[int, int, int, int]]) -> None:
+    def set_relaunch(self, rect: Optional[Rect]) -> None:
         self._launch = True
-        self._rect = Rect(*rect) if rect else None
+        self._rect = rect
 
     @property
     def rect(self) -> Optional[Rect]:
@@ -184,12 +184,39 @@ class _Launcher:
         return None
 
 
+class PlayerWindowWatcher:
+    def __init__(self, ui: UI) -> None:
+        self._ui = ui
+        self._rect: Optional[Rect] = None
+        self._watcher: Optional[WindowWatcher] = None
+
+    def _pos_changed(self, rect, iconic, no_border):
+        self._ui.follow(rect, iconic, no_border)
+        if not (iconic or no_border):
+            self._rect = rect
+
+    def start(self, pid: int, name: str) -> None:
+        self._watcher = WindowWatcher(pid, name)
+        self._watcher.set_callback(self._pos_changed)
+        self._watcher.start()
+
+    def stop(self) -> None:
+        if self._watcher:
+            self._ui.stop_following()
+            self._watcher.stop()
+
+    @property
+    def rect(self) -> Optional[Rect]:
+        return self._rect
+
+
 class Player:
     """run the player"""
 
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
         self.path = _PlayerPath(player_path, ui).path
         self.logs = PlayerLogs(self.path)
+        self._window_watcher = PlayerWindowWatcher(ui)
         self._rect: Optional[_PlayerRect] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._process_lock = threading.Lock()
@@ -225,6 +252,7 @@ class Player:
             with _PlayerConfigDirSetting().watch(self.stop_and_relaunch):
                 with subprocess.Popen([self.path]) as self._process:
                     logger.info("player started")
+                    self._window_watcher.start(self._process.pid, self.path)
                     if set_rect_lock:
                         # give time to the player to read its config
                         time.sleep(0.5)
@@ -233,6 +261,7 @@ class Player:
                 with self._process_lock:
                     self._process = None
                 logger.info("player stopped")
+                self._window_watcher.stop()
 
     def stop_and_relaunch(self) -> None:
         # give time to the player to stop if it's been initiated by the user
@@ -240,7 +269,6 @@ class Player:
         with self._process_lock:
             if self._process:
                 if self._process.poll() is None:  # still running ?
-                    rect = get_rect_for_pid(self._process.pid)
                     self._process.terminate()
-                    self._launcher.set_relaunch(rect)
+                    self._launcher.set_relaunch(self._window_watcher.rect)
                     logger.info("restart the player")

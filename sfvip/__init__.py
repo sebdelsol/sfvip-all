@@ -6,9 +6,9 @@ from .proxies import LocalProxies
 from .ui import UI
 
 
-def sfvip(config: DefaultAppConfig, name: str, splash: str) -> None:
+def sfvip(config: DefaultAppConfig, name: str, version: str, splash: str, logo: str) -> None:
     config.update()
-    ui = UI(name, splash)
+    ui = UI(name, version, splash, logo)
     try:
         player = Player(config.player.path, ui)
         if config.player.path != player.path:
@@ -20,10 +20,10 @@ def sfvip(config: DefaultAppConfig, name: str, splash: str) -> None:
                 ui.splash.show(player.rect)
                 accounts = Accounts(player.logs)
                 with LocalProxies(config.all_category, accounts.upstreams) as proxies:
-                    with accounts.set_proxies(proxies.by_upstreams) as restore_accounts_proxies:
+                    with accounts.set_proxies(proxies.by_upstreams, ui) as restore_accounts_proxies:
                         with player.run():
                             restore_accounts_proxies(player.stop_and_relaunch)
-                            ui.splash.hide()
+                            ui.splash.hide(fade_duration_ms=2000)
 
         ui.run_in_thread(PlayerError, main)
 
