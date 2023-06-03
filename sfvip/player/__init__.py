@@ -11,7 +11,7 @@ from typing import Any, Callable, Iterator, NamedTuple, Optional
 from winapi import SystemWideMutex
 
 from ..registry import Registry
-from ..ui import UI, Rect
+from ..ui import UI, Rect, WinState
 from ..watchers import FileWatcher, RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .exception import PlayerError
@@ -160,6 +160,32 @@ class _PlayerPath:
                 return None
 
 
+class _PlayerWindowWatcher:
+    def __init__(self, ui: UI) -> None:
+        self._ui = ui
+        self._rect: Optional[Rect] = None
+        self._watcher: Optional[WindowWatcher] = None
+
+    def _pos_changed(self, state: WinState) -> None:
+        self._ui.follow(state)
+        if not (state.is_minimized or state.no_border):
+            self._rect = state.rect
+
+    def start(self, pid: int, name: str) -> None:
+        self._watcher = WindowWatcher(pid, name)
+        self._watcher.set_callback(self._pos_changed)
+        self._watcher.start()
+
+    def stop(self) -> None:
+        if self._watcher:
+            self._ui.has_stopped_following()
+            self._watcher.stop()
+
+    @property
+    def rect(self) -> Optional[Rect]:
+        return self._rect
+
+
 class _Launcher:
     """handle player's relaunch"""
 
@@ -184,39 +210,13 @@ class _Launcher:
         return None
 
 
-class PlayerWindowWatcher:
-    def __init__(self, ui: UI) -> None:
-        self._ui = ui
-        self._rect: Optional[Rect] = None
-        self._watcher: Optional[WindowWatcher] = None
-
-    def _pos_changed(self, rect, iconic, no_border):
-        self._ui.follow(rect, iconic, no_border)
-        if not (iconic or no_border):
-            self._rect = rect
-
-    def start(self, pid: int, name: str) -> None:
-        self._watcher = WindowWatcher(pid, name)
-        self._watcher.set_callback(self._pos_changed)
-        self._watcher.start()
-
-    def stop(self) -> None:
-        if self._watcher:
-            self._ui.stop_following()
-            self._watcher.stop()
-
-    @property
-    def rect(self) -> Optional[Rect]:
-        return self._rect
-
-
 class Player:
     """run the player"""
 
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
         self.path = _PlayerPath(player_path, ui).path
         self.logs = PlayerLogs(self.path)
-        self._window_watcher = PlayerWindowWatcher(ui)
+        self._window_watcher = _PlayerWindowWatcher(ui)
         self._rect: Optional[_PlayerRect] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._process_lock = threading.Lock()
