@@ -2,11 +2,11 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox
-from typing import Any, Callable, NamedTuple, Self, Sequence
+from typing import Any, Callable, NamedTuple, Optional, Self, Sequence
 
 from winapi import set_click_through
 
-# TODO handle always on top
+# TODO catch toogle topmost switch
 # TODO use sfvip player caption bar color
 # TODO scrollbar if to much infos
 
@@ -37,6 +37,13 @@ class Rect(NamedTuple):
         return f"{self.w}x{self.h}+{self.x:.0f}+{self.y:.0f}"
 
 
+class WinState(NamedTuple):
+    rect: Rect
+    is_minimized: bool
+    no_border: bool
+    is_topmost: bool
+
+
 class _Sticky(tk.Toplevel):
     """follow position, hide & show when needed"""
 
@@ -48,21 +55,26 @@ class _Sticky(tk.Toplevel):
         self.withdraw()
         self.overrideredirect(True)
         self._offset = offset
+        self._rect: Optional[Rect] = None
 
     @staticmethod
     def instances() -> list["_Sticky"]:
         return _Sticky._instances
 
-    def follow(self, rect: Rect, is_minimized: bool, no_border: bool) -> None:
-        if no_border or is_minimized:
+    def follow(self, state: WinState) -> None:
+        if state.no_border or state.is_minimized:
             self.withdraw()
-        elif rect.valid():
-            rect = rect.position(self._offset, self.winfo_reqwidth(), self.winfo_reqheight())
-            self.attributes("-topmost", "true")
-            self.geometry(rect.to_geometry())
-            self.deiconify()
+        elif state.rect.valid():
+            if state.rect != self._rect:  # position changed
+                rect = state.rect.position(self._offset, self.winfo_reqwidth(), self.winfo_reqheight())
+                self.geometry(rect.to_geometry())
+                self._rect = state.rect
+            else:  # lift me to stay on top
+                self.attributes("-topmost", state.is_topmost)
+                self.lift()
+                self.deiconify()
 
-    def stop_following(self) -> None:
+    def has_stopped_following(self) -> None:
         self.withdraw()
 
 
@@ -176,13 +188,13 @@ class _Splash(_Sticky):
         self._fade = _Fade(self)
 
     def show(self, rect: Rect) -> None:
-        self.follow(rect, False, False)
+        self.follow(WinState(rect, False, False, True))
 
     def hide(self, fade_duration_ms) -> None:
         self._fade.fade(fade_duration_ms, out=True)
 
-    def stop_following(self) -> None:
-        super().stop_following()
+    def has_stopped_following(self) -> None:
+        super().has_stopped_following()
         self.attributes("-alpha", 1.0)
 
 
@@ -228,14 +240,14 @@ class UI(tk.Tk):
             raise exceptions[0]
 
     @staticmethod
-    def follow(rect: Rect, is_minimized: bool, no_border: bool) -> None:
+    def follow(state: WinState) -> None:
         for sticky in _Sticky.instances():
-            sticky.follow(rect, is_minimized, no_border)
+            sticky.follow(state)
 
     @staticmethod
-    def stop_following() -> None:
+    def has_stopped_following() -> None:
         for sticky in _Sticky.instances():
-            sticky.stop_following()
+            sticky.has_stopped_following()
 
     def showinfo(self, message: str) -> None:
         messagebox.showinfo(self._app_name, message=message)

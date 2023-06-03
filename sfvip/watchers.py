@@ -13,7 +13,7 @@ from watchdog.observers.api import BaseObserver
 import winapi
 from winapi import wait_for_registry_change
 
-from .ui import Rect
+from .ui import Rect, WinState
 
 logger = logging.getLogger(__name__)
 
@@ -150,12 +150,12 @@ class RegistryWatcher(StartStopContextManager):
 
 
 class _CallbackWindowWatcher(NamedTuple):
-    _CallbackFunc = Callable[[Rect, bool, bool], None]
+    _CallbackFunc = Callable[[WinState], None]
 
     func: _CallbackFunc
 
-    def __call__(self, rect: Rect, iconic: bool, no_border: bool) -> None:
-        self.func(rect, iconic, no_border)
+    def __call__(self, state: WinState) -> None:
+        self.func(state)
 
 
 class WindowWatcher(StartStopContextManager):
@@ -167,12 +167,18 @@ class WindowWatcher(StartStopContextManager):
         self._thread: Optional[threading.Thread] = None
         self._callback: Optional[_CallbackWindowWatcher] = None
 
-    def _hook_event(self, hwnd: winapi.HWND) -> None:
+    def _on_pos_changed(self, hwnd: winapi.HWND) -> None:
         if self._callback:
-            self._callback(Rect(*winapi.get_rect(hwnd)), winapi.is_minimized(hwnd), winapi.has_no_border(hwnd))
+            state = WinState(
+                Rect(*winapi.get_rect(hwnd)),
+                winapi.is_minimized(hwnd),
+                winapi.has_no_border(hwnd),
+                winapi.is_topmost(hwnd),
+            )
+            self._callback(state)
 
-    def _hook(self):
-        with winapi.Hook(self._pid, winapi.EVENT_OBJECT_LOCATIONCHANGE, self._hook_event):
+    def _hook(self) -> None:
+        with winapi.Hook(self._pid, self._on_pos_changed):
             self._init_done.set()
             self._event_loop.start()
 
@@ -186,7 +192,7 @@ class WindowWatcher(StartStopContextManager):
         self._init_done.wait()
         logger.info("watch started on %s Window", self._name)
 
-    def stop(self):
+    def stop(self) -> None:
         if self._thread:
             self._event_loop.stop()
             self._thread.join()

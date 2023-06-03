@@ -16,7 +16,7 @@ So you can easily **search your entire catalog**.
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-1583-informational)
+![sloc](https://img.shields.io/badge/Loc-1606-informational)
 
 **Check [_build config_](build_config.py).**
 ### Create the environment
