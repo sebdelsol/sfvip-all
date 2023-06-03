@@ -11,12 +11,14 @@ from typing import Any, Callable, Iterator, NamedTuple, Optional
 from winapi import SystemWideMutex
 
 from ..registry import Registry
-from ..ui import UI, Rect, WinState
+from ..ui import UI, Rect, UIError, WinState
 from ..watchers import FileWatcher, RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .exception import PlayerError
 
 logger = logging.getLogger(__name__)
+
+# TODO bring the player foreground when relaunching
 
 
 class PlayerLogs:
@@ -161,15 +163,19 @@ class _PlayerPath:
 
 
 class _PlayerWindowWatcher:
-    def __init__(self, ui: UI) -> None:
+    def __init__(self, ui: UI, player_stop: Callable[[], bool]) -> None:
         self._ui = ui
         self._rect: Optional[Rect] = None
         self._watcher: Optional[WindowWatcher] = None
+        self._player_stop = player_stop
 
     def _pos_changed(self, state: WinState) -> None:
-        self._ui.follow(state)
-        if not (state.is_minimized or state.no_border):
-            self._rect = state.rect
+        try:
+            self._ui.follow(state)
+            if not (state.is_minimized or state.no_border):
+                self._rect = state.rect
+        except UIError:
+            self._player_stop()
 
     def start(self, pid: int, name: str) -> None:
         self._watcher = WindowWatcher(pid, name)
@@ -178,7 +184,7 @@ class _PlayerWindowWatcher:
 
     def stop(self) -> None:
         if self._watcher:
-            self._ui.has_stopped_following()
+            self._ui.stop_following()
             self._watcher.stop()
 
     @property
@@ -216,7 +222,7 @@ class Player:
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
         self.path = _PlayerPath(player_path, ui).path
         self.logs = PlayerLogs(self.path)
-        self._window_watcher = _PlayerWindowWatcher(ui)
+        self._window_watcher = _PlayerWindowWatcher(ui, self.stop)
         self._rect: Optional[_PlayerRect] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._process_lock = threading.Lock()
@@ -263,12 +269,17 @@ class Player:
                 logger.info("player stopped")
                 self._window_watcher.stop()
 
-    def stop_and_relaunch(self) -> None:
-        # give time to the player to stop if it's been initiated by the user
-        time.sleep(1)
+    def stop(self) -> bool:
         with self._process_lock:
             if self._process:
                 if self._process.poll() is None:  # still running ?
                     self._process.terminate()
-                    self._launcher.set_relaunch(self._window_watcher.rect)
-                    logger.info("restart the player")
+                    return True
+        return False
+
+    def stop_and_relaunch(self) -> None:
+        # give time to the player to stop if it's been initiated by the user
+        time.sleep(1)
+        if self.stop():
+            self._launcher.set_relaunch(self._window_watcher.rect)
+            logger.info("restart the player")

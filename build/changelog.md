@@ -1,5 +1,7 @@
 ## 1.1.7
-* _Sfvip All_ logo sticks in the top left corner of _Sfvip Player_: Mouse hover on it to get proxies informations.
+* _Sfvip All_ logo lives in the top left corner of _Sfvip Player_: 
+    * Mouse hover on it to get the proxies informations.
+    * Pulse color indicate the proxies statuses.
 * A lot of bug fixes.
 
 ## 1.1.6

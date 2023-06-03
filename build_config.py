@@ -15,4 +15,4 @@ class Build:
     class Logo:
         use = "ressources/Sfvip All.png"
         path = "ressources/logo.png"
-        size = 31, 31
+        size = 28, 28

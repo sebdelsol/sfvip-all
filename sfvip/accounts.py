@@ -8,7 +8,7 @@ from typing import IO, Callable, Iterator
 from .player import PlayerLogs
 from .player.config import PlayerDatabase
 from .retry import retry_if_exception
-from .ui import UI
+from .ui import UI, Info
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +83,19 @@ class _Database:
         self._accessed_by_me = self.atime
 
 
+_InfoMethodT = Callable[[_Account, dict[str, str]], Info]
+
+
+def _info_set(account: _Account, proxies: dict[str, str]) -> Info:
+    return Info(account.Name, proxies.get(account.HttpProxy, ""), account.HttpProxy)
+
+
+def _info_restore(account: _Account, proxies: dict[str, str]) -> Info:
+    if account.HttpProxy in proxies:
+        return Info(account.Name, account.HttpProxy, proxies[account.HttpProxy])
+    return Info(account.Name, "", account.HttpProxy)
+
+
 class Accounts:
     """modify & restore accounts proxies"""
 
@@ -104,12 +117,9 @@ class Accounts:
         """don't handle m3u playlists"""
         return _AccountList(account for account in self._database.accounts if not account.is_playlist())
 
-    def _set_ui_infos(self, proxies: dict[str, str], ui: UI) -> None:
-        infos = []
-        for account in self._accounts_to_set:
-            if account.HttpProxy in proxies:
-                infos.append([account.Name, proxies[account.HttpProxy], account.HttpProxy])
-        ui.infos.set(infos)
+    def _set_ui_infos(self, proxies: dict[str, str], method: _InfoMethodT, ui: UI) -> None:
+        self._database.load()
+        ui.set_infos([method(account, proxies) for account in self._accounts_to_set])
 
     def _set_proxies(self, proxies: dict[str, str], msg: str) -> None:
         with self._database.lock:
@@ -124,7 +134,7 @@ class Accounts:
     @contextmanager
     def set_proxies(self, proxies: dict[str, str], ui: UI) -> Iterator[Callable[[Callable[[], None]], None]]:
         """set proxies and provide a method to restore the proxies"""
-        self._set_ui_infos(proxies, ui)
+        self._set_ui_infos(proxies, _info_set, ui)
         self._set_proxies(proxies, "set")
         restore_proxies = {v: k for k, v in proxies.items()}
         known_proxies = sum(proxies.items(), ())
@@ -133,8 +143,9 @@ class Accounts:
             if log := self._player_logs.get_last():
                 # an account has been changed by the user ?
                 if log.timestamp > last_modified and Accounts._edited_account_log in log.msg:
-                    logger.info("accounts proxies have been externally modified")
+                    logger.info("accounts proxies file has been modified")
                     upstreams = self.upstreams  # saved for checking new proxies
+                    self._set_ui_infos(restore_proxies, _info_restore, ui)
                     self._set_proxies(restore_proxies, "restore")
                     if not upstreams.issubset(known_proxies):  # new proxies ?
                         player_stop_and_relaunch()
