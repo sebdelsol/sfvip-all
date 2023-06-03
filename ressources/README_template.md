@@ -10,15 +10,15 @@ So you can easily **search your entire catalog**.
 [![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)
 
 **Check the [_Changelog_](build/changelog.md).**  
-
-<sub>_**Sfvip Player** should have been launched at least once._</sub>  
-<sub>_**Sfvip All.exe** might be slow to start its first run._</sub>
+You need to have Sfvip Player already installed & launched once.  
+<sub>_**Sfvip All.exe** might be slow to start its first run._</sub>  
+<sub>_**Sfvip All.exe** might trigger your antivirus because Nuitka build are unfortunately not exempt from it._</sub>
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 ![sloc](https://img.shields.io/badge/Loc-{loc}-informational)
 
-**Check [_build config_](build_config.py).**
+**Check the [_build config_](build_config.py).**
 ### Create the environment
 ```console
 python -m venv .sfvip

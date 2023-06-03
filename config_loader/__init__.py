@@ -51,7 +51,8 @@ class ConfigLoader:
                 self.load()
         except (json.JSONDecodeError, FileNotFoundError):
             pass
-        self.save()  # always save to fix the config file
+        # always save if the config file needs some fixes
+        self.save()
 
     def _im_newer(self) -> bool:
         if "__compiled__" in globals():  # launched as an exe build by nuitka ?
@@ -60,7 +61,7 @@ class ConfigLoader:
         return bool(module_file and getmtime(module_file) > getmtime(self._path))
 
     def _dict_from(self, config: Self | SimpleNamespace) -> dict[str, Any]:
-        """recursively get a dict from SimpleNamespace with fields validation and default fallback"""
+        """recursively get a dict from SimpleNamespace with fields validation & default values"""
         dct = {}
         for name, obj in _public_only(config.__dict__):
             if hasattr(config, name):
@@ -76,7 +77,7 @@ class ConfigLoader:
         return dct
 
     def _map_dict_to(self, config: Self | SimpleNamespace, dct: dict[str, Any]) -> None:
-        """recursively map a dict to SimpleNamespace with fields validation and default fallback"""
+        """recursively map a dict to SimpleNamespace with fields validation & default values"""
         for name, obj in _public_only(dct):
             if hasattr(config, name):
                 if isinstance(obj, dict) and isinstance(ns := getattr(config, name), SimpleNamespace):

@@ -173,13 +173,16 @@ class WindowWatcher(StartStopContextManager):
                 Rect(*winapi.get_rect(hwnd)),
                 winapi.is_minimized(hwnd),
                 winapi.has_no_border(hwnd),
+                winapi.is_maximized(hwnd),
                 winapi.is_topmost(hwnd),
             )
             self._callback(state)
 
     def _hook(self) -> None:
         with winapi.Hook(self._pid, self._on_pos_changed):
+            # we're good to go now
             self._init_done.set()
+            # we need an event loop to make the hook working
             self._event_loop.start()
 
     def set_callback(self, callback: _CallbackWindowWatcher._CallbackFunc) -> None:

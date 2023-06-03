@@ -23,6 +23,10 @@ def is_minimized(hwnd: HWND) -> bool:
     return _user32.IsIconic(hwnd) == 1
 
 
+def is_maximized(hwnd: HWND) -> bool:
+    return _user32.IsZoomed(hwnd) == 1
+
+
 def has_no_border(hwnd: HWND) -> bool:
     exstyle = _get_window_exstyle(hwnd)
     return exstyle & _WS_EX_WINDOWEDGE == 0

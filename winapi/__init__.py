@@ -4,4 +4,10 @@ from .hook import EventLoop, Hook
 from .mutex import SystemWideMutex
 from .rect import get_rect
 from .registry import wait_for_registry_change
-from .style import has_no_border, is_minimized, is_topmost, set_click_through
+from .style import (
+    has_no_border,
+    is_maximized,
+    is_minimized,
+    is_topmost,
+    set_click_through,
+)
