@@ -248,8 +248,8 @@ class _Infos(_Sticky):
         self._frame = frame = tk.Frame(self, bg=WIDGET_BG, **bd)
         self._headers = list(Info.get_headers(app_name, app_version))
         self._fade = _Fade(self)
-        # frame.bind("<Enter>", lambda _: self.show())
-        # frame.bind("<Leave>", lambda _: self.hide())
+        frame.bind("<Enter>", lambda _: self.show())
+        frame.bind("<Leave>", lambda _: self.hide())
         frame.pack()
 
     def set(self, infos: list[Info]) -> bool:
