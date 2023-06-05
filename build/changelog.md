@@ -1,3 +1,5 @@
+## 1.1.7.1
+* Proxies infos window is scrollable when the list is too big.
 ## 1.1.7
 * _Sfvip All_ logo lives in the top left corner of _Sfvip Player_: 
     * Mouse hover on it to get the proxies informations.

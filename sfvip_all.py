@@ -1,6 +1,7 @@
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     # reduce what's imported in the 2nd process
@@ -18,7 +19,7 @@ if __name__ == "__main__":
             logs = [file for file in path.iterdir() if file.match(f"{Build.name} - *.log")]
             if len(logs) > keep:
                 logs.sort(key=lambda f: f.stat().st_mtime, reverse=True)
-                logging.info("keep the last %d logs", keep)
+                logger.info("keep the last %d logs", keep)
                 for log in logs[keep:]:
                     try:
                         log.unlink(missing_ok=False)
@@ -28,13 +29,19 @@ if __name__ == "__main__":
     def run() -> None:
         # use a different config json filename than sfvip player just in case
         config_json = Path(os.environ["APPDATA"]) / Build.name / "Config All.json"
-        config = DefaultAppConfig(config_json)
-        sfvip(config, Build.name, Build.version, Build.splash, Build.Logo.path)
+        main_dir = Path(__file__).parent
+        sfvip(
+            DefaultAppConfig(config_json),
+            Build.name,
+            Build.version,
+            main_dir / Build.splash,
+            main_dir / Build.Logo.path,
+        )
 
-    logging.info("main process started")
+    logger.info("main process started")
     run()
     remove_old_logs(keep=6)
-    logging.info("main process exit")
+    logger.info("main process exit")
 
 else:
-    logging.info("proxies process started")
+    logger.info("proxies process started")
