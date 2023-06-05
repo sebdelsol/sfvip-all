@@ -61,12 +61,11 @@ class _Pulse:
 
     def start(self) -> None:
         self.stop()
-        self._pulse()
+        self._after = self._widget.after(0, self._pulse)
 
     def stop(self) -> None:
-        with self._lock:
-            if self._after:
-                self._widget.after_cancel(self._after)
+        if self._after:
+            self._widget.after_cancel(self._after)
 
 
 class _Fade:

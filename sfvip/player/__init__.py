@@ -12,7 +12,6 @@ from winapi import SystemWideMutex
 
 from ..registry import Registry
 from ..ui import UI, Rect, WinState, sticky
-from ..ui.exception import UIError
 from ..watchers import FileWatcher, RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .exception import PlayerError
@@ -164,18 +163,14 @@ class _PlayerPath:
 
 
 class _PlayerWindowWatcher:
-    def __init__(self, player_stop: Callable[[], bool]) -> None:
+    def __init__(self) -> None:
         self._rect: Optional[Rect] = None
         self._watcher: Optional[WindowWatcher] = None
-        self._player_stop = player_stop
 
     def _pos_changed(self, state: WinState) -> None:
-        try:
-            sticky.follow(state)
-            if not (state.is_minimized or state.no_border):
-                self._rect = state.rect
-        except UIError:
-            self._player_stop()
+        sticky.follow(state)
+        if not (state.is_minimized or state.no_border):
+            self._rect = state.rect
 
     def start(self, pid: int, name: str) -> None:
         self._watcher = WindowWatcher(pid, name)
@@ -222,7 +217,7 @@ class Player:
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
         self.path = _PlayerPath(player_path, ui).path
         self.logs = PlayerLogs(self.path)
-        self._window_watcher = _PlayerWindowWatcher(self.stop)
+        self._window_watcher = _PlayerWindowWatcher()
         self._rect: Optional[_PlayerRect] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._process_lock = threading.Lock()
@@ -277,9 +272,9 @@ class Player:
                     return True
         return False
 
-    def stop_and_relaunch(self) -> None:
+    def stop_and_relaunch(self, sleep_duration_s: float = 1) -> None:
         # give time to the player to stop if it's been initiated by the user
-        time.sleep(1)
+        time.sleep(sleep_duration_s)
         if self.stop():
             self._launcher.set_relaunch(self._window_watcher.rect)
             logger.info("restart the player")

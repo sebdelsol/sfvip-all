@@ -1,8 +1,6 @@
 import tkinter as tk
 from typing import NamedTuple, Optional, Self
 
-from .exception import UIError
-
 
 class _Offset(NamedTuple):
     regular: tuple[int, int] = 0, 0
@@ -51,28 +49,31 @@ class _StickyWindow(tk.Toplevel):
         self._offset = offset
         self._rect: Optional[Rect] = None
 
-    @staticmethod
-    def instances() -> list["_StickyWindow"]:
-        return _StickyWindow._instances
+        # prevent closing (alt-f4)
+        self.protocol("WM_DELETE_WINDOW", lambda: None)
 
     def follow(self, state: WinState) -> None:
         if state.no_border or state.is_minimized:
             if self.winfo_ismapped():
                 self.stop_following()
         elif state.rect.valid():
-            # position changed ?
             if state.rect != self._rect:
-                w, h = self.winfo_reqwidth(), self.winfo_reqheight()
-                rect = state.rect.position(self._offset, state.is_maximized, w, h)
-                self.geometry(rect.to_geometry())
-                self._rect = state.rect
-            # else lift me to stay on top
+                self._change_pos(state)
             else:
-                self.attributes("-topmost", True)
-                self.attributes("-topmost", state.is_topmost)
-                self.lift()
                 if not self.winfo_ismapped():
                     self.start_following()
+                self._bring_to_front(state)
+
+    def _change_pos(self, state: WinState) -> None:
+        w, h = self.winfo_reqwidth(), self.winfo_reqheight()
+        rect = state.rect.position(self._offset, state.is_maximized, w, h)
+        self.geometry(rect.to_geometry())
+        self._rect = state.rect
+
+    def _bring_to_front(self, state: WinState) -> None:
+        self.attributes("-topmost", True)
+        if not state.is_topmost:
+            self.attributes("-topmost", False)
 
     def stop_following(self) -> None:
         self.withdraw()
@@ -80,21 +81,16 @@ class _StickyWindow(tk.Toplevel):
     def start_following(self) -> None:
         self.deiconify()
 
+    @staticmethod
+    def instances() -> list["_StickyWindow"]:
+        return _StickyWindow._instances
+
 
 def follow(state: WinState) -> None:
     for sticky in _StickyWindow.instances():
-        try:
-            sticky.follow(state)
-        # catch tcl error due to alt-f4
-        # and propagate as UIError
-        except tk.TclError as err:
-            raise UIError from err
+        sticky.follow(state)
 
 
 def stop_following() -> None:
     for sticky in _StickyWindow.instances():
-        try:
-            sticky.stop_following()
-        # clean exit when exiting due to alt-f4
-        except tk.TclError:
-            pass
+        sticky.stop_following()
