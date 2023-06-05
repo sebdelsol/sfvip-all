@@ -3,7 +3,7 @@ import logging
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
-from typing import IO, Callable, Iterator
+from typing import IO, Callable, Iterator, Optional
 
 from .player import PlayerLogs
 from .player.config import PlayerDatabase
@@ -117,9 +117,15 @@ class Accounts:
         """don't handle m3u playlists"""
         return _AccountList(account for account in self._database.accounts if not account.is_playlist())
 
-    def _set_ui_infos(self, proxies: dict[str, str], method: _InfoMethodT, ui: UI) -> None:
+    def _set_ui_infos(
+        self,
+        proxies: dict[str, str],
+        method: _InfoMethodT,
+        ui: UI,
+        player_stop_and_relaunch: Optional[Callable[[], None]] = None,
+    ) -> None:
         self._database.load()
-        ui.set_infos([method(account, proxies) for account in self._accounts_to_set])
+        ui.set_infos([method(account, proxies) for account in self._accounts_to_set], player_stop_and_relaunch)
 
     def _set_proxies(self, proxies: dict[str, str], msg: str) -> None:
         with self._database.lock:
@@ -137,18 +143,18 @@ class Accounts:
         self._set_ui_infos(proxies, _info_set, ui)
         self._set_proxies(proxies, "set")
         restore_proxies = {v: k for k, v in proxies.items()}
-        known_proxies = sum(proxies.items(), ())
+        # known_proxies = sum(proxies.items(), ())
 
         def on_modified(last_modified: float, player_stop_and_relaunch: Callable[[], None]) -> None:
             if log := self._player_logs.get_last():
                 # an account has been changed by the user ?
                 if log.timestamp > last_modified and Accounts._edited_account_log in log.msg:
                     logger.info("accounts proxies file has been modified")
-                    upstreams = self.upstreams  # saved for checking new proxies
-                    self._set_ui_infos(restore_proxies, _info_restore, ui)
+                    # upstreams = self.upstreams  # saved for checking new proxies
+                    self._set_ui_infos(restore_proxies, _info_restore, ui, player_stop_and_relaunch)
                     self._set_proxies(restore_proxies, "restore")
-                    if not upstreams.issubset(known_proxies):  # new proxies ?
-                        player_stop_and_relaunch()
+                    # if not upstreams.issubset(known_proxies):  # new proxies ?
+                    #     player_stop_and_relaunch()
 
         def restore_after_being_read(player_stop_and_relaunch: Callable[[], None]) -> None:
             self._database.wait_being_read()

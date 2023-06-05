@@ -11,7 +11,12 @@ class _AutoScrollbar(tk.Scrollbar):
 
 
 class _VAutoScrollableCanvas(tk.Canvas):  # pylint: disable=too-many-ancestors
-    def __init__(self, master=None, **kwargs) -> None:
+    """
+    Canvas with an automatic vertical scrollbar
+    use _VAutoScrollableCanvas.frame to populate it
+    """
+
+    def __init__(self, master, **kwargs) -> None:
         super().__init__(master, bd=0, highlightthickness=0, **kwargs)  # w/o border
         # set the vertical scrollbar
         vscrollbar = _AutoScrollbar(master, orient="vertical")
@@ -38,3 +43,27 @@ class _VAutoScrollableCanvas(tk.Canvas):  # pylint: disable=too-many-ancestors
 
     def _on_mousewheel(self, event):
         self.yview_scroll(int(-1 * (event.delta / 12)), "units")
+
+
+class _Button(tk.Button):
+    """
+    button with a colored border
+    with a mouseover color
+    """
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self, master, bg: str, mouseover: str, bd_color: str, bd_width: float, bd_relief: str, **kwargs
+    ) -> None:
+        # create a frame for the border
+        border = dict(highlightbackground=bd_color, highlightcolor=bd_color, bd=bd_width, relief=bd_relief)
+        self._frame = tk.Frame(master, bg=bg, **border)
+        active = dict(activebackground=bg, activeforeground=kwargs.get("fg", "white"))
+        super().__init__(self._frame, bg=bg, bd=0, **active, **kwargs)
+        self.pack(fill="both", expand=True)
+        # handle mouseover
+        self.bind("<Enter>", lambda _: self.config(bg=mouseover))
+        self.bind("<Leave>", lambda _: self.config(bg=bg))
+
+    def grid(self, **kwargs) -> None:
+        self._frame.grid(**kwargs)
