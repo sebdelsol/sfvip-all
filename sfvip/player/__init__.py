@@ -11,7 +11,8 @@ from typing import Any, Callable, Iterator, NamedTuple, Optional
 from winapi import SystemWideMutex
 
 from ..registry import Registry
-from ..ui import UI, Rect, UIError, WinState
+from ..ui import UI, Rect, WinState, sticky
+from ..ui.exception import UIError
 from ..watchers import FileWatcher, RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .exception import PlayerError
@@ -163,15 +164,14 @@ class _PlayerPath:
 
 
 class _PlayerWindowWatcher:
-    def __init__(self, ui: UI, player_stop: Callable[[], bool]) -> None:
-        self._ui = ui
+    def __init__(self, player_stop: Callable[[], bool]) -> None:
         self._rect: Optional[Rect] = None
         self._watcher: Optional[WindowWatcher] = None
         self._player_stop = player_stop
 
     def _pos_changed(self, state: WinState) -> None:
         try:
-            self._ui.follow(state)
+            sticky.follow(state)
             if not (state.is_minimized or state.no_border):
                 self._rect = state.rect
         except UIError:
@@ -184,7 +184,7 @@ class _PlayerWindowWatcher:
 
     def stop(self) -> None:
         if self._watcher:
-            self._ui.stop_following()
+            sticky.stop_following()
             self._watcher.stop()
 
     @property
@@ -222,7 +222,7 @@ class Player:
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
         self.path = _PlayerPath(player_path, ui).path
         self.logs = PlayerLogs(self.path)
-        self._window_watcher = _PlayerWindowWatcher(ui, self.stop)
+        self._window_watcher = _PlayerWindowWatcher(self.stop)
         self._rect: Optional[_PlayerRect] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._process_lock = threading.Lock()
