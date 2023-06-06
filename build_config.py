@@ -9,7 +9,7 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.1.7.1"
+    version = "1.1.8"
     dir = "build"
 
     class Logo:

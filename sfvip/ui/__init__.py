@@ -2,7 +2,7 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox
-from typing import Any, Callable, Iterator, NamedTuple, Optional
+from typing import Any, Callable, NamedTuple, Optional
 
 from winapi import set_click_through
 
@@ -13,15 +13,15 @@ from .widget import _Button, _VAutoScrollableCanvas
 
 WIDGET_BG = "#242424"
 WIDGET_BG2 = "#2A2A2A"
-WIDGET_BORDER_COLOR = "#333333"
+WIDGET_BD_COLOR = "#333333"
 BUTTON_COLOR = "#1F1E1D"
 BUTTON_HIGHLIGHT_COLOR = "#3F3F41"
 
-_STL = _Style(font="Calibri", font_size=12)
-_STL_NAME = _STL.white
-_STL_PROXY = _STL.light_green
+_STL = _Style().font("Calibri").font_size(12)
+_ARROW = _STL("➞").color("#707070").bigger(5)
 _STL_UPSTREAM = _STL.color("#A0A0A0")
-_ARROW = "➞", _STL.color("#707070").bigger(5)
+_STL_PROXY = _STL.light_green
+_STL_NAME = _STL.white
 _MAX_STR_LEN = 30
 
 
@@ -30,31 +30,34 @@ class Info(NamedTuple):
     proxy: str
     upstream: str
 
-    def get_info(self) -> Iterator[tuple[str, _Style]]:
+    def get_info(self) -> tuple[_Style, ...]:
         name = self.name[:_MAX_STR_LEN]
         proxy = self.proxy[:_MAX_STR_LEN]
         upstream = self.upstream[:_MAX_STR_LEN]
-
-        yield (name, _STL_NAME)
-        yield _ARROW
-        yield (proxy, _STL_PROXY) if proxy else ("No Proxy", _STL.red)
-        yield _ARROW if upstream else ("", _STL)
-        yield (upstream, _STL_UPSTREAM) if upstream else ("-", _STL.grey)
+        return (
+            _STL_NAME(name),  # type: ignore
+            _ARROW,
+            _STL_PROXY(proxy) if proxy else _STL("No Proxy").red,
+            _ARROW if upstream else _STL(""),
+            _STL_UPSTREAM(upstream) if upstream else _STL("-").grey,
+        )
 
     def valid(self) -> bool:
         return bool(self.proxy)
 
 
-def _get_infos_headers(app_name: str, app_version: str) -> Iterator[tuple[str, _Style]]:
-    yield "Account Name", _STL_NAME.bigger(2).bold.italic
-    yield "", _STL
-    yield f"{app_name} v{app_version} Proxy", _STL_PROXY.bigger(3).bold
-    yield "", _STL
-    yield "Account Proxy", _STL_UPSTREAM.bigger(2).bold.italic
+def _get_infos_headers(app_name: str, app_version: str) -> tuple[_Style, ...]:
+    return (
+        _STL_NAME("Account Name").bigger(2).bold.italic,  # type: ignore
+        _STL(""),
+        _STL_PROXY(f"{app_name} v{app_version} Proxy").bigger(3).bold,  # type: ignore
+        _STL(""),
+        _STL_UPSTREAM("Account Proxy").bigger(2).bold.italic,
+    )
 
 
-def _get_button_warn() -> tuple[str, _Style]:
-    return "Click to relaunch Sfvip Player... and fix the proxies", _STL.bigger(1).white.bold
+def _get_button_relaunch() -> _Style:
+    return _STL("Click to relaunch Sfvip Player... and fix the proxies").bigger(1).white.bold
 
 
 def _are_infos_valid(infos: list[Info]) -> bool:
@@ -72,17 +75,17 @@ class _InfosWindow(_StickyWindow):
     def __init__(self, app_name: str, app_version: str) -> None:
         super().__init__(
             _InfosWindow._offset,
-            highlightbackground=WIDGET_BORDER_COLOR,
+            highlightbackground=WIDGET_BD_COLOR,
             highlightthickness=_InfosWindow._border_size,
-            highlightcolor=WIDGET_BORDER_COLOR,
+            highlightcolor=WIDGET_BD_COLOR,
         )
         self.attributes("-alpha", 0.0)
         self.maxsize(-1, _InfosWindow._max_height)
         canvas = _VAutoScrollableCanvas(self, bg=WIDGET_BG2)
-        self._frame = frame = canvas.frame
+        self._frame = canvas.frame
         self._headers = list(_get_infos_headers(app_name, app_version))
         self._fade = _Fade(self)
-        self._bind_mouse_hover(frame, canvas, canvas.scrollbar)
+        self._bind_mouse_hover(canvas, canvas.scrollbar, canvas.frame)
 
     def set(self, infos: list[Info], player_stop_and_relaunch: Optional[Callable[[], None]]) -> bool:
         # clear the frame
@@ -92,31 +95,35 @@ class _InfosWindow(_StickyWindow):
         row = 0
         pad = _InfosWindow._pad
         valid = _are_infos_valid(infos)
+        # relaunch button
         if not valid and player_stop_and_relaunch:
-            button = self._set_warn_relaunch(player_stop_and_relaunch)
+            button = self._set_relaunch(player_stop_and_relaunch)
             button.grid(columnspan=6, padx=pad, pady=pad, sticky=tk.EW)
             row += 1
-        for column, (text, style) in enumerate(self._headers):
-            label = tk.Label(self._frame, bg=WIDGET_BG, text=text, **style())
+        # headers
+        for column, text in enumerate(self._headers):
+            label = tk.Label(self._frame, bg=WIDGET_BG, **text.to_tk)
             label.grid(row=row, column=column, ipadx=pad, ipady=pad, sticky=tk.NSEW)
         row += 1
+        # proxies
         for row_index, info in enumerate(infos):
-            for column, (text, style) in enumerate(info.get_info()):
-                label = tk.Label(self._frame, bg=WIDGET_BG if row_index % 2 else WIDGET_BG2, text=text, **style())
+            for column, text in enumerate(info.get_info()):
+                bg = WIDGET_BG if row_index % 2 else WIDGET_BG2
+                label = tk.Label(self._frame, bg=bg, **text.to_tk)
                 label.grid(row=row + row_index, column=column, ipadx=pad, ipady=pad, sticky=tk.NSEW)
         # enable resizing
         self.geometry("")
         return valid
 
-    def _set_warn_relaunch(self, player_stop_and_relaunch: Callable[[], None]) -> tk.Button:
-        text, style = _get_button_warn()
+    def _set_relaunch(self, player_stop_and_relaunch: Callable[[], None]) -> tk.Button:
+        text = _get_button_relaunch()
         border = dict(bd_color="white", bd_width=0.75, bd_relief="groove")
-        bstyle = dict(bg=BUTTON_COLOR, mouseover=BUTTON_HIGHLIGHT_COLOR)
-        button = _Button(self._frame, text=text, **bstyle, **border, **style())
+        buttonstyle = dict(bg=BUTTON_COLOR, mouseover=BUTTON_HIGHLIGHT_COLOR)
+        button = _Button(self._frame, **buttonstyle, **border, **text.to_tk)
 
         def relaunch(_) -> None:
             button.unbind("<Button-1>")
-            # give time for the button feedback
+            # give time for the button feedback and ask for instant relaunch
             self.after(100, player_stop_and_relaunch, 0)
 
         button.bind("<Button-1>", relaunch)
@@ -124,7 +131,7 @@ class _InfosWindow(_StickyWindow):
 
     def _bind_mouse_hover(self, *widgets: tk.Widget) -> None:
         def show(_):
-            """keep showing only when already there"""
+            """keep showing only when already there to avoid showing again when fading out"""
             if self.attributes("-alpha") == 1.0:
                 self.show()
 
@@ -196,7 +203,7 @@ class UI(tk.Tk):
 
     def __init__(self, app_name: str, app_version: str, splash_path: Path, logo_path: Path) -> None:
         super().__init__()
-        self.withdraw()
+        self.withdraw()  # we rely on some _StickyWindow instead
         self._splash_img = tk.PhotoImage(file=splash_path)  # keep a reference for tk
         self.wm_iconphoto(True, self._splash_img)
         self._app_name = app_name

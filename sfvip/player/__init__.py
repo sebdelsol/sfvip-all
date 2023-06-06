@@ -6,7 +6,7 @@ import time
 import winreg
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Iterator, NamedTuple, Optional
+from typing import Callable, Iterator, NamedTuple, Optional
 
 from winapi import SystemWideMutex
 
@@ -17,8 +17,6 @@ from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .exception import PlayerError
 
 logger = logging.getLogger(__name__)
-
-# TODO bring the player foreground when relaunching
 
 
 class PlayerLogs:
@@ -110,6 +108,31 @@ class _PlayerRect(PlayerConfig):
                 self.save(config)
 
 
+class _PlayerWindowWatcher:
+    def __init__(self) -> None:
+        self._rect: Optional[Rect] = None
+        self._watcher: Optional[WindowWatcher] = None
+
+    def _pos_changed(self, state: WinState) -> None:
+        sticky.follow(state)
+        if not (state.is_minimized or state.no_border):
+            self._rect = state.rect
+
+    def start(self, pid: int, name: str) -> None:
+        self._watcher = WindowWatcher(pid, name)
+        self._watcher.set_callback(self._pos_changed)
+        self._watcher.start()
+
+    def stop(self) -> None:
+        if self._watcher:
+            sticky.stop_following()
+            self._watcher.stop()
+
+    @property
+    def rect(self) -> Optional[Rect]:
+        return self._rect
+
+
 class _PlayerPath:
     """find the player exe"""
 
@@ -160,31 +183,6 @@ class _PlayerPath:
                     return player
             if not ui.askretry(message=f"{_PlayerPath._name.capitalize()} not found, try again ?"):
                 return None
-
-
-class _PlayerWindowWatcher:
-    def __init__(self) -> None:
-        self._rect: Optional[Rect] = None
-        self._watcher: Optional[WindowWatcher] = None
-
-    def _pos_changed(self, state: WinState) -> None:
-        sticky.follow(state)
-        if not (state.is_minimized or state.no_border):
-            self._rect = state.rect
-
-    def start(self, pid: int, name: str) -> None:
-        self._watcher = WindowWatcher(pid, name)
-        self._watcher.set_callback(self._pos_changed)
-        self._watcher.start()
-
-    def stop(self) -> None:
-        if self._watcher:
-            sticky.stop_following()
-            self._watcher.stop()
-
-    @property
-    def rect(self) -> Optional[Rect]:
-        return self._rect
 
 
 class _Launcher:

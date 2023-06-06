@@ -3,7 +3,7 @@ import logging
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
-from typing import IO, Callable, Iterator, Optional
+from typing import IO, Callable, Iterator, Optional, Protocol
 
 from .player import PlayerLogs
 from .player.config import PlayerDatabase
@@ -83,7 +83,10 @@ class _Database:
         self._accessed_by_me = self.atime
 
 
-_InfoMethodT = Callable[[_Account, dict[str, str]], Info]
+class _InfoMethod(Protocol):
+    @staticmethod
+    def __call__(account: _Account, proxies: dict[str, str]) -> Info:
+        ...
 
 
 def _info_set(account: _Account, proxies: dict[str, str]) -> Info:
@@ -120,7 +123,7 @@ class Accounts:
     def _set_ui_infos(
         self,
         proxies: dict[str, str],
-        method: _InfoMethodT,
+        method: _InfoMethod,
         ui: UI,
         player_stop_and_relaunch: Optional[Callable[[], None]] = None,
     ) -> None:

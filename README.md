@@ -4,19 +4,19 @@ So you can easily **search your entire catalog**.
 
 <img src="ressources/all.png">
 
-## Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.7.1/Sfvip%20All.exe) or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.7.1/Sfvip%20All.zip)
-[![Version](https://img.shields.io/badge/Version-1.1.7.1-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.7.1/Sfvip%20All.exe)
+## Download the [**Exe**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.8/Sfvip%20All.exe) or [**Zip**](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.8/Sfvip%20All.zip)
+[![Version](https://img.shields.io/badge/Version-1.1.8-informational)](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.1.8/Sfvip%20All.exe)
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)
 
 **Check the [_Changelog_](build/changelog.md).**  
-You need to have Sfvip Player already installed & launched once.  
+You need to have Sfvip Player already installed <sub><sup>_and preferably launched at least once._</sup></sub>  
 <sub>_**Sfvip All.exe** might be slow to start its first run._</sub>  
 <sub>_**Sfvip All.exe** might trigger your antivirus because Nuitka build are unfortunately not exempt from it._</sub>
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-1922-informational)
+![sloc](https://img.shields.io/badge/Loc-1963-informational)
 
 **Check the [_build config_](build_config.py).**
 ### Create the environment

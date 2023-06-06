@@ -10,7 +10,7 @@ So you can easily **search your entire catalog**.
 [![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)
 
 **Check the [_Changelog_](build/changelog.md).**  
-You need to have Sfvip Player already installed & launched once.  
+You need to have Sfvip Player already installed <sub><sup>_and preferably launched at least once._</sup></sub>  
 <sub>_**Sfvip All.exe** might be slow to start its first run._</sub>  
 <sub>_**Sfvip All.exe** might trigger your antivirus because Nuitka build are unfortunately not exempt from it._</sub>
 ## Build
