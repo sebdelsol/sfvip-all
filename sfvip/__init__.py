@@ -25,7 +25,7 @@ def sfvip(config: DefaultAppConfig, name: str, version: str, splash: Path, logo:
                 with LocalProxies(config.all_category, accounts.upstreams) as proxies:
                     with accounts.set_proxies(proxies.by_upstreams, ui) as restore_accounts_proxies:
                         with player.run():
-                            restore_accounts_proxies(player.stop_and_relaunch)
+                            restore_accounts_proxies(player.relaunch)
                             ui.splash.hide(fade_duration_ms=1000, wait_ms=1000)
 
         ui.run_in_thread(PlayerError, main)

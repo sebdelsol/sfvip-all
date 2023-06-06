@@ -13,16 +13,17 @@ if __name__ == "__main__":
     from sfvip import sfvip
     from sfvip_all_config import DefaultAppConfig
 
-    def remove_old_logs(keep: int) -> None:
-        if "__compiled__" in globals():  # launched as an exe build by nuitka ?
+    def remove_old_exe_logs(keep: int) -> None:
+        if "__compiled__" in globals():
+            # launched as an exe build by nuitka ? logs files are in the exe dir
             path = Path(sys.argv[0]).parent
-            logs = [file for file in path.iterdir() if file.match(f"{Build.name} - *.log")]
-            if len(logs) > keep:
-                logs.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+            log_files = [file for file in path.iterdir() if file.match(f"{Build.name} - *.log")]
+            if len(log_files) > keep:
                 logger.info("keep the last %d logs", keep)
-                for log in logs[keep:]:
+                log_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+                for logfile in log_files[keep:]:
                     try:
-                        log.unlink(missing_ok=False)
+                        logfile.unlink(missing_ok=False)
                     except PermissionError:
                         pass
 
@@ -40,7 +41,7 @@ if __name__ == "__main__":
 
     logger.info("main process started")
     run()
-    remove_old_logs(keep=6)
+    remove_old_exe_logs(keep=6)
     logger.info("main process exit")
 
 else:
