@@ -1,7 +1,6 @@
 ## 1.1.8
-* Proxies infos window is scrollable when the list is too big.
-* No auto relaunch when the proxies have been changed.
-* Suggest to relaunch with a button to do so in the proxies' infos window.
+* No auto relaunch when the proxies have been changed. Add a button to do so when needed.
+* Proxies infos window is scrollable when the list is too long.
 * Fix a potential deadlock.
 
 ## 1.1.7

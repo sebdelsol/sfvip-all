@@ -62,30 +62,30 @@ class _PlayerLogSetting(PlayerConfig):
                 return config.get(_PlayerLogSetting._key) is False
         return False
 
-    def _on_modified(self, _, player_stop_and_relaunch: Callable[[], None]) -> None:
+    def _on_modified(self, _, player_relaunch: Callable[[], None]) -> None:
         # do not modify the config file
         # to avoid other sfvip instance to miss the change
         if self._is_off():
             logger.info("Player logging setting has been switched off")
-            player_stop_and_relaunch()
+            player_relaunch()
 
-    def watch(self, player_stop_and_relaunch: Callable[[], None]) -> FileWatcher:
+    def watch(self, player_relaunch: Callable[[], None]) -> FileWatcher:
         watcher = self.get_watcher()
-        watcher.add_callback(self._on_modified, player_stop_and_relaunch)
+        watcher.add_callback(self._on_modified, player_relaunch)
         return watcher
 
 
 class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
     """watch for a change of the player config dir setting"""
 
-    def _on_modified(self, value: str, player_stop_and_relaunch: Callable[[], None]) -> None:
+    def _on_modified(self, value: str, player_relaunch: Callable[[], None]) -> None:
         logger.info("Player config dir has changed to %s", value)
         self.has_changed()  # clear the relevant caches
-        player_stop_and_relaunch()
+        player_relaunch()
 
-    def watch(self, player_stop_and_relaunch: Callable[[], None]) -> RegistryWatcher:
+    def watch(self, player_relaunch: Callable[[], None]) -> RegistryWatcher:
         assert self._watcher is not None
-        self._watcher.add_callback(self._on_modified, player_stop_and_relaunch)
+        self._watcher.add_callback(self._on_modified, player_relaunch)
         return self._watcher
 
 
@@ -247,8 +247,8 @@ class Player:
             set_rect_lock.acquire()
             self._rect.set(self._launcher.rect)
 
-        with _PlayerLogSetting().watch(self.stop_and_relaunch):
-            with _PlayerConfigDirSetting().watch(self.stop_and_relaunch):
+        with _PlayerLogSetting().watch(self.relaunch):
+            with _PlayerConfigDirSetting().watch(self.relaunch):
                 with subprocess.Popen([self.path]) as self._process:
                     logger.info("player started")
                     self._window_watcher.start(self._process.pid, self.path)
@@ -270,7 +270,7 @@ class Player:
                     return True
         return False
 
-    def stop_and_relaunch(self, sleep_duration_s: float = 1) -> None:
+    def relaunch(self, sleep_duration_s: float = 1) -> None:
         # give time to the player to stop if it's been initiated by the user
         time.sleep(sleep_duration_s)
         if self.stop():

@@ -23,6 +23,7 @@ _STL_UPSTREAM = _STL.color("#A0A0A0")
 _STL_PROXY = _STL.light_green
 _STL_NAME = _STL.white
 _MAX_STR_LEN = 30
+_BLANK = _STL("")
 
 
 class Info(NamedTuple):
@@ -48,11 +49,11 @@ class Info(NamedTuple):
 
 def _get_infos_headers(app_name: str, app_version: str) -> tuple[_Style, ...]:
     return (
-        _STL_NAME("Account Name").bigger(2).bold.italic,  # type: ignore
-        _STL(""),
+        _STL_NAME("User Name").bigger(2).bold.italic,  # type: ignore
+        _BLANK,
         _STL_PROXY(f"{app_name} v{app_version} Proxy").bigger(3).bold,  # type: ignore
-        _STL(""),
-        _STL_UPSTREAM("Account Proxy").bigger(2).bold.italic,
+        _BLANK,
+        _STL_UPSTREAM("User Proxy").bigger(2).bold.italic,
     )
 
 
@@ -87,7 +88,7 @@ class _InfosWindow(_StickyWindow):
         self._fade = _Fade(self)
         self._bind_mouse_hover(canvas, canvas.scrollbar, canvas.frame)
 
-    def set(self, infos: list[Info], player_stop_and_relaunch: Optional[Callable[[], None]]) -> bool:
+    def set(self, infos: list[Info], player_relaunch: Optional[Callable[[], None]]) -> bool:
         # clear the frame
         for widget in self._frame.winfo_children():
             widget.destroy()
@@ -96,8 +97,8 @@ class _InfosWindow(_StickyWindow):
         pad = _InfosWindow._pad
         valid = _are_infos_valid(infos)
         # relaunch button
-        if not valid and player_stop_and_relaunch:
-            button = self._set_relaunch(player_stop_and_relaunch)
+        if not valid and player_relaunch:
+            button = self._set_relaunch(player_relaunch)
             button.grid(columnspan=6, padx=pad, pady=pad, sticky=tk.EW)
             row += 1
         # headers
@@ -115,7 +116,7 @@ class _InfosWindow(_StickyWindow):
         self.geometry("")
         return valid
 
-    def _set_relaunch(self, player_stop_and_relaunch: Callable[[], None]) -> tk.Button:
+    def _set_relaunch(self, player_relaunch: Callable[[], None]) -> tk.Button:
         text = _get_button_relaunch()
         border = dict(bd_color="white", bd_width=0.75, bd_relief="groove")
         buttonstyle = dict(bg=BUTTON_COLOR, mouseover=BUTTON_HIGHLIGHT_COLOR)
@@ -124,7 +125,7 @@ class _InfosWindow(_StickyWindow):
         def relaunch(_) -> None:
             button.unbind("<Button-1>")
             # give time for the button feedback and ask for instant relaunch
-            self.after(100, player_stop_and_relaunch, 0)
+            self.after(100, player_relaunch, 0)
 
         button.bind("<Button-1>", relaunch)
         return button
@@ -239,8 +240,8 @@ class UI(tk.Tk):
         if exception is not None:
             raise exception  # type:ignore
 
-    def set_infos(self, infos: list[Info], player_stop_and_relaunch: Optional[Callable[[], None]]) -> None:
-        ok = self._infos.set(infos, player_stop_and_relaunch)
+    def set_infos(self, infos: list[Info], player_relaunch: Optional[Callable[[], None]]) -> None:
+        ok = self._infos.set(infos, player_relaunch)
         self._logo.set_pulse(ok=ok)
 
     def showinfo(self, message: str) -> None:

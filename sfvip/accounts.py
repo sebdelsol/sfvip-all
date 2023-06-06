@@ -125,10 +125,10 @@ class Accounts:
         proxies: dict[str, str],
         method: _InfoMethod,
         ui: UI,
-        player_stop_and_relaunch: Optional[Callable[[], None]] = None,
+        player_relaunch: Optional[Callable[[], None]] = None,
     ) -> None:
         self._database.load()
-        ui.set_infos([method(account, proxies) for account in self._accounts_to_set], player_stop_and_relaunch)
+        ui.set_infos([method(account, proxies) for account in self._accounts_to_set], player_relaunch)
 
     def _set_proxies(self, proxies: dict[str, str], msg: str) -> None:
         with self._database.lock:
@@ -148,23 +148,23 @@ class Accounts:
         restore_proxies = {v: k for k, v in proxies.items()}
         # known_proxies = sum(proxies.items(), ())
 
-        def on_modified(last_modified: float, player_stop_and_relaunch: Callable[[], None]) -> None:
+        def on_modified(last_modified: float, player_relaunch: Callable[[], None]) -> None:
             if log := self._player_logs.get_last():
                 # an account has been changed by the user ?
                 if log.timestamp > last_modified and Accounts._edited_account_log in log.msg:
                     logger.info("accounts proxies file has been modified")
                     # upstreams = self.upstreams  # saved for checking new proxies
-                    self._set_ui_infos(restore_proxies, _info_restore, ui, player_stop_and_relaunch)
+                    self._set_ui_infos(restore_proxies, _info_restore, ui, player_relaunch)
                     self._set_proxies(restore_proxies, "restore")
                     # if not upstreams.issubset(known_proxies):  # new proxies ?
-                    #     player_stop_and_relaunch()
+                    #     player_relaunch()
 
-        def restore_after_being_read(player_stop_and_relaunch: Callable[[], None]) -> None:
+        def restore_after_being_read(player_relaunch: Callable[[], None]) -> None:
             self._database.wait_being_read()
             self._set_proxies(restore_proxies, "restore")
             # we can now safely release the database and start the watcher
             self._database.lock.release()
-            self._database.watcher.add_callback(on_modified, player_stop_and_relaunch)
+            self._database.watcher.add_callback(on_modified, player_relaunch)
             self._database.watcher.start()
 
         try:
