@@ -27,8 +27,8 @@ class SystemWideMutex:
     """A system-wide mutex"""
 
     def __init__(self, name: str) -> None:
-        name = name.replace("\\", " ")
-        if not (ret := _CreateMutex(None, False, name)):
+        self._name = name.replace("\\", " ")
+        if not (ret := _CreateMutex(None, False, self._name)):
             raise ctypes.WinError()
         self._handle = ret
 
@@ -60,3 +60,6 @@ class SystemWideMutex:
 
     def __exit__(self, *_) -> None:
         self.release()
+
+    def __repr__(self) -> str:
+        return f'SystemWideMutex "{self._name}"'

@@ -31,7 +31,7 @@ class _VAutoScrollableCanvas(tk.Canvas):  # pylint: disable=too-many-ancestors
         self.master.grid_columnconfigure(0, weight=1)
         # creating the frame attached to self
         self.frame = tk.Frame(self, bg=self["bg"])
-        self.create_window(0, 0, anchor=tk.NW, window=self.frame, tags="expand")
+        self.create_window(0, 0, anchor=tk.NW, window=self.frame)
         # set the scroll region when the frame content changes
         self.frame.bind("<Configure>", self._on_configure)
         # bind the mousewheel

@@ -1,7 +1,8 @@
-## 1.1.7.1
+## 1.1.8
 * Proxies infos window is scrollable when the list is too big.
 * No auto relaunch when the proxies have been changed.
 * Suggest to relaunch with a button to do so in the proxies' infos window.
+* Fix a potential deadlock.
 
 ## 1.1.7
 * _Sfvip All_ logo lives in the top left corner of _Sfvip Player_: 
