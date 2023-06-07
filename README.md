@@ -16,7 +16,7 @@ You need to have Sfvip Player already installed <sub><sup>_and preferably launch
 ## Build
 [![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-1970-informational)
+![sloc](https://img.shields.io/badge/Loc-2052-informational)
 
 **Check the [_build config_](build_config.py).**
 ### Create the environment

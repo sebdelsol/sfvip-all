@@ -1,6 +1,7 @@
 ## 1.1.8
 * No auto relaunch when the proxies have been changed. Add a button to do so when needed.
 * Proxies infos window is scrollable when the list is too long.
+* Better looking proxies infos window.
 * Fix a potential deadlock.
 
 ## 1.1.7

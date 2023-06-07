@@ -9,21 +9,39 @@ from winapi import set_click_through
 from .fx import _Fade, _Pulse
 from .sticky import Rect, WinState, _Offset, _StickyWindow
 from .style import _Style
-from .widget import _Button, _VAutoScrollableCanvas
+from .widget import _Button, _ListView, _VscrollCanvas
 
-WIDGET_BG = "#242424"
-WIDGET_BG2 = "#2A2A2A"
-WIDGET_BD_COLOR = "#333333"
-BUTTON_COLOR = "#1F1E1D"
-BUTTON_HIGHLIGHT_COLOR = "#3F3F41"
 
-_STL = _Style().font("Calibri").font_size(12)
-_ARROW = _STL("➞").color("#707070").bigger(5)
-_STL_UPSTREAM = _STL.color("#A0A0A0")
-_STL_PROXY = _STL.light_green
-_STL_NAME = _STL.white
-_MAX_STR_LEN = 30
-_BLANK = _STL("")
+class TH:
+    bg = "#2A2A2A"
+
+
+class InfoTH:
+    pad = 5
+    bg = TH.bg
+
+    class Listview:
+        headers = TH.bg
+        rows = "#242424"
+        sep = "#303030"
+
+    class Button:
+        bg = "#1F1E1D"
+        mouseover = "#3F3F41"
+
+    class Border:
+        bg = "#808080"
+        bd = 1
+
+
+class StlInfo:
+    stl = _Style().font("Calibri").font_size(12)
+    arrow = stl("➞").color("#707070").bigger(5)
+    upstream = stl.color("#A0A0A0")
+    proxy = stl.white
+    blank = stl("")
+    name = upstream
+    max_len = 30
 
 
 class Info(NamedTuple):
@@ -31,38 +49,44 @@ class Info(NamedTuple):
     proxy: str
     upstream: str
 
-    def get_info(self) -> tuple[_Style, ...]:
-        name = self.name[:_MAX_STR_LEN]
-        proxy = self.proxy[:_MAX_STR_LEN]
-        upstream = self.upstream[:_MAX_STR_LEN]
-        return (
-            _STL_NAME(name),  # type: ignore
-            _ARROW,
-            _STL_PROXY(proxy) if proxy else _STL("No Proxy").red,
-            _ARROW if upstream else _STL(""),
-            _STL_UPSTREAM(upstream) if upstream else _STL("-").grey,
-        )
 
-    def valid(self) -> bool:
-        return bool(self.proxy)
-
-
-def _get_infos_headers(app_name: str, app_version: str) -> tuple[_Style, ...]:
+def _get_infos_headers(app_name: str) -> tuple[_Style, ...]:
     return (
-        _STL_NAME("User Name").bigger(2).bold.italic,  # type: ignore
-        _BLANK,
-        _STL_PROXY(f"{app_name} v{app_version} Proxy").bigger(3).bold,  # type: ignore
-        _BLANK,
-        _STL_UPSTREAM("User Proxy").bigger(2).bold.italic,
+        StlInfo.name("User Name").bigger(2).bold,  # type: ignore
+        StlInfo.blank,
+        StlInfo.proxy(f"{app_name} Proxy").bigger(2).bold,  # type: ignore
+        StlInfo.blank,
+        StlInfo.proxy("User Proxy").bigger(2).bold,
+    )
+
+
+def get_row(info: Info) -> tuple[_Style, ...]:
+    name = info.name[: StlInfo.max_len]
+    proxy = info.proxy[: StlInfo.max_len]
+    upstream = info.upstream[: StlInfo.max_len]
+    return (
+        StlInfo.name(name),  # type: ignore
+        StlInfo.arrow,
+        StlInfo.proxy(proxy) if proxy else StlInfo.stl("No Proxy").red,
+        StlInfo.arrow if upstream else StlInfo.stl(""),
+        StlInfo.upstream(upstream) if upstream else StlInfo.stl("-").grey,
     )
 
 
 def _get_button_relaunch() -> _Style:
-    return _STL("Click to relaunch Sfvip Player... and fix the proxies").bigger(1).white.bold
+    return StlInfo.stl("Click to relaunch... and fix the proxies").white
+
+
+def _get_version(app_name: str, app_version: str) -> _Style:
+    return StlInfo.stl(f"{app_name} {app_version}").smaller(2).grey
+
+
+def is_valid(info: Info) -> bool:
+    return bool(info.proxy)
 
 
 def _are_infos_valid(infos: list[Info]) -> bool:
-    return all(info.valid() for info in infos)
+    return all(is_valid(info) for info in infos)
 
 
 class _InfosWindow(_StickyWindow):
@@ -70,75 +94,78 @@ class _InfosWindow(_StickyWindow):
 
     _offset = _Offset(regular=(5, 37), maximized=(3, 35))
     _max_height = 300
-    _border_size = 2
-    _pad = 5
 
     def __init__(self, app_name: str, app_version: str) -> None:
         super().__init__(
             _InfosWindow._offset,
-            highlightbackground=WIDGET_BD_COLOR,
-            highlightthickness=_InfosWindow._border_size,
-            highlightcolor=WIDGET_BD_COLOR,
+            highlightbackground=InfoTH.Border.bg,
+            highlightthickness=InfoTH.Border.bd,
+            highlightcolor=InfoTH.Border.bg,
+            bg=InfoTH.bg,
         )
         self.attributes("-alpha", 0.0)
         self.maxsize(-1, _InfosWindow._max_height)
-        canvas = _VAutoScrollableCanvas(self, bg=WIDGET_BG2)
-        self._frame = canvas.frame
-        self._headers = list(_get_infos_headers(app_name, app_version))
+        self._headers = _get_infos_headers(app_name)
         self._fade = _Fade(self)
-        self._bind_mouse_hover(canvas, canvas.scrollbar, canvas.frame)
+        # create a frame for a working mouse hovering detection
+        hover_frame = tk.Frame(self, bg=InfoTH.bg)
+        hover_frame.pack(fill="both", expand=True)
+        self._bind_mouse_hover(hover_frame)
+        # create the widgets
+        self.create_widgets(hover_frame, app_name, app_version)
 
-    def set(self, infos: list[Info], player_relaunch: Optional[Callable[[], None]]) -> bool:
-        # clear the frame
-        for widget in self._frame.winfo_children():
-            widget.destroy()
-        # populate
-        row = 0
-        pad = _InfosWindow._pad
-        valid = _are_infos_valid(infos)
+    def create_widgets(self, frame: tk.Frame, app_name: str, app_version: str) -> None:
+        # version
+        pad = InfoTH.pad
+        text = _get_version(app_name, app_version)
+        label = tk.Label(frame, bg=InfoTH.bg, **text.to_tk)
         # relaunch button
-        if not valid and player_relaunch:
-            button = self._set_relaunch(player_relaunch)
-            button.grid(columnspan=6, padx=pad, pady=pad, sticky=tk.EW)
-            row += 1
-        # headers
-        for column, text in enumerate(self._headers):
-            label = tk.Label(self._frame, bg=WIDGET_BG, **text.to_tk)
-            label.grid(row=row, column=column, ipadx=pad, ipady=pad, sticky=tk.NSEW)
-        row += 1
-        # proxies
-        for row_index, info in enumerate(infos):
-            for column, text in enumerate(info.get_info()):
-                bg = WIDGET_BG if row_index % 2 else WIDGET_BG2
-                label = tk.Label(self._frame, bg=bg, **text.to_tk)
-                label.grid(row=row + row_index, column=column, ipadx=pad, ipady=pad, sticky=tk.NSEW)
-        # enable resizing
-        self.geometry("")
-        return valid
-
-    def _set_relaunch(self, player_relaunch: Callable[[], None]) -> tk.Button:
         text = _get_button_relaunch()
         border = dict(bd_color="white", bd_width=0.75, bd_relief="groove")
-        buttonstyle = dict(bg=BUTTON_COLOR, mouseover=BUTTON_HIGHLIGHT_COLOR)
-        button = _Button(self._frame, **buttonstyle, **border, **text.to_tk)
+        buttonstyle = dict(bg=InfoTH.Button.bg, mouseover=InfoTH.Button.mouseover)
+        relaunch_button = _Button(frame, **buttonstyle, **border, **text.to_tk)
+        # separator
+        sep = tk.Frame(frame, bg=InfoTH.Listview.sep)
+        # list view
+        listview = _ListView(frame, InfoTH.Listview.headers, InfoTH.Listview.rows, InfoTH.Listview.sep, pad)
+        # layout
+        label.grid(row=0, padx=pad, sticky=tk.W)
+        relaunch_button.grid(row=0, column=1, padx=pad, pady=pad, sticky=tk.EW)
+        relaunch_button.grid_remove()
+        frame.columnconfigure(1, weight=1)
+        sep.grid(row=1, columnspan=2, sticky=tk.EW)
+        listview.grid(row=2, columnspan=2, sticky=tk.NSEW)
+        frame.rowconfigure(2, weight=1)
+        # for later use
+        self._relaunch_button = relaunch_button
+        self._listview = listview
 
+    def set(self, infos: list[Info], player_relaunch: Optional[Callable[[], None]]) -> bool:
+        self._listview.set(self._headers, [get_row(info) for info in infos])
+        valid = _are_infos_valid(infos)
+        if not valid and player_relaunch:
+            self._set_relaunch(player_relaunch)
+        self.geometry("")  # enable resizing
+        return valid
+
+    def _set_relaunch(self, player_relaunch: Callable[[], None]) -> None:
         def relaunch(_) -> None:
-            button.unbind("<Button-1>")
+            self._relaunch_button.unbind("<Button-1>")
+            self._relaunch_button.grid_remove()
             # give time for the button feedback and ask for instant relaunch
             self.after(100, player_relaunch, 0)
 
-        button.bind("<Button-1>", relaunch)
-        return button
+        self._relaunch_button.grid()
+        self._relaunch_button.bind("<Button-1>", relaunch)
 
-    def _bind_mouse_hover(self, *widgets: tk.Widget) -> None:
+    def _bind_mouse_hover(self, widget: tk.Widget) -> None:
         def show(_):
             """keep showing only when already there to avoid showing again when fading out"""
             if self.attributes("-alpha") == 1.0:
                 self.show()
 
-        for widget in widgets:
-            widget.bind("<Enter>", show)
-            widget.bind("<Leave>", lambda _: self.hide())
+        widget.bind("<Enter>", show, add="+")
+        widget.bind("<Leave>", lambda _: self.hide(), add="+")
 
     def show(self) -> None:
         self._fade.fade(fade_duration_ms=250, out=False)
@@ -150,8 +177,8 @@ class _InfosWindow(_StickyWindow):
 class _LogoWindow(_StickyWindow):
     """logo, mouse hover to show infos"""
 
-    _pulse_warn = _Pulse.Args(WIDGET_BG, "#990000", frequency=1)
-    _pulse_ok = _Pulse.Args(WIDGET_BG, "#006000", frequency=0.33)
+    _pulse_warn = _Pulse.Args(TH.bg, "#990000", frequency=1)
+    _pulse_ok = _Pulse.Args(TH.bg, "#006000", frequency=0.33)
     _offset = _Offset(regular=(2, 2), maximized=(0, 0))
 
     def __init__(self, logo_path: Path, infos: _InfosWindow) -> None:

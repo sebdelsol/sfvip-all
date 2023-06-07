@@ -46,8 +46,8 @@ class _Style(str):
     def bigger(self, dsize: int) -> Self:
         return self._update("_font_size", self._font_size + dsize)
 
-    # def smaller(self, dsize: int) -> Self:
-    #     return self._update("_font_size", max(1, self._font_size - dsize))
+    def smaller(self, dsize: int) -> Self:
+        return self._update("_font_size", max(1, self._font_size - dsize))
 
     def color(self, color: str) -> Self:
         return self._update("_fg", color)
