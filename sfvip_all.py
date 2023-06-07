@@ -21,9 +21,9 @@ if __name__ == "__main__":
             if len(log_files) > keep:
                 logger.info("keep the last %d logs", keep)
                 log_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
-                for logfile in log_files[keep:]:
+                for log in log_files[keep:]:
                     try:
-                        logfile.unlink(missing_ok=False)
+                        log.unlink(missing_ok=False)
                     except PermissionError:
                         pass
 
