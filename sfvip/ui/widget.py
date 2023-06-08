@@ -1,12 +1,47 @@
 import tkinter as tk
-from typing import Collection
+from tkinter import ttk
+from typing import Any, Collection
 
 from pyparsing import Sequence
 
 from .style import _Style
 
 
-class _AutoScrollbar(tk.Scrollbar):
+def _set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
+    """flat, no arrow, bg=color of slider"""
+    style = ttk.Style()
+    style.theme_use("clam")
+    style.layout(
+        "Vertical.TScrollbar",
+        [
+            (
+                "Vertical.Scrollbar.trough",
+                {
+                    "children": [("Vertical.Scrollbar.thumb", {"expand": "1", "sticky": "nswe"})],
+                    "sticky": "ns",
+                },
+            )
+        ],
+    )
+    style.configure(
+        "Vertical.TScrollbar",
+        background=slider,
+        gripcount=0,
+        bordercolor=bg,
+        troughcolor=bg,
+        relief="flat",
+        lightcolor=bg,
+        darkcolor=bg,
+    )
+    style.map("Vertical.TScrollbar", background=[("active", active_slider)])
+
+
+def _set_border(bg: str, size: float, **kwargs: str) -> dict[str, Any]:
+    return dict(highlightbackground=bg, highlightthickness=size, highlightcolor=bg, **kwargs)
+
+
+# pylint: disable=too-many-ancestors
+class _AutoScrollbar(ttk.Scrollbar):
     def set(self, first, last):
         if float(first) <= 0.0 and float(last) >= 1.0:
             self.grid_remove()
@@ -15,7 +50,7 @@ class _AutoScrollbar(tk.Scrollbar):
         super().set(first, last)
 
 
-class _VscrollCanvas(tk.Canvas):  # pylint: disable=too-many-ancestors
+class _VscrollCanvas(tk.Canvas):
     """
     Canvas with an automatic vertical scrollbar
     use _VAutoScrollableCanvas.frame to populate it
@@ -42,11 +77,11 @@ class _VscrollCanvas(tk.Canvas):  # pylint: disable=too-many-ancestors
         # bind the mousewheel
         self.bind_all("<MouseWheel>", self._on_mousewheel)
 
-    def _on_configure(self, _):
+    def _on_configure(self, _) -> None:
         w, h = self.frame.winfo_reqwidth(), self.frame.winfo_reqheight()
         self.config(scrollregion=(0, 0, w, h), width=w, height=h)
 
-    def _on_mousewheel(self, event):
+    def _on_mousewheel(self, event) -> None:
         self.yview_scroll(int(-1 * (event.delta / 12)), "units")
 
 
@@ -63,12 +98,12 @@ class _Button(tk.Button):
         bg: str,
         mouseover: str,
         bd_color: str,
-        bd_width: float,
+        bd_size: float,
         bd_relief: str,
         **kwargs
     ) -> None:
         # create a frame for the border, note: do not pack
-        border = dict(highlightbackground=bd_color, highlightcolor=bd_color, bd=bd_width, relief=bd_relief)
+        border = _set_border(bg=bd_color, size=bd_size, relief=bd_relief)
         self._frame = tk.Frame(master, bg=bg, **border)
         active = dict(activebackground=bg, activeforeground=kwargs.get("fg", "white"))
         # create the button
@@ -119,7 +154,7 @@ class _ListView(tk.Frame):
         self._pad = pad
 
     @staticmethod
-    def _clear(what: tk.BaseWidget):
+    def _clear(what: tk.BaseWidget) -> None:
         for widget in what.winfo_children():
             widget.destroy()
 

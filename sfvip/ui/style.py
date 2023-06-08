@@ -21,6 +21,7 @@ class _Style(str):
         self._font = "Calibri"
         self._font_size = 10
         self._font_styles = set()
+        self._max_width = None
 
     def __call__(self, text: str) -> Self:
         """return a COPY with a new text"""
@@ -28,6 +29,7 @@ class _Style(str):
         a_copy._fg = self._fg
         a_copy._font = self._font
         a_copy._font_size = self._font_size
+        a_copy._max_width = self._max_width
         a_copy._font_styles = set(self._font_styles)
         return a_copy
 
@@ -36,6 +38,9 @@ class _Style(str):
         a_copy = self(str(self))
         setattr(a_copy, name, value)
         return a_copy
+
+    def max_width(self, max_width: int) -> Self:
+        return self._update("_max_width", max_width)
 
     def font(self, font: str) -> Self:
         return self._update("_font", font)
@@ -65,7 +70,10 @@ class _Style(str):
     def to_tk(self) -> dict[str, Any]:
         # Note: self is callable (see __ call__)
         # and tk calls its kwargs if possible in widget creation
-        return dict(text=str(self), fg=self._fg, font=self._font_str)
+        text = str(self)
+        if self._max_width and len(text) > self._max_width:
+            text = f"{text[:self._max_width-3]}..."
+        return dict(text=text, fg=self._fg, font=self._font_str)
 
     def __repr__(self) -> str:
         return f'"{str(self)}" ({self._fg} {self._font_str})'
