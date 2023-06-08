@@ -9,14 +9,16 @@ So you can easily **search your entire catalog**.
 [![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)
 
-**Check the [_Changelog_](build/changelog.md).**  
-You need to have Sfvip Player already installed <sub><sup>_and preferably launched at least once._</sup></sub>  
-<sub>_**Sfvip All.exe** might be slow to start its first run._</sub>  
-<sub>_**Sfvip All.exe** might trigger your antivirus because Nuitka build are unfortunately not exempt from it._</sub>
+You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** already installed <sub><sup>_and preferably launched at least once._</sup></sub>  
+<sub>_**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._</sub>  
+<sub>_**Sfvip All.exe** might trigger your antivirus because even Nuitka build are not exempt from it._</sub>  
+<sub>_**Sfvip All.exe** will ask you for network connection its first run because it relies on local proxies to do its magic._</sub>
+
+**Check the [_Changelog_](build/changelog.md).**
 ## Build
-[![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3113/)
+[![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3114/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-2076-informational)
+![sloc](https://img.shields.io/badge/Loc-2107-informational)
 
 **Check the [_build config_](build_config.py).**
 ### Create the environment
@@ -24,8 +26,8 @@ You need to have Sfvip Player already installed <sub><sup>_and preferably launch
 python -m venv .sfvip
 .sfvip\scripts\activate
 python -m pip install --upgrade pip
-pip install -r requirements.txt
-pip install -r requirements.dev.txt
+python -m pip install -r requirements.txt
+python -m pip install -r requirements.dev.txt
 ```
 Everything that follows should be done in the ***.sfvip environment***.
 ### Upgrade dependencies

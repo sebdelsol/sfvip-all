@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 logging.getLogger("mitmproxy.proxy.server").setLevel(logging.WARNING)
 
 
-# warning: use only the needed addons,
-# if any issues use addons.default_addons() instead
+# use only the needed addons,
+# Note: use addons.default_addons() instead if any issues
 def _minimum_addons():
     return [
         core.Core(),
@@ -50,7 +50,7 @@ class Mode(NamedTuple):
     port: int
     upstream: str
 
-    def to_mitm(self):
+    def to_mitm(self) -> str:
         proxy = f"upstream:{self.upstream}" if self.upstream else "regular"
         return f"{proxy}@{self.port}"
 

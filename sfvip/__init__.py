@@ -31,4 +31,4 @@ def sfvip(config: DefaultAppConfig, name: str, version: str, splash: Path, logo:
         ui.run_in_thread(PlayerError, main)
 
     except PlayerError as err:
-        ui.showinfo(f"{err}.\n\nPlease launch Sfvip Player at least once !")
+        ui.showinfo(f"{err}.\nPlease launch Sfvip Player at least once !")

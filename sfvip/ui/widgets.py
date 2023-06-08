@@ -42,7 +42,7 @@ def _set_border(bg: str, size: float, **kwargs: str) -> dict[str, Any]:
 
 # pylint: disable=too-many-ancestors
 class _AutoScrollbar(ttk.Scrollbar):
-    def set(self, first, last):
+    def set(self, first, last) -> None:
         if float(first) <= 0.0 and float(last) >= 1.0:
             self.grid_remove()
         else:
@@ -124,7 +124,10 @@ class _Button(tk.Button):
 
 
 class _ListView(tk.Frame):
-    """List view with styled content and auto scroll"""
+    """
+    List view with styled content and auto scroll
+    Note: set_headers should be called before set_rows
+    """
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -143,46 +146,50 @@ class _ListView(tk.Frame):
         sep = tk.Frame(self, bg=bg_separator)
         sep.pack(fill="both", expand=True)
         # rows
-        frame_list = tk.Frame(self)
-        canvas = _VscrollCanvas(frame_list, bg=bg_separator)
-        self._frame_list = canvas.frame
-        frame_list.pack(fill="both", expand=True)
-
+        frame_rows = tk.Frame(self)
+        canvas = _VscrollCanvas(frame_rows, bg=bg_separator)
+        self._frame_rows = canvas.frame
+        frame_rows.pack(fill="both", expand=True)
+        # for use later
         self._bg_headers = bg_headers
         self._bg_row = bg_row
         self._bg_separator = bg_separator
         self._pad = pad
+        self._widths = []
 
     @staticmethod
     def _clear(what: tk.BaseWidget) -> None:
         for widget in what.winfo_children():
             widget.destroy()
 
-    def set(self, headers: Collection[_Style], rows: Sequence[Collection[_Style]]) -> None:
-        # clear the frame
+    def set_headers(self, headers: Collection[_Style]) -> None:
         self._clear(self._frame_headers)
-        self._clear(self._frame_list)
-        # populate
         pad = self._pad
         n_column = len(headers)
-        widths = [0] * n_column
-        # headers
+        self._widths = [0] * n_column
         for column, text in enumerate(headers):
             label = tk.Label(self._frame_headers, bg=self._bg_headers, **text.to_tk)
             label.grid(row=0, column=column, ipadx=pad, ipady=pad, sticky=tk.NSEW)
-            widths[column] = max(label.winfo_reqwidth() + pad * 2, widths[column])
-        # rows
+            self._widths[column] = max(label.winfo_reqwidth() + pad * 2, self._widths[column])
+        self.set_column_widths()
+
+    def set_rows(self, rows: Sequence[Collection[_Style]]) -> None:
+        self._clear(self._frame_rows)
+        pad = self._pad
+        n_column = len(self._widths)
         for row, row_content in enumerate(rows):
             assert len(row_content) == n_column
             for column, text in enumerate(row_content):
-                label = tk.Label(self._frame_list, bg=self._bg_row, **text.to_tk)
+                label = tk.Label(self._frame_rows, bg=self._bg_row, **text.to_tk)
                 label.grid(row=row * 2, column=column, ipadx=pad, ipady=pad, sticky=tk.NSEW)
-                widths[column] = max(label.winfo_reqwidth() + pad * 2, widths[column])
+                self._widths[column] = max(label.winfo_reqwidth() + pad * 2, self._widths[column])
                 # row separator
                 if row != len(rows) - 1:
-                    sep = tk.Frame(self._frame_list, bg=self._bg_separator)
+                    sep = tk.Frame(self._frame_rows, bg=self._bg_separator)
                     sep.grid(row=row * 2 + 1, column=0, columnspan=n_column, sticky=tk.EW)
-        # sync both grids
-        for i in range(n_column):
-            self._frame_headers.columnconfigure(i, minsize=widths[i])
-            self._frame_list.columnconfigure(i, minsize=widths[i])
+        self.set_column_widths()
+
+    def set_column_widths(self) -> None:
+        for column, width in enumerate(self._widths):
+            self._frame_headers.columnconfigure(column, minsize=width)
+            self._frame_rows.columnconfigure(column, minsize=width)

@@ -29,8 +29,8 @@ class _Style(str):
         a_copy._fg = self._fg
         a_copy._font = self._font
         a_copy._font_size = self._font_size
-        a_copy._max_width = self._max_width
         a_copy._font_styles = set(self._font_styles)
+        a_copy._max_width = self._max_width
         return a_copy
 
     def _update(self, name: str, value: Any) -> Self:
@@ -38,6 +38,10 @@ class _Style(str):
         a_copy = self(str(self))
         setattr(a_copy, name, value)
         return a_copy
+
+    @property
+    def no_truncate(self) -> Self:
+        return self._update("_max_width", None)
 
     def max_width(self, max_width: int) -> Self:
         return self._update("_max_width", max_width)
@@ -76,27 +80,28 @@ class _Style(str):
         return dict(text=text, fg=self._fg, font=self._font_str)
 
     def __repr__(self) -> str:
-        return f'"{str(self)}" ({self._fg} {self._font_str})'
+        max_width = f", max_width={self._max_width}" if self._max_width else ""
+        return f'"{str(self)}" ({self._fg} {self._font_str}{max_width})'
 
     @property
     def _font_str(self) -> str:
         return f"{self._font} {self._font_size} {' '.join(self._font_styles)}".rstrip()
 
-    # def __add__(self, txt):
+    # def __add__(self, text: str) -> Self:
     #     """_Style + str"""
-    #     return self(str(self) + txt)
+    #     return self(str(self) + text)
 
-    # def __radd__(self, txt):
+    # def __radd__(self, text: str) -> Self:
     #     """str + _Style"""
-    #     return self(txt + str(self))
+    #     return self(text + str(self))
 
-    # def __getattribute__(self, name):
+    # def __getattribute__(self, name: str) -> Any:
     #     """check when using any str function"""
     #     attr = super().__getattribute__(name)
     #     # is it a str method ?
     #     if name in dir(str):
 
-    #         def method(*args, **kwargs):
+    #         def method(*args, **kwargs) -> Any:
     #             """keep str methods returned values of type _Style"""
     #             value = attr(*args, **kwargs)
     #             if isinstance(value, str):
