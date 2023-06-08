@@ -46,14 +46,14 @@ class EventLoop:
     def __init__(self) -> None:
         self._tid: Optional[int] = None
 
-    def start(self):
+    def start(self) -> None:
         self._tid = threading.get_native_id()
         msg = MSG()
         while _user32.GetMessageW(ctypes.byref(msg), 0, 0, 0) != 0:
             _user32.TranslateMessageW(msg)
             _user32.DispatchMessageW(msg)
 
-    def stop(self):
+    def stop(self) -> None:
         if self._tid:
             _user32.PostThreadMessageW(self._tid, _WM_QUIT, 0, 0)
 

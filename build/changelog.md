@@ -1,13 +1,13 @@
 ## 1.1.8
-* No auto relaunch when the proxies have been changed. Add a button to do so when needed.
-* Proxies infos window is scrollable when the list is too long.
-* Better looking proxies infos window.
+* No auto relaunch when the proxies have been changed: a relaunch button is showed instead.
+* Proxies window is scrollable when the list is too long.
+* Proxies window mimics _Sfvip Player_ UI.
 * Fix a potential deadlock.
 
 ## 1.1.7
-* _Sfvip All_ logo lives in the top left corner of _Sfvip Player_: 
-    * Mouse hover on it to get the proxies informations.
-    * Pulse color indicate the proxies statuses.
+* _Sfvip All_ lives in the top left corner of _Sfvip Player_: 
+    * Mouse over to show the proxies window.
+    * Pulse color shows the proxies status.
 * A lot of bug fixes.
 
 ## 1.1.6

@@ -4,7 +4,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
-    # reduce what's imported in the 2nd process
+    # reduce what's imported in the proxies process
     import os
     import sys
     from pathlib import Path
@@ -23,7 +23,7 @@ if __name__ == "__main__":
                 log_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
                 for log in log_files[keep:]:
                     try:
-                        log.unlink(missing_ok=False)
+                        log.unlink(missing_ok=True)
                     except PermissionError:
                         pass
 
