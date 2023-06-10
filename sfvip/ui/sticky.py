@@ -1,6 +1,8 @@
 import tkinter as tk
 from typing import NamedTuple, Optional, Self
 
+from winapi import monitors_areas
+
 
 class _Offset(NamedTuple):
     regular: tuple[int, int] = 0, 0
@@ -14,25 +16,29 @@ class Rect(NamedTuple):
     y: float = _default
     w: float = _default
     h: float = _default
+    is_maximized: bool = False
 
     def valid(self) -> bool:
         return all(attr != Rect._default for attr in self)  # pylint: disable=not-an-iterable
 
-    def position(self, offset: _Offset, is_maximized: bool, w: int, h: int) -> Self:
+    def position(self, offset: _Offset, w: int, h: int) -> Self:
         if offset.centered:
             return Rect(self.x + (self.w - w) * 0.5, self.y + (self.h - h) * 0.5, w, h)
-        x, y = offset.maximized if is_maximized else offset.regular
+        x, y = offset.maximized if self.is_maximized else offset.regular
         return Rect(self.x + x, self.y + y, w, h)
 
     def to_geometry(self) -> str:
         return f"{self.w}x{self.h}+{self.x:.0f}+{self.y:.0f}"
+
+    def is_middle_inside(self, rect: Self) -> bool:
+        x, y = self.x + self.w * 0.5, self.y + self.h * 0.5
+        return rect.x <= x <= rect.x + rect.w and rect.y <= y <= rect.y + rect.h
 
 
 class WinState(NamedTuple):
     rect: Rect
     is_minimized: bool
     no_border: bool
-    is_maximized: bool
     is_topmost: bool
 
 
@@ -48,6 +54,7 @@ class _StickyWindow(tk.Toplevel):
         self.overrideredirect(True)
         self._offset = offset
         self._rect: Optional[Rect] = None
+        self._monitor_areas = monitors_areas()
 
         # prevent closing (alt-f4)
         self.protocol("WM_DELETE_WINDOW", lambda: None)
@@ -58,19 +65,29 @@ class _StickyWindow(tk.Toplevel):
                 self.stop_following()
         elif state.rect.valid():
             if state.rect != self._rect:
-                self._change_pos(state)
+                self._on_changed_position(state)
+                self._rect = state.rect
             else:
                 if not self.winfo_ismapped():
                     self.start_following()
-                self._bring_to_front(state)
+                self._on_bring_to_front(state)
 
-    def _change_pos(self, state: WinState) -> None:
+    def _fix_maximized(self, rect: Rect) -> Rect:
+        if rect.is_maximized:
+            # fix possible wrong zoomed coords
+            for area in self._monitor_areas:
+                work_area = Rect(*area.work_area, True)
+                if rect.is_middle_inside(work_area):
+                    return work_area
+        return rect
+
+    def _on_changed_position(self, state: WinState) -> None:
+        rect = self._fix_maximized(state.rect)
         w, h = self.winfo_reqwidth(), self.winfo_reqheight()
-        rect = state.rect.position(self._offset, state.is_maximized, w, h)
+        rect = rect.position(self._offset, w, h)
         self.geometry(rect.to_geometry())
-        self._rect = state.rect
 
-    def _bring_to_front(self, state: WinState) -> None:
+    def _on_bring_to_front(self, state: WinState) -> None:
         self.attributes("-topmost", True)
         if not state.is_topmost:
             self.attributes("-topmost", False)
@@ -86,11 +103,11 @@ class _StickyWindow(tk.Toplevel):
         return _StickyWindow._instances
 
 
-def follow(state: WinState) -> None:
+def follow_all(state: WinState) -> None:
     for sticky in _StickyWindow.instances():
         sticky.follow(state)
 
 
-def stop_following() -> None:
+def stop_following_all() -> None:
     for sticky in _StickyWindow.instances():
         sticky.stop_following()
