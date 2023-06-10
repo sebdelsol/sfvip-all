@@ -14,7 +14,7 @@ class _SplashWindow(_StickyWindow):
 
     def __init__(self, image: tk.PhotoImage) -> None:
         super().__init__(_SplashWindow._offset, bg=_SplashWindow._bg)
-        tk.Label(self, bg=_SplashWindow._bg, image=image).pack(fill="both", expand=True)
+        tk.Label(self, bg=_SplashWindow._bg, image=image).pack()
         self.attributes("-transparentcolor", _SplashWindow._bg)
         set_click_through(self.winfo_id())
         self._fade = _Fade(self)

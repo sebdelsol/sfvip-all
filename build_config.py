@@ -1,3 +1,6 @@
+import sys
+
+
 class Github:
     owner = "sebdelsol"
     repo = "sfvip-all"
@@ -16,3 +19,7 @@ class Build:
         use = "ressources/Sfvip All.png"
         path = "ressources/logo.png"
         size = 28, 28
+
+    class Python:
+        version = sys.version.split(" ", maxsplit=1)[0]
+        bitness = "x64" if sys.maxsize == (2**63) - 1 else "x86"

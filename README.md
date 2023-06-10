@@ -16,9 +16,9 @@ You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threa
 
 **Check the [_Changelog_](build/changelog.md).**
 ## Build
-[![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3114/)
+[![Python](https://img.shields.io/badge/Python-3.11.4-fbdf79)](https://www.python.org/downloads/release/python-3114/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Loc-2158-informational)
+![sloc](https://img.shields.io/badge/Loc-2165-informational)
 
 **Check the [_build config_](build_config.py).**
 ### Create the environment

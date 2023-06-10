@@ -6,7 +6,7 @@ So you can easily **search your entire catalog**.
 
 ## Download the [**Exe**](https://github.com/{github_path}/raw/master/{exe_link}) or [**Zip**](https://github.com/{github_path}/raw/master/{archive_link})
 [![Version](https://img.shields.io/badge/Version-{version}-informational)](https://github.com/{github_path}/raw/master/{exe_link})
-[![Windows](https://img.shields.io/badge/Windows-x64-white)](https://www.microsoft.com/windows/)
+[![Windows](https://img.shields.io/badge/Windows-{py_bitness}-white)](https://www.microsoft.com/windows/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-fbdf79)](https://nuitka.net/)
 
 You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** already installed <sub><sup>_and preferably launched at least once._</sup></sub>  
@@ -16,7 +16,7 @@ You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threa
 
 **Check the [_Changelog_](build/changelog.md).**
 ## Build
-[![Python](https://img.shields.io/badge/Python-3.11-fbdf79)](https://www.python.org/downloads/release/python-3114/)
+[![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 ![sloc](https://img.shields.io/badge/Loc-{loc}-informational)
 

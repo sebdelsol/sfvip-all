@@ -7,6 +7,12 @@ from .style import _Style
 from .widgets import _Button, _ListView, _set_border, _set_vscrollbar_style
 
 
+class AppInfo(NamedTuple):
+    name: str
+    version: str
+    bitness: str
+
+
 class Info(NamedTuple):
     name: str
     proxy: str
@@ -57,8 +63,8 @@ def _get_button_relaunch() -> _Style:
     return _InfoStyle.stl("Click to relaunch... to fix the proxies").no_truncate.white
 
 
-def _get_version(app_name: str, app_version: str) -> _Style:
-    return _InfoStyle.stl(f"{app_name} v{app_version}").smaller(2).grey
+def _get_app_info(app_info: AppInfo) -> _Style:
+    return _InfoStyle.stl(f"{app_info.name} v{app_info.version} {app_info.bitness}").smaller(2).grey
 
 
 def is_valid(info: Info) -> bool:
@@ -75,7 +81,7 @@ class _InfosWindow(_StickyWindow):
     _offset = _Offset(regular=(5, 37), maximized=(3, 35))
     _max_height = 300
 
-    def __init__(self, app_name: str, app_version: str) -> None:
+    def __init__(self, app_info: AppInfo) -> None:
         border = _set_border(**_InfoTheme.border)  # type:ignore
         super().__init__(_InfosWindow._offset, **border, bg=_InfoTheme.bg_headers)
         self.attributes("-alpha", 0.0)
@@ -85,20 +91,20 @@ class _InfosWindow(_StickyWindow):
         hover_frame.pack(fill="both", expand=True)
         self._bind_mouse_hover(hover_frame)
         # create the widgets
-        self._create_widgets(hover_frame, _get_version(app_name, app_version))
-        self._listview.set_headers(_get_infos_headers(app_name))
+        self._create_widgets(hover_frame, _get_app_info(app_info))
+        self._listview.set_headers(_get_infos_headers(app_info.name))
         self._fade = _Fade(self)
 
-    def _create_widgets(self, frame: tk.Frame, version_style: _Style) -> None:
+    def _create_widgets(self, frame: tk.Frame, app_info_style: _Style) -> None:
         pad = _InfoTheme.pad
         _set_vscrollbar_style(**_InfoTheme.listview_scrollbar)
         # widgets
         self._relaunch_button = _Button(frame, **_InfoTheme.button, **_get_button_relaunch().to_tk)
         self._listview = _ListView(frame, **_InfoTheme.listview, pad=pad)
-        version = tk.Label(frame, bg=_InfoTheme.bg_headers, **version_style.to_tk)
+        app_info = tk.Label(frame, bg=_InfoTheme.bg_headers, **app_info_style.to_tk)
         separator = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
-        version.grid(row=0, padx=pad, sticky=tk.W)
+        app_info.grid(row=0, padx=pad, sticky=tk.W)
         self._relaunch_button.grid(row=0, column=1, padx=pad, pady=pad, sticky=tk.EW)
         self._relaunch_button.grid_remove()
         self._listview.grid(row=2, columnspan=2, sticky=tk.NSEW)
