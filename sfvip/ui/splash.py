@@ -14,13 +14,13 @@ class _SplashWindow(_StickyWindow):
 
     def __init__(self, image: tk.PhotoImage) -> None:
         super().__init__(_SplashWindow._offset, bg=_SplashWindow._bg)
-        tk.Label(self, bg=_SplashWindow._bg, image=image).pack()
+        tk.Label(self, bg=_SplashWindow._bg, image=image).pack(fill="both", expand=True)
         self.attributes("-transparentcolor", _SplashWindow._bg)
         set_click_through(self.winfo_id())
         self._fade = _Fade(self)
 
     def show(self, rect: Rect) -> None:
-        self.follow(WinState(rect, False, False, False, True))
+        self.follow(WinState(rect, is_minimized=False, no_border=False, is_topmost=True))
         self.attributes("-alpha", 1.0)
         self.deiconify()
 

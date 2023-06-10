@@ -170,10 +170,9 @@ class WindowWatcher(StartStopContextManager):
     def _on_pos_changed(self, hwnd: winapi.HWND) -> None:
         if self._callback:
             state = WinState(
-                Rect(*winapi.get_rect(hwnd)),
+                Rect(*winapi.get_rect(hwnd), winapi.is_maximized(hwnd)),
                 winapi.is_minimized(hwnd),
                 winapi.has_no_border(hwnd),
-                winapi.is_maximized(hwnd),
                 winapi.is_topmost(hwnd),
             )
             self._callback(state)

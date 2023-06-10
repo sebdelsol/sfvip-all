@@ -89,50 +89,6 @@ class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
         return self._watcher
 
 
-class _PlayerRect(PlayerConfig):
-    """load & save the player's window position"""
-
-    _keys = "Left", "Top", "Width", "Height"
-
-    @property
-    def rect(self) -> Rect:
-        if config := self.load():
-            return Rect(*(config[key] for key in _PlayerRect._keys))
-        return Rect()
-
-    def set(self, rect: Rect) -> None:
-        if rect.valid():
-            if config := self.load():
-                for key, value in zip(_PlayerRect._keys, rect):
-                    config[key] = value
-                self.save(config)
-
-
-class _PlayerWindowWatcher:
-    def __init__(self) -> None:
-        self._rect: Optional[Rect] = None
-        self._watcher: Optional[WindowWatcher] = None
-
-    def _pos_changed(self, state: WinState) -> None:
-        sticky.follow(state)
-        if not (state.is_minimized or state.no_border):
-            self._rect = state.rect
-
-    def start(self, pid: int, name: str) -> None:
-        self._watcher = WindowWatcher(pid, name)
-        self._watcher.set_callback(self._pos_changed)
-        self._watcher.start()
-
-    def stop(self) -> None:
-        if self._watcher:
-            sticky.stop_following()
-            self._watcher.stop()
-
-    @property
-    def rect(self) -> Optional[Rect]:
-        return self._rect
-
-
 class _PlayerPath:
     """find the player exe"""
 
@@ -183,6 +139,56 @@ class _PlayerPath:
                     return player
             if not ui.askretry(message=f"{_PlayerPath._name.capitalize()} not found, try again ?"):
                 return None
+
+
+class _PlayerRect(PlayerConfig):
+    """load & save the player's window position"""
+
+    _maximized = "IsMaximized"
+    _keys = "Left", "Top", "Width", "Height", _maximized
+
+    @property
+    def rect(self) -> Rect:
+        if config := self.load():
+            return Rect(*(config[key] for key in _PlayerRect._keys))
+        return Rect()
+
+    def set(self, rect: Rect) -> None:
+        if rect.valid():
+            if config := self.load():
+                if rect.is_maximized:
+                    # do not write the rect coords
+                    # since it's only meant for non maximized window
+                    config[_PlayerRect._maximized] = True
+                else:
+                    for key, value in zip(_PlayerRect._keys, rect):
+                        config[key] = value
+                self.save(config)
+
+
+class _PlayerWindowWatcher:
+    def __init__(self) -> None:
+        self._rect: Optional[Rect] = None
+        self._watcher: Optional[WindowWatcher] = None
+
+    def _on_position_changed(self, state: WinState) -> None:
+        sticky.follow_all(state)
+        if not (state.is_minimized or state.no_border):
+            self._rect = state.rect
+
+    def start(self, pid: int, name: str) -> None:
+        self._watcher = WindowWatcher(pid, name)
+        self._watcher.set_callback(self._on_position_changed)
+        self._watcher.start()
+
+    def stop(self) -> None:
+        if self._watcher:
+            sticky.stop_following_all()
+            self._watcher.stop()
+
+    @property
+    def rect(self) -> Optional[Rect]:
+        return self._rect
 
 
 class _Launcher:
