@@ -6,9 +6,9 @@ from typing import NamedTuple, Self
 
 
 class _Color(NamedTuple):
-    r: int
-    g: int
-    b: int
+    r: int = 0
+    g: int = 0
+    b: int = 0
 
     @classmethod
     def from_str(cls, color: str) -> Self:
@@ -40,8 +40,8 @@ class _Pulse:
     def __init__(self, widget: tk.Widget) -> None:
         self._after = None
         self._widget = widget
-        self._color1 = _Color.from_str("#000000")
-        self._color2 = _Color.from_str("#000000")
+        self._color1 = _Color()
+        self._color2 = _Color()
         self._two_pi_frequency = 2 * math.pi
         self._lock = threading.Lock()
 

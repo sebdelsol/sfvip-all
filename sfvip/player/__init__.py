@@ -31,7 +31,7 @@ class PlayerLogs:
 
     def get_last(self) -> Optional["PlayerLogs.Log"]:
         """get before last line in the last log file"""
-        logs = [file for file in self._player_dir.iterdir() if file.match("Log-*.txt")]
+        logs = list(self._player_dir.glob("Log-*.txt"))
         if logs:
             logs.sort(key=lambda f: f.stat().st_mtime, reverse=True)
             log = logs[0]
@@ -141,27 +141,28 @@ class _PlayerPath:
                 return None
 
 
-class _PlayerRect(PlayerConfig):
+class _PlayerRectLoader(PlayerConfig):
     """load & save the player's window position"""
 
-    _maximized = "IsMaximized"
-    _keys = "Left", "Top", "Width", "Height", _maximized
+    _maximized_key = "IsMaximized"
+    _keys = "Left", "Top", "Width", "Height", _maximized_key
 
     @property
     def rect(self) -> Rect:
         if config := self.load():
-            return Rect(*(config[key] for key in _PlayerRect._keys))
+            return Rect(*(config[key] for key in _PlayerRectLoader._keys))
         return Rect()
 
-    def set(self, rect: Rect) -> None:
+    @rect.setter
+    def rect(self, rect: Rect) -> None:
         if rect.valid():
             if config := self.load():
                 if rect.is_maximized:
                     # do not write the rect coords
                     # since it's only meant for non maximized window
-                    config[_PlayerRect._maximized] = True
+                    config[_PlayerRectLoader._maximized_key] = True
                 else:
-                    for key, value in zip(_PlayerRect._keys, rect):
+                    for key, value in zip(_PlayerRectLoader._keys, rect):
                         config[key] = value
                 self.save(config)
 
@@ -222,7 +223,7 @@ class Player:
         self.path = _PlayerPath(player_path, ui).path
         self.logs = PlayerLogs(self.path)
         self._window_watcher = _PlayerWindowWatcher()
-        self._rect: Optional[_PlayerRect] = None
+        self._rect_loader: Optional[_PlayerRectLoader] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._process_lock = threading.Lock()
         self._launcher = _Launcher()
@@ -230,28 +231,28 @@ class Player:
     def want_to_launch(self) -> bool:
         launch = self._launcher.want_to_launch()
         if launch:
-            self._rect = _PlayerRect()
+            self._rect_loader = _PlayerRectLoader()
         return launch
 
     @property
     def rect(self) -> Rect:
         if self._launcher.rect:
             return self._launcher.rect
-        assert self._rect is not None
-        return self._rect.rect
+        assert self._rect_loader is not None
+        return self._rect_loader.rect
 
     @contextmanager
     def run(self) -> Iterator[None]:
         assert self.path is not None
-        assert self._rect is not None
+        assert self._rect_loader is not None
 
         set_rect_lock = None
-        if self._rect and self._launcher.rect:
+        if self._launcher.rect:
             # prevent another instance of sfvip to run
             # before the player position has been set
             set_rect_lock = SystemWideMutex("set player rect lock")
             set_rect_lock.acquire()
-            self._rect.set(self._launcher.rect)
+            self._rect_loader.rect = self._launcher.rect
 
         with _PlayerLogSetting().watch(self.relaunch):
             with _PlayerConfigDirSetting().watch(self.relaunch):

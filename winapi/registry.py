@@ -4,6 +4,8 @@ import threading
 from ctypes.wintypes import BOOL, DWORD, HANDLE, HKEY, LONG, LPCWSTR, LPVOID
 from typing import Iterator, Self
 
+from .mutex import _CloseHandle, _WaitForSingleObject
+
 _kernel32 = ctypes.windll.kernel32
 
 _RegNotifyChangeKeyValue = ctypes.windll.advapi32.RegNotifyChangeKeyValue
@@ -13,14 +15,6 @@ _RegNotifyChangeKeyValue.argtypes = [HKEY, BOOL, DWORD, HANDLE, BOOL]
 _CreateEvent = _kernel32.CreateEventW
 _CreateEvent.restype = BOOL
 _CreateEvent.argtypes = [LPVOID, BOOL, BOOL, LPCWSTR]
-
-_CloseHandle = _kernel32.CloseHandle
-_CloseHandle.restype = BOOL
-_CloseHandle.argtypes = [HANDLE]
-
-_WaitForSingleObject = _kernel32.WaitForSingleObject
-_WaitForSingleObject.restype = DWORD
-_WaitForSingleObject.argtypes = [HANDLE, DWORD]
 
 
 _REG_NOTIFY_CHANGE_LAST_SET = 0x00000004

@@ -10,8 +10,6 @@ from PIL import Image
 
 from build_config import Build, Github
 
-# import re
-
 # pylint: disable=invalid-name
 parser = argparse.ArgumentParser()
 parser.add_argument("--nobuild", "--readme", action="store_true", help="update readme and post only")
@@ -70,8 +68,10 @@ loc = subprocess.run(
     check=False,
     capture_output=True,
 )
-
 template_format = dict(
+    py_version_compact=Build.Python.version.replace(".", ""),
+    py_version=Build.Python.version,
+    py_bitness=Build.Python.bitness,
     github_path=f"{Github.owner}/{Github.repo}",
     archive_link=quote(f"{dist_name}.zip"),
     exe_link=quote(f"{dist_name}.exe"),

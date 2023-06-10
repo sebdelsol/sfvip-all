@@ -3,7 +3,7 @@ from typing import Optional, Self
 from urllib.parse import urlparse, urlsplit, urlunsplit
 
 from mitm_proxy import MitmLocalProxy, Mode, validate_upstream
-from mitm_proxy.sfvip_addon import AllCategory, SfVipAddOn
+from mitm_proxy.addon import AllCategory, SfVipAddOn
 
 
 def _find_port(excluded_ports: set[int]) -> int:
@@ -37,6 +37,8 @@ def _fix_upstream(url: str) -> Optional[str]:
 class LocalProxies:
     """start a local proxy for each upstream proxies (no upstream proxy count as one)"""
 
+    _localhost = "http://127.0.0.1"
+
     def __init__(self, all_category: AllCategory, upstreams: set[str]) -> None:
         self._all_category = all_category
         self._upstreams = upstreams
@@ -57,7 +59,7 @@ class LocalProxies:
                     port = _find_port(excluded_ports)
                     excluded_ports.add(port)
                     modes.add(Mode(port=port, upstream=upstream_fixed))
-                    self._by_upstreams[upstream] = f"http://127.0.0.1:{port}"
+                    self._by_upstreams[upstream] = f"{LocalProxies._localhost}:{port}"
             if modes:
                 self._mitm_proxy = MitmLocalProxy(SfVipAddOn(self._all_category), modes)
                 self._mitm_proxy.start()

@@ -88,15 +88,15 @@ class _Style(str):
         return f"{self._font} {self._font_size} {' '.join(self._font_styles)}".rstrip()
 
     # def __add__(self, text: str) -> Self:
-    #     """_Style + str"""
+    #     """needed for _Style + str"""
     #     return self(str(self) + text)
 
     # def __radd__(self, text: str) -> Self:
-    #     """str + _Style"""
+    #     """needed for str + _Style"""
     #     return self(text + str(self))
 
     # def __getattribute__(self, name: str) -> Any:
-    #     """check when using any str function"""
+    #     """needed when using any regular str function"""
     #     attr = super().__getattribute__(name)
     #     # is it a str method ?
     #     if name in dir(str):

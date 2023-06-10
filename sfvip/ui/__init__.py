@@ -4,7 +4,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox
 from typing import Any, Callable, Optional
 
-from .infos import Info, _InfosWindow
+from .infos import AppInfo, Info, _InfosWindow
 from .logo import _LogoWindow
 from .splash import _SplashWindow
 from .sticky import Rect, WinState
@@ -13,15 +13,15 @@ from .sticky import Rect, WinState
 class UI(tk.Tk):
     """basic UI with a tk mainloop, the app has to run in a thread"""
 
-    def __init__(self, app_name: str, app_version: str, splash_path: Path, logo_path: Path) -> None:
+    def __init__(self, app_info: AppInfo, splash_path: Path, logo_path: Path) -> None:
         super().__init__()
         self.withdraw()  # we rely on some _StickyWindow instead
         self._splash_img = tk.PhotoImage(file=splash_path)  # keep a reference for tk
         self.wm_iconphoto(True, self._splash_img)
         self.splash = _SplashWindow(self._splash_img)
-        self._infos = _InfosWindow(app_name, app_version)
+        self._infos = _InfosWindow(app_info)
         self._logo = _LogoWindow(logo_path, self._infos)
-        self._app_name = app_name
+        self._app_name = app_info.name
 
     def run_in_thread(
         self, catch_exception: type[Exception], target: Callable[..., None], *args: Any, **kwargs: Any

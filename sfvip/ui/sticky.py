@@ -55,7 +55,6 @@ class _StickyWindow(tk.Toplevel):
         self._offset = offset
         self._rect: Optional[Rect] = None
         self._monitor_areas = monitors_areas()
-
         # prevent closing (alt-f4)
         self.protocol("WM_DELETE_WINDOW", lambda: None)
 
