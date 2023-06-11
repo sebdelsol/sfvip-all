@@ -33,9 +33,9 @@ class _InfoTheme:
 class _InfoStyle:
     stl = _Style().font("Calibri").font_size(12).max_width(30)
     arrow = stl("➞").color("#707070").bigger(5)
-    upstream = stl.color("#A0A0A0")
-    proxy = stl.white
-    name = upstream
+    upstream = stl.copy().color("#A0A0A0")
+    proxy = stl.copy().white
+    name = upstream.copy()
     blank = stl("")
 
 

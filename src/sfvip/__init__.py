@@ -11,6 +11,8 @@ from .ui import UI, AppInfo
 
 logger = logging.getLogger(__name__)
 
+print("import")
+
 
 def remove_old_exe_logs(app_name: str, keep: int) -> None:
     # launched as an exe build by nuitka ?

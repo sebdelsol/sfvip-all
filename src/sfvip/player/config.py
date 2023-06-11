@@ -5,8 +5,7 @@ from functools import cache
 from pathlib import Path
 from typing import IO, Any, Callable, Optional, Self
 
-from winapi import SystemWideMutex
-
+from ...winapi import mutex
 from ..registry import Registry
 from ..retry import retry_if_exception
 from ..watchers import FileWatcher, RegistryWatcher
@@ -31,8 +30,8 @@ class _PlayerConfigDir:
 
     @classmethod
     @cache
-    def lock_for(cls, filename: str) -> SystemWideMutex:
-        return SystemWideMutex(f"file lock for {_PlayerConfigDir.path() / filename}")
+    def lock_for(cls, filename: str) -> mutex.SystemWideMutex:
+        return mutex.SystemWideMutex(f"file lock for {_PlayerConfigDir.path() / filename}")
 
     @classmethod
     @cache

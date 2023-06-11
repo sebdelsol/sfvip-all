@@ -10,9 +10,7 @@ from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 from watchdog.observers.api import BaseObserver
 
-import winapi
-from winapi import wait_for_registry_change
-
+from ..winapi import hook, rect, registry, win
 from .ui import Rect, WinState
 
 logger = logging.getLogger(__name__)
@@ -140,7 +138,7 @@ class RegistryWatcher(StartStopContextManager):
     def _wait_for_change(self) -> None:
         with winreg.OpenKey(self._key.hkey, self._key.path) as key:
             current_value, _ = winreg.QueryValueEx(key, self._key.name)
-            for change in wait_for_registry_change(key.handle, RegistryWatcher._timeout_ms, self._running):  # type: ignore
+            for change in registry.wait_for_registry_change(key.handle, RegistryWatcher._timeout_ms, self._running):  # type: ignore
                 if change:
                     value, _ = winreg.QueryValueEx(key, self._key.name)
                     if value != current_value:
@@ -163,22 +161,22 @@ class WindowWatcher(StartStopContextManager):
         self._pid = pid
         self._name = name
         self._init_done = threading.Event()
-        self._event_loop = winapi.EventLoop()
+        self._event_loop = hook.EventLoop()
         self._thread: Optional[threading.Thread] = None
         self._callback: Optional[_CallbackWindowWatcher] = None
 
-    def _on_pos_changed(self, hwnd: winapi.HWND) -> None:
+    def _on_pos_changed(self, hwnd: hook.HWND) -> None:
         if self._callback:
             state = WinState(
-                Rect(*winapi.get_rect(hwnd), winapi.is_maximized(hwnd)),
-                winapi.is_minimized(hwnd),
-                winapi.has_no_border(hwnd),
-                winapi.is_topmost(hwnd),
+                Rect(*rect.get_rect(hwnd), win.is_maximized(hwnd)),
+                win.is_minimized(hwnd),
+                win.has_no_border(hwnd),
+                win.is_topmost(hwnd),
             )
             self._callback(state)
 
     def _hook(self) -> None:
-        with winapi.Hook(self._pid, self._on_pos_changed):
+        with hook.Hook(self._pid, self._on_pos_changed):
             # we're good to go now
             self._init_done.set()
             # we need an event loop to make the hook working

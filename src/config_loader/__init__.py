@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import IO, Any, Iterator, Self, cast, get_type_hints
 
-from winapi import SystemWideMutex
+from ..winapi import mutex
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class ConfigLoader:
 
     def __init__(self, path: Path) -> None:
         self._path = path
-        self._file_lock = SystemWideMutex(f"file lock for {path}")
+        self._file_lock = mutex.SystemWideMutex(f"file lock for {path}")
         # turn all config nested classes into SimpleNamespace instance attributes
         self._to_simplenamespace(self, self.__class__.__dict__)
 

@@ -1,7 +1,7 @@
 import tkinter as tk
 from typing import NamedTuple, Optional, Self
 
-from winapi import monitors_areas
+from ...winapi import monitor
 
 
 class _Offset(NamedTuple):
@@ -54,7 +54,7 @@ class _StickyWindow(tk.Toplevel):
         self.overrideredirect(True)
         self._offset = offset
         self._rect: Optional[Rect] = None
-        self._monitor_areas = monitors_areas()
+        self._monitor_areas = monitor.monitors_areas()
         # prevent closing (alt-f4)
         self.protocol("WM_DELETE_WINDOW", lambda: None)
 

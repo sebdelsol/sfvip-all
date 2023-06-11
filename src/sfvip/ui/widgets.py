@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, Collection
-
-from pyparsing import Sequence
+from typing import Any, Collection, Sequence
 
 from .style import _Style
 

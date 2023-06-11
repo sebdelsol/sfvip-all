@@ -8,8 +8,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Callable, Iterator, NamedTuple, Optional
 
-from winapi import SystemWideMutex
-
+from ...winapi import mutex
 from ..registry import Registry
 from ..ui import UI, Rect, WinState, sticky
 from ..watchers import FileWatcher, RegistryWatcher, WindowWatcher
@@ -250,7 +249,7 @@ class Player:
         if self._launcher.rect:
             # prevent another instance of sfvip to run
             # before the player position has been set
-            set_rect_lock = SystemWideMutex("set player rect lock")
+            set_rect_lock = mutex.SystemWideMutex("set player rect lock")
             set_rect_lock.acquire()
             self._rect_loader.rect = self._launcher.rect
 

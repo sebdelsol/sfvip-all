@@ -1,4 +1,4 @@
-from typing import Any, Self
+from typing import Any, Optional, Self
 
 
 class _Style(str):
@@ -24,8 +24,11 @@ class _Style(str):
         self._max_width = None
 
     def __call__(self, text: str) -> Self:
-        """return a COPY with a new text"""
-        a_copy = _Style(text)
+        return self.copy(text)
+
+    def copy(self, text: Optional[str] = None) -> Self:
+        a_copy = _Style(str(self) if text is None else text)
+        # pylint: disable=protected-access
         a_copy._fg = self._fg
         a_copy._font = self._font
         a_copy._font_size = self._font_size
@@ -33,41 +36,42 @@ class _Style(str):
         a_copy._max_width = self._max_width
         return a_copy
 
-    def _update(self, name: str, value: Any) -> Self:
-        """return a modified COPY"""
-        a_copy = self(str(self))
-        setattr(a_copy, name, value)
-        return a_copy
-
     @property
     def no_truncate(self) -> Self:
-        return self._update("_max_width", None)
+        self._max_width = None
+        return self
 
     def max_width(self, max_width: int) -> Self:
-        return self._update("_max_width", max_width)
+        self._max_width = max_width
+        return self
 
     def font(self, font: str) -> Self:
-        return self._update("_font", font)
+        self._font = font
+        return self
 
     def font_size(self, font_size: int) -> Self:
-        return self._update("_font_size", font_size)
+        self._font_size = font_size
+        return self
 
     def bigger(self, dsize: int) -> Self:
-        return self._update("_font_size", self._font_size + dsize)
+        self._font_size = self._font_size + dsize
+        return self
 
     def smaller(self, dsize: int) -> Self:
-        return self._update("_font_size", max(1, self._font_size - dsize))
+        self._font_size = max(1, self._font_size - dsize)
+        return self
 
     def color(self, color: str) -> Self:
-        return self._update("_fg", color)
+        self._fg = color
+        return self
 
     def __getattr__(self, name: str) -> Self:
         """style or color"""
         if name in _Style._known_font_styles:
             self._font_styles.add(name)
-            return self._update("_font_styles", self._font_styles)
-        if not name.startswith("_"):
-            return self._update("_fg", name.replace("_", " "))
+            self._font_styles = self._font_styles
+        elif not name.startswith("_"):
+            self._fg = name.replace("_", " ")
         return self
 
     @property
