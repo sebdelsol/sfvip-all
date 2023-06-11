@@ -1,2 +1,0 @@
-class PlayerError(Exception):
-    pass

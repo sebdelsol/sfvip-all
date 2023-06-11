@@ -1,4 +1,4 @@
-from config_loader import ConfigLoader
+from src.config_loader import ConfigLoader
 
 
 # pylint: disable=invalid-name

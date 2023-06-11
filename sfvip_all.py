@@ -9,8 +9,8 @@ if __name__ == "__main__":
     from pathlib import Path
 
     from build_config import Build
-    from sfvip import AppInfo, remove_old_exe_logs, run_app
     from sfvip_all_config import DefaultAppConfig
+    from src.sfvip import AppInfo, remove_old_exe_logs, run_app
 
     logger.info("main process started")
     # use a different config json filename than sfvip player just in case
