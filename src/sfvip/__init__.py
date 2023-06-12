@@ -11,8 +11,6 @@ from .ui import UI, AppInfo
 
 logger = logging.getLogger(__name__)
 
-print("import")
-
 
 def remove_old_exe_logs(app_name: str, keep: int) -> None:
     # launched as an exe build by nuitka ?
@@ -53,4 +51,5 @@ def run_app(config: DefaultAppConfig, app_info: AppInfo, splash: Path, logo: Pat
         ui.run_in_thread(PlayerError, run)
 
     except PlayerError as err:
-        ui.showinfo(f"{err}.\nPlease launch Sfvip Player at least once !")
+        ui.showinfo(f"{err}\nPlease launch Sfvip Player at least once !")
+        logger.warning(str(err))

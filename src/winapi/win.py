@@ -11,12 +11,28 @@ _WS_EX_WINDOWEDGE = 0x00000100
 _WS_EX_TOPMOST = 0x00000008
 
 
+try:
+    _GetWindowLong = _user32.GetWindowLongPtrW
+    _SetWindowLong = _user32.SetWindowLongPtrW
+except AttributeError:
+    _GetWindowLong = _user32.GetWindowLongA
+    _SetWindowLong = _user32.SetWindowLongA
+
+
 def _get_window_exstyle(hwnd: HWND) -> int:
-    return _user32.GetWindowLongPtrW(hwnd, _GWL_EXSTYLE)
+    return _GetWindowLong(hwnd, _GWL_EXSTYLE)
 
 
 def _set_window_exstyle(hwnd: HWND, exstyle: int) -> None:
-    _user32.SetWindowLongPtrW(hwnd, _GWL_EXSTYLE, exstyle)
+    _SetWindowLong(hwnd, _GWL_EXSTYLE, exstyle)
+
+
+def is_visible(hwnd: HWND) -> bool:
+    return _user32.IsWindowVisible(hwnd) == 1
+
+
+def is_enabled(hwnd: HWND) -> bool:
+    return _user32.IsWindowEnabled(hwnd) == 1
 
 
 def is_minimized(hwnd: HWND) -> bool:
@@ -25,6 +41,10 @@ def is_minimized(hwnd: HWND) -> bool:
 
 def is_maximized(hwnd: HWND) -> bool:
     return _user32.IsZoomed(hwnd) == 1
+
+
+def is_foreground(hwnd: HWND) -> bool:
+    return _user32.GetForegroundWindow() == hwnd
 
 
 def has_no_border(hwnd: HWND) -> bool:

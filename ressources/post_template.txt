@@ -1,6 +1,6 @@
 [B][SIZE=20px]{name}[/B][/SIZE] {version}
 [SIZE=10px][I]Pretražite ceo katalog / Search your whole catalog[/I][/SIZE]
 [HR][/HR]
-[URL='https://github.com/{github_path}/raw/master/{exe_link}'][B]Exe[/B][/URL] - [URL='https://github.com/{github_path}/raw/master/{archive_link}'][B]Zip[/B][/URL] - [URL='https://github.com/{github_path}/blob/master/build/changelog.md'][B]Changelog[/B][/URL] - [URL='https://github.com/{github_path}'][B]Github[/B][/URL]  
+[URL='https://github.com/{github_path}/raw/master/{exe64_link}'][B]x64[/B][/URL] - [URL='https://github.com/{github_path}/raw/master/{exe32_link}'][B]x86[/B][/URL] - [URL='https://github.com/{github_path}/blob/master/build/changelog.md'][B]Changelog[/B][/URL] - [URL='https://github.com/{github_path}'][B]Github[/B][/URL]  
 [HR][/HR]
 [SIZE=10px][I]Dodajte ⭐ ako vam odgovara / Add a ⭐ if you like it[/I][/SIZE]

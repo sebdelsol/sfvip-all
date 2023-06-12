@@ -1,3 +1,7 @@
+## 1.1.9
+* Builds for _x64_ and _x86_.
+* Minor bug fixes.
+
 ## 1.1.8
 * No auto relaunch when the proxies have been changed: a relaunch button is showed instead.
 * Proxies window is scrollable when the list is too long.
@@ -44,4 +48,4 @@
 * _Svip Player_ proxies are restored ASAP.
 
 ## 1.0
-* Find and wraps _Sfvip Player_ with a proxy to add an _All_ category in _vod_ and _series_.
+* Find and wraps _Sfvip Player_ with a local proxy to add an _All_ category in _vod_ and _series_.

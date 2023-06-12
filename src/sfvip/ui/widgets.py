@@ -132,7 +132,7 @@ class _ListView(tk.Frame):
         self,
         master: tk.BaseWidget,
         bg_headers: str,
-        bg_row: str,
+        bg_rows: str,
         bg_separator: str,
         pad: int,
     ) -> None:
@@ -145,12 +145,12 @@ class _ListView(tk.Frame):
         sep.pack(fill="both", expand=True)
         # rows
         frame_rows = tk.Frame(self)
-        canvas = _VscrollCanvas(frame_rows, bg=bg_separator)
+        canvas = _VscrollCanvas(frame_rows, bg=bg_rows)
         self._frame_rows = canvas.frame
         frame_rows.pack(fill="both", expand=True)
         # for use later
         self._bg_headers = bg_headers
-        self._bg_row = bg_row
+        self._bg_rows = bg_rows
         self._bg_separator = bg_separator
         self._pad = pad
         self._widths = []
@@ -178,13 +178,15 @@ class _ListView(tk.Frame):
         for row, row_content in enumerate(rows):
             assert len(row_content) == n_column
             for column, text in enumerate(row_content):
-                label = tk.Label(self._frame_rows, bg=self._bg_row, **text.to_tk)
+                label = tk.Label(self._frame_rows, bg=self._bg_rows, **text.to_tk)
                 label.grid(row=row * 2, column=column, ipadx=pad, ipady=pad, sticky=tk.NSEW)
                 self._widths[column] = max(label.winfo_reqwidth() + pad * 2, self._widths[column])
                 # row separator
                 if row != len(rows) - 1:
                     sep = tk.Frame(self._frame_rows, bg=self._bg_separator)
                     sep.grid(row=row * 2 + 1, column=0, columnspan=n_column, sticky=tk.EW)
+        if not rows:
+            self._frame_rows.config(height=1)
         self.set_column_widths()
 
     def set_column_widths(self) -> None:

@@ -3,6 +3,8 @@ import threading
 from ctypes.wintypes import BOOL, DWORD, HWND, LONG, LPARAM, LPDWORD, MSG
 from typing import Callable, Optional
 
+from .win import is_enabled, is_foreground, is_visible
+
 _user32 = ctypes.windll.user32
 
 
@@ -14,23 +16,15 @@ _GetWindowThreadProcessId = _user32.GetWindowThreadProcessId
 _GetWindowThreadProcessId.argtypes = HWND, LPDWORD
 _GetWindowThreadProcessId.restype = DWORD
 
-_IsWindowVisible = _user32.IsWindowVisible
-_IsWindowVisible.argtypes = [HWND]
-_IsWindowVisible.restype = BOOL
-
-_IsWindowEnabled = _user32.IsWindowEnabled
-_IsWindowEnabled.argtypes = [HWND]
-_IsWindowEnabled.restype = BOOL
-
 
 def _get_hwnd_from_pid(pid: int) -> Optional[HWND]:
     hwnds: list[HWND] = []
-    lpdw_process_id = ctypes.c_ulong()
+    process_id = DWORD()
 
     def callback(hwnd: HWND, _) -> bool:
-        if _IsWindowVisible(hwnd) and _IsWindowEnabled(hwnd):
-            _GetWindowThreadProcessId(hwnd, ctypes.byref(lpdw_process_id))
-            if lpdw_process_id.value == pid:
+        if is_visible(hwnd) and is_enabled(hwnd):
+            _GetWindowThreadProcessId(hwnd, ctypes.byref(process_id))
+            if process_id.value == pid:
                 hwnds.append(hwnd)
                 return False  # stop iteration
         return True
@@ -47,21 +41,22 @@ class EventLoop:
         self._tid: Optional[int] = None
 
     def start(self) -> None:
-        self._tid = threading.get_native_id()
-        msg = MSG()
-        while _user32.GetMessageW(ctypes.byref(msg), 0, 0, 0) != 0:
-            _user32.TranslateMessageW(msg)
-            _user32.DispatchMessageW(msg)
+        if self._tid is None:
+            self._tid = threading.get_native_id()
+            msg = MSG()
+            while _user32.GetMessageW(ctypes.byref(msg), 0, 0, 0) != 0:
+                _user32.TranslateMessageW(msg)
+                _user32.DispatchMessageW(msg)
 
     def stop(self) -> None:
-        if self._tid:
+        if self._tid is not None:
             _user32.PostThreadMessageW(self._tid, _WM_QUIT, 0, 0)
 
 
 _WINEVENT_OUTOFCONTEXT = 0x0000
-_HWINEVENTHOOK = ctypes.c_int64
 _SetWinEventHook = _user32.SetWinEventHook
-_WinEventProcType = ctypes.WINFUNCTYPE(None, ctypes.c_int64, DWORD, HWND, LONG, LONG, DWORD, DWORD)
+_HWINEVENTHOOK = ctypes.c_int64
+_WinEventProcType = ctypes.WINFUNCTYPE(None, _HWINEVENTHOOK, DWORD, HWND, LONG, LONG, DWORD, DWORD)
 _user32.SetWinEventHook.restype = _HWINEVENTHOOK
 _UnhookWinEvent = _user32.UnhookWinEvent
 
@@ -73,9 +68,17 @@ _EVENT_OBJECT_SHOW = 0x8002
 
 class Hook:
     """
-    catch window movement, resize and change of z order
+    catch window movement, resize and z order change
     Note: need an event loop to work
     """
+
+    _location_event = _EVENT_OBJECT_LOCATIONCHANGE
+    _hooked_events = (
+        _location_event,
+        _EVENT_SYSTEM_FOREGROUND,
+        _EVENT_OBJECT_REORDER,
+        _EVENT_OBJECT_SHOW,
+    )
 
     def __init__(self, pid: int, event_callback: Callable[[HWND], None]) -> None:
         self._hooks: list[_HWINEVENTHOOK] = []
@@ -87,31 +90,24 @@ class Hook:
     # pylint: disable=unused-argument, too-many-arguments
     def _handle_event(self, event_hook, event, hwnd, id_object, id_child, event_thread, event_time) -> None:
         # try to reject as mush as we can
-        if (
-            hwnd  # None hwnd comes from mouse & caret events
-            and hwnd == self._main_hwnd
-            # we are not interested in child windows location changes
-            or event != _EVENT_OBJECT_LOCATIONCHANGE
-        ):
+        # None hwnd comes from mouse & caret events
+        # we are not interested in child windows location changes
+        if hwnd and hwnd == self._main_hwnd or event != Hook._location_event:
             if self._main_hwnd is None:
                 self._main_hwnd = _get_hwnd_from_pid(self._pid)
-            if self._main_hwnd:
-                self._event_callback(self._main_hwnd)
+            if hwnd := self._main_hwnd:
+                if is_foreground(hwnd) and is_visible(hwnd) and is_enabled(hwnd):
+                    self._event_callback(hwnd)
 
-    def _add_hook(self, event: int) -> None:
+    def _set_hook(self, event: int) -> _HWINEVENTHOOK:
         """hook for only ONE event"""
-        hook = _SetWinEventHook(event, event, 0, self._event_proc, self._pid, 0, _WINEVENT_OUTOFCONTEXT)
-        self._hooks.append(hook)
+        return _SetWinEventHook(event, event, 0, self._event_proc, self._pid, 0, _WINEVENT_OUTOFCONTEXT)
 
     def __enter__(self) -> None:
-        # several hooks with only one event to reduce uneeded and costly hook
-        for event in (
-            _EVENT_SYSTEM_FOREGROUND,
-            _EVENT_OBJECT_LOCATIONCHANGE,
-            _EVENT_OBJECT_SHOW,
-            _EVENT_OBJECT_REORDER,
-        ):
-            self._add_hook(event)
+        # several hooks with only one event to reduce uneeded and costly hook trigger
+        for event in Hook._hooked_events:
+            hook = self._set_hook(event)
+            self._hooks.append(hook)
 
     def __exit__(self, *_) -> None:
         for hook in self._hooks:
