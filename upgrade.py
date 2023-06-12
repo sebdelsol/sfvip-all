@@ -2,30 +2,11 @@ import json
 import msvcrt
 import os
 import subprocess
-import sys
 from pathlib import Path
-from typing import Callable, Iterable, Iterator, NamedTuple, Optional, Protocol, cast
+from typing import Callable, Iterable, Iterator, NamedTuple, Optional, cast
 
-from colorama import Fore, Style, just_fix_windows_console
-
-just_fix_windows_console()
-
-
-class Stl:
-    class ToStyle(Protocol):  # to handle hint for the callable default paramater
-        def __call__(self, txt: str = "") -> str:
-            ...
-
-    @staticmethod
-    def _use_style(style: str) -> ToStyle:
-        return lambda txt="": f"{style}{txt}{Style.RESET_ALL}" if txt else style
-
-    _use_style = _use_style.__func__
-
-    title = _use_style(Fore.GREEN + Style.BRIGHT)
-    warn = _use_style(Fore.RED + Style.BRIGHT)
-    high = _use_style(Fore.YELLOW)
-    low = _use_style(Fore.CYAN)
+from build_config import Build
+from color import Stl
 
 
 class Pckg(NamedTuple):
@@ -47,12 +28,28 @@ def line_clear() -> None:
 
 
 class Upgrader:
-    pip_install = sys.executable, "-m", "pip", "install", "-U", "--require-virtualenv"
+    pip_install = "-m", "pip", "install", "-U", "--require-virtualenv"
 
-    @staticmethod
-    def _install(*options: str) -> None:
+    def __init__(self, python_exe: Path) -> None:
+        if python_exe.exists():
+            self.python_exe = str(python_exe.resolve())
+            env = python_exe.parent.parent
+            print()
+            print(
+                Stl.title("Environment: "),
+                Stl.low(str(env.parent.resolve())),
+                Stl.low("\\"),
+                Stl.high(str(env.name)),
+                sep="",
+            )
+        else:
+            print(Stl.warn("No Python found:"), Stl.high(str(str(python_exe.resolve()))))
+            self.python_exe = None
+
+    def _install(self, *options: str) -> None:
+        assert self.python_exe
         with subprocess.Popen(
-            [*Upgrader.pip_install, *options],
+            [self.python_exe, *Upgrader.pip_install, *options],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             bufsize=0,
@@ -109,6 +106,8 @@ class Upgrader:
         return n
 
     def install_for(self, *req_files: str) -> None:
+        if not self.python_exe:
+            return
         # flush the input buffer
         while msvcrt.kbhit():
             msvcrt.getch()
@@ -143,8 +142,8 @@ class Upgrader:
                 self._install(pckg.url or pckg.name)
                 to_upgrade.remove(pckg)
 
-        print(Stl.warn("Exit"))
-
 
 if __name__ == "__main__":
-    Upgrader().install_for("requirements.txt", "requirements.dev.txt")
+    for environment in Build.Environment.x64, Build.Environment.x86:
+        python_executable = Path(environment) / "scripts" / "python.exe"
+        Upgrader(python_executable).install_for("requirements.txt", "requirements.dev.txt")

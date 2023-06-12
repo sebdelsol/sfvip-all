@@ -13,12 +13,11 @@ if __name__ == "__main__":
     from src.sfvip import AppInfo, remove_old_exe_logs, run_app
 
     logger.info("main process started")
-    # use a different config json filename than sfvip player just in case
-    config_json = Path(os.environ["APPDATA"]) / Build.name / "Config All.json"
+    config_path = Path(os.environ["APPDATA"]) / Build.name / "Config All.json"
     main_dir = Path(__file__).parent
     run_app(
-        DefaultAppConfig(config_json),
-        AppInfo(Build.name, Build.version, Build.Python.bitness),
+        DefaultAppConfig(config_path),
+        AppInfo(Build.name, Build.version, Build.Python.is_64bit, Build.System.is_64bit),
         main_dir / Build.splash,
         main_dir / Build.Logo.path,
     )

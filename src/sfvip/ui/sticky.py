@@ -87,8 +87,10 @@ class _StickyWindow(tk.Toplevel):
         self.geometry(rect.to_geometry())
 
     def _on_bring_to_front(self, state: WinState) -> None:
-        self.attributes("-topmost", True)
-        if not state.is_topmost:
+        if state.is_topmost:
+            self.attributes("-topmost", True)
+        else:
+            self.attributes("-topmost", True)
             self.attributes("-topmost", False)
 
     def stop_following(self) -> None:

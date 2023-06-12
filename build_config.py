@@ -1,3 +1,4 @@
+import platform
 import sys
 
 
@@ -12,8 +13,12 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.1.8"
+    version = "1.1.9"
     dir = "build"
+
+    class Environment:
+        x86 = ".sfvip32"
+        x64 = ".sfvip"
 
     class Logo:
         use = "ressources/Sfvip All.png"
@@ -22,4 +27,7 @@ class Build:
 
     class Python:
         version = sys.version.split(" ", maxsplit=1)[0]
-        bitness = "x64" if sys.maxsize == (2**63) - 1 else "x86"
+        is_64bit = sys.maxsize == (2**63) - 1
+
+    class System:
+        is_64bit = platform.machine().endswith("64")

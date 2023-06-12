@@ -4,7 +4,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox
 from typing import Any, Callable, Optional
 
-from .infos import AppInfo, Info, _InfosWindow
+from .infos import AppInfo, Info, _InfosWindow, get_bitness_str
 from .logo import _LogoWindow
 from .splash import _SplashWindow
 from .sticky import Rect, WinState
@@ -21,7 +21,7 @@ class UI(tk.Tk):
         self.splash = _SplashWindow(self._splash_img)
         self._infos = _InfosWindow(app_info)
         self._logo = _LogoWindow(logo_path, self._infos)
-        self._app_name = app_info.name
+        self._title = f"{app_info.name} v{app_info.version} {get_bitness_str(app_info.app_64bit)}"
 
     def run_in_thread(
         self, catch_exception: type[Exception], target: Callable[..., None], *args: Any, **kwargs: Any
@@ -62,11 +62,11 @@ class UI(tk.Tk):
         self._logo.set_pulse(ok=ok)
 
     def showinfo(self, message: str) -> None:
-        messagebox.showinfo(self._app_name, message=message)
+        messagebox.showinfo(self._title, message=message)
 
     def find_file(self, name: str, pattern: str) -> str:
-        title = f"{self._app_name}: Find {name}"
+        title = f"{self._title}: Find {name}"
         return filedialog.askopenfilename(title=title, filetypes=[(name, pattern)])
 
     def askretry(self, message: str) -> bool:
-        return messagebox.askretrycancel(self._app_name, message=message)
+        return messagebox.askretrycancel(self._title, message=message)

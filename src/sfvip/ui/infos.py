@@ -10,7 +10,12 @@ from .widgets import _Button, _ListView, _set_border, _set_vscrollbar_style
 class AppInfo(NamedTuple):
     name: str
     version: str
-    bitness: str
+    app_64bit: bool
+    os_64bit: bool
+
+
+def get_bitness_str(is_64bit: bool) -> str:
+    return "x64" if is_64bit else "x86"
 
 
 class Info(NamedTuple):
@@ -26,7 +31,7 @@ class _InfoTheme:
     separator = "#303030"
     border = dict(bg="#808080", size=1)
     button = dict(bg="#1F1E1D", mouseover="#3F3F41", bd_color="white", bd_size=0.75, bd_relief="groove")
-    listview = dict(bg_headers=bg_headers, bg_row=bg_rows, bg_separator=separator)
+    listview = dict(bg_headers=bg_headers, bg_rows=bg_rows, bg_separator=separator)
     listview_scrollbar = dict(bg=bg_rows, slider="white", active_slider="grey")
 
 
@@ -37,6 +42,8 @@ class _InfoStyle:
     proxy = stl.copy().white
     name = upstream.copy()
     blank = stl("")
+    app_warn = stl.copy().smaller(2).no_truncate.red
+    app = stl.copy().smaller(2)
 
 
 def _get_infos_headers(app_name: str) -> tuple[_Style, ...]:
@@ -51,8 +58,8 @@ def _get_infos_headers(app_name: str) -> tuple[_Style, ...]:
 
 def _get_row(info: Info) -> tuple[_Style, ...]:
     return (
-        _InfoStyle.name(info.name),
-        _InfoStyle.arrow,
+        _InfoStyle.name(info.name) if info.name else _InfoStyle.name("-").grey,
+        _InfoStyle.arrow if info.name else _InfoStyle.blank,
         _InfoStyle.proxy(info.proxy) if info.proxy else _InfoStyle.stl("No Proxy").red,
         _InfoStyle.arrow if info.upstream else _InfoStyle.blank,
         _InfoStyle.upstream(info.upstream) if info.upstream else _InfoStyle.stl("-").grey,
@@ -64,7 +71,16 @@ def _get_button_relaunch() -> _Style:
 
 
 def _get_app_info(app_info: AppInfo) -> _Style:
-    return _InfoStyle.stl(f"{app_info.name} v{app_info.version} {app_info.bitness}").smaller(2).grey
+    bitness = get_bitness_str(app_info.app_64bit)
+    return _InfoStyle.app(f"{app_info.name} v{app_info.version} {bitness}").grey
+
+
+def _get_app_warn(app_info: AppInfo) -> _Style:
+    if app_info.app_64bit != app_info.os_64bit:
+        warn = f"You should use the {get_bitness_str(app_info.os_64bit)} version!"
+    else:
+        warn = ""
+    return _InfoStyle.app_warn(warn)
 
 
 def is_valid(info: Info) -> bool:
@@ -91,25 +107,27 @@ class _InfosWindow(_StickyWindow):
         hover_frame.pack(fill="both", expand=True)
         self._bind_mouse_hover(hover_frame)
         # create the widgets
-        self._create_widgets(hover_frame, _get_app_info(app_info))
+        self._create_widgets(hover_frame, _get_app_info(app_info), _get_app_warn(app_info))
         self._listview.set_headers(_get_infos_headers(app_info.name))
         self._fade = _Fade(self)
 
-    def _create_widgets(self, frame: tk.Frame, app_info_style: _Style) -> None:
+    def _create_widgets(self, frame: tk.Frame, app_info: _Style, app_warn: _Style) -> None:
         pad = _InfoTheme.pad
         _set_vscrollbar_style(**_InfoTheme.listview_scrollbar)
         # widgets
         self._relaunch_button = _Button(frame, **_InfoTheme.button, **_get_button_relaunch().to_tk)
         self._listview = _ListView(frame, **_InfoTheme.listview, pad=pad)
-        app_info = tk.Label(frame, bg=_InfoTheme.bg_headers, **app_info_style.to_tk)
+        app_info_label = tk.Label(frame, bg=_InfoTheme.bg_headers, **app_info.to_tk)
+        app_warn_label = tk.Label(frame, bg=_InfoTheme.bg_headers, **app_warn.to_tk)
         separator = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
-        app_info.grid(row=0, padx=pad, sticky=tk.W)
-        self._relaunch_button.grid(row=0, column=1, padx=pad, pady=pad, sticky=tk.EW)
+        app_info_label.grid(row=0, padx=pad, sticky=tk.W)
+        app_warn_label.grid(row=0, column=1, padx=pad, sticky=tk.W)
+        self._relaunch_button.grid(row=0, column=2, padx=pad, pady=pad, sticky=tk.EW)
         self._relaunch_button.grid_remove()
-        self._listview.grid(row=2, columnspan=2, sticky=tk.NSEW)
-        separator.grid(row=1, columnspan=2, sticky=tk.EW)
-        frame.columnconfigure(1, weight=1)
+        self._listview.grid(row=2, columnspan=3, sticky=tk.NSEW)
+        separator.grid(row=1, columnspan=3, sticky=tk.EW)
+        frame.columnconfigure(2, weight=1)
         frame.rowconfigure(2, weight=1)
 
     def _set_relaunch(self, player_relaunch: Callable[[], None]) -> None:
@@ -133,6 +151,8 @@ class _InfosWindow(_StickyWindow):
 
     def set(self, infos: list[Info], player_relaunch: Optional[Callable[[], None]]) -> bool:
         rows = [_get_row(info) for info in infos]
+        if not rows:
+            rows = [_get_row(Info("", "-", ""))]
         self._listview.set_rows(rows)
         # add relaunch if not valid
         valid = _are_infos_valid(infos)

@@ -102,7 +102,7 @@ def _info_restore(account: _Account, proxies: dict[str, str]) -> Info:
 class Accounts:
     """modify & restore accounts proxies"""
 
-    _edited_account_log = "Edit User Account"
+    _edited_account_msg = "Edit User", "Remove User"
 
     def __init__(self, player_logs: PlayerLogs) -> None:
         self._database = _Database()
@@ -133,12 +133,13 @@ class Accounts:
     def _set_proxies(self, proxies: dict[str, str], msg: str) -> None:
         with self._database.lock:
             self._database.load()
-            for account in self._accounts_to_set:
-                if account.HttpProxy in proxies:
-                    proxy = proxies[account.HttpProxy]
-                    logger.info("%s '%s' proxy: %s", msg, account.Name, f"'{account.HttpProxy}' -> '{proxy}'")
-                    account.HttpProxy = proxy
-            self._database.save()
+            if self._database.accounts:
+                for account in self._accounts_to_set:
+                    if account.HttpProxy in proxies:
+                        proxy = proxies[account.HttpProxy]
+                        logger.info("%s '%s' proxy: %s", msg, account.Name, f"'{account.HttpProxy}' -> '{proxy}'")
+                        account.HttpProxy = proxy
+                self._database.save()
 
     @contextmanager
     def set_proxies(self, proxies: dict[str, str], ui: UI) -> Iterator[Callable[[Callable[[], None]], None]]:
@@ -146,18 +147,17 @@ class Accounts:
         self._set_ui_infos(proxies, _info_set, ui)
         self._set_proxies(proxies, "set")
         restore_proxies = {v: k for k, v in proxies.items()}
-        # known_proxies = sum(proxies.items(), ())
 
         def on_modified(last_modified: float, player_relaunch: Callable[[], None]) -> None:
-            if log := self._player_logs.get_last():
-                # an account has been changed by the user ?
-                if log.timestamp > last_modified and Accounts._edited_account_log in log.msg:
-                    logger.info("accounts proxies file has been modified")
-                    # upstreams = self.upstreams  # saved for checking new proxies
-                    self._set_ui_infos(restore_proxies, _info_restore, ui, player_relaunch)
-                    self._set_proxies(restore_proxies, "restore")
-                    # if not upstreams.issubset(known_proxies):  # new proxies ?
-                    #     player_relaunch()
+            self._set_ui_infos(restore_proxies, _info_restore, ui, player_relaunch)
+            # an account has been changed by the user ? prevent recursion
+            if (
+                (log := self._player_logs.get_last())
+                and log.timestamp > last_modified
+                and any(s in log.msg for s in Accounts._edited_account_msg)
+            ):
+                logger.info("accounts proxies file has been modified")
+                self._set_proxies(restore_proxies, "restore")
 
         def restore_after_being_read(player_relaunch: Callable[[], None]) -> None:
             self._database.wait_being_read()
