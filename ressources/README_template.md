@@ -43,11 +43,11 @@ python -m sfvip_all
 ```
 ### Build with ***Mingw64*** <sub><sup>the easiest option</sup></sub>
 ```console
-python -m build
+python -m build --mingw
 ```
 ### Build with ***Clang*** <sub><sup>the recommended option</sup></sub>
 ```console
-python -m build --clang
+python -m build
 ```
 You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](ressources/.vsconfig):
 
@@ -55,7 +55,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 ### Build an ***x86*** version
 Create another [***environment***](#Create-the-environment) with a ***32bit Python*** version:  
-It should be called ***.sfvip32*** or you have to set [***`Build.Environment.x86`***](build_config.py#L20) appropriately.  
+It should be called ***.sfvip32*** or you have to set [***`Build.Environment.x86`***](build_config.py#L17) appropriately.  
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy.  
 ```console
 rustup target add i686-pc-windows-msvc

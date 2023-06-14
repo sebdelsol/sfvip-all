@@ -6,7 +6,7 @@ just_fix_windows_console()
 
 
 class Stl:
-    class ToStyle(Protocol):  # to handle hint for the callable default paramater
+    class ToStyle(Protocol):  # to handle hint for the callable default parameter
         def __call__(self, txt: str = "") -> str:
             ...
 
