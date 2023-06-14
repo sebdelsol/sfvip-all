@@ -2,7 +2,7 @@ import logging
 import sys
 from pathlib import Path
 
-from sfvip_all_config import DefaultAppConfig
+from sfvip_all_config import AppConfig
 
 from .accounts import Accounts
 from .player import Player, PlayerError
@@ -28,7 +28,7 @@ def remove_old_exe_logs(app_name: str, keep: int) -> None:
                     pass
 
 
-def run_app(config: DefaultAppConfig, app_info: AppInfo, splash: Path, logo: Path) -> None:
+def run_app(config: AppConfig, app_info: AppInfo, splash: Path, logo: Path) -> None:
     config.update()
     ui = UI(app_info, splash, logo)
 
