@@ -102,8 +102,6 @@ def _info_restore(account: _Account, proxies: dict[str, str]) -> Info:
 class Accounts:
     """modify & restore accounts proxies"""
 
-    _edited_account_msg = "Edit User", "Remove User"
-
     def __init__(self, player_logs: PlayerLogs) -> None:
         self._database = _Database()
         self._player_logs = player_logs
@@ -149,15 +147,13 @@ class Accounts:
         restore_proxies = {v: k for k, v in proxies.items()}
 
         def on_modified(last_modified: float, player_relaunch: Callable[[], None]) -> None:
-            self._set_ui_infos(restore_proxies, _info_restore, ui, player_relaunch)
-            # an account has been changed by the user ? prevent recursion
-            if (
-                (log := self._player_logs.get_last())
-                and log.timestamp > last_modified
-                and any(s in log.msg for s in Accounts._edited_account_msg)
-            ):
+            # an account has been changed externaly ? prevent recursion
+            if (log := self._player_logs.get_last()) and log.timestamp > last_modified:
                 logger.info("accounts proxies file has been modified")
                 self._set_proxies(restore_proxies, "restore")
+                self._set_ui_infos(proxies, _info_set, ui, player_relaunch)
+            else:
+                self._set_ui_infos(restore_proxies, _info_restore, ui, player_relaunch)
 
         def restore_after_being_read(player_relaunch: Callable[[], None]) -> None:
             self._database.wait_being_read()
