@@ -42,7 +42,10 @@ class PythonEnv:
 
     def print(self) -> None:
         print(
+            Stl.title("In "),
             Stl.high(get_bitness_str(self.is_64bit)),
+            Stl.title(" Python "),
+            Stl.high(self.version),
             Stl.title(" environment "),
             Stl.low(str(self._env.parent.resolve())),
             Stl.low("\\"),

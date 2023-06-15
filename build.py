@@ -1,11 +1,7 @@
-from build_config import Build, Github
-from builder import Builder, Template, create_logo, get_args
+from build_config import Build, Environments, Github, Logo, Splash
+from builder import Builder, Datas, Templates
 
 if __name__ == "__main__":
-    args = get_args()
-    builder = Builder(args, Build)
-    builder.build_all()
-    template = Template(Build, Github)
-    template.create_readme()
-    template.create_post()
-    create_logo(Build.Logo)
+    datas = Datas(Logo, Splash)
+    Builder(Build, Environments, datas).build_all()
+    Templates(Build, Environments, Github).create_all()

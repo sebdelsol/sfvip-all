@@ -158,6 +158,8 @@ class _InfosWindow(_StickyWindow):
         valid = _are_infos_valid(infos)
         if not valid and player_relaunch:
             self._set_relaunch(player_relaunch)
+        else:
+            self._relaunch_button.grid_remove()
         # enable resizing
         self.geometry("")
         return valid
