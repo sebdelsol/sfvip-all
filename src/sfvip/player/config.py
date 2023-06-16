@@ -80,7 +80,7 @@ class PlayerConfigDirFile(type(Path())):
     def get_watcher(self) -> FileWatcher:
         return _PlayerConfigDir.watcher_for(self._filename)
 
-    @retry_if_exception(json.decoder.JSONDecodeError, PermissionError, timeout=1)
+    @retry_if_exception(json.JSONDecodeError, PermissionError, timeout=1)
     def open_and_do(self, mode: str, do: Callable[[IO[str]], None]) -> Any:
         if self.is_file():
             with self._lock:

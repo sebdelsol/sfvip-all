@@ -94,7 +94,7 @@ def _are_infos_valid(infos: list[Info]) -> bool:
 class _InfosWindow(_StickyWindow):
     """installed proxies infos"""
 
-    _offset = _Offset(regular=(5, 37), maximized=(3, 35))
+    _offset = _Offset(regular=(-36, 36), maximized=(2, 35))
     _max_height = 300
 
     def __init__(self, app_info: AppInfo) -> None:

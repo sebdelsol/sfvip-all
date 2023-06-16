@@ -60,15 +60,15 @@ class _StickyWindow(tk.Toplevel):
 
     def follow(self, state: WinState) -> None:
         if state.no_border or state.is_minimized:
-            if self.winfo_ismapped():
-                self.stop_following()
+            if self.state() == "normal":
+                self.withdraw()
         elif state.rect.valid():
             if state.rect != self._rect:
                 self._on_changed_position(state)
                 self._rect = state.rect
             else:
-                if not self.winfo_ismapped():
-                    self.start_following()
+                if self.state() != "normal":
+                    self.deiconify()
                 self._on_bring_to_front(state)
 
     def _fix_maximized(self, rect: Rect) -> Rect:
@@ -93,12 +93,6 @@ class _StickyWindow(tk.Toplevel):
             self.attributes("-topmost", True)
             self.attributes("-topmost", False)
 
-    def stop_following(self) -> None:
-        self.withdraw()
-
-    def start_following(self) -> None:
-        self.deiconify()
-
     @staticmethod
     def instances() -> list["_StickyWindow"]:
         return _StickyWindow._instances
@@ -109,6 +103,6 @@ def follow_all(state: WinState) -> None:
         sticky.follow(state)
 
 
-def stop_following_all() -> None:
+def hide_all() -> None:
     for sticky in _StickyWindow.instances():
-        sticky.stop_following()
+        sticky.withdraw()

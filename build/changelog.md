@@ -1,3 +1,9 @@
+## 1.2.0
+* Proxies are correctly restored when several _Sfvip All_ are running concurrently.
+* No longer restart when _Sfvip Player_ Logging setting is switched off.
+* Fix _Sfvip Player_ bug when several Users have the same name.
+* Minor bug fixes.
+
 ## 1.1.9
 * Builds for _x64_ and _x86_.
 * Minor bug fixes.
@@ -16,7 +22,7 @@
 
 ## 1.1.6
 * Enforce _Sfvip Player_ logging setting to stay on for proper change detection.
-* _All_ category added in _live_ for older version of _sfvip player_.
+* _All_ category added in _live_ for older version of _Sfvip Player_.
 * Handle change of _Config Location_ in _Sfvip Player_ settings.
 * Player position is preserved when a relaunch occurs.
 * _Logs_ are to be found in the _Exe_ directory.

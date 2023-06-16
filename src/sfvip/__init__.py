@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -28,7 +29,9 @@ def remove_old_exe_logs(app_name: str, keep: int) -> None:
                     pass
 
 
-def run_app(config: AppConfig, app_info: AppInfo, splash: Path, logo: Path) -> None:
+def run_app(app_info: AppInfo, splash: Path, logo: Path) -> None:
+    app_roaming = Path(os.environ["APPDATA"]) / app_info.name
+    config = AppConfig(app_roaming / "Config All.json")
     config.update()
     ui = UI(app_info, splash, logo)
 
@@ -41,7 +44,7 @@ def run_app(config: AppConfig, app_info: AppInfo, splash: Path, logo: Path) -> N
         def run() -> None:
             while player.want_to_launch():
                 ui.splash.show(player.rect)
-                accounts = Accounts(player.logs)
+                accounts = Accounts(app_roaming)
                 with LocalProxies(config.all_category, accounts.upstreams) as proxies:
                     with accounts.set_proxies(proxies.by_upstreams, ui) as restore_accounts_proxies:
                         with player.run():
