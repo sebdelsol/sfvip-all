@@ -18,62 +18,6 @@ from .exception import PlayerError
 logger = logging.getLogger(__name__)
 
 
-class PlayerLogs:
-    """get player last log"""
-
-    class Log(NamedTuple):
-        timestamp: float
-        msg: str
-
-    def __init__(self, player_path: str) -> None:
-        self._player_dir = Path(player_path).parent
-
-    def get_last(self) -> Optional["PlayerLogs.Log"]:
-        """get before last line in the last log file"""
-        logs = list(self._player_dir.glob("Log-*.txt"))
-        if logs:
-            logs.sort(key=lambda f: f.stat().st_mtime, reverse=True)
-            log = logs[0]
-            with log.open("r") as f:
-                lines = f.readlines()
-            if len(lines) >= 2:
-                return PlayerLogs.Log(log.stat().st_mtime, lines[-2])
-        return None
-
-
-class _PlayerLogSetting(PlayerConfig):
-    """force player logging, watch for a change"""
-
-    _key = "IsLogging"
-
-    def __init__(self) -> None:
-        super().__init__()
-        with self._lock:
-            if config := self.load():
-                if config.get(_PlayerLogSetting._key) is False:
-                    logger.info("Force player logging setting to on")
-                    config[_PlayerLogSetting._key] = True
-                    self.save(config)
-
-    def _is_off(self) -> bool:
-        with self._lock:
-            if config := self.load():
-                return config.get(_PlayerLogSetting._key) is False
-        return False
-
-    def _on_modified(self, _, player_relaunch: Callable[[], None]) -> None:
-        # do not modify the config file
-        # to avoid other sfvip instance to miss the change
-        if self._is_off():
-            logger.info("Player logging setting has been switched off")
-            player_relaunch()
-
-    def watch(self, player_relaunch: Callable[[], None]) -> FileWatcher:
-        watcher = self.get_watcher()
-        watcher.add_callback(self._on_modified, player_relaunch)
-        return watcher
-
-
 class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
     """watch for a change of the player config dir setting"""
 
@@ -183,7 +127,7 @@ class _PlayerWindowWatcher:
 
     def stop(self) -> None:
         if self._watcher:
-            sticky.stop_following_all()
+            sticky.hide_all()
             self._watcher.stop()
 
     @property
@@ -220,7 +164,6 @@ class Player:
 
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
         self.path = _PlayerPath(player_path, ui).path
-        self.logs = PlayerLogs(self.path)
         self._window_watcher = _PlayerWindowWatcher()
         self._rect_loader: Optional[_PlayerRectLoader] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
@@ -253,20 +196,19 @@ class Player:
             set_rect_lock.acquire()
             self._rect_loader.rect = self._launcher.rect
 
-        with _PlayerLogSetting().watch(self.relaunch):
-            with _PlayerConfigDirSetting().watch(self.relaunch):
-                with subprocess.Popen([self.path]) as self._process:
-                    logger.info("player started")
-                    self._window_watcher.start(self._process.pid, self.path)
-                    if set_rect_lock:
-                        # give time to the player to read its config
-                        time.sleep(0.5)
-                        set_rect_lock.release()
-                    yield
-                with self._process_lock:
-                    self._process = None
-                logger.info("player stopped")
-                self._window_watcher.stop()
+        with _PlayerConfigDirSetting().watch(self.relaunch):
+            with subprocess.Popen([self.path]) as self._process:
+                logger.info("player started")
+                self._window_watcher.start(self._process.pid, self.path)
+                if set_rect_lock:
+                    # give time to the player to read its config
+                    time.sleep(0.5)
+                    set_rect_lock.release()
+                yield
+            with self._process_lock:
+                self._process = None
+            logger.info("player stopped")
+            self._window_watcher.stop()
 
     def stop(self) -> bool:
         with self._process_lock:

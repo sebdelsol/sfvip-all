@@ -15,7 +15,7 @@ You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threa
 <sub>_**Sfvip All.exe** will ask you for network connection its first run because it relies on local proxies to do its magic._</sub>  
 <sub>_On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._</sub>
 
-Check the [***Changelog***](build/changelog.md).
+Check the [***changelog***](build/changelog.md).
 
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)

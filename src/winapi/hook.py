@@ -64,6 +64,7 @@ _EVENT_OBJECT_LOCATIONCHANGE = 0x800B
 _EVENT_SYSTEM_FOREGROUND = 0x0003
 _EVENT_OBJECT_REORDER = 0x8004
 _EVENT_OBJECT_SHOW = 0x8002
+_OBJID_CLIENT = -4
 
 
 class Hook:
@@ -83,21 +84,21 @@ class Hook:
     def __init__(self, pid: int, event_callback: Callable[[HWND], None]) -> None:
         self._hooks: list[_HWINEVENTHOOK] = []
         self._event_proc = _WinEventProcType(self._handle_event)  # keep a refernce
-        self._main_hwnd: Optional[HWND] = None
+        self._hwnd: Optional[HWND] = None
         self._event_callback = event_callback
         self._pid = pid
 
     # pylint: disable=unused-argument, too-many-arguments
     def _handle_event(self, event_hook, event, hwnd, id_object, id_child, event_thread, event_time) -> None:
+        if self._hwnd is None:
+            self._hwnd = _get_hwnd_from_pid(self._pid)
         # try to reject as mush as we can
         # None hwnd comes from mouse & caret events
         # we are not interested in child windows location changes
-        if hwnd and hwnd == self._main_hwnd or event != Hook._location_event:
-            if self._main_hwnd is None:
-                self._main_hwnd = _get_hwnd_from_pid(self._pid)
-            if hwnd := self._main_hwnd:
-                if is_foreground(hwnd) and is_visible(hwnd) and is_enabled(hwnd):
-                    self._event_callback(hwnd)
+        if hwnd and hwnd == self._hwnd or event != Hook._location_event:
+            if self._hwnd and is_visible(self._hwnd) and is_enabled(self._hwnd):
+                if is_foreground(self._hwnd) or is_foreground(hwnd) or id_object == _OBJID_CLIENT:
+                    self._event_callback(self._hwnd)
 
     def _set_hook(self, event: int) -> _HWINEVENTHOOK:
         """hook for only ONE event"""

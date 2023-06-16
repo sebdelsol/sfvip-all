@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Iterator, Protocol
 from urllib.parse import quote
 
-from PIL import Image  # pylint: disable=import-outside-toplevel
+from PIL import Image
 
 from build_config import Build, Environments, Github
 
@@ -128,6 +128,8 @@ class Builder:
         if self.onefile:
             print(Stl.title("Create"), Stl.high(f"{dist_name}.exe"))
             shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
+        else:
+            print(Stl.warn("Warning:"), Stl.high(f"{dist_name}.exe"), Stl.warn("not created !"))
 
     def build_all(self) -> None:
         for is_64 in self.builds_bitness:
@@ -148,7 +150,7 @@ class Builder:
         # missing versions
         for missing in set((True, False)) - set(self.builds_bitness):
             dist_name = _get_dist_name(self.build, missing)
-            print(Stl.warn("Warning:"), Stl.high(dist_name), Stl.warn("Not updated !"))
+            print(Stl.warn("Warning:"), Stl.high(dist_name), Stl.warn("not updated !"))
 
 
 def _get_loc() -> int:

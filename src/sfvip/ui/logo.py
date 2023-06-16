@@ -1,5 +1,6 @@
 import tkinter as tk
 from pathlib import Path
+from typing import Callable
 
 from .fx import _Pulse
 from .infos import _InfosWindow
@@ -8,14 +9,14 @@ from .sticky import _Offset, _StickyWindow
 
 class _LogoTheme:
     bg = "#242424"
-    pulse_warn = _Pulse.Args(bg, "#990000", frequency=1)
-    pulse_ok = _Pulse.Args(bg, "#006000", frequency=0.33)
+    pulse_warn = _Pulse.Args("#000000", "#900000", frequency=1)
+    pulse_ok = _Pulse.Args("#000000", "#009000", frequency=0.33)
 
 
 class _LogoWindow(_StickyWindow):
-    """logo, mouse hover to show infos"""
+    """logo, mouse hover to show infos, pulse color show status"""
 
-    _offset = _Offset(regular=(2, 2), maximized=(0, 0))
+    _offset = _Offset(regular=(-36, 0), maximized=(0, 0))
 
     def __init__(self, logo_path: Path, infos: _InfosWindow) -> None:
         super().__init__(_LogoWindow._offset, takefocus=0)
@@ -23,18 +24,19 @@ class _LogoWindow(_StickyWindow):
         self._image = tk.PhotoImage(file=logo_path)  # keep a reference for tkinter
         logo = tk.Label(self, bg=_LogoTheme.pulse_ok.color1, image=self._image, takefocus=0)
         logo.pack()
-        self.bind("<Enter>", lambda _: self._infos.show())
-        self.bind("<Leave>", lambda _: self._infos.hide())
         self._pulse = _Pulse(logo)
         self.set_pulse(ok=True)
+        self._bind_event("<Map>", self._pulse.start)
+        self._bind_event("<Unmap>", self._pulse.stop)
+        self._bind_event("<Enter>", self._infos.show)
+        self._bind_event("<Leave>", self._infos.hide)
+
+    def _bind_event(self, event_name: str, do: Callable[[], None]) -> None:
+        def on_event(event: tk.Event) -> None:
+            if event.widget == self:
+                do()
+
+        self.bind(event_name, on_event)
 
     def set_pulse(self, ok: bool) -> None:
         self._pulse.set(*(_LogoTheme.pulse_ok if ok else _LogoTheme.pulse_warn))
-
-    def start_following(self) -> None:
-        super().start_following()
-        self._pulse.start()
-
-    def stop_following(self) -> None:
-        super().stop_following()
-        self._pulse.stop()

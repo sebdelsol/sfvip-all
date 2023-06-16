@@ -79,7 +79,7 @@ class _VscrollCanvas(tk.Canvas):
         w, h = self.frame.winfo_reqwidth(), self.frame.winfo_reqheight()
         self.config(scrollregion=(0, 0, w, h), width=w, height=h)
 
-    def _on_mousewheel(self, event) -> None:
+    def _on_mousewheel(self, event: tk.Event) -> None:
         self.yview_scroll(int(-1 * (event.delta / 12)), "units")
 
 

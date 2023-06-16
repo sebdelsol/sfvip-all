@@ -1,6 +1,5 @@
 import logging
 import threading
-import time
 import winreg
 from abc import abstractmethod
 from pathlib import Path
@@ -47,30 +46,25 @@ class _CallbackFileWatcher(NamedTuple):
 
 
 class FileWatcher(StartStopContextManager):
-    _debounce_s = 0.1
+    # _debounce_s = 0.1
 
     def __init__(self, path: Optional[Path]) -> None:
         self._observer: Optional[BaseObserver] = None
         self._callbacks: set[_CallbackFileWatcher] = set()
         self._path: Optional[Path] = path if path and path.is_file() else None
-        self._last_modified: float = float("inf")
 
     def _on_modified(self, event: FileSystemEvent) -> None:
         assert self._path
         if event.src_path == str(self._path):
-            # debounce
-            if time.time() > self._last_modified + FileWatcher._debounce_s:
-                logger.info("watched file %s modified", self._path)
-                for callback in self._callbacks:
-                    callback(self._last_modified)
-            self._last_modified = self._path.stat().st_mtime
+            logger.info("watched file %s modified", self._path)
+            for callback in self._callbacks:
+                callback(self._path.stat().st_mtime)
 
     def add_callback(self, callback: _CallbackFileWatcher._CallbackFunc, *args: Any) -> None:
         self._callbacks.add(_CallbackFileWatcher(callback, args))
 
     def start(self) -> None:
         if self._path:
-            self._last_modified = self._path.stat().st_mtime
             self._observer = Observer()
             event_handler = FileSystemEventHandler()
             event_handler.on_modified = self._on_modified

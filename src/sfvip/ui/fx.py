@@ -35,7 +35,7 @@ class _Pulse:
         color2: str
         frequency: float
 
-    _pulse_dt_ms: int = 100  # reduce load
+    _pulse_dt_ms: int = 50  # reduce load
 
     def __init__(self, widget: tk.Widget) -> None:
         self._after = None
