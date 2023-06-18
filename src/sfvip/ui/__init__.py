@@ -57,7 +57,7 @@ class UI(tk.Tk):
         self.mainloop()
         thread.join()
 
-    def set_infos(self, infos: list[Info], player_relaunch: Optional[Callable[[], None]]) -> None:
+    def set_infos(self, infos: list[Info], player_relaunch: Optional[Callable[[], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)
         self._logo.set_pulse(ok=ok)
 

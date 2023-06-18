@@ -16,7 +16,7 @@ class SharedProxiesToRestore(dict):
     def __init__(self, app_roaming: Path) -> None:
         self._path = app_roaming / "ProxiesToRestore.json"
         self._lock = mutex.SystemWideMutex(f"file lock for {self._path}")
-        logger.info("Shared Proxies to restore : %s", self._path)
+        logger.info("shared proxies to restore : %s", self._path)
         super().__init__()
 
     @retry_if_exception(json.JSONDecodeError, PermissionError, FileNotFoundError, TypeError, timeout=1)
@@ -57,10 +57,10 @@ class SharedProxiesToRestore(dict):
 class SharedEventTime:
     """time of an event shared by all instances of the app"""
 
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, name: str) -> None:
         self._path = path
         self._lock = mutex.SystemWideMutex(f"file lock for {self._path}")
-        logger.info("Shared Event Time : %s", self._path)
+        logger.info("shared %s event: %s", name, self._path)
 
     def set(self) -> None:
         with self._lock:

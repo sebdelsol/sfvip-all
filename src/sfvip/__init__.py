@@ -5,7 +5,7 @@ from pathlib import Path
 
 from sfvip_all_config import AppConfig
 
-from .accounts import Accounts
+from .accounts import AccountsProxies
 from .player import Player, PlayerError
 from .proxies import LocalProxies
 from .ui import UI, AppInfo
@@ -44,9 +44,9 @@ def run_app(app_info: AppInfo, splash: Path, logo: Path) -> None:
         def run() -> None:
             while player.want_to_launch():
                 ui.splash.show(player.rect)
-                accounts = Accounts(app_roaming)
-                with LocalProxies(config.all_category, accounts.upstreams) as proxies:
-                    with accounts.set_proxies(proxies.by_upstreams, ui) as restore_accounts_proxies:
+                accounts_proxies = AccountsProxies(app_roaming, ui)
+                with LocalProxies(config.all_category, accounts_proxies.upstreams) as local_proxies:
+                    with accounts_proxies.set(local_proxies.by_upstreams) as restore_accounts_proxies:
                         with player.run():
                             restore_accounts_proxies(player.relaunch)
                             ui.splash.hide(fade_duration_ms=1000, wait_ms=1000)
