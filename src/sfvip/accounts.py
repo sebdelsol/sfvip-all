@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
@@ -11,6 +12,24 @@ from .shared import SharedEventTime, SharedProxiesToRestore
 from .ui import UI, Info
 
 logger = logging.getLogger(__name__)
+
+
+class _JsonTrailingCommas:
+    _object = re.compile(r'(,)\s*}(?=([^"\\]*(\\.|"([^"\\]*\\.)*[^"\\]*"))*[^"]*$)')
+    _array = re.compile(r'(,)\s*\](?=([^"\\]*(\\.|"([^"\\]*\\.)*[^"\\]*"))*[^"]*$)')
+
+    @staticmethod
+    def remove(json_str: str) -> str:
+        json_str = _JsonTrailingCommas._object.sub("}", json_str)
+        return _JsonTrailingCommas._array.sub("]", json_str)
+
+
+class _UniqueNames(dict):
+    def unique(self, name: str) -> str:
+        n = self[name] = self.setdefault(name, 0) + 1
+        if n > 1:
+            return self.unique(f"{name}{n}")
+        return name
 
 
 class _Account(SimpleNamespace):
@@ -30,7 +49,7 @@ class _Account(SimpleNamespace):
         return path.suffix in _Account._playlist_ext or path.is_file()
 
 
-class _AccountList(list[_Account]):
+class _Accounts(list[_Account]):
     """list of Accounts with json load & dump"""
 
     class _Encoder(json.JSONEncoder):
@@ -39,10 +58,11 @@ class _AccountList(list[_Account]):
 
     def load(self, f: IO[str]) -> None:
         self.clear()
-        self.extend(json.load(f, object_hook=lambda dct: _Account(**dct)))
+        json_str = _JsonTrailingCommas.remove(f.read())
+        self.extend(json.loads(json_str, object_hook=lambda dct: _Account(**dct)))
 
     def dump(self, f: IO[str]) -> None:
-        json.dump(self, f, cls=_AccountList._Encoder, indent=2, separators=(",", ":"))
+        json.dump(self, f, cls=_Accounts._Encoder, indent=2, separators=(",", ":"))
 
 
 class _Database:
@@ -52,10 +72,10 @@ class _Database:
         pass
 
     def __init__(self, app_roaming: Path) -> None:
-        self._shared_self_modified = SharedEventTime(app_roaming / "DatabaseModified")
+        self._shared_self_modified = SharedEventTime(app_roaming / "DatabaseModified", "database modified")
         self._database = PlayerDatabase()
         self._accessed_by_me = self._atime
-        self.accounts = _AccountList()
+        self.accounts = _Accounts()
         self.lock = self._database._lock
         self.watcher = self._database.get_watcher()
         if self._database.is_file():
@@ -86,22 +106,16 @@ class _Database:
 
     @property
     def shared_self_modified_time(self):
+        # time when any instance have internally modified the database
         return self._shared_self_modified.time
 
 
-class _UniqueNames(dict):
-    def unique(self, name: str) -> str:
-        n = self[name] = self.setdefault(name, 0) + 1
-        if n > 1:
-            return self.unique(f"{name}{n}")
-        return name
-
-
-class Accounts:
+class AccountsProxies:
     """set & restore accounts proxies"""
 
-    def __init__(self, app_roaming: Path) -> None:
-        self._proxies_to_restore = SharedProxiesToRestore(app_roaming)
+    def __init__(self, app_roaming: Path, ui: UI) -> None:
+        self._ui = ui
+        self._app_roaming = app_roaming
         self._database = _Database(app_roaming)
         # need to lock the database till the proxies have been restored
         self._database.lock.acquire()
@@ -112,18 +126,9 @@ class Accounts:
         return {account.HttpProxy for account in self._accounts_to_set}
 
     @property
-    def _accounts_to_set(self) -> _AccountList:
+    def _accounts_to_set(self) -> _Accounts:
         """don't handle m3u playlists"""
-        return _AccountList(account for account in self._database.accounts if not account.is_playlist())
-
-    def _set_info(
-        self, proxies: dict[str, str], ui: UI, player_relaunch: Optional[Callable[[], None]] = None
-    ) -> None:
-        self._database.load()
-        infos = []
-        for account in self._accounts_to_set:
-            infos.append(Info(account.Name, proxies.get(account.HttpProxy, ""), account.HttpProxy))
-        ui.set_infos(infos, player_relaunch)
+        return _Accounts(account for account in self._database.accounts if not account.is_playlist())
 
     def _set_proxies(self, proxies: dict[str, str], msg: str) -> None:
         names = _UniqueNames()
@@ -136,34 +141,49 @@ class Accounts:
                     logger.info("%s %s proxy to '%s'", msg, account.Name, account.HttpProxy)
             self._database.save()
 
-    def _restore_proxies(self) -> None:
-        self._set_proxies(self._proxies_to_restore.all, "restore")
+    def _infos(self, proxies: dict[str, str]) -> list[Info]:
+        self._database.load()
+        return [
+            Info(account.Name, proxies.get(account.HttpProxy, ""), account.HttpProxy)
+            for account in self._accounts_to_set
+        ]
 
     @contextmanager
-    def set_proxies(self, proxies: dict[str, str], ui: UI) -> Iterator[Callable[[Callable[[], None]], None]]:
-        """set proxies and provide a method to restore the proxies"""
-        self._proxies_to_restore.add({v: k for k, v in proxies.items()})
-        self._set_info(proxies, ui)
-        self._set_proxies(proxies, "set")
+    def set(self, proxies: dict[str, str]) -> Iterator[Callable[[Callable[[], None]], None]]:
+        """set proxies, infos and provide a method to restore the proxies"""
 
-        def on_modified(last_modified: float, player_relaunch: Callable[[], None]) -> None:
-            # to prevent recursion check it occured after any modification done by any instance
-            if last_modified > self._database.shared_self_modified_time:
-                logger.info("accounts proxies file has been externaly modified")
-                self._restore_proxies()
-                self._set_info(proxies, ui, player_relaunch)
+        def set_infos(player_relaunch: Optional[Callable[[], None]] = None) -> None:
+            infos = self._infos(proxies)
+            self._ui.set_infos(infos, player_relaunch)
+
+        def set_proxies() -> None:
+            proxies_to_restore.add({v: k for k, v in proxies.items()})
+            self._set_proxies(proxies, "set")
+
+        def restore_proxies() -> None:
+            self._set_proxies(proxies_to_restore.all, "restore")
 
         def restore_after_being_read(player_relaunch: Callable[[], None]) -> None:
+            def on_modified(last_modified: float) -> None:
+                # to prevent recursion check it occured after any modification done by any instance
+                if last_modified > self._database.shared_self_modified_time:
+                    logger.info("accounts proxies file has been externaly modified")
+                    restore_proxies()
+                    set_infos(player_relaunch)
+
             self._database.wait_being_read()
-            self._restore_proxies()
+            restore_proxies()
             # we can now safely release the database and start the watcher
             self._database.lock.release()
-            self._database.watcher.add_callback(on_modified, player_relaunch)
+            self._database.watcher.add_callback(on_modified)
             self._database.watcher.start()
 
+        proxies_to_restore = SharedProxiesToRestore(self._app_roaming)
+        set_infos()
+        set_proxies()
         try:
             yield restore_after_being_read
         finally:
             self._database.watcher.stop()
-            self._restore_proxies()
-            self._proxies_to_restore.clean()
+            restore_proxies()
+            proxies_to_restore.clean()
