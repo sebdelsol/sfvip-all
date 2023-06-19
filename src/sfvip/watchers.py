@@ -159,7 +159,7 @@ class WindowWatcher(StartStopContextManager):
         self._thread: Optional[threading.Thread] = None
         self._callback: Optional[_CallbackWindowWatcher] = None
 
-    def _on_pos_changed(self, hwnd: hook.HWND) -> None:
+    def _on_state_changed(self, hwnd: hook.HWND) -> None:
         if self._callback:
             state = WinState(
                 Rect(*rect.get_rect(hwnd), win.is_maximized(hwnd)),
@@ -170,7 +170,7 @@ class WindowWatcher(StartStopContextManager):
             self._callback(state)
 
     def _hook(self) -> None:
-        with hook.Hook(self._pid, self._on_pos_changed):
+        with hook.Hook(self._pid, self._on_state_changed):
             # we're good to go now
             self._init_done.set()
             # we need an event loop to make the hook working

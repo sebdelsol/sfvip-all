@@ -45,64 +45,81 @@ class WinState(NamedTuple):
 class _StickyWindow(tk.Toplevel):
     """follow position, hide & show when needed"""
 
-    _instances = []
-
     def __init__(self, offset: _Offset, **kwargs) -> None:
-        _StickyWindow._instances.append(self)
         super().__init__(**kwargs)
         self.withdraw()
         self.overrideredirect(True)
         self._offset = offset
-        self._rect: Optional[Rect] = None
-        self._monitor_areas = monitor.monitors_areas()
         # prevent closing (alt-f4)
         self.protocol("WM_DELETE_WINDOW", lambda: None)
+        StickyWindows.register(self)
 
-    def follow(self, state: WinState) -> None:
-        if state.no_border or state.is_minimized:
-            if self.state() == "normal":
-                self.withdraw()
-        elif state.rect.valid():
-            if state.rect != self._rect:
-                self._on_changed_position(state)
-                self._rect = state.rect
-            else:
-                if self.state() != "normal":
-                    self.deiconify()
-                self._on_bring_to_front(state)
+    def withdraw(self) -> None:
+        if self.state() == "normal":
+            super().withdraw()
 
-    def _fix_maximized(self, rect: Rect) -> Rect:
-        if rect.is_maximized:
-            # fix possible wrong zoomed coords
-            for area in self._monitor_areas:
-                work_area = Rect(*area.work_area, True)
-                if rect.is_middle_inside(work_area):
-                    return work_area
-        return rect
-
-    def _on_changed_position(self, state: WinState) -> None:
-        rect = self._fix_maximized(state.rect)
+    def change_position(self, rect: Rect) -> None:
         w, h = self.winfo_reqwidth(), self.winfo_reqheight()
         rect = rect.position(self._offset, w, h)
         self.geometry(rect.to_geometry())
 
-    def _on_bring_to_front(self, state: WinState) -> None:
-        if state.is_topmost:
+    def bring_to_front(self, is_topmost: bool) -> None:
+        if self.state() != "normal":
+            self.deiconify()
+        if is_topmost:
             self.attributes("-topmost", True)
         else:
             self.attributes("-topmost", True)
             self.attributes("-topmost", False)
 
+
+class StickyWindows:
+    """pure class, handle on_state_changed on all _StickyWindow"""
+
+    _monitor_rects = [Rect(*area.work_area, True) for area in monitor.monitors_areas()]
+    _current_rect: Optional[Rect] = None
+    _instances: list[_StickyWindow] = []
+
     @staticmethod
-    def instances() -> list["_StickyWindow"]:
-        return _StickyWindow._instances
+    def register(instance: _StickyWindow) -> None:
+        StickyWindows._instances.append(instance)
 
+    @staticmethod
+    def _fix_maximized(rect: Rect) -> Rect:
+        if rect.is_maximized:
+            # fix possible wrong zoomed coords
+            for monitor_rect in StickyWindows._monitor_rects:
+                if rect.is_middle_inside(monitor_rect):
+                    return monitor_rect
+        return rect
 
-def follow_all(state: WinState) -> None:
-    for sticky in _StickyWindow.instances():
-        sticky.follow(state)
+    @staticmethod
+    def get_rect() -> Optional[Rect]:
+        return StickyWindows._current_rect
 
+    @staticmethod
+    def change_position_all(rect: Rect) -> None:
+        for sticky in StickyWindows._instances:
+            sticky.change_position(rect)
 
-def hide_all() -> None:
-    for sticky in _StickyWindow.instances():
-        sticky.withdraw()
+    @staticmethod
+    def bring_to_front_all(is_topmost: bool) -> None:
+        for sticky in StickyWindows._instances:
+            sticky.bring_to_front(is_topmost)
+
+    @staticmethod
+    def hide_all() -> None:
+        for sticky in StickyWindows._instances:
+            sticky.withdraw()
+
+    @staticmethod
+    def on_state_changed(state: WinState) -> None:
+        if state.no_border or state.is_minimized:
+            StickyWindows.hide_all()
+        elif state.rect.valid():
+            if state.rect != StickyWindows._current_rect:
+                StickyWindows._current_rect = state.rect
+                rect = StickyWindows._fix_maximized(state.rect)
+                StickyWindows.change_position_all(rect)
+            else:
+                StickyWindows.bring_to_front_all(state.is_topmost)
