@@ -6,12 +6,12 @@ import time
 import winreg
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable, Iterator, NamedTuple, Optional
+from typing import Callable, Iterator, Optional
 
 from ...winapi import mutex
 from ..registry import Registry
 from ..ui import UI, Rect, WinState, sticky
-from ..watchers import FileWatcher, RegistryWatcher, WindowWatcher
+from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .exception import PlayerError
 
@@ -112,27 +112,21 @@ class _PlayerRectLoader(PlayerConfig):
 
 class _PlayerWindowWatcher:
     def __init__(self) -> None:
-        self._rect: Optional[Rect] = None
         self._watcher: Optional[WindowWatcher] = None
-
-    def _on_position_changed(self, state: WinState) -> None:
-        sticky.follow_all(state)
-        if not (state.is_minimized or state.no_border):
-            self._rect = state.rect
 
     def start(self, pid: int, name: str) -> None:
         self._watcher = WindowWatcher(pid, name)
-        self._watcher.set_callback(self._on_position_changed)
+        self._watcher.set_callback(sticky.StickyWindows.on_state_changed)
         self._watcher.start()
 
     def stop(self) -> None:
         if self._watcher:
-            sticky.hide_all()
+            sticky.StickyWindows.hide_all()
             self._watcher.stop()
 
     @property
     def rect(self) -> Optional[Rect]:
-        return self._rect
+        return sticky.StickyWindows.get_rect()
 
 
 class _Launcher:

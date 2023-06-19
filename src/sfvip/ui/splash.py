@@ -2,7 +2,7 @@ import tkinter as tk
 
 from ...winapi import win
 from .fx import _Fade
-from .sticky import Rect, WinState, _Offset, _StickyWindow
+from .sticky import Rect, _Offset, _StickyWindow
 
 
 class _SplashWindow(_StickyWindow):
@@ -19,7 +19,9 @@ class _SplashWindow(_StickyWindow):
         self._fade = _Fade(self)
 
     def show(self, rect: Rect) -> None:
-        self.follow(WinState(rect, is_minimized=False, no_border=False, is_topmost=True))
+        if rect.valid():
+            self.change_position(rect)
+            self.bring_to_front(is_topmost=True)
         self.attributes("-alpha", 1.0)
         self.deiconify()
 
