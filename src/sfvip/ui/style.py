@@ -54,7 +54,7 @@ class _Style(str):
         return self
 
     def bigger(self, dsize: int) -> Self:
-        self._font_size = self._font_size + dsize
+        self._font_size += dsize
         return self
 
     def smaller(self, dsize: int) -> Self:
@@ -71,15 +71,15 @@ class _Style(str):
             self._font_styles.add(name)
             self._font_styles = self._font_styles
         elif not name.startswith("_"):
-            self._fg = name.replace("_", " ")
+            self._fg = name.replace("_", " ")  # lime_green -> lime green
         return self
 
     @property
     def to_tk(self) -> dict[str, Any]:
-        # Note: self is callable (see __ call__)
-        # and tk calls its kwargs if possible in widget creation
+        # Note: self is callable and tk calls its kwargs in widget creation
         text = str(self)
         if self._max_width and len(text) > self._max_width:
+            assert self._max_width >= 3
             text = f"{text[:self._max_width-3]}..."
         return dict(text=text, fg=self._fg, font=self._font_str)
 

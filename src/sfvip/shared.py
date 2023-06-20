@@ -10,7 +10,7 @@ from .retry import retry_if_exception
 logger = logging.getLogger(__name__)
 
 
-class SharedProxiesToRestore(dict):
+class SharedProxiesToRestore(dict[str, dict[str, str]]):
     """dict of proxies to restore by pid, shared by all instances of the app"""
 
     def __init__(self, app_roaming: Path) -> None:

@@ -24,7 +24,7 @@ class _JsonTrailingCommas:
         return _JsonTrailingCommas._array.sub("]", json_str)
 
 
-class _UniqueNames(dict):
+class _UniqueNames(dict[str, int]):
     def unique(self, name: str) -> str:
         n = self[name] = self.setdefault(name, 0) + 1
         if n > 1:

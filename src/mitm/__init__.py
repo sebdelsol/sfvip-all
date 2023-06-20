@@ -75,7 +75,7 @@ class MitmLocalProxy(multiprocessing.Process):
     def run(self) -> None:
         # launch one proxy per mode
         modes = [mode.to_mitm() for mode in self._modes]
-        logger.info("mimtproxy started with mode(s): %s", " - ".join(modes))
+        logger.info("mitmproxy started")
         # do not verify upstream server SSL/TLS certificates
         opts = options.Options(ssl_insecure=True, mode=modes)
         loop = asyncio.get_event_loop()
@@ -92,4 +92,4 @@ class MitmLocalProxy(multiprocessing.Process):
     def stop(self) -> None:
         self._stop.set()
         self.join()
-        logger.info("mimtproxy stopped")
+        logger.info("mitmproxy stopped")

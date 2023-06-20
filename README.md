@@ -5,9 +5,9 @@ So you can easily **search your entire catalog**.
 <img src="ressources/all.png">
 
 # Download
-<img src="https://img.shields.io/badge/Version-1.2.0-informational" valign="middle"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.0/x64/Sfvip%20All.exe) or [zip](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.0/x64/Sfvip%20All.zip).
+<img src="https://img.shields.io/badge/Version-1.2.1-informational" valign="middle"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.1/x64/Sfvip%20All.exe) or [zip](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.1/x64/Sfvip%20All.zip).
 
-<img src="https://img.shields.io/badge/Version-1.2.0-informational" valign="middle"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.0/x86/Sfvip%20All.exe) or [zip](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.0/x86/Sfvip%20All.zip).
+<img src="https://img.shields.io/badge/Version-1.2.1-informational" valign="middle"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.1/x86/Sfvip%20All.exe) or [zip](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.1/x86/Sfvip%20All.zip).
 
 You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** last version already installed <sub><sup>_and preferably launched at least once._</sup></sub>  
 <sub>_**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._</sub>  
@@ -21,7 +21,7 @@ Check the [***changelog***](build/changelog.md).
 [![Python](https://img.shields.io/badge/Python-3.11.4-fbdf79)](https://www.python.org/downloads/release/python-3114/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-lightgrey)](https://nuitka.net/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Sloc-2464-informational)
+![sloc](https://img.shields.io/badge/Sloc-2472-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an environment

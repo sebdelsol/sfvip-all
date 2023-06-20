@@ -1,6 +1,6 @@
 import threading
 import tkinter as tk
-from typing import NamedTuple, Optional, Self
+from typing import Any, NamedTuple, Optional, Self
 
 from ...winapi import monitor
 
@@ -46,7 +46,7 @@ class WinState(NamedTuple):
 class _StickyWindow(tk.Toplevel):
     """follow position, hide & show when needed"""
 
-    def __init__(self, offset: _Offset, **kwargs) -> None:
+    def __init__(self, offset: _Offset, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.withdraw()
         self.overrideredirect(True)
@@ -54,10 +54,6 @@ class _StickyWindow(tk.Toplevel):
         # prevent closing (alt-f4)
         self.protocol("WM_DELETE_WINDOW", lambda: None)
         StickyWindows.register(self)
-
-    def withdraw(self) -> None:
-        if self.state() == "normal":
-            super().withdraw()
 
     def change_position(self, rect: Rect) -> None:
         w, h = self.winfo_reqwidth(), self.winfo_reqheight()
@@ -100,7 +96,7 @@ class StickyWindows:
             sticky.bring_to_front(is_topmost)
 
     @staticmethod
-    def hide_all() -> None:
+    def withdraw_all() -> None:
         for sticky in StickyWindows._instances:
             sticky.withdraw()
 
@@ -108,13 +104,12 @@ class StickyWindows:
     def on_state_changed(state: WinState) -> None:
         with StickyWindows._lock:  # sure to be sequential
             if state.no_border or state.is_minimized:
-                StickyWindows.hide_all()
+                StickyWindows.withdraw_all()
             elif state.rect.valid():
+                StickyWindows.bring_to_front_all(state.is_topmost)
                 if state.rect != StickyWindows._current_rect:
                     StickyWindows._current_rect = state.rect
                     StickyWindows.change_position_all(FixMaximized.fix(state.rect))
-                else:
-                    StickyWindows.bring_to_front_all(state.is_topmost)
 
 
 class FixMaximized:
