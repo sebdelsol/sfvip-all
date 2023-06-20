@@ -9,7 +9,7 @@ class ExitCodeProcess(ctypes.Structure):
     _fields_ = [("hProcess", HANDLE), ("lpExitCode", LPDWORD)]  # HANDLE  # LPDWORD
 
 
-def exists(pid):
+def exists(pid: int) -> bool:
     """Check whether a process with the given pid exists. Works on Windows only.
     Works even if the process is not owned by the current user."""
     kernel32 = ctypes.windll.kernel32

@@ -22,15 +22,15 @@ _GetWindowTextLength = _user32.GetWindowTextLengthW
 _GetWindowThreadProcessId = _user32.GetWindowThreadProcessId
 
 
-class WinIDs(NamedTuple):
+class Window(NamedTuple):
     hwnd: HWND
     tid: DWORD
     pid: DWORD
     title: str
 
 
-def get_winids_from_pid(pid: int) -> Optional[WinIDs]:
-    hwnds: list[WinIDs] = []
+def get_window_from_pid(pid: int) -> Optional[Window]:
+    hwnds: list[Window] = []
     process_id = DWORD()
 
     def callback(hwnd: HWND, _) -> bool:
@@ -40,7 +40,7 @@ def get_winids_from_pid(pid: int) -> Optional[WinIDs]:
                 length = _GetWindowTextLength(hwnd)
                 text = ctypes.create_unicode_buffer(length + 1)
                 _GetWindowText(hwnd, text, length + 1)
-                hwnds.append(WinIDs(hwnd, tid, DWORD(pid), text.value))
+                hwnds.append(Window(hwnd, tid, DWORD(pid), text.value))
                 return False  # stop iteration
         return True
 
@@ -69,13 +69,13 @@ class EventLoop:
             self._tid = None
 
 
-_WINEVENT_OUTOFCONTEXT = 0x0000
-_SetWinEventHook = _user32.SetWinEventHook
 _HWINEVENTHOOK = ctypes.c_int64
 _WinEventProcType = ctypes.WINFUNCTYPE(None, _HWINEVENTHOOK, DWORD, HWND, LONG, LONG, DWORD, DWORD)
-_user32.SetWinEventHook.restype = _HWINEVENTHOOK
+_SetWinEventHook = _user32.SetWinEventHook
+_SetWinEventHook.restype = _HWINEVENTHOOK
 _UnhookWinEvent = _user32.UnhookWinEvent
-
+_WINEVENT_OUTOFCONTEXT = 0x0000
+_WINEVENT_SKIPOWNTHREAD = 0x0001
 _EVENT_OBJECT_LOCATIONCHANGE = 0x800B
 _EVENT_SYSTEM_FOREGROUND = 0x0003
 _EVENT_OBJECT_REORDER = 0x8004
@@ -88,31 +88,32 @@ class Hook:
     Note: need an event loop to work
     """
 
-    _location_event = _EVENT_OBJECT_LOCATIONCHANGE
     _hooked_events = (
-        _location_event,
+        _EVENT_OBJECT_LOCATIONCHANGE,
         _EVENT_SYSTEM_FOREGROUND,
         _EVENT_OBJECT_REORDER,
         _EVENT_OBJECT_SHOW,
     )
 
-    def __init__(self, winids: WinIDs, event_callback: Callable[[HWND], None]) -> None:
-        self._hwnd = winids.hwnd
-        self._events = _Events(winids.hwnd, event_callback)
+    def __init__(self, window: Window, event_callback: Callable[[HWND], None]) -> None:
+        self._lock = threading.Lock()
+        self._hwnd = window.hwnd
         self._hooks: list[_HWINEVENTHOOK] = []
+        self._events = _Events(window.hwnd, event_callback)
         _event_proc = _WinEventProcType(self._handle_event)  # keep a strong reference or crash
-        self._hook_args = 0, _event_proc, winids.pid, winids.tid, _WINEVENT_OUTOFCONTEXT
+        self._hook_args = 0, _event_proc, window.pid, window.tid, _WINEVENT_OUTOFCONTEXT | _WINEVENT_SKIPOWNTHREAD
 
     # pylint: disable=unused-argument, too-many-arguments
     def _handle_event(self, event_hook, event, hwnd, id_object, id_child, event_thread, event_time) -> None:
-        # try to reject as mush as we can
-        # None hwnd comes from mouse & caret events
+        # try to reject as much as we can
+        # None hwnd come from mouse & caret events
         # we are not interested in child windows location changes
-        if hwnd and hwnd == self._hwnd or event != Hook._location_event:
-            self._events.trigger()
+        if hwnd and hwnd == self._hwnd or event != _EVENT_OBJECT_LOCATIONCHANGE:
+            with self._lock:  # prevent reentry
+                self._events.trigger()
 
     def __enter__(self) -> None:
-        # several hooks with only one event to reduce uneeded and costly hook trigger
+        # several hooks with only one event to reduce unneeded costly hook trigger
         for event in Hook._hooked_events:
             hook = _SetWinEventHook(event, event, *self._hook_args)
             self._hooks.append(hook)
@@ -132,11 +133,12 @@ class _Events:
         self._event_callback = event_callback
         self._listenning = True
         self._event_count = 0
-        self._events = queue.LifoQueue()
+        self._events = queue.LifoQueue()  # last event is the first handeld
         self._event_count_lock = threading.Lock()
         self._listen_thread = threading.Thread(target=self._listen_event)
 
     def _listen_event(self) -> None:
+        """listen and call only the most recent event"""
         last_event_count = 0
         while self._listenning:
             event_count = self._events.get()
@@ -146,7 +148,7 @@ class _Events:
 
     def trigger(self) -> None:
         with self._event_count_lock:
-            self._event_count += 1  # safe for one week with 1000 events / second
+            self._event_count += 1  # safe for years with 1000 events / second ^^
         self._events.put_nowait(self._event_count)
 
     def start(self) -> None:

@@ -1,7 +1,12 @@
+## 1.2.1
+* Reduce drasticaly _Sfvip All_ windows load thanks to a way more efficient hook.
+* Handle _Database.json_ trailing commas like _Sfvip Player_ does.
+* Minor bug fixes.
+
 ## 1.2.0
 * Proxies are correctly restored when several _Sfvip All_ are running concurrently.
 * No longer restart when _Sfvip Player_ Logging setting is switched off.
-* Fix _Sfvip Player_ bug when several Users have the same name.
+* Fix _Sfvip Player_ bug when several users have the same name.
 * Minor bug fixes.
 
 ## 1.1.9
@@ -9,7 +14,7 @@
 * Minor bug fixes.
 
 ## 1.1.8
-* No auto relaunch when the proxies have been changed: a relaunch button is showed instead.
+* No auto relaunch when the proxies have been changed. A relaunch button is showed instead.
 * Proxies window is scrollable when the list is too long.
 * Proxies window mimics _Sfvip Player_ UI.
 * Fix a potential deadlock.
@@ -26,7 +31,7 @@
 * Handle change of _Config Location_ in _Sfvip Player_ settings.
 * Player position is preserved when a relaunch occurs.
 * _Logs_ are to be found in the _Exe_ directory.
-* _'Config All.json'_ is safe to tamper with.
+* _Config All.json_ is safe to tamper with.
 * Fix _Zip_ launcher broken by 1.1.5.
 
 ## 1.1.5

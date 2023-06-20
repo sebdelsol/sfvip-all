@@ -10,7 +10,7 @@ from typing import Callable, Iterator, Optional
 
 from ...winapi import mutex
 from ..registry import Registry
-from ..ui import UI, Rect, WinState, sticky
+from ..ui import UI, Rect, sticky
 from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .exception import PlayerError
@@ -101,8 +101,7 @@ class _PlayerRectLoader(PlayerConfig):
         if rect.valid():
             if config := self.load():
                 if rect.is_maximized:
-                    # do not write the rect coords
-                    # since it's only meant for non maximized window
+                    # do not write the rect coords since it's only meant for non maximized window
                     config[_PlayerRectLoader._maximized_key] = True
                 else:
                     for key, value in zip(_PlayerRectLoader._keys, rect):
@@ -121,8 +120,8 @@ class _PlayerWindowWatcher:
 
     def stop(self) -> None:
         if self._watcher:
-            sticky.StickyWindows.hide_all()
             self._watcher.stop()
+            sticky.StickyWindows.withdraw_all()
 
     @property
     def rect(self) -> Optional[Rect]:

@@ -133,7 +133,9 @@ class RegistryWatcher(StartStopContextManager):
     def _wait_for_change(self) -> None:
         with winreg.OpenKey(self._key.hkey, self._key.path) as key:
             current_value, _ = winreg.QueryValueEx(key, self._key.name)
-            for change in registry.wait_for_registry_change(key.handle, RegistryWatcher._timeout_ms, self._running):  # type: ignore
+            for change in registry.wait_for_registry_change(
+                key.handle, RegistryWatcher._timeout_ms, self._running  # type: ignore
+            ):
                 if change:
                     value, _ = winreg.QueryValueEx(key, self._key.name)
                     if value != current_value:
@@ -152,6 +154,8 @@ class _CallbackWindowWatcher(NamedTuple):
 
 
 class WindowWatcher(StartStopContextManager):
+    _min_dt = 1.0 / 120.0  # reduce load
+
     def __init__(self, pid) -> None:
         self._pid = pid
         self._searching = threading.Event()
@@ -169,19 +173,20 @@ class WindowWatcher(StartStopContextManager):
                 win.is_topmost(hwnd),
             )
             self._callback(state)
+            time.sleep(WindowWatcher._min_dt)
 
     def _hook(self) -> None:
         while self._searching:
             time.sleep(0)
-            if winids := hook.get_winids_from_pid(self._pid):
-                with hook.Hook(winids, self._on_state_changed):
+            if window := hook.get_window_from_pid(self._pid):
+                with hook.Hook(window, self._on_state_changed):
                     # don't wait events that might come later
-                    self._on_state_changed(winids.hwnd)
+                    self._on_state_changed(window.hwnd)
                     # event loop for the hook
-                    logger.info("watch started on window '%s'", winids.title)
+                    logger.info("watch started on window '%s'", window.title)
                     self._search_done.set()
                     self._event_loop.run()
-                    logger.info("watch stopped on window '%s'", winids.title)
+                    logger.info("watch stopped on window '%s'", window.title)
                     break
         self._search_done.set()
 

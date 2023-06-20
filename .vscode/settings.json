@@ -9,14 +9,13 @@
         "--disable=missing-class-docstring",
         "--disable=missing-function-docstring",
         "--disable=use-dict-literal",
-        "--disable=line-too-long",
         "--disable=too-few-public-methods",
-        "--load-plugins=pylint.extensions.no_self_use"
+        "--load-plugins=pylint.extensions.no_self_use",
+        "--max-line-length=115"
     ],
     // type checking
     "python.analysis.typeCheckingMode": "basic",
     // black
-    "python.formatting.provider": "none",
     "black-formatter.args": [
         "--line-length=115"
     ],

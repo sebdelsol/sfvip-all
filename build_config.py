@@ -3,7 +3,7 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.2.0"
+    version = "1.2.1"
     dir = "build"
 
 
