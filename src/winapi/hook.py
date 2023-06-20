@@ -1,9 +1,10 @@
 import ctypes
+import queue
 import threading
 from ctypes.wintypes import BOOL, DWORD, HWND, LONG, LPARAM, LPDWORD, MSG
 from typing import Callable, NamedTuple, Optional
 
-from .win import is_enabled, is_foreground, is_visible
+from .win import is_enabled, is_visible
 
 _user32 = ctypes.windll.user32
 
@@ -18,6 +19,7 @@ _GetWindowThreadProcessId.restype = DWORD
 
 _GetWindowText = _user32.GetWindowTextW
 _GetWindowTextLength = _user32.GetWindowTextLengthW
+_GetWindowThreadProcessId = _user32.GetWindowThreadProcessId
 
 
 class WinIDs(NamedTuple):
@@ -78,7 +80,6 @@ _EVENT_OBJECT_LOCATIONCHANGE = 0x800B
 _EVENT_SYSTEM_FOREGROUND = 0x0003
 _EVENT_OBJECT_REORDER = 0x8004
 _EVENT_OBJECT_SHOW = 0x8002
-_OBJID_CLIENT = -4
 
 
 class Hook:
@@ -97,7 +98,7 @@ class Hook:
 
     def __init__(self, winids: WinIDs, event_callback: Callable[[HWND], None]) -> None:
         self._hwnd = winids.hwnd
-        self._event_callback = event_callback
+        self._events = _Events(winids.hwnd, event_callback)
         self._hooks: list[_HWINEVENTHOOK] = []
         _event_proc = _WinEventProcType(self._handle_event)  # keep a strong reference or crash
         self._hook_args = 0, _event_proc, winids.pid, winids.tid, _WINEVENT_OUTOFCONTEXT
@@ -108,16 +109,50 @@ class Hook:
         # None hwnd comes from mouse & caret events
         # we are not interested in child windows location changes
         if hwnd and hwnd == self._hwnd or event != Hook._location_event:
-            if self._hwnd and is_visible(self._hwnd) and is_enabled(self._hwnd):
-                if is_foreground(self._hwnd) or is_foreground(hwnd) or id_object == _OBJID_CLIENT:
-                    self._event_callback(self._hwnd)
+            self._events.trigger()
 
     def __enter__(self) -> None:
         # several hooks with only one event to reduce uneeded and costly hook trigger
         for event in Hook._hooked_events:
             hook = _SetWinEventHook(event, event, *self._hook_args)
             self._hooks.append(hook)
+        self._events.start()
 
     def __exit__(self, *_) -> None:
         for hook in self._hooks:
             _UnhookWinEvent(hook)
+        self._events.stop()
+
+
+class _Events:
+    """uncouple trigger event from event callback so that a triggering is as fast as possible"""
+
+    def __init__(self, hwnd: HWND, event_callback: Callable[[HWND], None]) -> None:
+        self._hwnd = hwnd
+        self._event_callback = event_callback
+        self._listenning = True
+        self._event_count = 0
+        self._events = queue.LifoQueue()
+        self._event_count_lock = threading.Lock()
+        self._listen_thread = threading.Thread(target=self._listen_event)
+
+    def _listen_event(self) -> None:
+        last_event_count = 0
+        while self._listenning:
+            event_count = self._events.get()
+            if event_count and event_count > last_event_count:
+                last_event_count = event_count
+                self._event_callback(self._hwnd)
+
+    def trigger(self) -> None:
+        with self._event_count_lock:
+            self._event_count += 1  # safe for one week with 1000 events / second
+        self._events.put_nowait(self._event_count)
+
+    def start(self) -> None:
+        self._listen_thread.start()
+
+    def stop(self) -> None:
+        self._listenning = False
+        self._events.put(None)  # unblock events queue
+        self._listen_thread.join()

@@ -21,7 +21,7 @@ Check the [***changelog***](build/changelog.md).
 [![Python](https://img.shields.io/badge/Python-3.11.4-fbdf79)](https://www.python.org/downloads/release/python-3114/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-lightgrey)](https://nuitka.net/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Sloc-2429-informational)
+![sloc](https://img.shields.io/badge/Sloc-2464-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an environment

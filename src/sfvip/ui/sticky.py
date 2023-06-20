@@ -1,3 +1,4 @@
+import threading
 import tkinter as tk
 from typing import NamedTuple, Optional, Self
 
@@ -76,22 +77,13 @@ class _StickyWindow(tk.Toplevel):
 class StickyWindows:
     """pure class, handle on_state_changed on all _StickyWindow"""
 
-    _monitor_rects = [Rect(*area.work_area, True) for area in monitor.monitors_areas()]
     _current_rect: Optional[Rect] = None
     _instances: list[_StickyWindow] = []
+    _lock = threading.Lock()
 
     @staticmethod
     def register(instance: _StickyWindow) -> None:
         StickyWindows._instances.append(instance)
-
-    @staticmethod
-    def _fix_maximized(rect: Rect) -> Rect:
-        if rect.is_maximized:
-            # fix possible wrong zoomed coords
-            for monitor_rect in StickyWindows._monitor_rects:
-                if rect.is_middle_inside(monitor_rect):
-                    return monitor_rect
-        return rect
 
     @staticmethod
     def get_rect() -> Optional[Rect]:
@@ -114,12 +106,25 @@ class StickyWindows:
 
     @staticmethod
     def on_state_changed(state: WinState) -> None:
-        if state.no_border or state.is_minimized:
-            StickyWindows.hide_all()
-        elif state.rect.valid():
-            if state.rect != StickyWindows._current_rect:
-                StickyWindows._current_rect = state.rect
-                rect = StickyWindows._fix_maximized(state.rect)
-                StickyWindows.change_position_all(rect)
-            else:
-                StickyWindows.bring_to_front_all(state.is_topmost)
+        with StickyWindows._lock:  # sure to be sequential
+            if state.no_border or state.is_minimized:
+                StickyWindows.hide_all()
+            elif state.rect.valid():
+                if state.rect != StickyWindows._current_rect:
+                    StickyWindows._current_rect = state.rect
+                    StickyWindows.change_position_all(FixMaximized.fix(state.rect))
+                else:
+                    StickyWindows.bring_to_front_all(state.is_topmost)
+
+
+class FixMaximized:
+    _monitor_rects = [Rect(*area.work_area, True) for area in monitor.monitors_areas()]
+
+    @staticmethod
+    def fix(rect: Rect) -> Rect:
+        if rect.is_maximized:
+            # fix possible wrong zoomed coords
+            for monitor_rect in FixMaximized._monitor_rects:
+                if rect.is_middle_inside(monitor_rect):
+                    return monitor_rect
+        return rect

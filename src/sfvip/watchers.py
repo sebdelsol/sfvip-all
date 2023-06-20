@@ -161,7 +161,7 @@ class WindowWatcher(StartStopContextManager):
         self._callback: Optional[_CallbackWindowWatcher] = None
 
     def _on_state_changed(self, hwnd: hook.HWND) -> None:
-        if self._callback:
+        if self._callback and win.is_foreground(self._pid):
             state = WinState(
                 Rect(*rect.get_rect(hwnd), win.is_maximized(hwnd)),
                 win.is_minimized(hwnd),

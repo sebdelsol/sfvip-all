@@ -1,5 +1,5 @@
 import ctypes
-from ctypes.wintypes import HWND
+from ctypes.wintypes import DWORD, HWND
 from typing import cast
 
 _user32 = ctypes.windll.user32
@@ -43,8 +43,12 @@ def is_maximized(hwnd: HWND) -> bool:
     return _user32.IsZoomed(hwnd) == 1
 
 
-def is_foreground(hwnd: HWND) -> bool:
-    return _user32.GetForegroundWindow() == hwnd
+def is_foreground(pid: int) -> bool:
+    if hwnd := _user32.GetForegroundWindow():
+        process_id = DWORD()
+        _user32.GetWindowThreadProcessId(hwnd, ctypes.byref(process_id))
+        return process_id.value == pid
+    return False
 
 
 def has_no_border(hwnd: HWND) -> bool:
