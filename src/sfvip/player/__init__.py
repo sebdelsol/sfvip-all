@@ -114,8 +114,8 @@ class _PlayerWindowWatcher:
     def __init__(self) -> None:
         self._watcher: Optional[WindowWatcher] = None
 
-    def start(self, pid: int, name: str) -> None:
-        self._watcher = WindowWatcher(pid, name)
+    def start(self, pid: int) -> None:
+        self._watcher = WindowWatcher(pid)
         self._watcher.set_callback(sticky.StickyWindows.on_state_changed)
         self._watcher.start()
 
@@ -193,7 +193,7 @@ class Player:
         with _PlayerConfigDirSetting().watch(self.relaunch):
             with subprocess.Popen([self.path]) as self._process:
                 logger.info("player started")
-                self._window_watcher.start(self._process.pid, self.path)
+                self._window_watcher.start(self._process.pid)
                 if set_rect_lock:
                     # give time to the player to read its config
                     time.sleep(0.5)

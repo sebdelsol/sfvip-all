@@ -85,7 +85,7 @@ class Upgrader:
     def _show_upgrade(to_upgrade: list[Pckg]) -> int:
         if (n := len(to_upgrade)) > 0:
             print()
-            print(Stl.title("Upgrade"))
+            print(Stl.title("Upgrade:"))
             for i, (name, version, req) in enumerate(
                 zip(
                     format_columns(to_upgrade, key_to_str=lambda pckg: Stl.high(pckg.name)),

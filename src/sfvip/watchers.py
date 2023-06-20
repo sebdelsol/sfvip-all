@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 import winreg
 from abc import abstractmethod
 from pathlib import Path
@@ -70,7 +71,7 @@ class FileWatcher(StartStopContextManager):
             event_handler.on_modified = self._on_modified
             self._observer.schedule(event_handler, self._path.parent, recursive=False)
             self._observer.start()
-            logger.info("watch started on %s", self._path)
+            logger.info("watch started on file '%s'", self._path)
 
     def stop(self) -> None:
         if self._observer and self._observer.is_alive():
@@ -78,7 +79,7 @@ class FileWatcher(StartStopContextManager):
             self._observer.join()
             self._observer = None
             self._callbacks = set()
-            logger.info("watch stopped on %s", self._path)
+            logger.info("watch stopped on file '%s'", self._path)
 
 
 class _CallbackRegWatcher(NamedTuple):
@@ -119,7 +120,7 @@ class RegistryWatcher(StartStopContextManager):
         self._thread = threading.Thread(target=self._wait_for_change)
         self._running.set()
         self._thread.start()
-        logger.info("watch started on %s", self._key)
+        logger.info("watch started on key '%s'", self._key)
 
     def stop(self) -> None:
         if self._thread:
@@ -127,7 +128,7 @@ class RegistryWatcher(StartStopContextManager):
             self._thread.join()
             self._thread = None
             self._callbacks = set()
-            logger.info("watch stopped on %s", self._key)
+            logger.info("watch stopped on key '%s'", self._key)
 
     def _wait_for_change(self) -> None:
         with winreg.OpenKey(self._key.hkey, self._key.path) as key:
@@ -151,10 +152,10 @@ class _CallbackWindowWatcher(NamedTuple):
 
 
 class WindowWatcher(StartStopContextManager):
-    def __init__(self, pid: int, name: str) -> None:
+    def __init__(self, pid) -> None:
         self._pid = pid
-        self._name = name
-        self._init_done = threading.Event()
+        self._searching = threading.Event()
+        self._search_done = threading.Event()
         self._event_loop = hook.EventLoop()
         self._thread: Optional[threading.Thread] = None
         self._callback: Optional[_CallbackWindowWatcher] = None
@@ -170,25 +171,33 @@ class WindowWatcher(StartStopContextManager):
             self._callback(state)
 
     def _hook(self) -> None:
-        with hook.Hook(self._pid, self._on_state_changed):
-            # we're good to go now
-            self._init_done.set()
-            # we need an event loop to make the hook working
-            self._event_loop.start()
+        while self._searching:
+            time.sleep(0)
+            if winids := hook.get_winids_from_pid(self._pid):
+                with hook.Hook(winids, self._on_state_changed):
+                    # don't wait events that might come later
+                    self._on_state_changed(winids.hwnd)
+                    # event loop for the hook
+                    logger.info("watch started on window '%s'", winids.title)
+                    self._search_done.set()
+                    self._event_loop.run()
+                    logger.info("watch stopped on window '%s'", winids.title)
+                    break
+        self._search_done.set()
 
     def set_callback(self, callback: _CallbackWindowWatcher._CallbackFunc) -> None:
         self._callback = _CallbackWindowWatcher(callback)
 
     def start(self) -> None:
         self._thread = threading.Thread(target=self._hook)
-        self._init_done.clear()
+        self._searching.set()
+        self._search_done.clear()
         self._thread.start()
-        self._init_done.wait()
-        logger.info("watch started on %s Window", self._name)
 
     def stop(self) -> None:
         if self._thread:
+            self._searching.clear()
+            self._search_done.wait()
             self._event_loop.stop()
             self._thread.join()
-            logger.info("watch stopped on %s Window", self._name)
             self._callback = None
