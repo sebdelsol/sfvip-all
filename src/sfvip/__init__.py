@@ -7,7 +7,7 @@ from sfvip_all_config import AppConfig
 
 from .accounts import AccountsProxies
 from .player import Player, PlayerError
-from .proxies import LocalProxies
+from .proxies import LocalProxies, LocalproxyError
 from .ui import UI, AppInfo
 
 logger = logging.getLogger(__name__)
@@ -51,8 +51,11 @@ def run_app(app_info: AppInfo, splash: Path, logo: Path) -> None:
                             restore_accounts_proxies(player.relaunch)
                             ui.splash.hide(fade_duration_ms=1000, wait_ms=1000)
 
-        ui.run_in_thread(PlayerError, run)
+        ui.run_in_thread(run, PlayerError, LocalproxyError)
 
     except PlayerError as err:
         ui.showinfo(f"{err}\nPlease launch Sfvip Player at least once !")
+        logger.warning(str(err))
+    except LocalproxyError as err:
+        ui.showinfo(f"{err}")
         logger.warning(str(err))

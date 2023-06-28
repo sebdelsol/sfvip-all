@@ -22,15 +22,15 @@ _GetWindowTextLength = _user32.GetWindowTextLengthW
 _GetWindowThreadProcessId = _user32.GetWindowThreadProcessId
 
 
-class Window(NamedTuple):
+class WindowExe(NamedTuple):
     hwnd: HWND
     tid: DWORD
     pid: DWORD
     title: str
 
 
-def get_window_from_pid(pid: int) -> Optional[Window]:
-    hwnds: list[Window] = []
+def get_window_from_pid(pid: int) -> Optional[WindowExe]:
+    hwnds: list[WindowExe] = []
     process_id = DWORD()
 
     def callback(hwnd: HWND, _) -> bool:
@@ -40,7 +40,7 @@ def get_window_from_pid(pid: int) -> Optional[Window]:
                 length = _GetWindowTextLength(hwnd)
                 text = ctypes.create_unicode_buffer(length + 1)
                 _GetWindowText(hwnd, text, length + 1)
-                hwnds.append(Window(hwnd, tid, DWORD(pid), text.value))
+                hwnds.append(WindowExe(hwnd, tid, DWORD(pid), text.value))
                 return False  # stop iteration
         return True
 
@@ -95,7 +95,7 @@ class Hook:
         _EVENT_OBJECT_SHOW,
     )
 
-    def __init__(self, window: Window, event_callback: Callable[[HWND], None]) -> None:
+    def __init__(self, window: WindowExe, event_callback: Callable[[HWND], None]) -> None:
         self._lock = threading.Lock()
         self._hwnd = window.hwnd
         self._hooks: list[_HWINEVENTHOOK] = []
@@ -114,10 +114,10 @@ class Hook:
 
     def __enter__(self) -> None:
         # several hooks with only one event to reduce unneeded costly hook trigger
+        self._events.start()
         for event in Hook._hooked_events:
             hook = _SetWinEventHook(event, event, *self._hook_args)
             self._hooks.append(hook)
-        self._events.start()
 
     def __exit__(self, *_) -> None:
         for hook in self._hooks:

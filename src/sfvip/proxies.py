@@ -4,15 +4,23 @@ from urllib.parse import urlparse, urlsplit, urlunsplit
 
 from ..mitm import MitmLocalProxy, Mode, validate_upstream
 from ..mitm.addon import AllCategory, SfVipAddOn
+from ..winapi import mutex
+
+
+class LocalproxyError(Exception):
+    pass
 
 
 def _find_port(excluded_ports: set[int]) -> int:
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.bind(("localhost", 0))
-            _, port = sock.getsockname()
-            if port not in excluded_ports:
-                return port
+            try:
+                sock.bind(("localhost", 0))
+                _, port = sock.getsockname()
+                if port not in excluded_ports:
+                    return port
+            except socket.error as e:
+                raise LocalproxyError("No socket port available !") from e
 
 
 def _ports_from(urls: set[str]) -> set[int]:
@@ -44,26 +52,29 @@ class LocalProxies:
         self._upstreams = upstreams
         self._by_upstreams: dict[str, str] = {}
         self._mitm_proxy: Optional[MitmLocalProxy] = None
+        self._bind_free_ports = mutex.SystemWideMutex("bind free ports for local proxies")
 
     @property
     def by_upstreams(self) -> dict[str, str]:
         return self._by_upstreams
 
     def __enter__(self) -> Self:
-        if self._upstreams:
-            modes: set[Mode] = set()
-            excluded_ports = _ports_from(self._upstreams)
-            for upstream in self._upstreams:
-                upstream_fixed = _fix_upstream(upstream)
-                if upstream_fixed is not None:
-                    port = _find_port(excluded_ports)
-                    excluded_ports.add(port)
-                    modes.add(Mode(port=port, upstream=upstream_fixed))
-                    self._by_upstreams[upstream] = f"{LocalProxies._localhost}:{port}"
-            if modes:
-                self._mitm_proxy = MitmLocalProxy(SfVipAddOn(self._all_category), modes)
-                self._mitm_proxy.start()
-        return self
+        with self._bind_free_ports:
+            if self._upstreams:
+                modes: set[Mode] = set()
+                excluded_ports = _ports_from(self._upstreams)
+                excluded_ports = set(range(1024, 9000))
+                for upstream in self._upstreams:
+                    upstream_fixed = _fix_upstream(upstream)
+                    if upstream_fixed is not None:
+                        port = _find_port(excluded_ports)
+                        excluded_ports.add(port)
+                        modes.add(Mode(port=port, upstream=upstream_fixed))
+                        self._by_upstreams[upstream] = f"{LocalProxies._localhost}:{port}"
+                if modes:
+                    self._mitm_proxy = MitmLocalProxy(SfVipAddOn(self._all_category), modes)
+                    self._mitm_proxy.start()
+            return self
 
     def __exit__(self, *_) -> None:
         if self._mitm_proxy:
