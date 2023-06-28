@@ -23,9 +23,7 @@ class UI(tk.Tk):
         self._logo = _LogoWindow(logo_path, self._infos)
         self._title = f"{app_info.name} v{app_info.version} {get_bitness_str(app_info.app_64bit)}"
 
-    def run_in_thread(
-        self, catch_exception: type[Exception], target: Callable[..., None], *args: Any, **kwargs: Any
-    ) -> None:
+    def run_in_thread(self, target: Callable[..., None], *catch_exceptions: type[Exception]) -> None:
         """
         run the target function in a thread,
         handle the mainloop and quit ui when done
@@ -42,7 +40,7 @@ class UI(tk.Tk):
             def run(self) -> None:
                 try:
                     super().run()
-                except catch_exception as exception:
+                except catch_exceptions as exception:
                     self._catched = exception
                 finally:
                     ui.after(0, ui.quit)
@@ -52,7 +50,7 @@ class UI(tk.Tk):
                 if self._catched is not None:
                     raise self._catched
 
-        thread = RaiseCatchedExceptionThread(target=target, args=args, kwargs=kwargs)
+        thread = RaiseCatchedExceptionThread(target=target)
         thread.start()
         self.mainloop()
         thread.join()
