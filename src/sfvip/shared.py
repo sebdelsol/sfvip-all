@@ -30,8 +30,8 @@ class SharedProxiesToRestore(dict[str, dict[str, str]]):
             json.dump(self, f, indent=2)
 
     def _clean_pids(self, pid_to_remove: Optional[str]) -> None:
-        terminated = [pid for pid in self if not pids.exists(int(pid)) or pid == pid_to_remove]
-        for pid in terminated:
+        clean_pids = [pid for pid in self if not pids.exists(int(pid)) or pid == pid_to_remove]
+        for pid in clean_pids:
             del self[pid]
 
     def _update_file(self, pid_to_remove: Optional[str] = None) -> None:

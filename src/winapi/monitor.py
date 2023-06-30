@@ -33,7 +33,7 @@ def _get_monitor_area(handle_monitor) -> MonitorArea:
 def get_handle_monitors():
     handle_monitors = []
 
-    def monitor_enum(handle_monitor, _0, _1, _2):
+    def monitor_enum(handle_monitor, *_):
         handle_monitors.append(handle_monitor)
         return True
 

@@ -2,7 +2,7 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Sequence
 
 from .infos import AppInfo, Info, _InfosWindow, get_bitness_str
 from .logo import _LogoWindow
@@ -55,7 +55,7 @@ class UI(tk.Tk):
         self.mainloop()
         thread.join()
 
-    def set_infos(self, infos: list[Info], player_relaunch: Optional[Callable[[], None]] = None) -> None:
+    def set_infos(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)
         self._logo.set_pulse(ok=ok)
 

@@ -1,12 +1,17 @@
+## 1.2.2
+* Hook cpu load reduced even in the worst case.
+* Cleanly fail when no ports are available.
+* Minor bug fixes.
+
 ## 1.2.1
-* Reduce drasticaly _Sfvip All_ windows load thanks to a way more efficient hook.
+* Reduce drasticaly _Sfvip All_ cpu load thanks to a way more efficient hook.
 * Handle _Database.json_ trailing commas like _Sfvip Player_ does.
 * Minor bug fixes.
 
 ## 1.2.0
 * Proxies are correctly restored when several _Sfvip All_ are running concurrently.
 * No longer restart when _Sfvip Player_ Logging setting is switched off.
-* Fix _Sfvip Player_ bug when several users have the same name.
+* Fix _Sfvip Player_ duplicate users name.
 * Minor bug fixes.
 
 ## 1.1.9

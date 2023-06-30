@@ -164,10 +164,10 @@ class Player:
         self._launcher = _Launcher()
 
     def want_to_launch(self) -> bool:
-        launch = self._launcher.want_to_launch()
-        if launch:
+        if self._launcher.want_to_launch():
             self._rect_loader = _PlayerRectLoader()
-        return launch
+            return True
+        return False
 
     @property
     def rect(self) -> Rect:

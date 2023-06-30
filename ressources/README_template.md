@@ -9,7 +9,7 @@ So you can easily **search your entire catalog**.
 
 <img src="https://img.shields.io/badge/Version-{version}-informational" valign="middle"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/{github_path}/raw/master/{exe32_link}) or [zip](https://github.com/{github_path}/raw/master/{archive32_link}).
 
-You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** last version already installed <sub><sup>_and preferably launched at least once._</sup></sub>  
+You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** lastest version already installed <sub><sup>_and preferably launched at least once._</sup></sub>  
 <sub>_**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._</sub>  
 <sub>_**Sfvip All.exe** might trigger your antivirus because even Nuitka build are not exempt from it._</sub>  
 <sub>_**Sfvip All.exe** will ask you for network connection its first run because it relies on local proxies to do its magic._</sub>  
@@ -32,7 +32,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m pip install -r requirements.dev.txt
 ```
-Everything that follows should be done in the ***.sfvip environment***.
+Everything that follows should be done in the ***.sfvip*** environment.
 ### Upgrade dependencies
 ```console
 python -m upgrade
@@ -56,11 +56,11 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 ### Build an ***x86*** version
 Create another [***environment***](#Create-the-environment) with a ***32bit Python*** version:  
 It should be called ***.sfvip32*** or you have to set [***`Environments.x86`***](build_config.py#L{line_of_x86}) appropriately.  
-You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy.  
+You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console
 rustup target add i686-pc-windows-msvc
 ```
 ### Build a specific version:
 ```console
-python -m build [--x86 | --x64 | --both]
+python -m build [--x86 | --x64 | --both] [--upgrade] [--mingw]
 ```

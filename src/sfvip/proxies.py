@@ -45,7 +45,7 @@ def _fix_upstream(url: str) -> Optional[str]:
 class LocalProxies:
     """start a local proxy for each upstream proxies (no upstream proxy count as one)"""
 
-    _localhost = "http://127.0.0.1"
+    _localhost = "http://127.0.0.1:{port}"
 
     def __init__(self, all_category: AllCategory, upstreams: set[str]) -> None:
         self._all_category = all_category
@@ -63,14 +63,13 @@ class LocalProxies:
             if self._upstreams:
                 modes: set[Mode] = set()
                 excluded_ports = _ports_from(self._upstreams)
-                excluded_ports = set(range(1024, 9000))
                 for upstream in self._upstreams:
                     upstream_fixed = _fix_upstream(upstream)
                     if upstream_fixed is not None:
                         port = _find_port(excluded_ports)
                         excluded_ports.add(port)
                         modes.add(Mode(port=port, upstream=upstream_fixed))
-                        self._by_upstreams[upstream] = f"{LocalProxies._localhost}:{port}"
+                        self._by_upstreams[upstream] = LocalProxies._localhost.format(port=port)
                 if modes:
                     self._mitm_proxy = MitmLocalProxy(SfVipAddOn(self._all_category), modes)
                     self._mitm_proxy.start()

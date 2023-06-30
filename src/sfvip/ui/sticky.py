@@ -109,17 +109,19 @@ class StickyWindows:
                 StickyWindows.bring_to_front_all(state.is_topmost)
                 if state.rect != StickyWindows._current_rect:
                     StickyWindows._current_rect = state.rect
-                    StickyWindows.change_position_all(FixMaximized.fix(state.rect))
+                    StickyWindows.change_position_all(_Maximized.fix(state.rect))
 
 
-class FixMaximized:
-    _monitor_rects = [Rect(*area.work_area, True) for area in monitor.monitors_areas()]
+class _Maximized:
+    """maximized window stay in its screen"""
+
+    _monitor_rects = tuple(Rect(*area.work_area, True) for area in monitor.monitors_areas())
 
     @staticmethod
     def fix(rect: Rect) -> Rect:
         if rect.is_maximized:
             # fix possible wrong zoomed coords
-            for monitor_rect in FixMaximized._monitor_rects:
+            for monitor_rect in _Maximized._monitor_rects:
                 if rect.is_middle_inside(monitor_rect):
                     return monitor_rect
         return rect
