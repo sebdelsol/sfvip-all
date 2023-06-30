@@ -1,5 +1,7 @@
+import platform
+import sys
 import tkinter as tk
-from typing import Callable, NamedTuple, Optional
+from typing import Callable, NamedTuple, Optional, Sequence
 
 from .fx import _Fade
 from .sticky import _Offset, _StickyWindow
@@ -10,8 +12,8 @@ from .widgets import _Button, _ListView, _set_border, _set_vscrollbar_style
 class AppInfo(NamedTuple):
     name: str
     version: str
-    app_64bit: bool
-    os_64bit: bool
+    app_64bit: bool = sys.maxsize == (2**63) - 1
+    os_64bit: bool = platform.machine().endswith("64")
 
 
 def get_bitness_str(is_64bit: bool) -> str:
@@ -37,7 +39,7 @@ class _InfoTheme:
 
 class _InfoStyle:
     stl = _Style().font("Calibri").font_size(12).max_width(30)
-    arrow = stl("➞").color("#707070").bigger(5)
+    arrow = stl("➜").color("#555555").bigger(5)
     upstream = stl.copy().color("#A0A0A0")
     proxy = stl.copy().white
     name = upstream.copy()
@@ -48,7 +50,7 @@ class _InfoStyle:
 
 def _get_infos_headers(app_name: str) -> tuple[_Style, ...]:
     return (
-        _InfoStyle.name("User Name").bigger(2).bold,
+        _InfoStyle.name("User").bigger(2).bold,
         _InfoStyle.blank,
         _InfoStyle.proxy(f"{app_name} Proxy").bigger(2).bold,
         _InfoStyle.blank,
@@ -87,7 +89,7 @@ def is_valid(info: Info) -> bool:
     return bool(info.proxy)
 
 
-def _are_infos_valid(infos: list[Info]) -> bool:
+def _are_infos_valid(infos: Sequence[Info]) -> bool:
     return all(is_valid(info) for info in infos)
 
 
@@ -149,7 +151,7 @@ class _InfosWindow(_StickyWindow):
         widget.bind("<Enter>", show, add="+")
         widget.bind("<Leave>", lambda _: self.hide(), add="+")
 
-    def set(self, infos: list[Info], player_relaunch: Optional[Callable[[], None]]) -> bool:
+    def set(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[], None]]) -> bool:
         rows = [_get_row(info) for info in infos]
         if not rows:
             rows = [_get_row(Info("", "-", ""))]

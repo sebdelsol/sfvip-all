@@ -36,7 +36,7 @@ def _remove_query_key(request: http.Request, key: str) -> None:
 
 
 def _get_query_key(request: http.Request, key: str) -> Optional[str]:
-    return _query(request).get(key, None)
+    return _query(request).get(key)
 
 
 def _response_json(response: http.Response) -> Optional[Any]:
