@@ -4,7 +4,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox
 from typing import Any, Callable, Optional, Sequence
 
-from .infos import AppInfo, Info, _InfosWindow, get_bitness_str
+from .infos import AppInfo, Info, _InfosWindow
 from .logo import _LogoWindow
 from .splash import _SplashWindow
 from .sticky import Rect, WinState
@@ -21,13 +21,13 @@ class UI(tk.Tk):
         self.splash = _SplashWindow(self._splash_img)
         self._infos = _InfosWindow(app_info)
         self._logo = _LogoWindow(logo_path, self._infos)
-        self._title = f"{app_info.name} v{app_info.version} {get_bitness_str(app_info.app_64bit)}"
+        self._title = f"{app_info.name} v{app_info.version} {app_info.bitness}"
 
-    def run_in_thread(self, target: Callable[..., None], *catch_exceptions: type[Exception]) -> None:
+    def run_in_thread(self, target: Callable[..., None], *exceptions: type[Exception]) -> None:
         """
         run the target function in a thread,
         handle the mainloop and quit ui when done
-        catch_exception is re-raised in the main thread
+        any exceptions is re-raised in the main thread
         """
 
         ui = self
@@ -40,7 +40,7 @@ class UI(tk.Tk):
             def run(self) -> None:
                 try:
                     super().run()
-                except catch_exceptions as exception:
+                except exceptions as exception:
                     self._catched = exception
                 finally:
                     ui.after(0, ui.quit)

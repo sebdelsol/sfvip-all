@@ -79,7 +79,7 @@ class _Database:
         self.lock = self._database._lock
         self.watcher = self._database.get_watcher()
         if self._database.is_file():
-            logger.info("accounts file: %s", self._database)
+            logger.info("accounts file is '%s'", self._database)
         else:
             logger.warning("no accounts file")
 

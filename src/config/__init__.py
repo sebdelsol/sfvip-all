@@ -38,12 +38,12 @@ class ConfigLoader:
         self._path.parent.mkdir(parents=True, exist_ok=True)
         with self._open("w") as f:
             json.dump(self._dict_from(self), f, indent=2)
-        logger.info("config saved to %s", self._path)
+        logger.info("config saved to '%s'", self._path)
 
     def load(self) -> None:
         with self._open("r") as f:
             self._map_dict_to(self, json.load(f))
-        logger.info("config loaded from %s", self._path)
+        logger.info("config loaded from '%s'", self._path)
 
     def update(self) -> None:
         try:

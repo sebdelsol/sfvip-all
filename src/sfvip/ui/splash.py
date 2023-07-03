@@ -21,7 +21,7 @@ class _SplashWindow(_StickyWindow):
     def show(self, rect: Rect) -> None:
         if rect.valid():
             self.change_position(_Maximized.fix(rect))
-            self.bring_to_front(is_topmost=True)
+            self.bring_to_front(is_topmost=True, is_foreground=True)
         self.attributes("-alpha", 1.0)
         self.deiconify()
 

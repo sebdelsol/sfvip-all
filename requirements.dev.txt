@@ -1,2 +1,2 @@
-imageio>=2.30.0
-nuitka>=1.6
+imageio>=2.31.1
+nuitka>=1.7.7

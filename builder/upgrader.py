@@ -113,12 +113,12 @@ class Upgrader:
                 break
 
             key = input(
-                f"{Stl.title('> q')}{Stl.low('uit')} {Stl.low('or')} "
+                f"{Stl.title('> e')}{Stl.low('xit')} {Stl.low('or')} "
                 f"{Stl.title('#')} {Stl.low('?')} {Stl.title()}"
             )
 
-            if key == "q":
-                print()
+            if key == "e":
+                print(Stl.title("Exit"))
                 break
 
             if key.isdigit() and 0 <= (i := int(key) - 1) < n:

@@ -20,7 +20,7 @@ def remove_old_exe_logs(app_name: str, keep: int) -> None:
         path = Path(sys.argv[0]).parent
         log_files = list(path.glob(f"{app_name} - *.log"))
         if len(log_files) > keep:
-            logger.info("keep the last %d logs", keep)
+            logger.info("keep the last %d log files", keep)
             log_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
             for log in log_files[keep:]:
                 try:
@@ -30,12 +30,12 @@ def remove_old_exe_logs(app_name: str, keep: int) -> None:
 
 
 def run_app(app_info: AppInfo, splash: Path, logo: Path) -> None:
-    app_roaming = Path(os.environ["APPDATA"]) / app_info.name
-    config = AppConfig(app_roaming / "Config All.json")
-    config.update()
     ui = UI(app_info, splash, logo)
-
     try:
+        app_roaming = Path(os.environ["APPDATA"]) / app_info.name
+        config = AppConfig(app_roaming / "Config All.json")
+        config.update()
+
         player = Player(config.player.path, ui)
         if config.player.path != player.path:
             config.player.path = player.path

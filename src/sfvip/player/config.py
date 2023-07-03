@@ -24,7 +24,7 @@ class _PlayerConfigDir:
     def path(cls) -> Path:
         path = Registry.value_by_name(*cls._from_registry)
         if path and (path := Path(path)).is_dir():
-            logger.info("player config dir: %s", path)
+            logger.info("player config dir is '%s'", path)
             return path
         raise PlayerError("Sfvip Player configuration directory not found")
 

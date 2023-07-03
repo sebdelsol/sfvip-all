@@ -4,7 +4,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Iterator, Protocol
+from typing import Iterator, Optional, Protocol
 from urllib.parse import quote
 
 from PIL import Image
@@ -21,6 +21,10 @@ class Data(Protocol):
     def path(self) -> str:
         ...
 
+    @property
+    def src(self) -> Optional[tuple[str, int]]:
+        ...
+
 
 class Datas:
     def __init__(self, *datas: type[Data]) -> None:
@@ -28,10 +32,10 @@ class Datas:
 
     def create_all(self) -> None:
         for data in self._datas:
-            if hasattr(data, "transform"):
+            if data.src:
+                src_path, size = data.src
+                Image.open(src_path).resize((size, size)).save(data.path)
                 print(Stl.title("Create"), Stl.high(data.__class__.__name__))
-                path, size = getattr(data, "transform")
-                Image.open(path).resize((size, size)).save(data.path)
 
     @property
     def include_datas(self) -> list[str]:

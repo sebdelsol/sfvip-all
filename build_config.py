@@ -3,7 +3,7 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.2.2"
+    version = "1.2.3"
     dir = "build"
 
 
@@ -15,11 +15,12 @@ class Environments:
 
 class Splash:
     path = "ressources/Sfvip All.png"
+    src = None
 
 
 class Logo:
     path = "ressources/logo.png"
-    transform = "ressources/Sfvip All.png", 28
+    src = "ressources/Sfvip All.png", 28
 
 
 class Github:
