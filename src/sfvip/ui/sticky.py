@@ -41,6 +41,7 @@ class WinState(NamedTuple):
     is_minimized: bool
     no_border: bool
     is_topmost: bool
+    is_foreground: bool
 
 
 class _StickyWindow(tk.Toplevel):
@@ -60,14 +61,15 @@ class _StickyWindow(tk.Toplevel):
         rect = rect.position(self._offset, w, h)
         self.geometry(rect.to_geometry())
 
-    def bring_to_front(self, is_topmost: bool) -> None:
+    def bring_to_front(self, is_topmost: bool, is_foreground: bool) -> None:
         if self.state() != "normal":
             self.deiconify()
-        if is_topmost:
-            self.attributes("-topmost", True)
-        else:
-            self.attributes("-topmost", True)
-            self.attributes("-topmost", False)
+        if is_foreground:
+            if is_topmost:
+                self.attributes("-topmost", True)
+            else:
+                self.attributes("-topmost", True)
+                self.attributes("-topmost", False)
 
 
 class StickyWindows:
@@ -91,9 +93,9 @@ class StickyWindows:
             sticky.change_position(rect)
 
     @staticmethod
-    def bring_to_front_all(is_topmost: bool) -> None:
+    def bring_to_front_all(is_topmost: bool, is_foreground: bool) -> None:
         for sticky in StickyWindows._instances:
-            sticky.bring_to_front(is_topmost)
+            sticky.bring_to_front(is_topmost, is_foreground)
 
     @staticmethod
     def withdraw_all() -> None:
@@ -106,7 +108,7 @@ class StickyWindows:
             if state.no_border or state.is_minimized:
                 StickyWindows.withdraw_all()
             elif state.rect.valid():
-                StickyWindows.bring_to_front_all(state.is_topmost)
+                StickyWindows.bring_to_front_all(state.is_topmost, state.is_foreground)
                 if state.rect != StickyWindows._current_rect:
                     StickyWindows._current_rect = state.rect
                     StickyWindows.change_position_all(_Maximized.fix(state.rect))

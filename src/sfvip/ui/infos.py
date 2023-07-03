@@ -15,15 +15,19 @@ class AppInfo(NamedTuple):
     app_64bit: bool = sys.maxsize == (2**63) - 1
     os_64bit: bool = platform.machine().endswith("64")
 
-
-def get_bitness_str(is_64bit: bool) -> str:
-    return "x64" if is_64bit else "x86"
+    @property
+    def bitness(self) -> str:
+        return "x64" if self.os_64bit else "x86"
 
 
 class Info(NamedTuple):
     name: str
     proxy: str
     upstream: str
+
+    @property
+    def is_valid(self) -> bool:
+        return bool(self.proxy)
 
 
 class _InfoTheme:
@@ -73,24 +77,19 @@ def _get_button_relaunch() -> _Style:
 
 
 def _get_app_info(app_info: AppInfo) -> _Style:
-    bitness = get_bitness_str(app_info.app_64bit)
-    return _InfoStyle.app(f"{app_info.name} v{app_info.version} {bitness}").grey
+    return _InfoStyle.app(f"{app_info.name} v{app_info.version} {app_info.bitness}").grey
 
 
 def _get_app_warn(app_info: AppInfo) -> _Style:
     if app_info.app_64bit != app_info.os_64bit:
-        warn = f"You should use the {get_bitness_str(app_info.os_64bit)} version!"
+        warn = f"You should use the {app_info.bitness} version"
     else:
         warn = ""
     return _InfoStyle.app_warn(warn)
 
 
-def is_valid(info: Info) -> bool:
-    return bool(info.proxy)
-
-
 def _are_infos_valid(infos: Sequence[Info]) -> bool:
-    return all(is_valid(info) for info in infos)
+    return all(info.is_valid for info in infos)
 
 
 class _InfosWindow(_StickyWindow):

@@ -33,22 +33,16 @@ class StartStopContextManager:
         ...
 
 
-ANY_PARAMETERS = ParamSpec("ANY_PARAMETERS")
-
-
 class _CallbackFileWatcher(NamedTuple):
-    _CallbackFunc = Callable[Concatenate[float, ANY_PARAMETERS], None]
+    _CallbackFunc = Callable[[float], None]
 
     func: _CallbackFunc
-    args: tuple[Any]
 
     def __call__(self, last_modified: float) -> None:
-        self.func(last_modified, *self.args)
+        self.func(last_modified)
 
 
 class FileWatcher(StartStopContextManager):
-    # _debounce_s = 0.1
-
     def __init__(self, path: Optional[Path]) -> None:
         self._observer: Optional[BaseObserver] = None
         self._callbacks: set[_CallbackFileWatcher] = set()
@@ -61,8 +55,8 @@ class FileWatcher(StartStopContextManager):
             for callback in self._callbacks:
                 callback(self._path.stat().st_mtime)
 
-    def add_callback(self, callback: _CallbackFileWatcher._CallbackFunc, *args: Any) -> None:
-        self._callbacks.add(_CallbackFileWatcher(callback, args))
+    def add_callback(self, callback: _CallbackFileWatcher._CallbackFunc) -> None:
+        self._callbacks.add(_CallbackFileWatcher(callback))
 
     def start(self) -> None:
         if self._path:
@@ -80,6 +74,9 @@ class FileWatcher(StartStopContextManager):
             self._observer = None
             self._callbacks = set()
             logger.info("watch stopped on file '%s'", self._path)
+
+
+ANY_PARAMETERS = ParamSpec("ANY_PARAMETERS")
 
 
 class _CallbackRegWatcher(NamedTuple):
@@ -164,27 +161,30 @@ class WindowWatcher(StartStopContextManager):
         self._thread: Optional[threading.Thread] = None
         self._callback: Optional[_CallbackWindowWatcher] = None
 
-    def _on_state_changed(self, hwnd: hook.HWND) -> None:
-        if self._callback and win.is_foreground(self._pid):
-            state = WinState(
-                Rect(*rect.get_rect(hwnd), win.is_maximized(hwnd)),
-                win.is_minimized(hwnd),
-                win.has_no_border(hwnd),
-                win.is_topmost(hwnd),
-            )
-            self._callback(state)
-            time.sleep(WindowWatcher._min_dt)
+    def _on_state_changed(self, hwnd: hook.HWND, check_foreground: bool = True) -> None:
+        if self._callback:
+            is_foreground = win.is_foreground(self._pid)
+            if is_foreground or not check_foreground:
+                state = WinState(
+                    Rect(*rect.get_rect(hwnd), win.is_maximized(hwnd)),
+                    win.is_minimized(hwnd),
+                    win.has_no_border(hwnd),
+                    win.is_topmost(hwnd),
+                    is_foreground,
+                )
+                self._callback(state)
+                time.sleep(WindowWatcher._min_dt)
 
     def _hook(self) -> None:
         while self._searching:
             time.sleep(0)
             if window := hook.get_window_from_pid(self._pid):
                 with hook.Hook(window, self._on_state_changed):
-                    # don't wait events that might come later
-                    self._on_state_changed(window.hwnd)
-                    # event loop for the hook
                     logger.info("watch started on window '%s'", window.title)
+                    # don't wait events that might come later
+                    self._on_state_changed(window.hwnd, check_foreground=False)
                     self._search_done.set()
+                    # event loop for the hook
                     self._event_loop.run()
                     logger.info("watch stopped on window '%s'", window.title)
                     break

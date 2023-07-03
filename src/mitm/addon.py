@@ -1,6 +1,7 @@
 # use separate named package to reduce what's imported by multiprocessing
 import json
 import logging
+import multiprocessing
 from dataclasses import dataclass
 from typing import Any, Optional, Protocol
 
@@ -31,7 +32,7 @@ def _query(request: http.Request) -> MultiDictView[str, str]:
     return getattr(request, "urlencoded_form" if request.method == "POST" else "query")
 
 
-def _remove_query_key(request: http.Request, key: str) -> None:
+def _del_query_key(request: http.Request, key: str) -> None:
     del _query(request)[key]
 
 
@@ -58,9 +59,9 @@ def _unused_category_id(categories: list[dict]) -> str:
     return "0"
 
 
-def _log(msg: str, panel: Panel, action: str) -> None:
-    txt = "%s category %s - id=%s - %s requested"
-    logger.info(txt, msg, panel.all_category_name, panel.all_category_id, action)
+def _log(verb: str, panel: Panel, action: str) -> None:
+    txt = "%s category '%s' (id=%s) for '%s' request"
+    logger.info(txt, verb, panel.all_category_name, panel.all_category_id, action)
 
 
 class SfVipAddOn:
@@ -79,6 +80,13 @@ class SfVipAddOn:
             panels = *panels, get_panel("live")
         self._category_panel = {panel.get_category: panel for panel in panels}
         self._categories_panel = {panel.get_categories: panel for panel in panels}
+        self._running = multiprocessing.Event()
+
+    def running(self) -> None:
+        self._running.set()
+
+    def wait_running(self, timeout: Optional[float] = None) -> bool:
+        return self._running.wait(timeout)
 
     def request(self, flow: http.HTTPFlow) -> None:
         if _is_api_request(flow.request):
@@ -88,7 +96,7 @@ class SfVipAddOn:
                 category_id = _get_query_key(flow.request, "category_id")
                 if category_id == panel.all_category_id:
                     # turn an all category query into a whole catalog query
-                    _remove_query_key(flow.request, "category_id")
+                    _del_query_key(flow.request, "category_id")
                     _log("serve", panel, action)
 
     def response(self, flow: http.HTTPFlow) -> None:

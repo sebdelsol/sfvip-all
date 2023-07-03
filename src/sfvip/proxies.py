@@ -71,8 +71,12 @@ class LocalProxies:
                         modes.add(Mode(port=port, upstream=upstream_fixed))
                         self._by_upstreams[upstream] = LocalProxies._localhost.format(port=port)
                 if modes:
-                    self._mitm_proxy = MitmLocalProxy(SfVipAddOn(self._all_category), modes)
+                    addon = SfVipAddOn(self._all_category)
+                    self._mitm_proxy = MitmLocalProxy(addon, modes)
                     self._mitm_proxy.start()
+                    # wait for proxies running so we're sure ports are bound
+                    if not addon.wait_running(timeout=5):
+                        raise LocalproxyError("Can't start local proxies !")
             return self
 
     def __exit__(self, *_) -> None:

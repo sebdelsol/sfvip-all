@@ -60,7 +60,7 @@ class _PlayerPath:
             else:
                 raise PlayerError("Sfvip Player not found")
         self.path: str = player_path  # it's been found # type: ignore
-        logger.info("player: %s", self.path)
+        logger.info("player is '%s'", self.path)
 
     @staticmethod
     def _valid_exe(path: Optional[Path | str]) -> bool:
