@@ -10,8 +10,10 @@ class ExitCodeProcess(ctypes.Structure):
 
 
 def exists(pid: int) -> bool:
-    """Check whether a process with the given pid exists. Works on Windows only.
-    Works even if the process is not owned by the current user."""
+    """
+    Check whether a process with the given pid exists. Works on Windows only
+    Works even if the process is not owned by the current user
+    """
     kernel32 = ctypes.windll.kernel32
 
     process = kernel32.OpenProcess(_SYNCHRONIZE, 0, pid)

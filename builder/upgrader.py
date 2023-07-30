@@ -40,7 +40,7 @@ class Upgrader:
     def _install(self, *options: str) -> None:
         assert self.python_exe
         with subprocess.Popen(
-            [self.python_exe, *Upgrader.pip_install, *options],
+            (self.python_exe, *Upgrader.pip_install, *options),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             bufsize=0,

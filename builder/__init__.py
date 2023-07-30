@@ -28,7 +28,7 @@ class Data(Protocol):
 
 class Datas:
     def __init__(self, *datas: type[Data]) -> None:
-        self._datas = [data() for data in datas]
+        self._datas = tuple(data() for data in datas)
 
     def create_all(self) -> None:
         for data in self._datas:
@@ -38,8 +38,8 @@ class Datas:
                 print(Stl.title("Create"), Stl.high(data.__class__.__name__))
 
     @property
-    def include_datas(self) -> list[str]:
-        return [f"--include-data-file={data.path}={data.path}" for data in self._datas]
+    def include_datas(self) -> tuple[str]:
+        return tuple(f"--include-data-file={data.path}={data.path}" for data in self._datas)
 
 
 def _get_args() -> argparse.Namespace:
@@ -105,7 +105,7 @@ class Builder:
         dist_name = _get_dist_name(self.build, is_64)
         dist_temp = _get_dist_temp(self.build, is_64)
         subprocess.run(
-            [
+            (
                 *(python_env.exe, "-m", "nuitka"),  # run nuitka
                 f"--force-stderr-spec=%PROGRAM%/../{self.build.name} - %TIME%.log",
                 f"--onefile-tempdir-spec=%CACHE_DIR%/{self.build.name}",
@@ -124,7 +124,7 @@ class Builder:
                 *self.onefile,
                 *self.include_datas,
                 self.build.main,
-            ],
+            ),
             check=True,
         )
         print(Stl.title("Create"), Stl.high(f"{dist_name}.zip"))
@@ -161,7 +161,7 @@ def _get_loc() -> int:
     get_py_files = "git ls-files -- '*.py'"
     count_non_blank_lines = "%{ ((Get-Content -Path $_) -notmatch '^\\s*$').Length }"
     loc = subprocess.run(
-        ["powershell", f"({get_py_files} | {count_non_blank_lines} | measure -Sum).Sum"],
+        ("powershell", f"({get_py_files} | {count_non_blank_lines} | measure -Sum).Sum"),
         text=True,
         check=False,
         capture_output=True,

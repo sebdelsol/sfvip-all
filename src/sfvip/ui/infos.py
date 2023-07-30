@@ -48,7 +48,7 @@ class _InfoStyle:
     proxy = stl.copy().white
     name = upstream.copy()
     blank = stl("")
-    app_warn = stl.copy().smaller(2).no_truncate.red
+    app_warn = stl.copy().smaller(2).no_truncate
     app = stl.copy().smaller(2)
 
 
@@ -83,9 +83,9 @@ def _get_app_info(app_info: AppInfo) -> _Style:
 def _get_app_warn(app_info: AppInfo) -> _Style:
     if app_info.app_64bit != app_info.os_64bit:
         warn = f"You should use the {app_info.bitness} version"
-    else:
-        warn = ""
-    return _InfoStyle.app_warn(warn)
+        return _InfoStyle.app_warn(warn).red
+    warn = "Search your whole catalog"
+    return _InfoStyle.app_warn(warn).lime_green
 
 
 def _are_infos_valid(infos: Sequence[Info]) -> bool:

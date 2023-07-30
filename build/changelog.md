@@ -1,5 +1,9 @@
+## 1.2.4
+* Upgrade requirements.
+* Still working with player 1.2.7.61.
+
 ## 1.2.3
-* Fix possible monitor areas overflow on x64
+* Fix possible monitor areas overflow on x64.
 
 ## 1.2.2
 * Hook cpu load reduced even in the worst case.
