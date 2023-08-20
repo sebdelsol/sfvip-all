@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 from PIL import Image
 
-from build_config import Build, Environments, Github
+from build_config import Environments, Github
 
 from .color import Stl
 from .env import PythonEnv, get_bitness_str
@@ -24,6 +24,15 @@ class Data(Protocol):
     @property
     def src(self) -> Optional[tuple[str, int]]:
         ...
+
+
+class BuildT(Protocol):
+    ico: str
+    main: str
+    name: str
+    company: str
+    version: str
+    dir: str
 
 
 class Datas:
@@ -54,11 +63,11 @@ def _get_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _get_dist_name(build: type[Build], is_64: bool) -> str:
+def _get_dist_name(build: BuildT, is_64: bool) -> str:
     return f"{build.dir}/{build.version}/{get_bitness_str(is_64)}/{build.name}"
 
 
-def _get_dist_temp(build: type[Build], is_64: bool) -> str:
+def _get_dist_temp(build: BuildT, is_64: bool) -> str:
     return f"{build.dir}/temp/{get_bitness_str(is_64)}"
 
 
@@ -90,7 +99,7 @@ def _get_builds_bitness(args: argparse.Namespace) -> Iterator[bool]:
 
 
 class Builder:
-    def __init__(self, build: type[Build], envs: type[Environments], datas: Datas) -> None:
+    def __init__(self, build: BuildT, envs: type[Environments], datas: Datas) -> None:
         self.build = build
         self.envs = envs
         args = _get_args()
@@ -101,30 +110,32 @@ class Builder:
         datas.create_all()
         self.include_datas = datas.include_datas
 
+    def _get_nuitka_args(self, dist_temp: str) -> tuple[str, ...]:
+        return (
+            f"--force-stderr-spec=%PROGRAM%/../{self.build.name} - %TIME%.log",
+            f"--onefile-tempdir-spec=%CACHE_DIR%/{self.build.name}",
+            f"--windows-file-version={self.build.version}",
+            f"--windows-company-name={self.build.company}",
+            f"--windows-icon-from-ico={self.build.ico}",
+            f"--output-filename={self.build.name}.exe",
+            f"--output-dir={dist_temp}",
+            "--assume-yes-for-downloads",
+            # needed for tkinter
+            "--enable-plugin=tk-inter",
+            "--python-flag=-OO",
+            "--disable-console",
+            "--standalone",
+            self.compiler,
+            *self.onefile,
+            *self.include_datas,
+            self.build.main,
+        )
+
     def _build_bitness(self, python_env: PythonEnv, is_64: bool) -> None:
         dist_name = _get_dist_name(self.build, is_64)
         dist_temp = _get_dist_temp(self.build, is_64)
         subprocess.run(
-            (
-                *(python_env.exe, "-m", "nuitka"),  # run nuitka
-                f"--force-stderr-spec=%PROGRAM%/../{self.build.name} - %TIME%.log",
-                f"--onefile-tempdir-spec=%CACHE_DIR%/{self.build.name}",
-                f"--windows-file-version={self.build.version}",
-                f"--windows-company-name={self.build.company}",
-                f"--windows-icon-from-ico={self.build.ico}",
-                f"--output-filename={self.build.name}.exe",
-                f"--output-dir={dist_temp}",
-                "--assume-yes-for-downloads",
-                # needed for tkinter
-                "--enable-plugin=tk-inter",
-                "--python-flag=-OO",
-                "--disable-console",
-                "--standalone",
-                self.compiler,
-                *self.onefile,
-                *self.include_datas,
-                self.build.main,
-            ),
+            (*(python_env.exe, "-m", "nuitka"), *self._get_nuitka_args(dist_temp)),
             check=True,
         )
         print(Stl.title("Create"), Stl.high(f"{dist_name}.zip"))
@@ -181,7 +192,8 @@ def _get_line_of_attr(obj: type, name: str) -> int:
 
 
 class Templates:
-    def __init__(self, build: type[Build], envs: type[Environments], github: type[Github]) -> None:
+    def __init__(self, build: BuildT, envs: type[Environments], github: type[Github]) -> None:
+        self.build = build
         dist_name64 = _get_dist_name(build, is_64=True)
         dist_name32 = _get_dist_name(build, is_64=False)
         python_version = _get_python_version(envs)
@@ -208,4 +220,4 @@ class Templates:
         print(Stl.title("create"), Stl.high("readme"))
         self._apply_template("ressources/README_template.md", "README.md")
         print(Stl.title("create"), Stl.high("post"))
-        self._apply_template("ressources/post_template.txt", f"{Build.dir}/{Build.version}/post.txt")
+        self._apply_template("ressources/post_template.txt", f"{self.build.dir}/{self.build.version}/post.txt")
