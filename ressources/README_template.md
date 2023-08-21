@@ -17,6 +17,11 @@ You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threa
 
 Check the [***changelog***](build/changelog.md).
 
+### SfvipUserProxy
+Add or remove a global user proxy for all users in ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** database.
+
+Check it [***here***](sfvip_user_proxy).
+
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-lightgrey)](https://nuitka.net/)

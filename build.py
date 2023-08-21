@@ -1,7 +1,7 @@
-from build_config import Build, Environments, Github, Logo, Splash
-from builder import Builder, Datas, Templates
+from build_config import Build, Environments, Github, Logo, Nuitka, Splash, Templates
+from builder import Builder, CreateTemplates, Datas
 
 if __name__ == "__main__":
     datas = Datas(Logo, Splash)
-    Builder(Build, Environments, datas).build_all()
-    Templates(Build, Environments, Github).create_all()
+    Builder(Build, Environments, Nuitka, datas).build_all()
+    CreateTemplates(Build, Environments, Templates, Github).create_all()

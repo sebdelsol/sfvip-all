@@ -90,5 +90,9 @@ class Users:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("url", nargs="?", default="", help="global user proxy url")
-    Users().set_user_proxy(parser.parse_args().url)
+    gp = parser.add_mutually_exclusive_group(required=True)
+    gp.add_argument("url", nargs="?", help="add a global user proxy url")
+    gp.add_argument("--remove", action="store_true", help="remove global user proxy")
+    args = parser.parse_args()
+    url = "" if args.remove else args.url
+    Users().set_user_proxy(url)

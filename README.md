@@ -17,11 +17,16 @@ You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threa
 
 Check the [***changelog***](build/changelog.md).
 
+### SfvipUserProxy
+Add or remove a global user proxy for all users in ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** database.
+
+Check it [***here***](sfvip_user_proxy).
+
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.4-fbdf79)](https://www.python.org/downloads/release/python-3114/)
 [![dist](https://img.shields.io/badge/Dist-Nuitka-lightgrey)](https://nuitka.net/)
 [![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Sloc-2612-informational)
+![sloc](https://img.shields.io/badge/Sloc-2634-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an environment
@@ -55,7 +60,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 ### Build an ***x86*** version
 Create another [***environment***](#Create-the-environment) with a ***32bit Python*** version:  
-It should be called ***.sfvip32*** or you have to set [***`Environments.x86`***](build_config.py#L12) appropriately.  
+It should be called ***.sfvip32*** or you have to set [***`Environments.x86`***](build_config.py#L27) appropriately.  
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console
 rustup target add i686-pc-windows-msvc

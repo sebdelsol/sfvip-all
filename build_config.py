@@ -7,8 +7,23 @@ class Build:
     dir = "build"
 
 
+class Nuitka:
+    args = [
+        f"--force-stderr-spec=%PROGRAM%/../{Build.name} - %TIME%.log",
+        "--enable-plugin=tk-inter",
+        "--disable-console",
+    ]
+
+
+class Templates:
+    list = [
+        ("ressources/README_template.md", "README.md"),
+        ("ressources/post_template.txt", f"{Build.dir}/{Build.version}/post.txt"),
+    ]
+
+
 class Environments:
-    requirements = "requirements.txt", "requirements.dev.txt"
+    requirements = ["requirements.txt", "requirements.dev.txt"]
     x86 = ".sfvip32"
     x64 = ".sfvip"
 
