@@ -8,7 +8,7 @@ class Build:
     dir = "user_proxy_cmd/build"
     name = "SfvipUserProxy"
     company = "sebdelsol"
-    version = "0.2"
+    version = "0.3"
 
 
 class Nuitka:

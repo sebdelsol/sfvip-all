@@ -1,6 +1,0 @@
-[B][SIZE=20px]sfvip_user_proxy[/B][/SIZE] 0.1
-[SIZE=10px][I]Dodajte globalni korisnički proksi za sve korisnike / Add a global user proxy for all users[/I][/SIZE]
-[HR][/HR]
-[URL='https://github.com/sebdelsol/sfvip-all/raw/master/sfvip_user_proxy/build/0.1/x64/sfvip_user_proxy.exe'][B]x64[/B][/URL] - [URL='https://github.com/sebdelsol/sfvip-all/raw/master/sfvip_user_proxy/build/0.1/x86/sfvip_user_proxy.exe'][B]x86[/B][/URL] - [URL='https://github.com/sebdelsol/sfvip-all'][B]Github[/B][/URL]  
-[HR][/HR]
-[SIZE=10px][I]Dodajte ⭐ ako vam odgovara / Add a ⭐ if you like it[/I][/SIZE]

@@ -11,14 +11,13 @@ So you can easily **search your entire catalog**.
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
+Get [***SfvipUserProxy***](user_proxy_cmd) command to add or remove a global user proxy for all users in ***Sfvip Player*** database.
+
 [^1]:You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** lastest version already installed _and preferably launched at least once._  
 _**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._  
 _**Sfvip All.exe** might trigger your antivirus because even Nuitka build are not exempt from it._  
 _**Sfvip All.exe** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._
-
-### SfvipUserProxy command
-Get it [***here***](user_proxy_cmd) to add or remove a global user proxy for all users in ***Sfvip Player*** database.
 
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)

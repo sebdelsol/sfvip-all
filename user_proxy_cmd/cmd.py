@@ -1,11 +1,3 @@
-# Use Python 3.11 with no dependencies
-
-# set a global user proxy:
-# python -m sfvip_user_proxy http://127.0.0.1:8888
-
-# remove the global user proxy:
-# python -m sfvip_puser_proxy
-
 import argparse
 import json
 import logging

@@ -1,5 +1,5 @@
-# {name} command
-***{name}*** add or remove an user proxy for **all users** in ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** database.
+# {name}
+***{name}*** command add or remove an user proxy for **all users** in ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** database.
 
 <img src="https://img.shields.io/badge/Version-{version}-informational" valign="middle"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/{github_path}/raw/master/{exe64_link}).
 
@@ -20,5 +20,5 @@
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 
 ```console
-python -m user_proxy.build [--x86 | --x64 | --both] [--upgrade] [--mingw]
+python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--upgrade] [--mingw]
 ```
