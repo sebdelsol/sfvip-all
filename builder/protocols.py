@@ -1,4 +1,4 @@
-from typing import NamedTuple, Optional, Protocol
+from typing import Optional, Protocol
 
 
 class Data(Protocol):
@@ -37,8 +37,3 @@ class Environments(Protocol):
 class Github(Protocol):
     owner: str
     repo: str
-
-
-class Template(NamedTuple):
-    src: str
-    dst: str

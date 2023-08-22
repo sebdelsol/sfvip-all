@@ -37,7 +37,7 @@ python -m pip install -r requirements.dev.txt
 Everything that follows should be done in the ***.sfvip*** environment.
 ### Upgrade dependencies
 ```console
-python -m upgrade
+python -m upgrade [--eager]
 ```
 ### Run locally
 ```console

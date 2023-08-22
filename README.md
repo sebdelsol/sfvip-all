@@ -23,7 +23,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.4-fbdf79)](https://www.python.org/downloads/release/python-3114/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.7.10-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-2642-informational)
+![Sloc](https://img.shields.io/badge/Sloc-2650-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an environment
@@ -37,7 +37,7 @@ python -m pip install -r requirements.dev.txt
 Everything that follows should be done in the ***.sfvip*** environment.
 ### Upgrade dependencies
 ```console
-python -m upgrade
+python -m upgrade [--eager]
 ```
 ### Run locally
 ```console

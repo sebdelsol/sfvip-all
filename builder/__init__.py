@@ -4,14 +4,14 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, NamedTuple
 from urllib.parse import quote
 
 from PIL import Image
 
 from .color import Stl
 from .env import PythonEnv, get_bitness_str
-from .protocols import Build, Data, Environments, Github, Nuitka, Template, Templates
+from .protocols import Build, Data, Environments, Github, Nuitka, Templates
 from .upgrader import Upgrader
 
 
@@ -146,7 +146,7 @@ class Builder:
             python_env.print()
             if python_env.check(is_64):
                 if self.upgrade:
-                    Upgrader(python_env).install_for(*self.environments.requirements)
+                    Upgrader(python_env).install_for(*self.environments.requirements, eager=False)
                 self._build_bitness(python_env, is_64)
             else:
                 print(Stl.warn("Build Failed"))
@@ -182,6 +182,11 @@ def _get_line_of_attr(obj: Any, name: str) -> int:
     return 0
 
 
+class _Template(NamedTuple):
+    src: str
+    dst: str
+
+
 class CreateTemplates:
     def __init__(self, build: Build, environments: Environments, templates: Templates, github: Github) -> None:
         self.build = build
@@ -212,6 +217,6 @@ class CreateTemplates:
 
     def create_all(self) -> None:
         for template in self.templates.list:
-            template = Template(*template)
+            template = _Template(*template)
             print(Stl.title("create"), Stl.high(template.dst))
             self._apply_template(template.src, template.dst)

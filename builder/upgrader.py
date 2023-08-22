@@ -57,15 +57,19 @@ class Upgrader:
                         print(f"{line}\r", end="")
             line_clear()
 
-    def _to_upgrade(self, req_file: str) -> list[Pckg]:
+    def _to_upgrade(self, req_file: str, eager: bool) -> list[Pckg]:
         print(Stl.title("Check upgrade for"), Stl.high(req_file))
 
-        report_file = f"{req_file}.json"
-        self._install("--dry-run", "-r", req_file, "--report", report_file)
+        report_file = Path(f"{req_file}.json")
+        self._install(
+            "--dry-run",
+            *("-r", req_file),
+            *("--report", report_file.name),
+            *("--upgrade-strategy", "eager" if eager else "only-if-needed"),
+        )
 
-        report_file = Path(report_file)
         if report_file.exists():
-            with open(report_file, mode="r", encoding="utf8") as f:
+            with report_file.open(mode="r", encoding="utf8") as f:
                 report = json.load(f)
             report_file.unlink()
 
@@ -96,14 +100,14 @@ class Upgrader:
                 print(Stl.title(f" {i + 1}."), name, version, Stl.low("from"), req)
         return n
 
-    def install_for(self, *req_files: str) -> None:
+    def install_for(self, *req_files: str, eager: bool) -> None:
         if not self.python_exe:
             return
         # flush the input buffer
         while msvcrt.kbhit():
             msvcrt.getch()
 
-        to_upgrade = sum((self._to_upgrade(req_file) for req_file in req_files), [])
+        to_upgrade = sum((self._to_upgrade(req_file, eager) for req_file in req_files), [])
 
         while True:
             n = self._show_upgrade(to_upgrade)
