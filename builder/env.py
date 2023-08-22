@@ -34,18 +34,25 @@ class PythonEnv:
         return sys.maxsize == (2**63) - 1
 
     @cached_property
-    def version(self) -> str:
+    def python_version(self) -> str:
         if self._exe:
             version = subprocess.run([self._exe, "--version"], check=True, capture_output=True, text=True)
             return version.stdout.replace("\n", "").split()[1]
         return sys.version.split(" ", maxsplit=1)[0]
+
+    def package_version(self, package_name: str) -> str:
+        if self._exe:
+            script = f"import importlib.metadata; print(importlib.metadata.version('{package_name}'))"
+            version = subprocess.run([self._exe, "-c", script], check=False, capture_output=True, text=True)
+            return version.stdout.strip()
+        return "version not found"
 
     def print(self) -> None:
         print(
             Stl.title("In "),
             Stl.high(get_bitness_str(self.is_64bit)),
             Stl.title(" Python "),
-            Stl.high(self.version),
+            Stl.high(self.python_version),
             Stl.title(" environment "),
             Stl.low(str(self._env.parent.resolve())),
             Stl.low("\\"),

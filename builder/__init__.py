@@ -4,52 +4,15 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, Iterator, NamedTuple, Optional, Protocol
+from typing import Any, Callable, Iterator
 from urllib.parse import quote
 
 from PIL import Image
 
 from .color import Stl
 from .env import PythonEnv, get_bitness_str
+from .protocols import Build, Data, Environments, Github, Nuitka, Template, Templates
 from .upgrader import Upgrader
-
-
-class Data(Protocol):
-    @property
-    def path(self) -> str:
-        ...
-
-    @property
-    def src(self) -> Optional[tuple[str, int]]:
-        ...
-
-
-class Build(Protocol):
-    ico: str
-    main: str
-    name: str
-    company: str
-    version: str
-    dir: str
-
-
-class Nuitka(Protocol):
-    args: list[str]
-
-
-class Templates(Protocol):
-    list: list[str]
-
-
-class Environments(Protocol):
-    requirements: list[str]
-    x86: str
-    x64: str
-
-
-class Github(Protocol):
-    owner: str
-    repo: str
 
 
 class Datas:
@@ -92,14 +55,21 @@ def _get_env(environments: Environments, is_64: bool) -> PythonEnv:
     return PythonEnv(environments.x64 if is_64 else environments.x86)
 
 
+def _get_version_of(environments: Environments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
+    versions = {is_64: get_version(_get_env(environments, is_64=is_64)) for is_64 in (True, False)}
+    if versions[True] != versions[False]:
+        print(Stl.high("x64"), Stl.warn("and"), Stl.high(f"x86 {name}"), Stl.warn("versions differ !"))
+        for is_64 in (True, False):
+            print(Stl.high(get_bitness_str(is_64)), Stl.title(f"{name} is"), Stl.high(versions[is_64]))
+    return versions[True]
+
+
 def _get_python_version(environments: Environments) -> str:
-    python_version64 = _get_env(environments, is_64=True).version
-    python_version32 = _get_env(environments, is_64=False).version
-    if python_version64 != python_version32:
-        print(Stl.warn("x64 and x86 Python versions differ !"))
-        print(Stl.high(get_bitness_str(True)), Stl.title("Python is"), Stl.high(python_version64))
-        print(Stl.high(get_bitness_str(False)), Stl.title("Python is"), Stl.high(python_version32))
-    return python_version64
+    return _get_version_of(environments, "Python", lambda environment: environment.python_version)
+
+
+def _get_nuitka_version(environments: Environments) -> str:
+    return _get_version_of(environments, "Nuitka", lambda environment: environment.package_version("nuitka"))
 
 
 def _get_builds_bitness(args: argparse.Namespace) -> Iterator[bool]:
@@ -115,7 +85,7 @@ def _get_builds_bitness(args: argparse.Namespace) -> Iterator[bool]:
         yield PythonEnv().is_64bit
 
 
-def _print_size(path: str) -> None:
+def _print_filename_size(path: str) -> None:
     size = Path(path).stat().st_size / 1024
     print(Stl.title(f"{size:.0f}"), Stl.low("KB"))
 
@@ -159,11 +129,11 @@ class Builder:
         )
         print(Stl.title("Create"), Stl.high(f"{dist_name}.zip"), end=" ")
         shutil.make_archive(dist_name, "zip", f"{dist_temp}/{Path(self.build.main).stem}.dist")
-        _print_size(f"{dist_name}.zip")
+        _print_filename_size(f"{dist_name}.zip")
         if self.onefile:
             print(Stl.title("Create"), Stl.high(f"{dist_name}.exe"), end=" ")
             shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
-            _print_size(f"{dist_name}.exe")
+            _print_filename_size(f"{dist_name}.exe")
         else:
             print(Stl.warn("Warning:"), Stl.high(f"{dist_name}.exe"), Stl.warn("not created !"))
 
@@ -212,11 +182,6 @@ def _get_line_of_attr(obj: Any, name: str) -> int:
     return 0
 
 
-class Template(NamedTuple):
-    src: str
-    dst: str
-
-
 class CreateTemplates:
     def __init__(self, build: Build, environments: Environments, templates: Templates, github: Github) -> None:
         self.build = build
@@ -224,6 +189,7 @@ class CreateTemplates:
         dist_name64 = _get_dist_name(build, is_64=True)
         dist_name32 = _get_dist_name(build, is_64=False)
         python_version = _get_python_version(environments)
+        nuitka_version = _get_nuitka_version(environments)
         self.template_format = dict(
             line_of_x86=_get_line_of_attr(environments, "x86"),
             py_version_compact=python_version.replace(".", ""),
@@ -233,6 +199,7 @@ class CreateTemplates:
             exe64_link=quote(f"{dist_name64}.exe"),
             exe32_link=quote(f"{dist_name32}.exe"),
             py_version=python_version,
+            nuitka_version=nuitka_version,
             ico_link=quote(build.ico),
             version=build.version,
             name=build.name,

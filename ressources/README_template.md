@@ -9,24 +9,22 @@ So you can easily **search your entire catalog**.
 
 <img src="https://img.shields.io/badge/Version-{version}-informational" valign="middle"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/{github_path}/raw/master/{exe32_link}) or [zip](https://github.com/{github_path}/raw/master/{archive32_link}).
 
-You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** lastest version already installed <sub><sup>_and preferably launched at least once._</sup></sub>  
-<sub>_**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._</sub>  
-<sub>_**Sfvip All.exe** might trigger your antivirus because even Nuitka build are not exempt from it._</sub>  
-<sub>_**Sfvip All.exe** will ask you for network connection its first run because it relies on local proxies to do its magic._</sub>  
-<sub>_On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._</sub>
+Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
-Check the [***changelog***](build/changelog.md).
+[^1]:You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** lastest version already installed _and preferably launched at least once._  
+_**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._  
+_**Sfvip All.exe** might trigger your antivirus because even Nuitka build are not exempt from it._  
+_**Sfvip All.exe** will ask you for network connection its first run because it relies on local proxies to do its magic._  
+_On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._
 
-### SfvipUserProxy
-Add or remove a global user proxy for all users in ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** database.
-
-Check it [***here***](sfvip_user_proxy).
+### SfvipUserProxy command
+Get it [***here***](user_proxy_cmd) to add or remove a global user proxy for all users in ***Sfvip Player*** database.
 
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
-[![dist](https://img.shields.io/badge/Dist-Nuitka-lightgrey)](https://nuitka.net/)
-[![style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![sloc](https://img.shields.io/badge/Sloc-{loc}-informational)
+[![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-lightgrey)](https://nuitka.net/)
+[![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
+![Sloc](https://img.shields.io/badge/Sloc-{loc}-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an environment

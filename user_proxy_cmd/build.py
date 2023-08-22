@@ -3,9 +3,9 @@ from builder import Builder, CreateTemplates, Datas
 
 
 class Build:
-    main = "sfvip_user_proxy/sfvip_user_proxy.py"
+    main = "user_proxy_cmd/cmd.py"
     ico = "ressources/Sfvip All.png"
-    dir = "sfvip_user_proxy/build"
+    dir = "user_proxy_cmd/build"
     name = "SfvipUserProxy"
     company = "sebdelsol"
     version = "0.2"
@@ -17,8 +17,8 @@ class Nuitka:
 
 class Templates:
     list = [
-        ("sfvip_user_proxy/README_template.md", "sfvip_user_proxy/README.md"),
-        ("sfvip_user_proxy/post_template.txt", f"{Build.dir}/{Build.version}/post.txt"),
+        ("user_proxy_cmd/ressources/README_template.md", "user_proxy_cmd/README.md"),
+        ("user_proxy_cmd/ressources/post_template.txt", f"{Build.dir}/{Build.version}/post.txt"),
     ]
 
 

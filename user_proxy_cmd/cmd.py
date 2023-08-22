@@ -35,7 +35,7 @@ class _JsonTrailingCommas:
         return _JsonTrailingCommas._array.sub("]", json_str)
 
 
-class User(SimpleNamespace):
+class _User(SimpleNamespace):
     _playlist_ext = ".m3u", ".m3u8"
 
     def __init__(self, **kwargs: str) -> None:
@@ -47,7 +47,7 @@ class User(SimpleNamespace):
 
     def is_playlist(self) -> bool:
         path = Path(self.Address)
-        return path.suffix in User._playlist_ext or path.is_file()
+        return path.suffix in _User._playlist_ext or path.is_file()
 
 
 class Users:
@@ -56,11 +56,11 @@ class Users:
     _encoding = "utf-8"
 
     class _Encoder(json.JSONEncoder):
-        def default(self, o: User) -> dict[str, str]:
+        def default(self, o: _User) -> dict[str, str]:
             return o.__dict__
 
     def __init__(self) -> None:
-        self._users: list[User] = []
+        self._users: list[_User] = []
         self._database = Path(reg_value_by_name(*Users._from_registry)) / Users._filename
         logging.info("Users database %s", self._database if self._database.is_file() else "NOT found")
 
@@ -68,7 +68,7 @@ class Users:
         with self._database.open("r", encoding=Users._encoding) as f:
             json_str = _JsonTrailingCommas.remove(f.read())
             try:
-                self._users = json.loads(json_str, object_hook=lambda dct: User(**dct))
+                self._users = json.loads(json_str, object_hook=lambda dct: _User(**dct))
             except json.decoder.JSONDecodeError:
                 self._users = []
 
