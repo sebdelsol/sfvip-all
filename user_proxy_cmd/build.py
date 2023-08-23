@@ -1,5 +1,5 @@
 from build_config import Environments, Github
-from builder import Builder, CreateTemplates, Datas
+from builder import Builder, Datas, Templater
 
 
 class Build:
@@ -30,4 +30,4 @@ class UserProxyEnvironements:
 
 if __name__ == "__main__":
     Builder(Build, UserProxyEnvironements, Nuitka, Datas()).build_all()
-    CreateTemplates(Build, UserProxyEnvironements, Templates, Github).create_all()
+    Templater(Build, UserProxyEnvironements, Templates, Github).create_all()

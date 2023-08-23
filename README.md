@@ -5,13 +5,13 @@ So you can easily **search your entire catalog**.
 <img src="ressources/all.png">
 
 # Download
-<img src="https://img.shields.io/badge/Version-1.2.4-informational" valign="middle"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.4/x64/Sfvip%20All.exe) or [zip](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.4/x64/Sfvip%20All.zip).
+[<img src="https://img.shields.io/badge/Version-1.2.4-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.4/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.4/x64/Sfvip%20All.zip)
 
-<img src="https://img.shields.io/badge/Version-1.2.4-informational" valign="middle"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.4/x86/Sfvip%20All.exe) or [zip](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.4/x86/Sfvip%20All.zip).
+[<img src="https://img.shields.io/badge/Version-1.2.4-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.4/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.4/x86/Sfvip%20All.zip)
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
-Get [***SfvipUserProxy***](user_proxy_cmd) command to add or remove a global user proxy for all users in ***Sfvip Player*** database.
+Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove a global user proxy for all users in ***Sfvip Player*** database.
 
 [^1]:You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** lastest version already installed _and preferably launched at least once._  
 _**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._  
@@ -23,7 +23,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.4-fbdf79)](https://www.python.org/downloads/release/python-3114/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.7.10-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-2650-informational)
+![Sloc](https://img.shields.io/badge/Sloc-2642-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an environment
@@ -31,8 +31,7 @@ Check the [***build config***](build_config.py).
 python -m venv .sfvip
 .sfvip\scripts\activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m pip install -r requirements.dev.txt
+python -m pip install -r requirements.txt -r requirements.dev.txt
 ```
 Everything that follows should be done in the ***.sfvip*** environment.
 ### Upgrade dependencies

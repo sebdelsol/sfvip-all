@@ -25,7 +25,7 @@ class Nuitka(Protocol):
 
 
 class Templates(Protocol):
-    list: list[str]
+    list: list[tuple[str, str]]
 
 
 class Environments(Protocol):

@@ -1,13 +1,12 @@
-import argparse
 import inspect
-import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, Callable, Iterator, NamedTuple
+from typing import Any, Callable, Self
 from urllib.parse import quote
 
 from PIL import Image
+from tap import Tap
 
 from .color import Stl
 from .env import PythonEnv, get_bitness_str
@@ -19,28 +18,27 @@ class Datas:
     def __init__(self, *datas: type[Data]) -> None:
         self._datas = tuple(data() for data in datas)
 
-    def create_all(self) -> None:
+    def create_all(self) -> Self:
         for data in self._datas:
             if data.src:
                 src_path, size = data.src
                 Image.open(src_path).resize((size, size)).save(data.path)
                 print(Stl.title("Create"), Stl.high(data.__class__.__name__))
+        return self
 
     @property
     def include_datas(self) -> tuple[str]:
         return tuple(f"--include-data-file={data.path}={data.path}" for data in self._datas)
 
 
-def _get_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--nobuild", "--readme", action="store_true", help="update readme and post only")
-    parser.add_argument("--upgrade", action="store_true", help="upgrade the environment")
-    parser.add_argument("--noexe", action="store_true", help="create only a zip (faster)")
-    parser.add_argument("--mingw", action="store_true", help="build with mingw64")
-    parser.add_argument("--both", action="store_true", help="build x64 and x86 version")
-    parser.add_argument("--x86", action="store_true", help="build x86 version")
-    parser.add_argument("--x64", action="store_true", help="build x64 version")
-    return parser.parse_args()
+class Args(Tap):
+    readme: bool = False  # update readme and post only
+    upgrade: bool = False  # upgrade the environment
+    noexe: bool = False  # create only a zip (faster)
+    mingw: bool = False  # build with mingw64
+    both: bool = False  # build x64 and x86 versions
+    x86: bool = False  # build x86 version
+    x64: bool = False  # build x64 version
 
 
 def _get_dist_name(build: Build, is_64: bool) -> str:
@@ -51,12 +49,12 @@ def _get_dist_temp(build: Build, is_64: bool) -> str:
     return f"{build.dir}/temp/{get_bitness_str(is_64)}"
 
 
-def _get_env(environments: Environments, is_64: bool) -> PythonEnv:
+def _get_python_env(environments: Environments, is_64: bool) -> PythonEnv:
     return PythonEnv(environments.x64 if is_64 else environments.x86)
 
 
 def _get_version_of(environments: Environments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
-    versions = {is_64: get_version(_get_env(environments, is_64=is_64)) for is_64 in (True, False)}
+    versions = {is_64: get_version(_get_python_env(environments, is_64=is_64)) for is_64 in (True, False)}
     if versions[True] != versions[False]:
         print(Stl.high("x64"), Stl.warn("and"), Stl.high(f"x86 {name}"), Stl.warn("versions differ !"))
         for is_64 in (True, False):
@@ -72,17 +70,16 @@ def _get_nuitka_version(environments: Environments) -> str:
     return _get_version_of(environments, "Nuitka", lambda environment: environment.package_version("nuitka"))
 
 
-def _get_builds_bitness(args: argparse.Namespace) -> Iterator[bool]:
-    if args.nobuild:
-        return
-        yield
-    if args.x64 or args.x86 or args.both:
-        if args.x64 or args.both:
-            yield True
-        if args.x86 or args.both:
-            yield False
-    else:
-        yield PythonEnv().is_64bit
+def _are_builds_64bits(args: Args) -> set[bool]:
+    if args.readme:
+        return set()
+    if args.both or (args.x64 and args.x86):
+        return {True, False}
+    if args.x64:
+        return {True}
+    if args.x86:
+        return {False}
+    return {PythonEnv().is_64bit}
 
 
 def _print_filename_size(path: str) -> None:
@@ -91,18 +88,20 @@ def _print_filename_size(path: str) -> None:
 
 
 class Builder:
-    # pylint: disable=too-many-instance-attributes
     def __init__(self, build: Build, environments: Environments, nuitka: Nuitka, datas: Datas) -> None:
+        args = Args().parse_args()
         self.build = build
         self.environments = environments
-        self.nuitka = nuitka
-        args = _get_args()
-        self.compiler = "--mingw64" if args.mingw else "--clang"
-        self.builds_bitness = list(_get_builds_bitness(args))
-        self.onefile = () if args.noexe else ("--onefile",)
+        self.are_builds_64bits = _are_builds_64bits(args)
+        self.onefile = not args.noexe
         self.upgrade = args.upgrade
-        datas.create_all()
-        self.include_datas = datas.include_datas
+        self.nuitka_args = (
+            "--mingw64" if args.mingw else "--clang",
+            *datas.create_all().include_datas,
+            *nuitka.args,
+        )
+        if self.onefile:
+            self.nuitka_args = *self.nuitka_args, "--onefile"
 
     def _build_bitness(self, python_env: PythonEnv, is_64: bool) -> None:
         dist_name = _get_dist_name(self.build, is_64)
@@ -110,7 +109,6 @@ class Builder:
         subprocess.run(
             (
                 *(python_env.exe, "-m", "nuitka"),
-                *self.nuitka.args,
                 f"--onefile-tempdir-spec=%CACHE_DIR%/{self.build.name}",
                 f"--windows-file-version={self.build.version}",
                 f"--windows-company-name={self.build.company}",
@@ -120,9 +118,7 @@ class Builder:
                 "--assume-yes-for-downloads",
                 "--python-flag=-OO",
                 "--standalone",
-                self.compiler,
-                *self.onefile,
-                *self.include_datas,
+                *self.nuitka_args,
                 self.build.main,
             ),
             check=True,
@@ -138,11 +134,11 @@ class Builder:
             print(Stl.warn("Warning:"), Stl.high(f"{dist_name}.exe"), Stl.warn("not created !"))
 
     def build_all(self) -> None:
-        for is_64 in self.builds_bitness:
+        for is_64 in self.are_builds_64bits:
             app_version = f"{self.build.name} v{self.build.version} {get_bitness_str(is_64)}"
             print(Stl.title("Build"), Stl.high(app_version))
 
-            python_env = _get_env(self.environments, is_64)
+            python_env = _get_python_env(self.environments, is_64)
             python_env.print()
             if python_env.check(is_64):
                 if self.upgrade:
@@ -154,7 +150,7 @@ class Builder:
             print()
 
         # missing versions
-        for missing in set((True, False)) - set(self.builds_bitness):
+        for missing in set((True, False)) - set(self.are_builds_64bits):
             dist_name = _get_dist_name(self.build, missing)
             print(Stl.warn("Warning:"), Stl.high(dist_name), Stl.warn("not updated !"))
 
@@ -182,12 +178,9 @@ def _get_line_of_attr(obj: Any, name: str) -> int:
     return 0
 
 
-class _Template(NamedTuple):
-    src: str
-    dst: str
+class Templater:
+    _encoding = "utf-8"
 
-
-class CreateTemplates:
     def __init__(self, build: Build, environments: Environments, templates: Templates, github: Github) -> None:
         self.build = build
         self.templates = templates
@@ -211,12 +204,11 @@ class CreateTemplates:
             loc=_get_loc(),
         )
 
-    def _apply_template(self, src: str, dst: str | Path) -> None:
-        template_txt = Path(src).read_text(encoding="utf-8")
-        Path(dst).write_text(template_txt.format(**self.template_format), encoding="utf-8")
+    def _apply_template(self, src: Path, dst: Path) -> None:
+        print(Stl.title("create"), Stl.high(dst.as_posix()))
+        template = src.read_text(encoding=Templater._encoding).format(**self.template_format)
+        dst.write_text(template, encoding=Templater._encoding)
 
     def create_all(self) -> None:
-        for template in self.templates.list:
-            template = _Template(*template)
-            print(Stl.title("create"), Stl.high(template.dst))
-            self._apply_template(template.src, template.dst)
+        for src, dst in self.templates.list:
+            self._apply_template(Path(src), Path(dst))

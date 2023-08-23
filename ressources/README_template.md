@@ -5,13 +5,13 @@ So you can easily **search your entire catalog**.
 <img src="ressources/all.png">
 
 # Download
-<img src="https://img.shields.io/badge/Version-{version}-informational" valign="middle"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/{github_path}/raw/master/{exe64_link}) or [zip](https://github.com/{github_path}/raw/master/{archive64_link}).
+[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe64_link}) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/{github_path}/raw/master/{archive64_link})
 
-<img src="https://img.shields.io/badge/Version-{version}-informational" valign="middle"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white" valign="middle"> &nbsp;[***Executable***](https://github.com/{github_path}/raw/master/{exe32_link}) or [zip](https://github.com/{github_path}/raw/master/{archive32_link}).
+[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe32_link}) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/{github_path}/raw/master/{archive32_link})
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
-Get [***SfvipUserProxy***](user_proxy_cmd) command to add or remove a global user proxy for all users in ***Sfvip Player*** database.
+Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove a global user proxy for all users in ***Sfvip Player*** database.
 
 [^1]:You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** lastest version already installed _and preferably launched at least once._  
 _**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._  
@@ -31,8 +31,7 @@ Check the [***build config***](build_config.py).
 python -m venv .sfvip
 .sfvip\scripts\activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m pip install -r requirements.dev.txt
+python -m pip install -r requirements.txt -r requirements.dev.txt
 ```
 Everything that follows should be done in the ***.sfvip*** environment.
 ### Upgrade dependencies
