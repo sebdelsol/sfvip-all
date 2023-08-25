@@ -9,15 +9,16 @@ SfvipUserProxy --remove
 ```
 
 # Download
-[<img src="https://img.shields.io/badge/Version-0.3-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/user_proxy_cmd/build/0.3/x64/SfvipUserProxy.exe) <sup>or</sup>
+[<img src="https://img.shields.io/badge/Version-0.3-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/user_proxy_cmd/build/0.3/x64/SfvipUserProxy.exe)
+
 [<img src="https://img.shields.io/badge/Version-0.3-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/user_proxy_cmd/build/0.3/x86/SfvipUserProxy.exe)
 
 
 # Build
-[![Python](https://img.shields.io/badge/Python-3.11.4-fbdf79)](https://www.python.org/downloads/release/python-3114/)
+[![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.7.10-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 
 ```console
-python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--upgrade] [--mingw]
+python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--mingw]
 ```

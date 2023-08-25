@@ -20,10 +20,10 @@ _**Sfvip All.exe** will ask you for network connection its first run because it 
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._
 
 # Build
-[![Python](https://img.shields.io/badge/Python-3.11.4-fbdf79)](https://www.python.org/downloads/release/python-3114/)
+[![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.7.10-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-2642-informational)
+![Sloc](https://img.shields.io/badge/Sloc-2643-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an environment
@@ -55,7 +55,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 <img src="ressources/VS.png">
 
 ### Build an ***x86*** version
-Create another [***environment***](#Create-the-environment) with a ***32bit Python*** version:  
+Create another [***environment***](#Create-the-environment) with a [***32bit Python***](https://www.python.org/ftp/python/3.11.5/python-3.11.5.exe) version:  
 It should be called ***.sfvip32*** or you have to set [***`Environments.x86`***](build_config.py#L27) appropriately.  
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console

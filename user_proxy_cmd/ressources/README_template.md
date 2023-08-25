@@ -9,7 +9,8 @@ _Remove it:_
 ```
 
 # Download
-[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe64_link}) <sup>or</sup>
+[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe64_link})
+
 [<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe32_link})
 
 
@@ -19,5 +20,5 @@ _Remove it:_
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 
 ```console
-python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--upgrade] [--mingw]
+python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--mingw]
 ```

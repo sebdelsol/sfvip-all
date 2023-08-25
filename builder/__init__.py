@@ -31,6 +31,7 @@ class Datas:
         return tuple(f"--include-data-file={data.path}={data.path}" for data in self._datas)
 
 
+# comments are automatically turned into argparse help
 class Args(Tap):
     readme: bool = False  # update readme and post only
     upgrade: bool = False  # upgrade the environment

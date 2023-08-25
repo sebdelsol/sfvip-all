@@ -55,7 +55,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 <img src="ressources/VS.png">
 
 ### Build an ***x86*** version
-Create another [***environment***](#Create-the-environment) with a ***32bit Python*** version:  
+Create another [***environment***](#Create-the-environment) with a [***32bit Python***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) version:  
 It should be called ***.sfvip32*** or you have to set [***`Environments.x86`***](build_config.py#L{line_of_x86}) appropriately.  
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console
