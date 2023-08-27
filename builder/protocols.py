@@ -11,7 +11,7 @@ class Data(Protocol):
         ...
 
 
-class Build(Protocol):
+class ConfigBuild(Protocol):
     ico: str
     main: str
     name: str
@@ -20,20 +20,20 @@ class Build(Protocol):
     dir: str
 
 
-class Nuitka(Protocol):
+class ConfigNuitka(Protocol):
     args: list[str]
 
 
-class Templates(Protocol):
+class ConfigTemplates(Protocol):
     list: list[tuple[str, str]]
 
 
-class Environments(Protocol):
+class ConfigEnvironments(Protocol):
     requirements: list[str]
     x86: str
     x64: str
 
 
-class Github(Protocol):
+class ConfigGithub(Protocol):
     owner: str
     repo: str

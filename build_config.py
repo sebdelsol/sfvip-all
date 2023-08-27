@@ -25,7 +25,7 @@ class Templates:
 class Environments:
     requirements = ["requirements.txt", "requirements.dev.txt"]
     x86 = ".sfvip32"
-    x64 = ".sfvip"
+    x64 = ".sfvip64"
 
 
 class Splash:

@@ -1,5 +1,5 @@
 # {name}
-_Command to add an user proxy for **all users** in [**Sfvip Player**](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en) **database**:_
+_Command to add an user proxy for **all users** in [**Sfvip Player**](https://github.com/K4L4Uz/SFVIP-Player/tree/master) **database**:_
 ```console
 {name} http://127.0.0.1:8888
 ```
@@ -9,9 +9,9 @@ _Remove it:_
 ```
 
 # Download
-[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe64_link})
+[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe64_link}) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/{github_path}/raw/master/{archive64_link})
 
-[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe32_link})
+[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe32_link}) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/{github_path}/raw/master/{archive32_link})
 
 
 # Build
