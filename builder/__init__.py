@@ -1,3 +1,4 @@
+import ast
 import inspect
 import shutil
 import subprocess
@@ -147,26 +148,26 @@ class Builder:
             print(Stl.warn("Warning:"), Stl.high(dist_name), Stl.warn("not build !"))
 
 
-def _get_loc() -> int:
+def _get_sloc() -> int:
     get_py_files = "git ls-files -- '*.py'"
     count_non_blank_lines = "%{ ((Get-Content -Path $_) -notmatch '^\\s*$').Length }"
-    loc = subprocess.run(
+    sloc = subprocess.run(
         ("powershell", f"({get_py_files} | {count_non_blank_lines} | measure -Sum).Sum"),
         text=True,
         check=False,
         capture_output=True,
     )
     try:
-        return int(loc.stdout)
+        return int(sloc.stdout)
     except ValueError:
         return 0
 
 
-def _get_line_of_attr(obj: Any, name: str) -> int:
+def _get_attr_lineno(obj: Any, name: str) -> int:
     lines, start = inspect.getsourcelines(obj)
-    for i, line in enumerate(lines):
-        if name in line.split("=")[0]:
-            return start + i
+    for node in ast.walk(ast.parse("".join(lines))):
+        if isinstance(node, ast.Assign) and isinstance(target := node.targets[0], ast.Name) and target.id == name:
+            return node.lineno + start - 1
     return 0
 
 
@@ -180,27 +181,25 @@ class Templater:
         templates: ConfigTemplates,
         github: ConfigGithub,
     ) -> None:
-        self.build = build
         self.templates = templates
-        dist_name64 = _get_dist_name(build, is_64=True)
-        dist_name32 = _get_dist_name(build, is_64=False)
         python_version = _get_python_version(environments)
-        nuitka_version = _get_nuitka_version(environments)
+        dist_name32 = _get_dist_name(build, is_64=False)
+        dist_name64 = _get_dist_name(build, is_64=True)
         self.template_format = dict(
-            line_of_x64=_get_line_of_attr(environments, "x64"),
-            line_of_x86=_get_line_of_attr(environments, "x86"),
             py_version_compact=python_version.replace(".", ""),
+            line_of_x64=_get_attr_lineno(environments, "x64"),
+            line_of_x86=_get_attr_lineno(environments, "x86"),
+            nuitka_version=_get_nuitka_version(environments),
             github_path=f"{github.owner}/{github.repo}",
             archive64_link=quote(f"{dist_name64}.zip"),
             archive32_link=quote(f"{dist_name32}.zip"),
             exe64_link=quote(f"{dist_name64}.exe"),
             exe32_link=quote(f"{dist_name32}.exe"),
             py_version=python_version,
-            nuitka_version=nuitka_version,
             ico_link=quote(build.ico),
             version=build.version,
             name=build.name,
-            loc=_get_loc(),
+            sloc=_get_sloc(),
         )
 
     def _apply_template(self, src: Path, dst: Path) -> None:
