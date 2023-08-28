@@ -26,7 +26,8 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
 
 Check the [***build config***](build_config.py).
-### Create a 64bit environment
+### Create an x64 environment
+Create an ***environment*** with an [***x64 Python***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) version.  
 Call it ***.sfvip64*** or you have to set [***`Environments.x64`***](build_config.py#L{line_of_x64}) appropriately.
 ```console
 python -m venv .sfvip64
@@ -40,12 +41,12 @@ python -m pip install -r requirements.txt -r requirements.dev.txt
 python -m sfvip_all
 ```
 ### Build with ***Mingw64***
-It's the easiest option.
+_The easiest option._
 ```console
 python -m build --mingw
 ```
 ### Build with ***Clang***
-It's the recommended option.
+_The recommended option._
 ```console
 python -m build
 ```
@@ -54,7 +55,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 <img src="ressources/VS.png">
 
 ### Build an ***x86*** version
-Create another [***environment***](#Create-the-environment) with a [***32bit Python***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) version:  
+Create another [***environment***](#Create-the-environment) with an [***x86 Python***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) version.  
 Call it ***.sfvip32*** or you have to set [***`Environments.x86`***](build_config.py#L{line_of_x86}) appropriately.  
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console

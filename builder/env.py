@@ -4,6 +4,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Optional
 
+from ordered_set import OrderedSet
 from tap import Tap
 
 from .color import Stl
@@ -81,8 +82,8 @@ class EnvArgs(Tap):
         if self.both:
             self.x64, self.x86 = True, True
 
-    def get_python_envs(self, environments: ConfigEnvironments) -> set[PythonEnv]:
-        envs = set()
+    def get_python_envs(self, environments: ConfigEnvironments) -> OrderedSet[PythonEnv]:
+        envs = OrderedSet(())
         if self.x64:
             envs.add(PythonEnv(environments, is_64=True))
         if self.x86:
