@@ -4,11 +4,12 @@ from typing import Any, Callable, Generic, Iterator, Sequence, TypeVar
 T = TypeVar("T")
 
 
-class Columns(Generic[T]):
-    class Justify(Enum):
-        LEFT = "<"
-        RIGHT = ">"
+class Justify(Enum):
+    LEFT = "<"
+    RIGHT = ">"
 
+
+class Columns(Generic[T]):
     def __init__(self, objs: Sequence[T]) -> None:
         self._objs = objs
         self._columns: list[Iterator[str]] = []

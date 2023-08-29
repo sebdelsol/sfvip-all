@@ -77,7 +77,7 @@ class EnvArgs(Tap):
     x86: bool = False  # x86 version
     x64: bool = False  # x64 version
 
-    def process_args(self):
+    def process_args(self) -> None:
         if self.both:
             self.x64, self.x86 = True, True
 
