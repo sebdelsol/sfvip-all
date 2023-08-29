@@ -11,11 +11,11 @@ from PIL import Image
 from .color import Stl
 from .env import EnvArgs, PythonEnv, get_bitness_str
 from .protocols import (
-    ConfigBuild,
-    ConfigEnvironments,
-    ConfigGithub,
-    ConfigNuitka,
-    ConfigTemplates,
+    CfgBuild,
+    CfgEnvironments,
+    CfgGithub,
+    CfgNuitka,
+    CfgTemplates,
     Data,
 )
 from .upgrader import Upgrader
@@ -46,15 +46,15 @@ class Args(EnvArgs):
     mingw: bool = False  # build with mingw64
 
 
-def _get_dist_name(build: ConfigBuild, is_64: bool) -> str:
+def _get_dist_name(build: CfgBuild, is_64: bool) -> str:
     return f"{build.dir}/{build.version}/{get_bitness_str(is_64)}/{build.name}"
 
 
-def _get_dist_temp(build: ConfigBuild, is_64: bool) -> str:
+def _get_dist_temp(build: CfgBuild, is_64: bool) -> str:
     return f"{build.dir}/temp/{get_bitness_str(is_64)}"
 
 
-def _get_version_of(environments: ConfigEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
+def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
     versions = {is_64: get_version(PythonEnv(environments, is_64)) for is_64 in (True, False)}
     if versions[True] != versions[False]:
         print(Stl.high("x64"), Stl.warn("and"), Stl.high(f"x86 {name}"), Stl.warn("versions differ !"))
@@ -63,11 +63,11 @@ def _get_version_of(environments: ConfigEnvironments, name: str, get_version: Ca
     return versions[True]
 
 
-def _get_python_version(environments: ConfigEnvironments) -> str:
+def _get_python_version(environments: CfgEnvironments) -> str:
     return _get_version_of(environments, "Python", lambda environment: environment.python_version)
 
 
-def _get_nuitka_version(environments: ConfigEnvironments) -> str:
+def _get_nuitka_version(environments: CfgEnvironments) -> str:
     return _get_version_of(environments, "Nuitka", lambda environment: environment.package_version("nuitka"))
 
 
@@ -77,13 +77,7 @@ def _print_filename_size(path: str) -> None:
 
 
 class Builder:
-    def __init__(
-        self,
-        build: ConfigBuild,
-        environments: ConfigEnvironments,
-        nuitka: ConfigNuitka,
-        datas: Datas,
-    ) -> None:
+    def __init__(self, build: CfgBuild, environments: CfgEnvironments, nuitka: CfgNuitka, datas: Datas) -> None:
         args = Args().parse_args()
         self.build = build
         self.requirements = environments.requirements
@@ -175,11 +169,7 @@ class Templater:
     _encoding = "utf-8"
 
     def __init__(
-        self,
-        build: ConfigBuild,
-        environments: ConfigEnvironments,
-        templates: ConfigTemplates,
-        github: ConfigGithub,
+        self, build: CfgBuild, environments: CfgEnvironments, templates: CfgTemplates, github: CfgGithub
     ) -> None:
         self.templates = templates
         python_version = _get_python_version(environments)

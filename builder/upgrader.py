@@ -3,9 +3,10 @@ import msvcrt
 import os
 import subprocess
 from pathlib import Path
-from typing import Any, Callable, Iterator, NamedTuple, Optional, Sequence, cast
+from typing import NamedTuple, Optional, Sequence, cast
 
 from .color import Stl
+from .columns import Columns
 from .env import PythonEnv
 
 
@@ -15,15 +16,8 @@ class Pckg(NamedTuple):
     url: Optional[str]
 
 
-def format_columns(objs: Sequence[Any], to_str: Callable[[Any], str], justify: str) -> Iterator[str]:
-    txts = [to_str(obj) for obj in objs]
-    len_txt = len(max(txts, key=len))
-    for txt in txts:
-        yield f"{txt:{justify}{len_txt + 1}}"
-
-
-def format_pckgs_columns(pckgs: Sequence[Pckg], to_str: Callable[[Pckg], str], justify: str) -> Iterator[str]:
-    return format_columns(pckgs, to_str, justify)
+class PckgsColumns(Columns[Pckg]):
+    ...
 
 
 def line_clear() -> None:
@@ -96,14 +90,14 @@ class Upgrader:
     @staticmethod
     def _show_upgrade(to_upgrade: list[Pckg]) -> int:
         if (n := len(to_upgrade)) > 0:
+            columns = PckgsColumns(to_upgrade)
+            columns.add_no_column(lambda i: Stl.title(f" {i + 1}."), Columns.Justify.RIGHT)
+            columns.add_attr_column(lambda pckg: Stl.high(pckg.name), Columns.Justify.LEFT)
+            columns.add_attr_column(lambda pckg: Stl.warn(pckg.version), Columns.Justify.LEFT)
             print()
             print(Stl.title("Upgrade:"))
-            for no, name, version in zip(
-                format_columns(range(len(to_upgrade)), lambda i: Stl.title(f" {i + 1}."), ">"),
-                format_pckgs_columns(to_upgrade, lambda pckg: Stl.high(pckg.name), "<"),
-                format_pckgs_columns(to_upgrade, lambda pckg: Stl.warn(pckg.version), "<"),
-            ):
-                print(no, name, version)
+            for row in columns.rows:
+                print(*row)
         return n
 
     def install_for(self, *req_files: str, eager: bool) -> None:

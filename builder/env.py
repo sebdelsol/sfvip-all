@@ -4,11 +4,10 @@ from functools import cached_property
 from pathlib import Path
 from typing import Optional
 
-from ordered_set import OrderedSet
 from tap import Tap
 
 from .color import Stl
-from .protocols import ConfigEnvironments
+from .protocols import CfgEnvironments
 
 
 def get_bitness_str(is_64bit: bool) -> str:
@@ -16,7 +15,7 @@ def get_bitness_str(is_64bit: bool) -> str:
 
 
 class PythonEnv:
-    def __init__(self, environments: Optional[ConfigEnvironments] = None, is_64: Optional[bool] = None) -> None:
+    def __init__(self, environments: Optional[CfgEnvironments] = None, is_64: Optional[bool] = None) -> None:
         # env = None for current running python
         if environments is None:
             self._exe = Path(sys.executable)
@@ -82,12 +81,12 @@ class EnvArgs(Tap):
         if self.both:
             self.x64, self.x86 = True, True
 
-    def get_python_envs(self, environments: ConfigEnvironments) -> OrderedSet[PythonEnv]:
-        envs = OrderedSet(())
+    def get_python_envs(self, environments: CfgEnvironments) -> list[PythonEnv]:
+        envs = []
         if self.x64:
-            envs.add(PythonEnv(environments, is_64=True))
+            envs.append(PythonEnv(environments, is_64=True))
         if self.x86:
-            envs.add(PythonEnv(environments, is_64=False))
+            envs.append(PythonEnv(environments, is_64=False))
         if not envs:
-            envs.add(PythonEnv())
+            envs.append(PythonEnv())
         return envs
