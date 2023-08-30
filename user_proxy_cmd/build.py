@@ -16,18 +16,16 @@ class Nuitka:
 
 
 class Templates:
-    list = [
+    all = (
         ("user_proxy_cmd/ressources/README_template.md", "user_proxy_cmd/README.md"),
         ("user_proxy_cmd/ressources/post_template.txt", f"{Build.dir}/{Build.version}/post.txt"),
-    ]
+    )
 
 
-class UserProxyEnvironements:
-    requirements = []
-    x86 = Environments.x86
-    x64 = Environments.x64
+Environments.x64.requirements = ()  # type: ignore
+Environments.x86.requirements = ()  # type: ignore
 
 
 if __name__ == "__main__":
-    Builder(Build, UserProxyEnvironements, Nuitka, Datas()).build_all()
-    Templater(Build, UserProxyEnvironements, Templates, Github).create_all()
+    Builder(Build, Environments, Nuitka, Datas()).build_all()
+    Templater(Build, Environments, Templates, Github).create_all()

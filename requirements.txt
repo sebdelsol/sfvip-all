@@ -1,2 +1,3 @@
-mitmproxy==9.0.1
+# packages to run the app for both environments
+mitmproxy<10.0.0 # https://github.com/mitmproxy/mitmproxy/issues/6303
 watchdog>=3.0.0

@@ -8,24 +8,33 @@ class Build:
 
 
 class Nuitka:
-    args = [
+    args = (
         f"--force-stderr-spec=%PROGRAM%/../{Build.name} - %TIME%.log",
         "--enable-plugin=tk-inter",
         "--disable-console",
-    ]
+    )
 
 
 class Templates:
-    list = [
+    all = (
         ("ressources/README_template.md", "README.md"),
         ("ressources/post_template.txt", f"{Build.dir}/{Build.version}/post.txt"),
-    ]
+    )
+
+
+class Environmentx64:
+    path = ".sfvip64"
+    requirements = "requirements.txt", "requirements.dev.txt"
+
+
+class Environmentx86:
+    path = ".sfvip86"
+    requirements = *Environmentx64.requirements, "requirements.constraints.x86.txt"
 
 
 class Environments:
-    requirements = ["requirements.txt", "requirements.dev.txt"]
-    x86 = ".sfvip32"
-    x64 = ".sfvip64"
+    x64 = Environmentx64
+    x86 = Environmentx86
 
 
 class Splash:

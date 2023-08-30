@@ -1,4 +1,4 @@
-from typing import Optional, Protocol
+from typing import Optional, Protocol, Sequence
 
 
 class Data(Protocol):
@@ -21,19 +21,37 @@ class CfgBuild(Protocol):
 
 
 class CfgNuitka(Protocol):
-    args: list[str]
+    @property
+    def args(self) -> Sequence[str]:
+        ...
 
 
 class CfgTemplates(Protocol):
-    list: list[tuple[str, str]]
-
-
-class CfgEnvironments(Protocol):
-    requirements: list[str]
-    x86: str
-    x64: str
+    @property
+    def all(self) -> Sequence[tuple[str, str]]:
+        ...
 
 
 class CfgGithub(Protocol):
     owner: str
     repo: str
+
+
+class _CfgEnvironment(Protocol):
+    @property
+    def path(self) -> str:
+        ...
+
+    @property
+    def requirements(self) -> Sequence[str]:
+        ...
+
+
+class CfgEnvironments(Protocol):
+    @property
+    def x86(self) -> _CfgEnvironment:
+        ...
+
+    @property
+    def x64(self) -> _CfgEnvironment:
+        ...

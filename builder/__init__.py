@@ -57,7 +57,7 @@ def _get_dist_temp(build: CfgBuild, is_64: bool) -> str:
 def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
     versions = {is_64: get_version(PythonEnv(environments, is_64)) for is_64 in (True, False)}
     if versions[True] != versions[False]:
-        print(Stl.high("x64"), Stl.warn("and"), Stl.high(f"x86 {name}"), Stl.warn("versions differ !"))
+        print(Stl.high("x64"), Stl.warn("and"), Stl.high("x86"), Stl.warn(f"{name} versions differ !"))
         for is_64 in (True, False):
             print(Stl.high(get_bitness_str(is_64)), Stl.title(f"{name} is"), Stl.high(versions[is_64]))
     return versions[True]
@@ -80,7 +80,6 @@ class Builder:
     def __init__(self, build: CfgBuild, environments: CfgEnvironments, nuitka: CfgNuitka, datas: Datas) -> None:
         args = Args().parse_args()
         self.build = build
-        self.requirements = environments.requirements
         self.python_envs = set() if args.readme else args.get_python_envs(environments)
         self.onefile = not args.noexe
         self.upgrade = args.upgrade
@@ -130,7 +129,7 @@ class Builder:
             python_env.print()
             if python_env.check():
                 if self.upgrade:
-                    Upgrader(python_env).install_for(*self.requirements, eager=False)
+                    Upgrader(python_env).check(eager=False)
                 self._build_in_env(python_env)
                 builds.add(python_env.is_64)
             else:
@@ -177,8 +176,8 @@ class Templater:
         dist_name64 = _get_dist_name(build, is_64=True)
         self.template_format = dict(
             py_version_compact=python_version.replace(".", ""),
-            line_of_x64=_get_attr_lineno(environments, "x64"),
-            line_of_x86=_get_attr_lineno(environments, "x86"),
+            line_of_x64=_get_attr_lineno(environments.x64, "path"),
+            line_of_x86=_get_attr_lineno(environments.x86, "path"),
             nuitka_version=_get_nuitka_version(environments),
             github_path=f"{github.owner}/{github.repo}",
             archive64_link=quote(f"{dist_name64}.zip"),
@@ -198,5 +197,5 @@ class Templater:
         dst.write_text(template, encoding=Templater._encoding)
 
     def create_all(self) -> None:
-        for src, dst in self.templates.list:
+        for src, dst in self.templates.all:
             self._apply_template(Path(src), Path(dst))

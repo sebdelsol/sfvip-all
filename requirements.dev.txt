@@ -1,3 +1,4 @@
+# additional packages to build the app for both environments
 imageio>=2.31.1
 nuitka>=1.7.7
 typed-argument-parser>=1.8.1

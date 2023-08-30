@@ -13,5 +13,6 @@ if __name__ == "__main__":
 
     for python_env in args.get_python_envs(Environments):
         python_env.print()
-        Upgrader(python_env).install_for(*Environments.requirements, eager=args.eager)
-        print()
+        if python_env.check():
+            Upgrader(python_env).check(eager=args.eager)
+            print()

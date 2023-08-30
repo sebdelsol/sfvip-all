@@ -1,0 +1,2 @@
+# additional packages' constraint for x86 environment
+Pillow<10.0.0 # https://pillow.readthedocs.io/en/stable/releasenotes/10.0.0.html#bit-wheels

@@ -23,12 +23,12 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.7.10-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-2693-informational)
+![Sloc](https://img.shields.io/badge/Sloc-2708-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment
 Create an ***environment*** with an [***x64 Python***](https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe) version.  
-Call it ***.sfvip64*** or you have to set [***`Environments.x64`***](build_config.py#L28) appropriately.
+Call it ***.sfvip64*** or you have to set [***`Environmentx64.path`***](build_config.py#L26) appropriately.
 ```console
 python -m venv .sfvip64
 .sfvip64\scripts\activate
@@ -56,7 +56,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 ### Build an ***x86*** version
 Create another [***environment***](#Create-the-environment) with an [***x86 Python***](https://www.python.org/ftp/python/3.11.5/python-3.11.5.exe) version.  
-Call it ***.sfvip32*** or you have to set [***`Environments.x86`***](build_config.py#L27) appropriately.  
+Call it ***.sfvip86*** or you have to set [***`Environmentx86.path`***](build_config.py#L31) appropriately.  
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console
 rustup target add i686-pc-windows-msvc

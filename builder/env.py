@@ -2,7 +2,7 @@ import subprocess
 import sys
 from functools import cached_property
 from pathlib import Path
-from typing import Optional
+from typing import Sequence
 
 from tap import Tap
 
@@ -10,40 +10,48 @@ from .color import Stl
 from .protocols import CfgEnvironments
 
 
-def get_bitness_str(is_64bit: bool) -> str:
-    return "x64" if is_64bit else "x86"
+def get_bitness_str(is_64: bool) -> str:
+    return "x64" if is_64 else "x86"
 
 
 class PythonEnv:
-    def __init__(self, environments: Optional[CfgEnvironments] = None, is_64: Optional[bool] = None) -> None:
-        # env = None for current running python
-        if environments is None:
-            self._exe = Path(sys.executable)
-            self._env = self._exe.parent.parent
-        else:
-            self._env = Path(environments.x64 if is_64 else environments.x86)
-            self._exe = self._env / "scripts" / "python.exe"
-        self._should_be_64 = is_64
+    def __init__(self, environments: CfgEnvironments, want_64: bool | None = None) -> None:
+        # use current Python bitness if not specified
+        self._want_64 = sys.maxsize == (2**63) - 1 if want_64 is None else want_64
+        env_cfg = environments.x64 if self._want_64 else environments.x86
+        self._env_path = Path(env_cfg.path)
+        self._exe = self._env_path / "scripts" / "python.exe"
+        self._requirements = env_cfg.requirements
 
     @property
     def exe(self) -> Path:
         return self._exe
 
+    @property
+    def requirements(self) -> Sequence[str]:
+        return self._requirements
+
     @cached_property
     def is_64(self) -> bool:
-        script = "import sys; sys.exit(int(sys.maxsize == (2**63) - 1))"
-        is_64 = subprocess.run([self._exe, "-c", script], check=False)
-        return bool(is_64.returncode)
+        if self._exe.exists():
+            script = "import sys; sys.exit(int(sys.maxsize == (2**63) - 1))"
+            is_64 = subprocess.run([self._exe, "-c", script], check=False)
+            return bool(is_64.returncode)
+        return self._want_64
 
     @cached_property
     def python_version(self) -> str:
-        version = subprocess.run([self._exe, "--version"], check=True, capture_output=True, text=True)
-        return version.stdout.replace("\n", "").split()[1]
+        if self._exe.exists():
+            version = subprocess.run([self._exe, "--version"], check=True, capture_output=True, text=True)
+            return version.stdout.replace("\n", "").split()[1]
+        return "undefined version"
 
     def package_version(self, package_name: str) -> str:
-        script = f"import importlib.metadata; print(importlib.metadata.version('{package_name}'))"
-        version = subprocess.run([self._exe, "-c", script], check=False, capture_output=True, text=True)
-        return version.stdout.strip()
+        if self._exe.exists():
+            script = f"import importlib.metadata; print(importlib.metadata.version('{package_name}'))"
+            version = subprocess.run([self._exe, "-c", script], check=False, capture_output=True, text=True)
+            return version.stdout.strip()
+        return "undefined version"
 
     def print(self) -> None:
         print(
@@ -52,22 +60,19 @@ class PythonEnv:
             Stl.title(" Python "),
             Stl.high(self.python_version),
             Stl.title(" environment "),
-            Stl.low(str(self._env.parent.resolve())),
+            Stl.low(str(self._env_path.parent.resolve())),
             Stl.low("\\"),
-            Stl.high(str(self._env.name)),
+            Stl.high(str(self._env_path.name)),
             sep="",
         )
 
     def check(self) -> bool:
         if not self._exe.exists():
-            print(Stl.warn("No Python exe found in the environement !"))
+            print(Stl.warn("No Python exe found !"))
             return False
-        if self._should_be_64 is not None and self.is_64 != self._should_be_64:
-            print(
-                Stl.warn("Wrong Python bitness !"),
-                Stl.low("it should be"),
-                Stl.high(get_bitness_str(self._should_be_64)),
-            )
+        if self.is_64 != self._want_64:
+            print(Stl.warn("Wrong Python bitness !"))
+            print(Stl.warn("It should be"), Stl.high(get_bitness_str(self._want_64)))
             return False
         return True
 
@@ -84,9 +89,9 @@ class EnvArgs(Tap):
     def get_python_envs(self, environments: CfgEnvironments) -> list[PythonEnv]:
         envs = []
         if self.x64:
-            envs.append(PythonEnv(environments, is_64=True))
+            envs.append(PythonEnv(environments, want_64=True))
         if self.x86:
-            envs.append(PythonEnv(environments, is_64=False))
+            envs.append(PythonEnv(environments, want_64=False))
         if not envs:
-            envs.append(PythonEnv())
+            envs.append(PythonEnv(environments))
         return envs
