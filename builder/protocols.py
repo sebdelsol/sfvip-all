@@ -1,14 +1,14 @@
-from typing import Optional, Protocol, Sequence
+from typing import Protocol, Sequence, runtime_checkable
 
 
-class Data(Protocol):
-    @property
-    def path(self) -> str:
-        ...
+class CfgFile(Protocol):
+    path: str
 
-    @property
-    def src(self) -> Optional[tuple[str, int]]:
-        ...
+
+@runtime_checkable
+class CfgFileResize(CfgFile, Protocol):
+    src: str
+    resize: tuple[int, int]
 
 
 class CfgBuild(Protocol):
@@ -19,28 +19,31 @@ class CfgBuild(Protocol):
     version: str
     dir: str
 
-
-class CfgNuitka(Protocol):
     @property
-    def args(self) -> Sequence[str]:
+    def files(self) -> Sequence[CfgFile | CfgFileResize]:
         ...
+
+    @property
+    def nuitka(self) -> Sequence[str]:
+        ...
+
+
+class _CfgTemplate(Protocol):
+    src: str
+    dst: str
 
 
 class CfgTemplates(Protocol):
     @property
-    def all(self) -> Sequence[tuple[str, str]]:
+    def all(self) -> Sequence[_CfgTemplate]:
         ...
 
-
-class CfgGithub(Protocol):
     owner: str
     repo: str
 
 
 class _CfgEnvironment(Protocol):
-    @property
-    def path(self) -> str:
-        ...
+    path: str
 
     @property
     def requirements(self) -> Sequence[str]:

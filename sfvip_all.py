@@ -13,7 +13,7 @@ if __name__ == "__main__":
     logger.info("main process started")
     app_dir = Path(__file__).parent
     run_app(
-        AppInfo(name=Build.name, version=Build.version),
+        AppInfo(Build.name, Build.version),
         app_dir / Splash.path,
         app_dir / Logo.path,
     )

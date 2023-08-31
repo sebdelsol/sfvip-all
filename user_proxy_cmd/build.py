@@ -1,5 +1,5 @@
-from build_config import Environments, Github
-from builder import Builder, Datas, Templater
+from build_config import Environments, Templates
+from builder import Builder, Templater
 
 
 class Build:
@@ -9,23 +9,25 @@ class Build:
     name = "SfvipUserProxy"
     company = "sebdelsol"
     version = "0.3"
+    nuitka = ["--enable-console"]
+    files = []
 
 
-class Nuitka:
-    args = ["--enable-console"]
+class Readme:
+    src = "user_proxy_cmd/ressources/README_template.md"
+    dst = "user_proxy_cmd/README.md"
 
 
-class Templates:
-    all = (
-        ("user_proxy_cmd/ressources/README_template.md", "user_proxy_cmd/README.md"),
-        ("user_proxy_cmd/ressources/post_template.txt", f"{Build.dir}/{Build.version}/post.txt"),
-    )
+class Post:
+    src = "user_proxy_cmd/ressources/post_template.txt"
+    dst = f"{Build.dir}/{Build.version}/post.txt"
 
 
+Templates.all = Readme, Post  # type: ignore
 Environments.x64.requirements = ()  # type: ignore
 Environments.x86.requirements = ()  # type: ignore
 
 
 if __name__ == "__main__":
-    Builder(Build, Environments, Nuitka, Datas()).build_all()
-    Templater(Build, Environments, Templates, Github).create_all()
+    Builder(Build, Environments).build_all()
+    Templater(Build, Environments, Templates).create_all()

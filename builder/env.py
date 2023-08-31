@@ -60,8 +60,8 @@ class PythonEnv:
             Stl.title(" Python "),
             Stl.high(self.python_version),
             Stl.title(" environment "),
-            Stl.low(str(self._env_path.parent.resolve())),
-            Stl.low("\\"),
+            Stl.low(str(self._env_path.parent.resolve().as_posix())),
+            Stl.low("/"),
             Stl.high(str(self._env_path.name)),
             sep="",
         )

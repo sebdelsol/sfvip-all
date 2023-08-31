@@ -3,39 +3,15 @@ import inspect
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, Callable, Self
+from typing import Any, Callable, Sequence
 from urllib.parse import quote
 
 from PIL import Image
 
 from .color import Stl
 from .env import EnvArgs, PythonEnv, get_bitness_str
-from .protocols import (
-    CfgBuild,
-    CfgEnvironments,
-    CfgGithub,
-    CfgNuitka,
-    CfgTemplates,
-    Data,
-)
+from .protocols import CfgBuild, CfgEnvironments, CfgFile, CfgFileResize, CfgTemplates
 from .upgrader import Upgrader
-
-
-class Datas:
-    def __init__(self, *datas: type[Data]) -> None:
-        self._datas = tuple(data() for data in datas)
-
-    def create_all(self) -> Self:
-        for data in self._datas:
-            if data.src:
-                src_path, size = data.src
-                Image.open(src_path).resize((size, size)).save(data.path)
-                print(Stl.title("Create"), Stl.high(data.__class__.__name__))
-        return self
-
-    @property
-    def include_datas(self) -> tuple[str]:
-        return tuple(f"--include-data-file={data.path}={data.path}" for data in self._datas)
 
 
 # comments are automatically turned into argparse help
@@ -44,6 +20,22 @@ class Args(EnvArgs):
     upgrade: bool = False  # upgrade the environment
     noexe: bool = False  # create only a zip (faster)
     mingw: bool = False  # build with mingw64
+
+
+class IncludeFiles:
+    def __init__(self, files: Sequence[CfgFile | CfgFileResize]) -> None:
+        self._files = files
+
+    def _create_all(self) -> None:
+        for file in self._files:
+            if isinstance(file, CfgFileResize):
+                Image.open(file.src).resize(file.resize).save(file.path)
+                print(Stl.title("Create"), Stl.high(file.path))
+
+    @property
+    def all(self) -> list[str]:
+        self._create_all()
+        return [f"--include-data-file={file.path}={file.path}" for file in self._files]
 
 
 def _get_dist_name(build: CfgBuild, is_64: bool) -> str:
@@ -77,16 +69,16 @@ def _print_filename_size(path: str) -> None:
 
 
 class Builder:
-    def __init__(self, build: CfgBuild, environments: CfgEnvironments, nuitka: CfgNuitka, datas: Datas) -> None:
+    def __init__(self, build: CfgBuild, environments: CfgEnvironments) -> None:
         args = Args().parse_args()
-        self.build = build
         self.python_envs = set() if args.readme else args.get_python_envs(environments)
         self.onefile = not args.noexe
         self.upgrade = args.upgrade
+        self.build = build
         self.nuitka_args = (
             "--mingw64" if args.mingw else "--clang",
-            *datas.create_all().include_datas,
-            *nuitka.args,
+            *IncludeFiles(build.files).all,
+            *build.nuitka,
         )
         if self.onefile:
             self.nuitka_args = *self.nuitka_args, "--onefile"
@@ -167,9 +159,7 @@ def _get_attr_lineno(obj: Any, name: str) -> int:
 class Templater:
     _encoding = "utf-8"
 
-    def __init__(
-        self, build: CfgBuild, environments: CfgEnvironments, templates: CfgTemplates, github: CfgGithub
-    ) -> None:
+    def __init__(self, build: CfgBuild, environments: CfgEnvironments, templates: CfgTemplates) -> None:
         self.templates = templates
         python_version = _get_python_version(environments)
         dist_name32 = _get_dist_name(build, is_64=False)
@@ -179,7 +169,7 @@ class Templater:
             line_of_x64=_get_attr_lineno(environments.x64, "path"),
             line_of_x86=_get_attr_lineno(environments.x86, "path"),
             nuitka_version=_get_nuitka_version(environments),
-            github_path=f"{github.owner}/{github.repo}",
+            github_path=f"{templates.owner}/{templates.repo}",
             archive64_link=quote(f"{dist_name64}.zip"),
             archive32_link=quote(f"{dist_name32}.zip"),
             exe64_link=quote(f"{dist_name64}.exe"),
@@ -193,9 +183,9 @@ class Templater:
 
     def _apply_template(self, src: Path, dst: Path) -> None:
         print(Stl.title("create"), Stl.high(dst.as_posix()))
-        template = src.read_text(encoding=Templater._encoding).format(**self.template_format)
-        dst.write_text(template, encoding=Templater._encoding)
+        template_text = src.read_text(encoding=Templater._encoding).format(**self.template_format)
+        dst.write_text(template_text, encoding=Templater._encoding)
 
     def create_all(self) -> None:
-        for src, dst in self.templates.all:
-            self._apply_template(Path(src), Path(dst))
+        for template in self.templates.all:
+            self._apply_template(Path(template.src), Path(template.dst))

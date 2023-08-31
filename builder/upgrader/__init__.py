@@ -56,7 +56,7 @@ class Upgrader:
                 Stl.title("Check"),
                 Stl.low("eagerly" if eager else "only needed"),
                 Stl.title("upgrades for"),
-                Stl.low(" and ").join(Stl.high(req_file) for req_file in req_files),
+                Stl.title(", ").join(Stl.high(req_file) for req_file in req_files),
             )
 
             report_file = Path("all_requirements.json")

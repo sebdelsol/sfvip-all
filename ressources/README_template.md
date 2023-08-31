@@ -11,7 +11,7 @@ So you can easily **search your entire catalog**.
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
-Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove a global user proxy for all users in ***Sfvip Player*** database.
+Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
 [^1]:You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** lastest version already installed _and preferably launched at least once._  
 _**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._  

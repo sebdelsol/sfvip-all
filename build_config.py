@@ -1,3 +1,13 @@
+class Splash:
+    path = "ressources/Sfvip All.png"
+
+
+class Logo:
+    path = "ressources/logo.png"
+    src = "ressources/Sfvip All.png"
+    resize = 28, 28
+
+
 class Build:
     ico = "ressources/Sfvip All.png"
     main = "sfvip_all.py"
@@ -5,21 +15,12 @@ class Build:
     name = "Sfvip All"
     version = "1.2.4"
     dir = "build"
-
-
-class Nuitka:
-    args = (
-        f"--force-stderr-spec=%PROGRAM%/../{Build.name} - %TIME%.log",
+    nuitka = (
+        f"--force-stderr-spec=%PROGRAM%/../{name} - %TIME%.log",
         "--enable-plugin=tk-inter",
         "--disable-console",
     )
-
-
-class Templates:
-    all = (
-        ("ressources/README_template.md", "README.md"),
-        ("ressources/post_template.txt", f"{Build.dir}/{Build.version}/post.txt"),
-    )
+    files = Splash, Logo
 
 
 class Environmentx64:
@@ -37,16 +38,17 @@ class Environments:
     x86 = Environmentx86
 
 
-class Splash:
-    path = "ressources/Sfvip All.png"
-    src = None
+class Readme:
+    src = "ressources/README_template.md"
+    dst = "README.md"
 
 
-class Logo:
-    path = "ressources/logo.png"
-    src = "ressources/Sfvip All.png", 28
+class Post:
+    src = "ressources/post_template.txt"
+    dst = f"{Build.dir}/{Build.version}/post.txt"
 
 
-class Github:
+class Templates:
+    all = Readme, Post
     owner = "sebdelsol"
     repo = "sfvip-all"
