@@ -46,24 +46,7 @@ def _get_dist_temp(build: CfgBuild, is_64: bool) -> str:
     return f"{build.dir}/temp/{get_bitness_str(is_64)}"
 
 
-def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
-    versions = {is_64: get_version(PythonEnv(environments, is_64)) for is_64 in (True, False)}
-    if versions[True] != versions[False]:
-        print(Stl.high("x64"), Stl.warn("and"), Stl.high("x86"), Stl.warn(f"{name} versions differ !"))
-        for is_64 in (True, False):
-            print(Stl.high(get_bitness_str(is_64)), Stl.title(f"{name} is"), Stl.high(versions[is_64]))
-    return versions[True]
-
-
-def _get_python_version(environments: CfgEnvironments) -> str:
-    return _get_version_of(environments, "Python", lambda environment: environment.python_version)
-
-
-def _get_nuitka_version(environments: CfgEnvironments) -> str:
-    return _get_version_of(environments, "Nuitka", lambda environment: environment.package_version("nuitka"))
-
-
-def _print_filename_size(path: str) -> None:
+def _print_file_size(path: str) -> None:
     size = Path(path).stat().st_size / 1024
     print(Stl.title(f"{size:.0f}"), Stl.low("KB"))
 
@@ -105,11 +88,11 @@ class Builder:
         )
         print(Stl.title("Create"), Stl.high(f"{dist_name}.zip"), end=" ")
         shutil.make_archive(dist_name, "zip", f"{dist_temp}/{Path(self.build.main).stem}.dist")
-        _print_filename_size(f"{dist_name}.zip")
+        _print_file_size(f"{dist_name}.zip")
         if self.onefile:
             print(Stl.title("Create"), Stl.high(f"{dist_name}.exe"), end=" ")
             shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
-            _print_filename_size(f"{dist_name}.exe")
+            _print_file_size(f"{dist_name}.exe")
         else:
             print(Stl.warn("Warning:"), Stl.high(f"{dist_name}.exe"), Stl.warn("not created !"))
 
@@ -133,8 +116,25 @@ class Builder:
             print(Stl.warn("Warning:"), Stl.high(dist_name), Stl.warn("not build !"))
 
 
-def _get_sloc() -> int:
-    get_py_files = "git ls-files -- '*.py'"
+def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
+    versions = {is_64: get_version(PythonEnv(environments, is_64)) for is_64 in (True, False)}
+    if versions[True] != versions[False]:
+        print(Stl.high("x64"), Stl.warn("and"), Stl.high("x86"), Stl.warn(f"{name} versions differ !"))
+        for is_64 in (True, False):
+            print(Stl.high(get_bitness_str(is_64)), Stl.title(f"{name} is"), Stl.high(versions[is_64]))
+    return versions[True]
+
+
+def _get_python_version(environments: CfgEnvironments) -> str:
+    return _get_version_of(environments, "Python", lambda environment: environment.python_version)
+
+
+def _get_nuitka_version(environments: CfgEnvironments) -> str:
+    return _get_version_of(environments, "Nuitka", lambda environment: environment.package_version("nuitka"))
+
+
+def _get_sloc(path: Path) -> int:
+    get_py_files = f"git ls-files -- '{path}/*.py'"
     count_non_blank_lines = "%{ ((Get-Content -Path $_) -notmatch '^\\s*$').Length }"
     sloc = subprocess.run(
         ("powershell", f"({get_py_files} | {count_non_blank_lines} | measure -Sum).Sum"),
@@ -172,13 +172,13 @@ class Templater:
             github_path=f"{templates.owner}/{templates.repo}",
             archive64_link=quote(f"{dist_name64}.zip"),
             archive32_link=quote(f"{dist_name32}.zip"),
+            sloc=_get_sloc(Path(build.main).parent),
             exe64_link=quote(f"{dist_name64}.exe"),
             exe32_link=quote(f"{dist_name32}.exe"),
             py_version=python_version,
             ico_link=quote(build.ico),
             version=build.version,
             name=build.name,
-            sloc=_get_sloc(),
         )
 
     def _apply_template(self, src: Path, dst: Path) -> None:

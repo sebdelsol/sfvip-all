@@ -18,6 +18,7 @@ _Remove it:_
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
+![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
 
 ```console
 python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--mingw]
