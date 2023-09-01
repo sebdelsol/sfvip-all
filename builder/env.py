@@ -15,13 +15,15 @@ def get_bitness_str(is_64: bool) -> str:
 
 
 class PythonEnv:
+    undefined_version = "undefined"
+
     def __init__(self, environments: CfgEnvironments, want_64: bool | None = None) -> None:
         # use current Python bitness if not specified
         self._want_64 = sys.maxsize == (2**63) - 1 if want_64 is None else want_64
-        env_cfg = environments.x64 if self._want_64 else environments.x86
+        env_cfg = environments.X64 if self._want_64 else environments.X86
         self._env_path = Path(env_cfg.path)
         self._exe = self._env_path / "scripts" / "python.exe"
-        self._requirements = env_cfg.requirements
+        self._requirements = env_cfg.requirements  # type: ignore
 
     @property
     def exe(self) -> Path:
@@ -44,14 +46,14 @@ class PythonEnv:
         if self._exe.exists():
             version = subprocess.run([self._exe, "--version"], check=True, capture_output=True, text=True)
             return version.stdout.replace("\n", "").split()[1]
-        return "undefined version"
+        return PythonEnv.undefined_version
 
     def package_version(self, package_name: str) -> str:
         if self._exe.exists():
             script = f"import importlib.metadata; print(importlib.metadata.version('{package_name}'))"
             version = subprocess.run([self._exe, "-c", script], check=False, capture_output=True, text=True)
             return version.stdout.strip()
-        return "undefined version"
+        return PythonEnv.undefined_version
 
     def print(self) -> None:
         print(

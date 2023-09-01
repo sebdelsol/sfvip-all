@@ -13,7 +13,7 @@ Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[^1]:You need to have ***[Sfvip Player](https://serbianforum-org.translate.goog/threads/sf-vip-plejer.878393/?_x_tr_sl=sr&_x_tr_tl=en)*** lastest version already installed _and preferably launched at least once._  
+[^1]:You need to have ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** lastest version already installed _and preferably launched at least once._  
 _**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._  
 _**Sfvip All.exe** might trigger your antivirus because even Nuitka build are not exempt from it._  
 _**Sfvip All.exe** will ask you for network connection its first run because it relies on local proxies to do its magic._  
@@ -23,12 +23,12 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-2703-informational)
+![Sloc](https://img.shields.io/badge/Sloc-2705-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment
 Create an ***environment*** with an [***x64 Python***](https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe) version.  
-Call it ***.sfvip64*** or you have to set [***`Environmentx64.path`***](build_config.py#L27) appropriately.
+Call it ***.sfvip64*** or you have to set ***[`Environments.X64.path`](/build_config.py#L28)*** appropriately.
 ```console
 python -m venv .sfvip64
 .sfvip64\scripts\activate
@@ -56,14 +56,14 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 ### Build an ***x86*** version
 Create another [***environment***](#Create-the-environment) with an [***x86 Python***](https://www.python.org/ftp/python/3.11.5/python-3.11.5.exe) version.  
-Call it ***.sfvip86*** or you have to set [***`Environmentx86.path`***](build_config.py#L32) appropriately.  
+Call it ***.sfvip86*** or you have to set ***[`Environments.X86.path`](/build_config.py#L32)*** appropriately.  
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console
 rustup target add i686-pc-windows-msvc
 ```
 ### Build a specific version
 ```console
-python -m build [--x86 | --x64 | --both] [--upgrade] [--mingw]
+python -m build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--mingw] [--upgrade]
 ```
 ### Upgrade dependencies
 ```console

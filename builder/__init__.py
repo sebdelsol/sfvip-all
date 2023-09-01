@@ -2,8 +2,9 @@ import ast
 import inspect
 import shutil
 import subprocess
+import textwrap
 from pathlib import Path
-from typing import Any, Callable, Sequence
+from typing import Any, Callable, Iterator, Literal, Sequence
 from urllib.parse import quote
 
 from PIL import Image
@@ -16,9 +17,10 @@ from .upgrader import Upgrader
 
 # comments are automatically turned into argparse help
 class Args(EnvArgs):
-    readme: bool = False  # update readme and post only
+    nobuild: bool = False  # update readme and post only
     upgrade: bool = False  # upgrade the environment
     noexe: bool = False  # create only a zip (faster)
+    nozip: bool = False  # create only a exe
     mingw: bool = False  # build with mingw64
 
 
@@ -33,9 +35,9 @@ class IncludeFiles:
                 print(Stl.title("Create"), Stl.high(file.path))
 
     @property
-    def all(self) -> list[str]:
+    def all(self) -> Iterator[str]:
         self._create_all()
-        return [f"--include-data-file={file.path}={file.path}" for file in self._files]
+        return (f"--include-data-file={file.path}={file.path}" for file in self._files)
 
 
 def _get_dist_name(build: CfgBuild, is_64: bool) -> str:
@@ -46,74 +48,73 @@ def _get_dist_temp(build: CfgBuild, is_64: bool) -> str:
     return f"{build.dir}/temp/{get_bitness_str(is_64)}"
 
 
-def _print_file_size(path: str) -> None:
-    size = Path(path).stat().st_size / 1024
-    print(Stl.title(f"{size:.0f}"), Stl.low("KB"))
-
-
 class Builder:
     def __init__(self, build: CfgBuild, environments: CfgEnvironments) -> None:
         args = Args().parse_args()
-        self.python_envs = set() if args.readme else args.get_python_envs(environments)
-        self.onefile = not args.noexe
+        self.python_envs = args.get_python_envs(environments)
+        self.build_exe = not (args.noexe or args.nobuild)
+        self.build_zip = not (args.nozip or args.nobuild)
         self.upgrade = args.upgrade
         self.build = build
         self.nuitka_args = (
+            f"--onefile-tempdir-spec=%CACHE_DIR%/{self.build.name}",
+            f"--windows-file-version={self.build.version}",
+            f"--windows-company-name={self.build.company}",
+            f"--windows-icon-from-ico={self.build.ico}",
+            f"--output-filename={self.build.name}.exe",
+            *(("--onefile",) if self.build_exe else ()),
             "--mingw64" if args.mingw else "--clang",
             *IncludeFiles(build.files).all,
-            *build.nuitka,
+            *build.nuitka_args,
+            "--assume-yes-for-downloads",
+            "--python-flag=-OO",
+            "--standalone",
+            self.build.main,
         )
-        if self.onefile:
-            self.nuitka_args = *self.nuitka_args, "--onefile"
 
-    def _build_in_env(self, python_env: PythonEnv) -> None:
-        dist_name = _get_dist_name(self.build, python_env.is_64)
-        dist_temp = _get_dist_temp(self.build, python_env.is_64)
-        subprocess.run(
-            (
-                *(python_env.exe, "-m", "nuitka"),
-                f"--onefile-tempdir-spec=%CACHE_DIR%/{self.build.name}",
-                f"--windows-file-version={self.build.version}",
-                f"--windows-company-name={self.build.company}",
-                f"--windows-icon-from-ico={self.build.ico}",
-                f"--output-filename={self.build.name}.exe",
-                f"--output-dir={dist_temp}",
-                "--assume-yes-for-downloads",
-                "--python-flag=-OO",
-                "--standalone",
-                *self.nuitka_args,
-                self.build.main,
-            ),
-            check=True,
+    def _build(self, python_env: PythonEnv) -> Iterator[str]:
+        def _built(ext: Literal["exe", "zip"]) -> str:
+            size = Path(f"{dist_name}.{ext}").stat().st_size / 1024
+            print(Stl.title("Create"), Stl.high(f"{dist_name}.{ext}"), Stl.title(f"{size:.0f}"), Stl.low("KB"))
+            return f"{dist_name}.{ext}"
+
+        print(
+            Stl.title("Building"),
+            Stl.high(f"{self.build.name} {self.build.version} {get_bitness_str(python_env.is_64)}"),
         )
-        print(Stl.title("Create"), Stl.high(f"{dist_name}.zip"), end=" ")
-        shutil.make_archive(dist_name, "zip", f"{dist_temp}/{Path(self.build.main).stem}.dist")
-        _print_file_size(f"{dist_name}.zip")
-        if self.onefile:
-            print(Stl.title("Create"), Stl.high(f"{dist_name}.exe"), end=" ")
-            shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
-            _print_file_size(f"{dist_name}.exe")
+        python_env.print()
+        if python_env.check():
+            if self.upgrade:
+                Upgrader(python_env).check(eager=False)
+            dist_name = _get_dist_name(self.build, python_env.is_64)
+            dist_temp = _get_dist_temp(self.build, python_env.is_64)
+            subprocess.run(
+                (python_env.exe, "-m", "nuitka", f"--output-dir={dist_temp}", *self.nuitka_args),
+                check=True,
+            )
+            Path(dist_name).parent.mkdir(parents=True, exist_ok=True)
+            if self.build_zip:
+                shutil.make_archive(dist_name, "zip", f"{dist_temp}/{Path(self.build.main).stem}.dist")
+                yield _built("zip")
+            if self.build_exe:
+                shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
+                yield _built("exe")
         else:
-            print(Stl.warn("Warning:"), Stl.high(f"{dist_name}.exe"), Stl.warn("not created !"))
+            print(Stl.warn("Build Failed !"))
+        print()
 
     def build_all(self) -> None:
-        builds = set()
-        for python_env in self.python_envs:
-            app_version = f"{self.build.name} v{self.build.version} {get_bitness_str(python_env.is_64)}"
-            print(Stl.title("Build"), Stl.high(app_version))
-            python_env.print()
-            if python_env.check():
-                if self.upgrade:
-                    Upgrader(python_env).check(eager=False)
-                self._build_in_env(python_env)
-                builds.add(python_env.is_64)
-            else:
-                print(Stl.warn("Build Failed"))
-            print()
+        builts = []
+        if self.build_exe or self.build_zip:
+            for python_env in self.python_envs:
+                for built in self._build(python_env):
+                    builts.append(built)
         # missing versions
-        for missing in {True, False} - builds:
-            dist_name = _get_dist_name(self.build, missing)
-            print(Stl.warn("Warning:"), Stl.high(dist_name), Stl.warn("not build !"))
+        for is_64 in True, False:
+            for ext in "exe", "zip":
+                build = f"{_get_dist_name(self.build, is_64)}.{ext}"
+                if build not in builts:
+                    print(Stl.warn("Warning:"), Stl.high(build), Stl.warn("not build !"))
 
 
 def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
@@ -121,7 +122,7 @@ def _get_version_of(environments: CfgEnvironments, name: str, get_version: Calla
     if versions[True] != versions[False]:
         print(Stl.high("x64"), Stl.warn("and"), Stl.high("x86"), Stl.warn(f"{name} versions differ !"))
         for is_64 in (True, False):
-            print(Stl.high(get_bitness_str(is_64)), Stl.title(f"{name} is"), Stl.high(versions[is_64]))
+            print(" ", Stl.high(get_bitness_str(is_64)), Stl.title(f"{name} is"), Stl.high(versions[is_64]))
     return versions[True]
 
 
@@ -148,28 +149,29 @@ def _get_sloc(path: Path) -> int:
         return 0
 
 
-def _get_attr_lineno(obj: Any, name: str) -> int:
+def _get_attr_link(obj: Any, attr: str) -> str:
     lines, start = inspect.getsourcelines(obj)
-    for node in ast.walk(ast.parse("".join(lines))):
-        if isinstance(node, ast.Assign) and isinstance(target := node.targets[0], ast.Name) and target.id == name:
-            return node.lineno + start - 1
-    return 0
+    for node in ast.walk(ast.parse(textwrap.dedent("".join(lines)))):
+        if isinstance(node, ast.Assign) and isinstance(target := node.targets[0], ast.Name) and target.id == attr:
+            path = inspect.getfile(obj).replace(str(Path().resolve()), "").replace("\\", "/")
+            return f"[`{obj.__qualname__}.{attr}`]({path}#L{node.lineno + start - 1})"
+    return ""
 
 
 class Templater:
     _encoding = "utf-8"
 
     def __init__(self, build: CfgBuild, environments: CfgEnvironments, templates: CfgTemplates) -> None:
-        self.templates = templates
+        self.templates = templates.all
         python_version = _get_python_version(environments)
         dist_name32 = _get_dist_name(build, is_64=False)
         dist_name64 = _get_dist_name(build, is_64=True)
         self.template_format = dict(
+            github_path=f"{templates.Github.owner}/{templates.Github.repo}",
+            env_x64_decl=_get_attr_link(environments.X64, "path"),
+            env_x86_decl=_get_attr_link(environments.X86, "path"),
             py_version_compact=python_version.replace(".", ""),
-            line_of_x64=_get_attr_lineno(environments.x64, "path"),
-            line_of_x86=_get_attr_lineno(environments.x86, "path"),
             nuitka_version=_get_nuitka_version(environments),
-            github_path=f"{templates.owner}/{templates.repo}",
             archive64_link=quote(f"{dist_name64}.zip"),
             archive32_link=quote(f"{dist_name32}.zip"),
             sloc=_get_sloc(Path(build.main).parent),
@@ -187,5 +189,5 @@ class Templater:
         dst.write_text(template_text, encoding=Templater._encoding)
 
     def create_all(self) -> None:
-        for template in self.templates.all:
+        for template in self.templates:
             self._apply_template(Path(template.src), Path(template.dst))

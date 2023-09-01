@@ -9,7 +9,7 @@ class Build:
     name = "SfvipUserProxy"
     company = "sebdelsol"
     version = "0.3"
-    nuitka = ["--enable-console"]
+    nuitka_args = ["--enable-console"]
     files = []
 
 
@@ -24,8 +24,8 @@ class Post:
 
 
 Templates.all = Readme, Post  # type: ignore
-Environments.x64.requirements = ()  # type: ignore
-Environments.x86.requirements = ()  # type: ignore
+Environments.X64.requirements = []  # type: ignore
+Environments.X86.requirements = []  # type: ignore
 
 
 if __name__ == "__main__":

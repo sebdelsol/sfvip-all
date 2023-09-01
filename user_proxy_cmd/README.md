@@ -21,5 +21,5 @@ SfvipUserProxy --remove
 ![Sloc](https://img.shields.io/badge/Sloc-94-informational)
 
 ```console
-python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--mingw]
+python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--mingw]
 ```

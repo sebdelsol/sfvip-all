@@ -24,7 +24,7 @@ class CfgBuild(Protocol):
         ...
 
     @property
-    def nuitka(self) -> Sequence[str]:
+    def nuitka_args(self) -> Sequence[str]:
         ...
 
 
@@ -38,8 +38,9 @@ class CfgTemplates(Protocol):
     def all(self) -> Sequence[_CfgTemplate]:
         ...
 
-    owner: str
-    repo: str
+    class Github(Protocol):
+        owner: str
+        repo: str
 
 
 class _CfgEnvironment(Protocol):
@@ -51,10 +52,8 @@ class _CfgEnvironment(Protocol):
 
 
 class CfgEnvironments(Protocol):
-    @property
-    def x86(self) -> _CfgEnvironment:
+    class X86(_CfgEnvironment, Protocol):
         ...
 
-    @property
-    def x64(self) -> _CfgEnvironment:
+    class X64(_CfgEnvironment, Protocol):
         ...
