@@ -18,10 +18,15 @@ from .upgrader import Upgrader
 # comments are automatically turned into argparse help
 class Args(EnvArgs):
     nobuild: bool = False  # update readme and post only
+    readme: bool = False  # update readme and post only
     upgrade: bool = False  # upgrade the environment
     noexe: bool = False  # create only a zip (faster)
     nozip: bool = False  # create only a exe
     mingw: bool = False  # build with mingw64
+
+    def process_args(self) -> None:
+        super().process_args()
+        self.nobuild |= self.readme
 
 
 class IncludeFiles:
@@ -29,10 +34,14 @@ class IncludeFiles:
         self._files = files
 
     def _create_all(self) -> None:
-        for file in self._files:
-            if isinstance(file, CfgFileResize):
-                Image.open(file.src).resize(file.resize).save(file.path)
-                print(Stl.title("Create"), Stl.high(file.path))
+        if self._files:
+            print()
+            for file in self._files:
+                if isinstance(file, CfgFileResize):
+                    Image.open(file.src).resize(file.resize).save(file.path)
+                    print(Stl.title("create & include file"), Stl.high(file.path))
+                else:
+                    print(Stl.title("include file"), Stl.high(file.path))
 
     @property
     def all(self) -> Iterator[str]:
@@ -40,11 +49,11 @@ class IncludeFiles:
         return (f"--include-data-file={file.path}={file.path}" for file in self._files)
 
 
-def _get_dist_name(build: CfgBuild, is_64: bool) -> str:
+def _dist_name(build: CfgBuild, is_64: bool) -> str:
     return f"{build.dir}/{build.version}/{get_bitness_str(is_64)}/{build.name}"
 
 
-def _get_dist_temp(build: CfgBuild, is_64: bool) -> str:
+def _dist_temp(build: CfgBuild, is_64: bool) -> str:
     return f"{build.dir}/temp/{get_bitness_str(is_64)}"
 
 
@@ -79,42 +88,50 @@ class Builder:
             return f"{dist_name}.{ext}"
 
         print(
-            Stl.title("Building"),
+            Stl.title("building"),
             Stl.high(f"{self.build.name} {self.build.version} {get_bitness_str(python_env.is_64)}"),
         )
         python_env.print()
         if python_env.check():
             if self.upgrade:
                 Upgrader(python_env).check(eager=False)
-            dist_name = _get_dist_name(self.build, python_env.is_64)
-            dist_temp = _get_dist_temp(self.build, python_env.is_64)
-            subprocess.run(
-                (python_env.exe, "-m", "nuitka", f"--output-dir={dist_temp}", *self.nuitka_args),
-                check=True,
-            )
-            Path(dist_name).parent.mkdir(parents=True, exist_ok=True)
-            if self.build_zip:
-                shutil.make_archive(dist_name, "zip", f"{dist_temp}/{Path(self.build.main).stem}.dist")
-                yield _built("zip")
-            if self.build_exe:
-                shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
-                yield _built("exe")
-        else:
-            print(Stl.warn("Build Failed !"))
-        print()
+            dist_name = _dist_name(self.build, python_env.is_64)
+            dist_temp = _dist_temp(self.build, python_env.is_64)
+            try:
+                subprocess.run(
+                    (python_env.exe, "-m", "nuitka", f"--output-dir={dist_temp}", *self.nuitka_args),
+                    check=True,
+                )
+            except subprocess.CalledProcessError:
+                pass
+            else:
+                Path(dist_name).parent.mkdir(parents=True, exist_ok=True)
+                if self.build_zip:
+                    shutil.make_archive(dist_name, "zip", f"{dist_temp}/{Path(self.build.main).stem}.dist")
+                    yield _built("zip")
+                if self.build_exe:
+                    shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
+                    yield _built("exe")
+                return
+        print(
+            Stl.warn("build"),
+            Stl.high(f"{self.build.name} {self.build.version} {get_bitness_str(python_env.is_64)}"),
+            Stl.warn("failed !"),
+        )
 
     def build_all(self) -> None:
-        builts = []
+        builts = set()
         if self.build_exe or self.build_zip:
             for python_env in self.python_envs:
+                print()
                 for built in self._build(python_env):
-                    builts.append(built)
+                    builts.add(built)
         # missing versions
-        for is_64 in True, False:
-            for ext in "exe", "zip":
-                build = f"{_get_dist_name(self.build, is_64)}.{ext}"
-                if build not in builts:
-                    print(Stl.warn("Warning:"), Stl.high(build), Stl.warn("not build !"))
+        builds = {f"{_dist_name(self.build, is_64)}.{ext}" for is_64 in (True, False) for ext in ("exe", "zip")}
+        if missings := builds - builts:
+            print()
+            for missing in missings:
+                print(Stl.warn("warning:"), Stl.high(missing), Stl.warn("not build !"))
 
 
 def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
@@ -164,8 +181,8 @@ class Templater:
     def __init__(self, build: CfgBuild, environments: CfgEnvironments, templates: CfgTemplates) -> None:
         self.templates = templates.all
         python_version = _get_python_version(environments)
-        dist_name32 = _get_dist_name(build, is_64=False)
-        dist_name64 = _get_dist_name(build, is_64=True)
+        dist_name32 = _dist_name(build, is_64=False)
+        dist_name64 = _dist_name(build, is_64=True)
         self.template_format = dict(
             github_path=f"{templates.Github.owner}/{templates.Github.repo}",
             env_x64_decl=_get_attr_link(environments.X64, "path"),
@@ -189,5 +206,8 @@ class Templater:
         dst.write_text(template_text, encoding=Templater._encoding)
 
     def create_all(self) -> None:
-        for template in self.templates:
-            self._apply_template(Path(template.src), Path(template.dst))
+        if self.templates:
+            print()
+            for template in self.templates:
+                self._apply_template(Path(template.src), Path(template.dst))
+            print()

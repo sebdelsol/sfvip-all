@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, Collection, Sequence
+from typing import Any, Collection, NamedTuple, Sequence
 
 from .style import _Style
 
@@ -34,8 +34,14 @@ def _set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
     style.map("Vertical.TScrollbar", background=[("active", active_slider)])
 
 
-def _set_border(bg: str, size: float, **kwargs: str) -> dict[str, Any]:
-    return dict(highlightbackground=bg, highlightthickness=size, highlightcolor=bg, **kwargs)
+class _Border(NamedTuple):
+    bg: str
+    size: float
+    relief: str
+
+
+def _get_border(border: _Border, **kwargs: Any) -> dict[str, Any]:
+    return dict(highlightbackground=border.bg, highlightthickness=border.size, highlightcolor=border.bg, **kwargs)
 
 
 # pylint: disable=too-many-ancestors
@@ -89,20 +95,9 @@ class _Button(tk.Button):
     with a mouseover color
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
-        self,
-        master: tk.BaseWidget,
-        bg: str,
-        mouseover: str,
-        bd_color: str,
-        bd_size: float,
-        bd_relief: str,
-        **kwargs
-    ) -> None:
+    def __init__(self, master: tk.BaseWidget, bg: str, mouseover: str, border: _Border, **kwargs: Any) -> None:
         # create a frame for the border, note: do not pack
-        border = _set_border(bg=bd_color, size=bd_size, relief=bd_relief)
-        self._frame = tk.Frame(master, bg=bg, **border)
+        self._frame = tk.Frame(master, bg=bg, **_get_border(border))
         active = dict(activebackground=bg, activeforeground=kwargs.get("fg", "white"))
         # create the button
         super().__init__(self._frame, bg=bg, bd=0, **active, **kwargs)
@@ -128,14 +123,7 @@ class _ListView(tk.Frame):
     """
 
     # pylint: disable=too-many-arguments
-    def __init__(
-        self,
-        master: tk.BaseWidget,
-        bg_headers: str,
-        bg_rows: str,
-        bg_separator: str,
-        pad: int,
-    ) -> None:
+    def __init__(self, master: tk.BaseWidget, bg_headers: str, bg_rows: str, bg_separator: str, pad: int) -> None:
         super().__init__(master)
         # headers
         self._frame_headers = tk.Frame(self, bg=bg_headers)

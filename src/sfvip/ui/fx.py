@@ -56,7 +56,7 @@ class _Pulse:
             self._after = None
             sin = math.sin(self._two_pi_frequency * time.perf_counter())
             color = self._color1.blend_with(self._color2, (sin + 1) * 0.5)  # keep in [0,1]
-            self._widget.configure(bg=color.to_str())  # type: ignore
+            self._widget["bg"] = color.to_str()
             self._after = self._widget.after(_Pulse._pulse_dt_ms, self._pulse)
 
     def start(self) -> None:

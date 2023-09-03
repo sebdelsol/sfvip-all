@@ -1,3 +1,8 @@
+## 1.2.5
+* Bump Python to 3.11.5.
+* Bump Nuitka to 1.8.
+* Requirements tailored for x64 and x86 versions.
+
 ## 1.2.4
 * Upgrade requirements.
 * Still working with player 1.2.7.61.

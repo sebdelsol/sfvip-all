@@ -3,7 +3,7 @@ import asyncio
 import logging
 import multiprocessing
 import threading
-from typing import NamedTuple, Protocol
+from typing import Any, NamedTuple, Protocol
 
 from mitmproxy import http, options
 from mitmproxy.addons import (
@@ -24,15 +24,15 @@ logging.getLogger("mitmproxy.proxy.server").setLevel(logging.WARNING)
 
 # use only the needed addons,
 # Note: use addons.default_addons() instead if any issues
-def _minimum_addons():
-    return [
+def _minimum_addons() -> tuple[Any, ...]:
+    return (
         core.Core(),
         disable_h2c.DisableH2C(),
         proxyserver.Proxyserver(),
         dns_resolver.DnsResolver(),
         next_layer.NextLayer(),
         tlsconfig.TlsConfig(),
-    ]
+    )
 
 
 class _AddOn(Protocol):

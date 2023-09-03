@@ -36,16 +36,16 @@ def run_app(app_info: AppInfo, splash: Path, logo: Path) -> None:
         config = AppConfig(app_roaming / "Config All.json")
         config.update()
 
-        player = Player(config.player.path, ui)
-        if config.player.path != player.path:
-            config.player.path = player.path
+        player = Player(config.Player.path, ui)
+        if config.Player.path != player.path:
+            config.Player.path = player.path
             config.save()
 
         def run() -> None:
             while player.want_to_launch():
                 ui.splash.show(player.rect)
                 accounts_proxies = AccountsProxies(app_roaming, ui)
-                with LocalProxies(config.all_category, accounts_proxies.upstreams) as local_proxies:
+                with LocalProxies(config.AllCategory, accounts_proxies.upstreams) as local_proxies:
                     with accounts_proxies.set(local_proxies.by_upstreams) as restore_accounts_proxies:
                         with player.run():
                             restore_accounts_proxies(player.relaunch)

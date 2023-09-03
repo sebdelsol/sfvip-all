@@ -118,7 +118,8 @@ class SfVipAddOn:
                         flow.response.text = json.dumps(categories)
                         _log("inject", panel, action)
 
-    def responseheaders(self, flow: http.HTTPFlow) -> None:  # pylint: disable=no-self-use
+    @staticmethod
+    def responseheaders(flow: http.HTTPFlow) -> None:
         """all reponses are streamed except the api requests"""
         if not _is_api_request(flow.request):
             if flow.response:

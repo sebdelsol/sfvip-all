@@ -23,7 +23,7 @@ class PythonEnv:
         env_cfg = environments.X64 if self._want_64 else environments.X86
         self._env_path = Path(env_cfg.path)
         self._exe = self._env_path / "scripts" / "python.exe"
-        self._requirements = env_cfg.requirements  # type: ignore
+        self._requirements = env_cfg.requirements
 
     @property
     def exe(self) -> Path:

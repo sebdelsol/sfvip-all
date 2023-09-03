@@ -1,11 +1,10 @@
 from src.config import ConfigLoader
 
 
-# pylint: disable=invalid-name
 class AppConfig(ConfigLoader):
-    class player:
+    class Player:
         path: str | None = None
 
-    class all_category:
+    class AllCategory:
         name: str = "All"
         inject_in_live: bool = True

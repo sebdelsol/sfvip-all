@@ -59,7 +59,8 @@ class _PlayerPath:
                     break
             else:
                 raise PlayerError("Sfvip Player not found")
-        self.path: str = player_path  # it's been found # type: ignore
+        assert player_path is not None
+        self.path = player_path
         logger.info("player is '%s'", self.path)
 
     @staticmethod

@@ -1,8 +1,7 @@
 import json
 import msvcrt
-import os
 from pathlib import Path
-from typing import NamedTuple, Optional, Sequence, cast
+from typing import NamedTuple, Optional
 
 from ..color import Stl
 from ..env import PythonEnv
@@ -20,10 +19,6 @@ class PckgsColumns(Columns[Pckg]):
     ...
 
 
-def line_clear() -> None:
-    print("\x1b[2K", end="")
-
-
 def flush_input_buffer() -> None:
     while msvcrt.kbhit():
         msvcrt.getch()
@@ -31,24 +26,14 @@ def flush_input_buffer() -> None:
 
 class Upgrader:
     pip_install = "-m", "pip", "install", "-U", "--require-virtualenv"
+    report_file = "all_requirements.json"
 
     def __init__(self, python_env: PythonEnv) -> None:
         self._python_env = python_env
 
     def _install(self, *options: str) -> bool:
-        ok = True
         with CommandMonitor(self._python_env.exe, *Upgrader.pip_install, *options) as command:
-            width, _ = os.get_terminal_size()
-            for line in command.lines:
-                line_clear()
-                if line.is_error:
-                    print(Stl.warn(line.text.replace("\n", "")))
-                    ok = False
-                else:
-                    text = line.text.replace("\n", "")[:width]
-                    print(f"{text}\r", end="")
-        line_clear()
-        return ok
+            return command.run(out=Stl.low, error=Stl.warn)
 
     def _to_upgrade(self, *req_files: str, eager: bool) -> list[Pckg]:
         if req_files:
@@ -59,7 +44,7 @@ class Upgrader:
                 Stl.title(", ").join(Stl.high(req_file) for req_file in req_files),
             )
 
-            report_file = Path("all_requirements.json")
+            report_file = Path(Upgrader.report_file)
             self._install(
                 "--dry-run",
                 *("--report", report_file.name),
@@ -78,7 +63,7 @@ class Upgrader:
                         version=data["version"],
                         url=pckg.get("download_info", {}).get("url"),
                     )
-                    for pckg in cast(Sequence[dict], report["install"])
+                    for pckg in report["install"]
                     if (data := pckg.get("metadata"))
                 ]
         return []

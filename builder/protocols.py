@@ -52,8 +52,11 @@ class _CfgEnvironment(Protocol):
 
 
 class CfgEnvironments(Protocol):
-    class X86(_CfgEnvironment, Protocol):
+    # pylint: disable=invalid-name
+    @property
+    def X86(self) -> _CfgEnvironment:
         ...
 
-    class X64(_CfgEnvironment, Protocol):
+    @property
+    def X64(self) -> _CfgEnvironment:
         ...

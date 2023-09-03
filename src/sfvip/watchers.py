@@ -83,7 +83,7 @@ class _CallbackRegWatcher(NamedTuple):
     _CallbackFunc = Callable[Concatenate[Any, ANY_PARAMETERS], None]
 
     func: _CallbackFunc
-    args: tuple[Any]
+    args: tuple[Any, ...]
 
     def __call__(self, value: Any) -> None:
         self.func(value, *self.args)
@@ -130,9 +130,7 @@ class RegistryWatcher(StartStopContextManager):
     def _wait_for_change(self) -> None:
         with winreg.OpenKey(self._key.hkey, self._key.path) as key:
             current_value, _ = winreg.QueryValueEx(key, self._key.name)
-            for change in registry.wait_for_registry_change(
-                key.handle, RegistryWatcher._timeout_ms, self._running  # type: ignore
-            ):
+            for change in registry.wait_for_registry_change(int(key), RegistryWatcher._timeout_ms, self._running):
                 if change:
                     value, _ = winreg.QueryValueEx(key, self._key.name)
                     if value != current_value:

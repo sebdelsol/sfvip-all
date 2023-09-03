@@ -141,7 +141,7 @@ class AccountsProxies:
                     logger.info("%s %s proxy to '%s'", msg, account.Name, account.HttpProxy)
             self._database.save()
 
-    def _infos(self, proxies: dict[str, str]) -> tuple[Info]:
+    def _infos(self, proxies: dict[str, str]) -> tuple[Info, ...]:
         self._database.load()
         return tuple(
             Info(account.Name, proxies.get(account.HttpProxy, ""), account.HttpProxy)

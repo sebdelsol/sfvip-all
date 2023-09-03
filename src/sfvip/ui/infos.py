@@ -6,7 +6,7 @@ from typing import Callable, NamedTuple, Optional, Sequence
 from .fx import _Fade
 from .sticky import _Offset, _StickyWindow
 from .style import _Style
-from .widgets import _Button, _ListView, _set_border, _set_vscrollbar_style
+from .widgets import _Border, _Button, _get_border, _ListView, _set_vscrollbar_style
 
 
 class AppInfo(NamedTuple):
@@ -35,8 +35,8 @@ class _InfoTheme:
     bg_headers = "#242424"
     bg_rows = "#2A2A2A"
     separator = "#303030"
-    border = dict(bg="#808080", size=1)
-    button = dict(bg="#1F1E1D", mouseover="#3F3F41", bd_color="white", bd_size=0.75, bd_relief="groove")
+    border = _Border(bg="#808080", size=1, relief="")
+    button = dict(bg="#1F1E1D", mouseover="#3F3F41", border=_Border(bg="white", size=0.75, relief="groove"))
     listview = dict(bg_headers=bg_headers, bg_rows=bg_rows, bg_separator=separator)
     listview_scrollbar = dict(bg=bg_rows, slider="white", active_slider="grey")
 
@@ -99,7 +99,7 @@ class _InfosWindow(_StickyWindow):
     _max_height = 300
 
     def __init__(self, app_info: AppInfo) -> None:
-        border = _set_border(**_InfoTheme.border)  # type:ignore
+        border = _get_border(_InfoTheme.border)
         super().__init__(_InfosWindow._offset, **border, bg=_InfoTheme.bg_headers)
         self.attributes("-alpha", 0.0)
         self.maxsize(-1, _InfosWindow._max_height)

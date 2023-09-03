@@ -22,7 +22,7 @@ class Rect(NamedTuple):
     is_maximized: bool = False
 
     def valid(self) -> bool:
-        return all(attr != infinity for attr in self)  # pylint: disable=not-an-iterable
+        return all(attr != infinity for attr in (self.x, self.y, self.w, self.h))
 
     def position(self, offset: _Offset, w: int, h: int) -> Self:
         if offset.centered:
