@@ -67,5 +67,5 @@ python -m build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--ming
 ```
 ### Upgrade dependencies
 ```console
-python -m upgrade [--x86 | --x64 | --both] [--eager]
+python -m upgrade [--x86 | --x64 | --both] [--noeager]
 ```

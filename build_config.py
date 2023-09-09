@@ -30,7 +30,7 @@ class Environments:
 
     class X86:
         path = ".sfvip86"
-        requirements = "requirements.txt", "requirements.dev.txt", "requirements.constraints.x86.txt"
+        requirements = "requirements.txt", "requirements.dev.txt", "requirements.x86.txt"
 
 
 class Readme:

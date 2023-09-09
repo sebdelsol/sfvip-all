@@ -23,7 +23,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-2712-informational)
+![Sloc](https://img.shields.io/badge/Sloc-2714-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment
@@ -67,5 +67,5 @@ python -m build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--ming
 ```
 ### Upgrade dependencies
 ```console
-python -m upgrade [--x86 | --x64 | --both] [--eager]
+python -m upgrade [--x86 | --x64 | --both] [--noeager]
 ```

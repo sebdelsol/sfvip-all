@@ -10,6 +10,7 @@ from urllib.parse import quote
 from PIL import Image
 
 from .color import Stl
+from .command import CommandMonitor
 from .env import EnvArgs, PythonEnv, get_bitness_str
 from .protocols import CfgBuild, CfgEnvironments, CfgFile, CfgFileResize, CfgTemplates
 from .upgrader import Upgrader
@@ -35,13 +36,10 @@ class IncludeFiles:
 
     def _create_all(self) -> None:
         if self._files:
-            print()
             for file in self._files:
                 if isinstance(file, CfgFileResize):
                     Image.open(file.src).resize(file.resize).save(file.path)
-                    print(Stl.title("create & include file"), Stl.high(file.path))
-                else:
-                    print(Stl.title("include file"), Stl.high(file.path))
+                print(Stl.title("Include"), Stl.high(file.path))
 
     @property
     def all(self) -> Iterator[str]:
@@ -66,45 +64,37 @@ class Builder:
         self.upgrade = args.upgrade
         self.build = build
         self.nuitka_args = (
-            f"--onefile-tempdir-spec=%CACHE_DIR%/{self.build.name}",
-            f"--windows-file-version={self.build.version}",
-            f"--windows-company-name={self.build.company}",
-            f"--windows-icon-from-ico={self.build.ico}",
-            f"--output-filename={self.build.name}.exe",
+            f"--onefile-tempdir-spec=%CACHE_DIR%/{build.name}",
             *(("--onefile",) if self.build_exe else ()),
+            f"--windows-file-version={build.version}",
+            f"--windows-company-name={build.company}",
             "--mingw64" if args.mingw else "--clang",
+            f"--windows-icon-from-ico={build.ico}",
+            f"--output-filename={build.name}.exe",
             *IncludeFiles(build.files).all,
-            *build.nuitka_args,
             "--assume-yes-for-downloads",
             "--python-flag=-OO",
+            *build.nuitka_args,
             "--standalone",
-            self.build.main,
+            build.main,
         )
 
     def _build(self, python_env: PythonEnv) -> Iterator[str]:
         def _built(ext: Literal["exe", "zip"]) -> str:
             size = Path(f"{dist_name}.{ext}").stat().st_size / 1024
-            print(Stl.title("Create"), Stl.high(f"{dist_name}.{ext}"), Stl.title(f"{size:.0f}"), Stl.low("KB"))
+            print(Stl.high(f"{dist_name}.{ext}"), Stl.title("Built"), Stl.low(f"({size:.0f} KB)"))
             return f"{dist_name}.{ext}"
 
-        print(
-            Stl.title("building"),
-            Stl.high(f"{self.build.name} {self.build.version} {get_bitness_str(python_env.is_64)}"),
-        )
+        name = f"{self.build.name} v{self.build.version} {get_bitness_str(python_env.is_64)}"
+        print(Stl.title("Build"), Stl.high(name))
         python_env.print()
         if python_env.check():
             if self.upgrade:
-                Upgrader(python_env).check(eager=False)
+                Upgrader(python_env).check(eager=True)
             dist_name = _dist_name(self.build, python_env.is_64)
             dist_temp = _dist_temp(self.build, python_env.is_64)
-            try:
-                subprocess.run(
-                    (python_env.exe, "-m", "nuitka", f"--output-dir={dist_temp}", *self.nuitka_args),
-                    check=True,
-                )
-            except subprocess.CalledProcessError:
-                pass
-            else:
+            nuitka = CommandMonitor(python_env.exe, "-m", "nuitka", f"--output-dir={dist_temp}", *self.nuitka_args)
+            if nuitka.run(out=Stl.title):
                 Path(dist_name).parent.mkdir(parents=True, exist_ok=True)
                 if self.build_zip:
                     shutil.make_archive(dist_name, "zip", f"{dist_temp}/{Path(self.build.main).stem}.dist")
@@ -113,25 +103,20 @@ class Builder:
                     shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
                     yield _built("exe")
                 return
-        print(
-            Stl.warn("build"),
-            Stl.high(f"{self.build.name} {self.build.version} {get_bitness_str(python_env.is_64)}"),
-            Stl.warn("failed !"),
-        )
+        print(Stl.warn("Build"), Stl.high(name), Stl.warn("failed !"))
 
     def build_all(self) -> None:
-        builts = set()
+        builts = []
         if self.build_exe or self.build_zip:
             for python_env in self.python_envs:
-                print()
                 for built in self._build(python_env):
-                    builts.add(built)
+                    builts.append(built)
         # missing versions
-        builds = {f"{_dist_name(self.build, is_64)}.{ext}" for is_64 in (True, False) for ext in ("exe", "zip")}
-        if missings := builds - builts:
-            print()
-            for missing in missings:
-                print(Stl.warn("warning:"), Stl.high(missing), Stl.warn("not build !"))
+        for is_64 in True, False:
+            for ext in "exe", "zip":
+                build = f"{_dist_name(self.build, is_64)}.{ext}"
+                if build not in builts:
+                    print(Stl.high(build), Stl.warn("not built !"))
 
 
 def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
@@ -201,13 +186,11 @@ class Templater:
         )
 
     def _apply_template(self, src: Path, dst: Path) -> None:
-        print(Stl.title("create"), Stl.high(dst.as_posix()))
+        print(Stl.title("Create"), Stl.high(dst.as_posix()))
         template_text = src.read_text(encoding=Templater._encoding).format(**self.template_format)
         dst.write_text(template_text, encoding=Templater._encoding)
 
     def create_all(self) -> None:
         if self.templates:
-            print()
             for template in self.templates:
                 self._apply_template(Path(template.src), Path(template.dst))
-            print()
