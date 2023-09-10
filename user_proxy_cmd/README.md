@@ -16,7 +16,7 @@ SfvipUserProxy --remove
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.8-lightgrey)](https://nuitka.net/)
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.1-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 ![Sloc](https://img.shields.io/badge/Sloc-94-informational)
 

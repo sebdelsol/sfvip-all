@@ -13,7 +13,7 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.2.5"
+    version = "1.2.6"
     dir = "build"
     nuitka_args = (
         f"--force-stderr-spec=%PROGRAM%/../{name} - %TIME%.log",

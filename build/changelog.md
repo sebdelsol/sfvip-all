@@ -1,3 +1,6 @@
+## 1.2.6
+* Download latest _Sfvip Player_ if not already installed.
+
 ## 1.2.5
 * Bump Python to 3.11.5.
 * Bump Nuitka to 1.8.

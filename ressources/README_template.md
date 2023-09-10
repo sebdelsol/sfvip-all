@@ -13,10 +13,9 @@ Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[^1]:You need to have ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** lastest version already installed _and preferably launched at least once._  
-_**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._  
-_**Sfvip All.exe** might trigger your antivirus because even Nuitka build are not exempt from it._  
-_**Sfvip All.exe** will ask you for network connection its first run because it relies on local proxies to do its magic._  
+[^1]:_**{name}** might be slow to start its first run because it unzips in a cached folder._  
+_**{name}** might trigger your antivirus because even Nuitka build are not exempt from it._  
+_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._
 
 # Build
@@ -28,17 +27,17 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 Check the [***build config***](build_config.py).
 ### Create an x64 environment
 Create an ***environment*** with an [***x64 Python***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) version.  
-Call it ***.sfvip64*** or you have to set ***{env_x64_decl}*** appropriately.
+Call it ***{env_x64}*** or you have to set ***{env_x64_decl}*** appropriately.
 ```console
-python -m venv .sfvip64
-.sfvip64\scripts\activate
+python -m venv {env_x64}
+{env_x64}\scripts\activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt -r requirements.dev.txt
 ```
 
 ### Run locally
 ```console
-python -m sfvip_all
+python -m {script_main}
 ```
 ### Build with ***Mingw64***
 _The easiest option._
@@ -56,7 +55,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 ### Build an ***x86*** version
 Create another [***environment***](#Create-the-environment) with an [***x86 Python***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) version.  
-Call it ***.sfvip86*** or you have to set ***{env_x86_decl}*** appropriately.  
+Call it ***{env_x86}*** or you have to set ***{env_x86_decl}*** appropriately.  
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console
 rustup target add i686-pc-windows-msvc

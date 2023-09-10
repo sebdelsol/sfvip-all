@@ -82,12 +82,12 @@ class Builder:
     def _build(self, python_env: PythonEnv) -> Iterator[str]:
         def _built(ext: Literal["exe", "zip"]) -> str:
             size = Path(f"{dist_name}.{ext}").stat().st_size / 1024
-            print(Stl.high(f"{dist_name}.{ext}"), Stl.title("Built"), Stl.low(f"({size:.0f} KB)"))
+            print(Stl.title("Built"), Stl.high(f"{dist_name}.{ext}"), Stl.low(f"{size:.0f} KB"))
             return f"{dist_name}.{ext}"
 
         name = f"{self.build.name} v{self.build.version} {get_bitness_str(python_env.is_64)}"
-        print(Stl.title("Build"), Stl.high(name))
         python_env.print()
+        print(Stl.title("Building"), Stl.high(name))
         if python_env.check():
             if self.upgrade:
                 Upgrader(python_env).check(eager=True)
@@ -103,7 +103,7 @@ class Builder:
                     shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
                     yield _built("exe")
                 return
-        print(Stl.warn("Build"), Stl.high(name), Stl.warn("failed !"))
+        print(Stl.warn("Build failed"), Stl.high(name))
 
     def build_all(self) -> None:
         builts = []
@@ -116,7 +116,7 @@ class Builder:
             for ext in "exe", "zip":
                 build = f"{_dist_name(self.build, is_64)}.{ext}"
                 if build not in builts:
-                    print(Stl.high(build), Stl.warn("not built !"))
+                    print(Stl.warn("Not built"), Stl.high(build))
 
 
 def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
@@ -179,6 +179,9 @@ class Templater:
             sloc=_get_sloc(Path(build.main).parent),
             exe64_link=quote(f"{dist_name64}.exe"),
             exe32_link=quote(f"{dist_name32}.exe"),
+            script_main=Path(build.main).stem,
+            env_x64=environments.X64.path,
+            env_x86=environments.X86.path,
             py_version=python_version,
             ico_link=quote(build.ico),
             version=build.version,
@@ -188,6 +191,7 @@ class Templater:
     def _apply_template(self, src: Path, dst: Path) -> None:
         print(Stl.title("Create"), Stl.high(dst.as_posix()))
         template_text = src.read_text(encoding=Templater._encoding).format(**self.template_format)
+        dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(template_text, encoding=Templater._encoding)
 
     def create_all(self) -> None:

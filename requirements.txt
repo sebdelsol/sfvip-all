@@ -1,3 +1,5 @@
 # packages to run the app for both environments
+feedparser>=6.0.10
 mitmproxy<10.0.0 # https://github.com/mitmproxy/mitmproxy/issues/6303
+py7zr>=0.20.6
 watchdog>=3.0.0

@@ -5,25 +5,24 @@ So you can easily **search your entire catalog**.
 <img src="ressources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-1.2.5-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.5/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.5/x64/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.2.6-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.6/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.6/x64/Sfvip%20All.zip)
 
-[<img src="https://img.shields.io/badge/Version-1.2.5-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.5/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.5/x86/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.2.6-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.6/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.2.6/x86/Sfvip%20All.zip)
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[^1]:You need to have ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** lastest version already installed _and preferably launched at least once._  
-_**Sfvip All.exe** might be slow to start its first run because it unzips in a cached folder._  
-_**Sfvip All.exe** might trigger your antivirus because even Nuitka build are not exempt from it._  
-_**Sfvip All.exe** will ask you for network connection its first run because it relies on local proxies to do its magic._  
+[^1]:_**Sfvip All** might be slow to start its first run because it unzips in a cached folder._  
+_**Sfvip All** might trigger your antivirus because even Nuitka build are not exempt from it._  
+_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.8-lightgrey)](https://nuitka.net/)
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.1-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-2714-informational)
+![Sloc](https://img.shields.io/badge/Sloc-2837-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment

@@ -13,6 +13,7 @@ from ..registry import Registry
 from ..ui import UI, Rect, sticky
 from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
+from .download import Download
 from .exception import PlayerError
 
 logger = logging.getLogger(__name__)
@@ -54,8 +55,12 @@ class _PlayerPath:
 
     def __init__(self, player_path: Optional[str], ui: UI) -> None:
         if not self._valid_exe(player_path):
-            for search_method in self._get_paths_from_registry, self._get_path_from_user:
-                if player_path := search_method(ui):
+            for get_path_method in (
+                self._get_paths_from_registry,
+                self._get_path_from_user,
+                self._get_path_from_download,
+            ):
+                if player_path := get_path_method(ui):
                     break
             else:
                 raise PlayerError("Sfvip Player not found")
@@ -83,6 +88,13 @@ class _PlayerPath:
                     return player
             if not ui.askretry(message=f"{_PlayerPath._name.capitalize()} not found, try again ?"):
                 return None
+
+    def _get_path_from_download(self, ui: UI) -> Optional[str]:
+        if ui.askyesno(message=f"Download {_PlayerPath._name.capitalize()} ?"):
+            player = Download(_PlayerPath._name, ui).get()
+            if self._valid_exe(player):
+                return player
+        return None
 
 
 class _PlayerRectLoader(PlayerConfig):
