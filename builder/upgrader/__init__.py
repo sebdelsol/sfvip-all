@@ -1,5 +1,7 @@
 import json
 import msvcrt
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import NamedTuple, Optional
 
@@ -25,7 +27,8 @@ def _flush_input_buffer() -> None:
 
 
 class Upgrader:
-    pip_install = "-m", "pip", "install", "-U", "--require-virtualenv"
+    pip_install = "-m", "pip", "install", "--upgrade", "--require-virtualenv"
+    pip_freeze = "-m", "pip", "freeze", "--quiet", "--exclude-editable"
     report_file = "all_requirements.json"
 
     def __init__(self, python_env: PythonEnv) -> None:
@@ -35,40 +38,55 @@ class Upgrader:
         pip = CommandMonitor(self._python_env.exe, *Upgrader.pip_install, *options)
         return pip.run(out=Stl.low, err=Stl.warn)
 
-    def _to_upgrade(self, *req_files: str, eager: bool) -> list[_Pckg]:
-        if req_files:
-            print(
-                Stl.title("Check upgrades"),
-                Stl.low("eagerly" if eager else "only needed"),
-                Stl.title("for"),
-                Stl.high(", ".join(req_files)),
-            )
-            report_file = Path(Upgrader.report_file)
-            self._install(
-                "--dry-run",
-                *("--report", report_file.name),
-                *sum((("-r", req_file) for req_file in req_files), ()),
-                *("--upgrade-strategy", "eager" if eager else "only-if-needed"),
-            )
-            if report_file.exists():
-                with report_file.open(mode="r", encoding="utf8") as f:
-                    report = json.load(f)
-                report_file.unlink()
-                return [
-                    _Pckg(
-                        name=data["name"],
-                        version=data["version"],
-                        url=pckg.get("download_info", {}).get("url"),
-                    )
-                    for pckg in report["install"]
-                    if (data := pckg.get("metadata"))
-                ]
+    def _upgrade(self, eager: bool, dry_run: bool) -> list[_Pckg]:
+        if self._python_env.requirements:
+            if dry_run:
+                print(
+                    Stl.title("Check upgrades"),
+                    Stl.low("eagerly" if eager else "only needed"),
+                    Stl.title("for"),
+                    Stl.high(", ".join(self._python_env.requirements)),
+                )
+            with tempfile.TemporaryDirectory() as temp_dir:
+                report_file = Path(temp_dir) / Upgrader.report_file
+                self._install(
+                    *(("--dry-run",) if dry_run else ()),
+                    *("--report", str(report_file)),
+                    *sum((("-r", req_file) for req_file in self._python_env.requirements), ()),
+                    *("--upgrade-strategy", "eager" if eager else "only-if-needed"),
+                )
+                if report_file.exists():
+                    with report_file.open(mode="r", encoding="utf8") as f:
+                        report = json.load(f)
+                    return [
+                        _Pckg(
+                            name=data["name"],
+                            version=data["version"],
+                            url=pckg.get("download_info", {}).get("url"),
+                        )
+                        for pckg in report["install"]
+                        if (data := pckg.get("metadata"))
+                    ]
         return []
+
+    def _install_package(self, pckg: _Pckg) -> bool:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # constraint the pckg installation with all other pckg versions in the environment
+            constraints = Path(temp_dir) / "current-env.txt"
+            freeze = subprocess.run(
+                (self._python_env.exe, *Upgrader.pip_freeze, "--exclude", pckg.name),
+                capture_output=True,
+                check=False,
+                text=True,
+            )
+            constraints.write_text(freeze.stdout)
+            if self._install(pckg.url or f"{pckg.name}=={pckg.version}", "-r", str(constraints)):
+                return True
+        return False
 
     def check(self, eager: bool) -> None:
         _flush_input_buffer()
-        to_upgrade = self._to_upgrade(*self._python_env.requirements, eager=eager)
-
+        to_upgrade = self._upgrade(eager, dry_run=True)
         while True:
             n = len(to_upgrade)
             if n > 0:
@@ -76,7 +94,6 @@ class Upgrader:
                 columns.add_no_column(lambda i: Stl.title(f" {i + 1}."), Justify.RIGHT)
                 columns.add_attr_column(lambda pckg: Stl.high(pckg.name), Justify.LEFT)
                 columns.add_attr_column(lambda pckg: Stl.warn(pckg.version), Justify.LEFT)
-                print()
                 print(Stl.title("Upgrade:"))
                 for row in columns.rows:
                     print(*row)
@@ -84,15 +101,18 @@ class Upgrader:
                 print(Stl.title("Nothing to upgrade"))
                 break
             keys = input(
-                f"{Stl.title('> e')}{Stl.low('xit')} {Stl.low('or')} "
-                f"{Stl.title('#')} {Stl.low('?')} {Stl.title()}"
-            )
+                f"{Stl.title('> E')}{Stl.low('xit,')} {Stl.title('A')}{Stl.low('ll')} "
+                f"{Stl.low('or a package')} {Stl.title('#')} {Stl.low('?')} {Stl.title()}"
+            ).lower()
             if keys == "e":
                 print(Stl.title("Exit"))
                 break
-            if keys.isdigit() and 0 <= (i := int(keys) - 1) < n:
+            if keys == "a":
+                print(Stl.title("Install"), Stl.high("all"))
+                upgraded = self._upgrade(eager, dry_run=False)
+                to_upgrade = [pckg for pckg in to_upgrade if pckg not in upgraded]  # keep to_upgrade in order
+            elif keys.isdigit() and 0 <= (i := int(keys) - 1) < n:
                 pckg = to_upgrade[i]
-                print()
                 print(Stl.title("Install"), Stl.high(pckg.name), Stl.warn(pckg.version))
-                if self._install(pckg.url or f"{pckg.name}=={pckg.version}"):
+                if self._install_package(pckg):
                     to_upgrade.remove(pckg)

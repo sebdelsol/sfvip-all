@@ -1,14 +1,18 @@
+## 1.2.7
+* Bump _mitmproxy_ to 10.0.0.
+* Upgrade always respects dependencies.
+
 ## 1.2.6
 * Download latest _Sfvip Player_ if not already installed.
 
 ## 1.2.5
-* Bump Python to 3.11.5.
-* Bump Nuitka to 1.8.
+* Bump _Python_ to 3.11.5.
+* Bump _Nuitka_ to 1.8.
 * Requirements tailored for x64 and x86 versions.
 
 ## 1.2.4
 * Upgrade requirements.
-* Still working with player 1.2.7.61.
+* Still working with _Sfvip Player_ 1.2.7.61.
 
 ## 1.2.3
 * Fix possible monitor areas overflow on x64.

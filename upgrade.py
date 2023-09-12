@@ -14,4 +14,3 @@ if __name__ == "__main__":
         python_env.print()
         if python_env.check():
             Upgrader(python_env).check(eager=not args.noeager)
-            print()
