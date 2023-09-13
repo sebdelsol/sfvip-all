@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 from PIL import Image
 
-from .color import Stl
+from .color import Low, Ok, Title, Warn
 from .command import CommandMonitor
 from .env import EnvArgs, PythonEnv, get_bitness_str
 from .protocols import CfgBuild, CfgEnvironments, CfgFile, CfgFileResize, CfgTemplates
@@ -39,7 +39,7 @@ class IncludeFiles:
             for file in self._files:
                 if isinstance(file, CfgFileResize):
                     Image.open(file.src).resize(file.resize).save(file.path)
-                print(Stl.title("Include"), Stl.high(file.path))
+                print(Title("Include"), Ok(file.path))
 
     @property
     def all(self) -> Iterator[str]:
@@ -82,19 +82,19 @@ class Builder:
     def _build(self, python_env: PythonEnv) -> Iterator[str]:
         def _built(ext: Literal["exe", "zip"]) -> str:
             size = Path(f"{dist_name}.{ext}").stat().st_size / 1024
-            print(Stl.title("Built"), Stl.high(f"{dist_name}.{ext}"), Stl.low(f"{size:.0f} KB"))
+            print(Title("Built"), Ok(f"{dist_name}.{ext}"), Low(f"{size:.0f} KB"))
             return f"{dist_name}.{ext}"
 
         name = f"{self.build.name} v{self.build.version} {get_bitness_str(python_env.is_64)}"
         python_env.print()
-        print(Stl.title("Building"), Stl.high(name))
+        print(Title("Building"), Ok(name))
         if python_env.check():
             if self.upgrade:
                 Upgrader(python_env).check(eager=True)
             dist_name = _dist_name(self.build, python_env.is_64)
             dist_temp = _dist_temp(self.build, python_env.is_64)
             nuitka = CommandMonitor(python_env.exe, "-m", "nuitka", f"--output-dir={dist_temp}", *self.nuitka_args)
-            if nuitka.run(out=Stl.title):
+            if nuitka.run(out=Title):
                 Path(dist_name).parent.mkdir(parents=True, exist_ok=True)
                 if self.build_zip:
                     shutil.make_archive(dist_name, "zip", f"{dist_temp}/{Path(self.build.main).stem}.dist")
@@ -103,7 +103,7 @@ class Builder:
                     shutil.copy(f"{dist_temp}/{self.build.name}.exe", f"{dist_name}.exe")
                     yield _built("exe")
                 return
-        print(Stl.warn("Build failed"), Stl.high(name))
+        print(Warn("Build failed"), Ok(name))
 
     def build_all(self) -> None:
         builts = []
@@ -116,15 +116,15 @@ class Builder:
             for ext in "exe", "zip":
                 build = f"{_dist_name(self.build, is_64)}.{ext}"
                 if build not in builts:
-                    print(Stl.warn("Not built"), Stl.high(build))
+                    print(Warn("Not built"), Ok(build))
 
 
 def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
     versions = {is_64: get_version(PythonEnv(environments, is_64)) for is_64 in (True, False)}
     if versions[True] != versions[False]:
-        print(Stl.high("x64"), Stl.warn("and"), Stl.high("x86"), Stl.warn(f"{name} versions differ !"))
+        print(Ok("x64"), Warn("and"), Ok("x86"), Warn(f"{name} versions differ !"))
         for is_64 in (True, False):
-            print(" ", Stl.high(get_bitness_str(is_64)), Stl.title(f"{name} is"), Stl.high(versions[is_64]))
+            print(" ", Ok(get_bitness_str(is_64)), Title(f"{name} is"), Ok(versions[is_64]))
     return versions[True]
 
 
@@ -189,7 +189,7 @@ class Templater:
         )
 
     def _apply_template(self, src: Path, dst: Path) -> None:
-        print(Stl.title("Create"), Stl.high(dst.as_posix()))
+        print(Title("Create"), Ok(dst.as_posix()))
         template_text = src.read_text(encoding=Templater._encoding).format(**self.template_format)
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(template_text, encoding=Templater._encoding)

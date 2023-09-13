@@ -2,11 +2,11 @@ import subprocess
 import sys
 from functools import cached_property
 from pathlib import Path
-from typing import Sequence
+from typing import Optional, Sequence
 
 from tap import Tap
 
-from .color import Stl
+from .color import Low, Ok, Title, Warn
 from .protocols import CfgEnvironments
 
 
@@ -33,48 +33,53 @@ class PythonEnv:
     def requirements(self) -> Sequence[str]:
         return self._requirements
 
+    def _python(self, *args: str) -> Optional[str]:
+        if self._exe.exists():
+            try:
+                return subprocess.run([self._exe, *args], check=True, capture_output=True, text=True).stdout
+            except subprocess.CalledProcessError:
+                return None
+        return None
+
     @cached_property
     def is_64(self) -> bool:
-        if self._exe.exists():
-            script = "import sys; sys.exit(int(sys.maxsize == (2**63) - 1))"
-            is_64 = subprocess.run([self._exe, "-c", script], check=False)
-            return bool(is_64.returncode)
+        script = "import sys; print(int(sys.maxsize == (2**63) - 1))"
+        if is_64 := self._python("-c", script):
+            return bool(int(is_64))
         return self._want_64
 
     @cached_property
     def python_version(self) -> str:
-        if self._exe.exists():
-            version = subprocess.run([self._exe, "--version"], check=True, capture_output=True, text=True)
-            return version.stdout.replace("\n", "").split()[1]
+        if version := self._python("--version"):
+            return version.replace("\n", "").split()[1]
         return PythonEnv.undefined_version
 
     def package_version(self, package_name: str) -> str:
-        if self._exe.exists():
-            script = f"import importlib.metadata; print(importlib.metadata.version('{package_name}'))"
-            version = subprocess.run([self._exe, "-c", script], check=False, capture_output=True, text=True)
-            return version.stdout.strip()
+        script = f"import importlib.metadata; print(importlib.metadata.version('{package_name}'))"
+        if version := self._python("-c", script):
+            return version.strip()
         return PythonEnv.undefined_version
 
     def print(self) -> None:
         print(
-            Stl.title("In "),
-            Stl.high(get_bitness_str(self.is_64)),
-            Stl.title(" Python "),
-            Stl.high(self.python_version),
-            Stl.title(" environment "),
-            Stl.low(str(self._env_path.parent.resolve().as_posix())),
-            Stl.low("/"),
-            Stl.high(str(self._env_path.name)),
+            Title("In "),
+            Ok(get_bitness_str(self.is_64)),
+            Title(" Python "),
+            Ok(self.python_version),
+            Title(" environment "),
+            Low(str(self._env_path.parent.resolve().as_posix())),
+            Low("/"),
+            Ok(str(self._env_path.name)),
             sep="",
         )
 
     def check(self) -> bool:
         if not self._exe.exists():
-            print(Stl.warn("No Python exe found !"))
+            print(Warn("No Python exe found !"))
             return False
         if self.is_64 != self._want_64:
-            print(Stl.warn("Wrong Python bitness !"))
-            print(Stl.warn("It should be"), Stl.high(get_bitness_str(self._want_64)))
+            print(Warn("Wrong Python bitness !"))
+            print(Warn("It should be"), Ok(get_bitness_str(self._want_64)))
             return False
         return True
 

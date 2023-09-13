@@ -6,7 +6,7 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import IO, Iterator, NamedTuple, Optional
 
-from .color import Stl, ToStyle
+from .color import Low, ToStyle, Warn
 
 
 class _Line(NamedTuple):
@@ -67,8 +67,8 @@ class CommandMonitor:
         ) as process:
             ok = True
             n_lines = 0
-            out = out or Stl.low
-            err = err or Stl.warn
+            out = out or Low
+            err = err or Warn
             for line in self._lines(process):
                 if line.is_error:
                     print(err(line.text.replace("\n", "")))
