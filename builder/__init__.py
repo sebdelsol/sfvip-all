@@ -86,7 +86,7 @@ class Builder:
             return f"{dist_name}.{ext}"
 
         name = f"{self.build.name} v{self.build.version} {get_bitness_str(python_env.is_64)}"
-        python_env.print()
+        print(python_env)
         print(Title("Building"), Ok(name))
         if python_env.check():
             if self.upgrade:

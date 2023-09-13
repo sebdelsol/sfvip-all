@@ -33,7 +33,7 @@ class PythonEnv:
     def requirements(self) -> Sequence[str]:
         return self._requirements
 
-    def _python(self, *args: str) -> Optional[str]:
+    def run_python(self, *args: str) -> Optional[str]:
         if self._exe.exists():
             try:
                 return subprocess.run([self._exe, *args], check=True, capture_output=True, text=True).stdout
@@ -44,34 +44,21 @@ class PythonEnv:
     @cached_property
     def is_64(self) -> bool:
         script = "import sys; print(int(sys.maxsize == (2**63) - 1))"
-        if is_64 := self._python("-c", script):
+        if is_64 := self.run_python("-c", script):
             return bool(int(is_64))
         return self._want_64
 
     @cached_property
     def python_version(self) -> str:
-        if version := self._python("--version"):
+        if version := self.run_python("--version"):
             return version.replace("\n", "").split()[1]
         return PythonEnv.undefined_version
 
     def package_version(self, package_name: str) -> str:
         script = f"import importlib.metadata; print(importlib.metadata.version('{package_name}'))"
-        if version := self._python("-c", script):
+        if version := self.run_python("-c", script):
             return version.strip()
         return PythonEnv.undefined_version
-
-    def print(self) -> None:
-        print(
-            Title("In "),
-            Ok(get_bitness_str(self.is_64)),
-            Title(" Python "),
-            Ok(self.python_version),
-            Title(" environment "),
-            Low(str(self._env_path.parent.resolve().as_posix())),
-            Low("/"),
-            Ok(str(self._env_path.name)),
-            sep="",
-        )
 
     def check(self) -> bool:
         if not self._exe.exists():
@@ -82,6 +69,20 @@ class PythonEnv:
             print(Warn("It should be"), Ok(get_bitness_str(self._want_64)))
             return False
         return True
+
+    def __str__(self) -> str:
+        return "".join(
+            (
+                Title("In "),
+                Ok(get_bitness_str(self.is_64)),
+                Title(" Python "),
+                Ok(self.python_version),
+                Title(" environment "),
+                Low(str(self._env_path.parent.resolve().as_posix())),
+                Low("/"),
+                Ok(str(self._env_path.name)),
+            )
+        )
 
 
 class EnvArgs(Tap):

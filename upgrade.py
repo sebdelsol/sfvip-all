@@ -11,6 +11,6 @@ class Args(EnvArgs):
 if __name__ == "__main__":
     args = Args().parse_args()
     for python_env in args.get_python_envs(Environments):
-        python_env.print()
+        print(python_env)
         if python_env.check():
             Upgrader(python_env).check(eager=not args.noeager)

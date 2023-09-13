@@ -73,6 +73,7 @@ class _PlayerPath:
         return bool(path and (_path := Path(path)).is_file() and _path.match(_PlayerPath._pattern))
 
     def _get_paths_from_registry(self, _) -> Optional[str]:
+        logger.info("try to find the player in the registry")
         for search_method, hkey, path, handle_found in _PlayerPath._registry_search:
             if found := search_method(hkey, path, _PlayerPath._name):
                 for player in handle_found(found):
@@ -82,6 +83,7 @@ class _PlayerPath:
 
     def _get_path_from_user(self, ui: UI) -> Optional[str]:
         ui.showinfo(f"Please find {_PlayerPath._name.capitalize()}")
+        logger.info("ask the user to find the player")
         while True:
             if player := ui.find_file(_PlayerPath._name, _PlayerPath._pattern):
                 if self._valid_exe(player):
@@ -91,6 +93,7 @@ class _PlayerPath:
 
     def _get_path_from_download(self, ui: UI) -> Optional[str]:
         if ui.askyesno(message=f"Download {_PlayerPath._name.capitalize()} ?"):
+            logger.info("try to download the player")
             player = Download(_PlayerPath._name, ui).get()
             if self._valid_exe(player):
                 return player

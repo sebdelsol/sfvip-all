@@ -1,9 +1,10 @@
+import logging
 import shutil
 import sys
 import tempfile
 import urllib.request
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional, Protocol
 from urllib.error import ContentTooShortError, HTTPError, URLError
 
 import feedparser
@@ -13,6 +14,9 @@ from src.sfvip.ui import UI
 
 from ..ui import UI, ProgressWindow
 
+# https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels
+X86_64_V3 = True
+logger = logging.getLogger(__name__)
 shutil.register_unpack_format("7zip", [".7z"], unpack_7zarchive)
 
 
@@ -40,8 +44,20 @@ class _Progress(ProgressWindow):
     def download_and_unpack(self, url: str, archive: Path, extract_dir: Path) -> None:
         self.msg(f"Download {archive.name}")
         if archive_format := self.download_archive(url, archive):
+            logger.info("%s downloaded", archive.name)
             self.msg(f"Unpack {archive.name}")
             shutil.unpack_archive(archive, extract_dir=extract_dir, format=archive_format)
+            logger.info("%s unpacked", archive.name)
+
+
+class _FeedEntries(Protocol):
+    class _Entry(Protocol):
+        title: Any
+        link: Any
+
+    entries: list[_Entry]
+    status: int
+    bozo: bool
 
 
 class Download:
@@ -49,9 +65,9 @@ class Download:
     _player_bitness = "x64" if _is_64 else "x86"
     _player_update = f"https://raw.githubusercontent.com/K4L4Uz/SFVIP-Player/master/Update_{_player_bitness}.zip"
     _libmpv_feed = "https://sourceforge.net/projects/mpv-player-windows/rss?path=/libmpv"
-    _libmpv_bitness = "x86_64-v3" if _is_64 else "i686"
-    _libmpv_dev = f"mpv-dev-{_libmpv_bitness}"
-    _libmpv_dll_pattern = "libmpv*.dll"
+    _libmpv_bitness = f"x86_64{'-v3' if X86_64_V3 else ''}" if _is_64 else "i686"
+    _libmpv = f"mpv-dev-{_libmpv_bitness}"
+    _libmpv_dll = "libmpv*.dll"
     _exceptions = OSError, URLError, HTTPError, ContentTooShortError, ValueError, shutil.ReadError
 
     def __init__(self, player_name: str, ui: UI) -> None:
@@ -61,22 +77,26 @@ class Download:
         self._ui = ui
 
     def _download_libmpv(self, progress: _Progress, temp_dir: Path) -> bool:
-        progress.msg("Find lastest libmpv")
-        feed = feedparser.parse(Download._libmpv_feed)
-        libmpv_urls = (entry.link for entry in feed.entries if Download._libmpv_dev in entry.title)
-        if libmpv_url := next(libmpv_urls, None):
-            progress.download_and_unpack(libmpv_url, temp_dir / "libmpv", temp_dir)
-            dlls = (file for file in temp_dir.glob(Download._libmpv_dll_pattern))
-            if dll := next(dlls, None):
-                lib = self._player_dir / "lib"
-                lib.mkdir(parents=True, exist_ok=True)
-                shutil.copy(dll, lib)
-                return True
+        feed: _FeedEntries = feedparser.parse(Download._libmpv_feed)
+        if feed.status in (200, 302) and not feed.bozo and feed.entries:
+            logger.info("search in libmpv feed")
+            libmpvs = (entry.link for entry in feed.entries if Download._libmpv in entry.title)
+            if libmpv := next(libmpvs, None):
+                logger.info("libmpv url found")
+                progress.download_and_unpack(libmpv, temp_dir / "libmpv", temp_dir)
+                dlls = (file for file in temp_dir.glob(Download._libmpv_dll))
+                if dll := next(dlls, None):
+                    lib = self._player_dir / "lib"
+                    lib.mkdir(parents=True, exist_ok=True)
+                    shutil.copy(dll, lib)
+                    logger.info("libmpv dll found")
+                    return True
         return False
 
     def _download_player(self, progress: _Progress, temp_dir: Path) -> bool:
-        progress.download_and_unpack(Download._player_update, temp_dir / "player", self._player_dir)
+        progress.download_and_unpack(Download._player_update, temp_dir / "player update", self._player_dir)
         if self._player_exe.exists():
+            logger.info("player exe found")
             return True
         return False
 
@@ -88,6 +108,8 @@ class Download:
                     if self._download_player(progress, temp_dir):
                         if self._download_libmpv(progress, temp_dir):
                             return str(self._player_exe)
-        except Download._exceptions:
+        except Download._exceptions as err:
             shutil.rmtree(self._player_dir, ignore_errors=True)
+            logger.warning("player download exception %s", err)
+        logger.warning("player download aborted")
         return None

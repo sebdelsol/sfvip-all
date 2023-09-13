@@ -1,6 +1,7 @@
 ## 1.2.7
 * Bump _mitmproxy_ to 10.0.0.
 * Upgrade always respects dependencies.
+* Better logs when looking for _Sfvip Player_. 
 
 ## 1.2.6
 * Download latest _Sfvip Player_ if not already installed.
