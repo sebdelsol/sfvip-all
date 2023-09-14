@@ -17,6 +17,10 @@ class AppInfo(NamedTuple):
 
     @property
     def bitness(self) -> str:
+        return "x64" if self.app_64bit else "x86"
+
+    @property
+    def os_bitness(self) -> str:
         return "x64" if self.os_64bit else "x86"
 
 
@@ -82,7 +86,7 @@ def _get_app_info(app_info: AppInfo) -> _Style:
 
 def _get_app_warn(app_info: AppInfo) -> _Style:
     if app_info.app_64bit != app_info.os_64bit:
-        warn = f"You should use the {app_info.bitness} version"
+        warn = f"You should use the {app_info.os_bitness} version"
         return _InfoStyle.app_warn(warn).red
     warn = "Search your whole catalog"
     return _InfoStyle.app_warn(warn).lime_green

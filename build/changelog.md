@@ -1,7 +1,11 @@
+## 1.2.8
+* Detection of x86-64-v3 architecture for libmpv download.
+* Fix wrong bitness in the info window.
+
 ## 1.2.7
 * Bump _mitmproxy_ to 10.0.0.
 * Upgrade always respects dependencies.
-* Better logs when looking for _Sfvip Player_. 
+* Logs for _Sfvip Player_ download. 
 
 ## 1.2.6
 * Download latest _Sfvip Player_ if not already installed.

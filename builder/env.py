@@ -51,7 +51,7 @@ class PythonEnv:
     @cached_property
     def python_version(self) -> str:
         if version := self.run_python("--version"):
-            return version.replace("\n", "").split()[1]
+            return version.split()[1]
         return PythonEnv.undefined_version
 
     def package_version(self, package_name: str) -> str:
