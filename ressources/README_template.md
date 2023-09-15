@@ -26,7 +26,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment
-Create an ***environment*** with an [***x64 Python***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) version.  
+Create a [***Python x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) ***environment***.  
 Call it ***{env_x64}*** or you have to set ***{env_x64_decl}*** appropriately.
 ```console
 python -m venv {env_x64}
@@ -54,7 +54,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 <img src="ressources/VS.png">
 
 ### Build an ***x86*** version
-Create another [***environment***](#Create-the-environment) with an [***x86 Python***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) version.  
+Create a [***Python x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) [***environment***](#Create-an-x64-environment).  
 Call it ***{env_x86}*** or you have to set ***{env_x86_decl}*** appropriately.  
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console

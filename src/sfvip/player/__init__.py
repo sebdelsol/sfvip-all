@@ -1,20 +1,18 @@
 import logging
-import os
 import subprocess
 import threading
 import time
-import winreg
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Callable, Iterator, Optional
 
 from ...winapi import mutex
-from ..registry import Registry
 from ..ui import UI, Rect, sticky
 from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
-from .download import Download
+from .download import download_player
 from .exception import PlayerError
+from .registry import player_from_registry
 
 logger = logging.getLogger(__name__)
 
@@ -38,66 +36,50 @@ class _PlayerPath:
 
     _name = "sfvip player"
     _pattern = "*sf*vip*player*.exe"
-    _registry_search = (
-        (
-            Registry.name_by_value,
-            winreg.HKEY_CLASSES_ROOT,
-            r"Local Settings\Software\Microsoft\Windows\Shell\MuiCache",
-            lambda found: [os.path.splitext(found)[0]],
-        ),
-        (
-            Registry.search_name_contains,
-            winreg.HKEY_CURRENT_USER,
-            r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store",
-            lambda found: found,
-        ),
-    )
 
-    def __init__(self, player_path: Optional[str], ui: UI) -> None:
-        if not self._valid_exe(player_path):
-            for get_path_method in (
-                self._get_paths_from_registry,
-                self._get_path_from_user,
-                self._get_path_from_download,
-            ):
-                if player_path := get_path_method(ui):
-                    break
-            else:
-                raise PlayerError("Sfvip Player not found")
-        assert player_path is not None
-        self.path = player_path
+    def __init__(self, player: Optional[str], ui: UI) -> None:
+        if not self._valid_exe(player):
+            player = self._find_player(ui)
+        self.path = player
         logger.info("player is '%s'", self.path)
+
+    def _find_player(self, ui: UI) -> str:
+        for find_player_method in (
+            self._player_from_registry,
+            self._player_from_user,
+            self._player_from_download,
+        ):
+            for player in find_player_method(ui):
+                if self._valid_exe(player):
+                    return player
+        raise PlayerError("Sfvip Player not found")
 
     @staticmethod
     def _valid_exe(path: Optional[Path | str]) -> bool:
         return bool(path and (_path := Path(path)).is_file() and _path.match(_PlayerPath._pattern))
 
-    def _get_paths_from_registry(self, _) -> Optional[str]:
+    @staticmethod
+    def _player_from_registry(_) -> Iterator[str]:
         logger.info("try to find the player in the registry")
-        for search_method, hkey, path, handle_found in _PlayerPath._registry_search:
-            if found := search_method(hkey, path, _PlayerPath._name):
-                for player in handle_found(found):
-                    if self._valid_exe(player):
-                        return player
-        return None
+        for player in player_from_registry(_PlayerPath._name):
+            yield player
 
-    def _get_path_from_user(self, ui: UI) -> Optional[str]:
+    @staticmethod
+    def _player_from_user(ui: UI) -> Iterator[str]:
         ui.showinfo(f"Please find {_PlayerPath._name.capitalize()}")
-        logger.info("ask the user to find the player")
         while True:
+            logger.info("ask the user to find the player")
             if player := ui.find_file(_PlayerPath._name, _PlayerPath._pattern):
-                if self._valid_exe(player):
-                    return player
+                yield player
             if not ui.askretry(message=f"{_PlayerPath._name.capitalize()} not found, try again ?"):
-                return None
+                break
 
-    def _get_path_from_download(self, ui: UI) -> Optional[str]:
+    @staticmethod
+    def _player_from_download(ui: UI) -> Iterator[str]:
         if ui.askyesno(message=f"Download {_PlayerPath._name.capitalize()} ?"):
             logger.info("try to download the player")
-            player = Download(_PlayerPath._name, ui).get()
-            if self._valid_exe(player):
-                return player
-        return None
+            for player in download_player(_PlayerPath._name, ui):
+                yield player
 
 
 class _PlayerRectLoader(PlayerConfig):
