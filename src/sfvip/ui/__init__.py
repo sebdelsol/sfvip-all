@@ -1,13 +1,13 @@
-import threading
 import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog, messagebox, ttk
-from typing import Any, Callable, Optional, Self, Sequence
+from tkinter import filedialog, messagebox
+from typing import Any, Callable, Optional, Sequence
 
 from .infos import AppInfo, Info, _InfosWindow
 from .logo import _LogoWindow
 from .splash import _SplashWindow
 from .sticky import Rect, WinState
+from .thread import run_in_thread_with_ui
 
 
 class UI(tk.Tk):
@@ -24,36 +24,7 @@ class UI(tk.Tk):
         self._title = f"{app_info.name} v{app_info.version} {app_info.bitness}"
 
     def run_in_thread(self, target: Callable[[], None], *exceptions: type[Exception]) -> None:
-        """
-        run the target function in a thread,
-        handle the mainloop and quit ui when done
-        any exceptions is re-raised in the main thread
-        """
-
-        ui = self
-
-        class RaiseCatchedExceptionThread(threading.Thread):
-            def __init__(self, *args: Any, **kwargs: Any) -> None:
-                super().__init__(*args, **kwargs)
-                self._catched: Optional[Exception] = None
-
-            def run(self) -> None:
-                try:
-                    super().run()
-                except exceptions as exception:
-                    self._catched = exception
-                finally:
-                    ui.after(0, ui.quit)
-
-            def join(self, timeout: Optional[float] = None) -> None:
-                super().join(timeout)
-                if self._catched is not None:
-                    raise self._catched
-
-        thread = RaiseCatchedExceptionThread(target=target)
-        thread.start()
-        self.mainloop()
-        thread.join()
+        return run_in_thread_with_ui(self, target, *exceptions)
 
     def set_infos(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)
@@ -71,42 +42,3 @@ class UI(tk.Tk):
 
     def askyesno(self, message: str) -> bool:
         return messagebox.askyesno(self._title, message=message)
-
-
-class ProgressWindow(tk.Toplevel):
-    def __init__(self, ui: UI, width: int, *exceptions: type[Exception]) -> None:
-        super().__init__(width=width)
-        ui.eval(f"tk::PlaceWindow {str(self)} center")
-        self.overrideredirect(True)
-        self._label = tk.Label(self, text="")
-        self._label.pack()
-        self._progressbar = ttk.Progressbar(self, orient="horizontal", mode="determinate", length=width)
-        self._progressbar.pack()
-        self._exceptions = exceptions
-        self._ui = ui
-
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(self, *_) -> None:
-        self.destroy()
-
-    def msg(self, text: str) -> None:
-        self._label.config(text=text)
-        self.update()
-
-    def set_percent_progress(self, percent: float) -> None:
-        self._progressbar["value"] = max(0, min(percent, 100))
-
-    def register_action_with_progress(self, action: Callable[..., Any]) -> None:
-        def action_with_progress(*args: Any, **kwargs: Any) -> Any:
-            def run_action() -> None:
-                nonlocal return_value
-                return_value = action(*args, **kwargs)
-
-            return_value = None
-            self._progressbar["value"] = 0
-            self._ui.run_in_thread(run_action, *self._exceptions)
-            return return_value
-
-        setattr(self, action.__name__, action_with_progress)

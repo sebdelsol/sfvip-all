@@ -17,8 +17,8 @@ def remove_old_exe_logs(app_name: str, keep: int) -> None:
     # launched as an exe build by nuitka ?
     if "__compiled__" in globals():
         # logs files are in the exe dir
-        path = Path(sys.argv[0]).parent
-        log_files = list(path.glob(f"{app_name} - *.log"))
+        exe_dir = Path(sys.argv[0]).parent
+        log_files = list(exe_dir.glob(f"{app_name} - *.log"))
         if len(log_files) > keep:
             logger.info("keep the last %d log files", keep)
             log_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)

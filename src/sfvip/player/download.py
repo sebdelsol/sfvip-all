@@ -12,7 +12,7 @@ import feedparser
 from cpuinfo.cpuinfo import _get_cpu_info_from_cpuid
 from py7zr import unpack_7zarchive
 
-from ..ui import UI, ProgressWindow
+from ..ui.progress import ProgressWindow
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +45,8 @@ MimeTypes_to_archive_format = {
 
 
 class _Progress(ProgressWindow):
-    def __init__(self, ui: UI, width: int, *exceptions: type[Exception]) -> None:
-        super().__init__(ui, width, *exceptions)
-        self.register_action_with_progress(self._download_archive)
+    def __init__(self, title: str, width: int, *exceptions: type[Exception]) -> None:
+        super().__init__(title, width, *exceptions)
         shutil.register_unpack_format("7zip", [".7z"], unpack_7zarchive)
 
     def _set_progress(self, block_num: int, block_size: int, total_size: int) -> None:
@@ -133,20 +132,24 @@ class _Libmpv:
         return False
 
 
-def download_player(player_name: str, ui: UI) -> Iterator[str]:
+def download_player(player_name: str, _) -> Iterator[str]:
+    def run() -> Optional[str]:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_dir = Path(temp_dir)
+            player_exe = player_dir / f"{player_name}.exe"
+            if _PlayerUpdate.download(player_exe, temp_dir, progress):
+                lib_dir = player_dir / "lib"
+                if _Libmpv.download(lib_dir, temp_dir, progress):
+                    return str(player_exe)
+        return None
+
     exceptions = OSError, URLError, HTTPError, ContentTooShortError, ValueError, shutil.ReadError
-    current_dir = Path(sys.argv[0]).parent
-    player_dir = current_dir / f"{player_name.capitalize()} {_PlayerUpdate.bitness}"
-    with _Progress(ui, 300, *exceptions) as progress:
-        try:
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_dir = Path(temp_dir)
-                player_exe = player_dir / f"{player_name}.exe"
-                if _PlayerUpdate.download(player_exe, temp_dir, progress):
-                    lib_dir = player_dir / "lib"
-                    if _Libmpv.download(lib_dir, temp_dir, progress):
-                        yield str(player_exe)
-        except exceptions as err:
-            logger.warning("player download exception %s", err)
+    exe_dir = Path(sys.argv[0]).parent
+    player_dir = exe_dir / f"{player_name.capitalize()} {_PlayerUpdate.bitness}"
+    progress = _Progress(f"Download {player_dir.name}", 400, *exceptions)
+    try:
+        yield progress.run_in_thread(run, *exceptions)
+    except exceptions as err:
+        logger.warning("player download exception %s", err)
     shutil.rmtree(player_dir, ignore_errors=True)
     logger.warning("player download failed")

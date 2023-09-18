@@ -1,3 +1,6 @@
+## 1.2.9
+* WIP
+
 ## 1.2.8
 * Detection of x86-64-v3 architecture for libmpv download.
 * Fix wrong bitness in the info window.
