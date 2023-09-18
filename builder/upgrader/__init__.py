@@ -95,7 +95,7 @@ class Upgrader:
                 for row in columns.rows:
                     print(f" {row}")
             else:
-                print(Title("Requirements uptodate"))
+                print(Title("Requirements"), Ok("up-to-date"))
                 break
             print()
             print(*Upgrader._prompt, end="", sep="")

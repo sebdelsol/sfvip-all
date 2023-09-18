@@ -1,9 +1,10 @@
 ## 1.2.9
-* WIP
+* Libmpv auto update option.
+* Download window mimics _Sfvip Player_ UI.
 
 ## 1.2.8
 * Detection of x86-64-v3 architecture for libmpv download.
-* Fix wrong bitness in the info window.
+* Fix wrong bitness in the Proxies window.
 
 ## 1.2.7
 * Bump _mitmproxy_ to 10.0.0.

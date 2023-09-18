@@ -1,9 +1,16 @@
 import threading
 import tkinter as tk
-from typing import Any, Callable, Optional
+from typing import Callable, Optional, TypeVar
+
+Treturn = TypeVar("Treturn")
 
 
-def run_in_thread_with_ui(ui: tk.Misc, target: Callable[[], Any], *exceptions: type[Exception]) -> Any:
+def run_in_thread_with_ui(
+    ui: tk.Misc,
+    target: Callable[[], Treturn],
+    *exceptions: type[Exception],
+    mainloop: bool,
+) -> Optional[Treturn]:
     """
     run the target function in a thread,
     handle the tk main loop,
@@ -11,7 +18,7 @@ def run_in_thread_with_ui(ui: tk.Misc, target: Callable[[], Any], *exceptions: t
     """
 
     class Return:
-        value = None
+        value: Optional[Treturn] = None
         exception: Optional[Exception] = None
 
     def run():
@@ -20,14 +27,21 @@ def run_in_thread_with_ui(ui: tk.Misc, target: Callable[[], Any], *exceptions: t
         except exceptions as exception:
             Return.exception = exception
         finally:
-            ui.after(0, ui.quit)
+            if mainloop:
+                ui.after(0, ui.quit)
+            else:
+                ui.after(0, ui.destroy)
 
-    thread = threading.Thread(target=run)
+    thread = threading.Thread(target=run, daemon=not mainloop)
     try:
         thread.start()
-        ui.mainloop()
+        if mainloop:
+            ui.mainloop()
+        else:
+            ui.wait_window(ui)
     finally:
-        thread.join()
+        if mainloop:  # TODO can't catch exception if no join, is that an issue ?
+            thread.join()
         if Return.exception is not None:
             raise Return.exception
     return Return.value

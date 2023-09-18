@@ -1,7 +1,7 @@
 import platform
 import sys
 import tkinter as tk
-from typing import Callable, NamedTuple, Optional, Sequence
+from typing import Any, Callable, NamedTuple, Optional, Sequence
 
 from .fx import _Fade
 from .sticky import _Offset, _StickyWindow
@@ -92,6 +92,19 @@ def _get_app_warn(app_info: AppInfo) -> _Style:
     return _InfoStyle.app_warn(warn).lime_green
 
 
+def _get_libmpv_info(version: str = "") -> _Style:
+    version, color = (version, "lime green") if version else ("Unknown version", "red")
+    return _InfoStyle.app(version).color(color)
+
+
+def _get_libmpv_update() -> _Style:
+    return _InfoStyle.app("Auto update Libmpv").grey
+
+
+def _get_libmpv_download(version: str = "") -> _Style:
+    return _InfoStyle.app(f"download {version}").no_truncate.white
+
+
 def _are_infos_valid(infos: Sequence[Info]) -> bool:
     return all(info.is_valid for info in infos)
 
@@ -115,6 +128,7 @@ class _InfosWindow(_StickyWindow):
         self._create_widgets(hover_frame, _get_app_info(app_info), _get_app_warn(app_info))
         self._listview.set_headers(_get_infos_headers(app_info.name))
         self._fade = _Fade(self)
+        self._libmpv_update_callback = None
 
     def _create_widgets(self, frame: tk.Frame, app_info: _Style, app_warn: _Style) -> None:
         pad = _InfoTheme.pad
@@ -125,25 +139,43 @@ class _InfosWindow(_StickyWindow):
         app_info_label = tk.Label(frame, bg=_InfoTheme.bg_headers, **app_info.to_tk)
         app_warn_label = tk.Label(frame, bg=_InfoTheme.bg_headers, **app_warn.to_tk)
         separator = tk.Frame(frame, bg=_InfoTheme.separator)
+        self._libmpv_info = tk.Label(frame, bg=_InfoTheme.bg_headers, **_get_libmpv_info().to_tk)
+        self._libmpv_update = tk.IntVar()
+        libmpv_update = tk.Checkbutton(
+            frame,
+            bg=_InfoTheme.bg_headers,
+            activebackground=_InfoTheme.bg_headers,
+            **(lib_update_style := _get_libmpv_update().to_tk),
+            activeforeground=lib_update_style["fg"],
+            variable=self._libmpv_update,
+            command=self.on_set_libmpv_update_changed,
+        )
+        self._libmpv_download = _Button(frame, **_InfoTheme.button, **_get_libmpv_download().to_tk)
+        separator2 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
         app_info_label.grid(row=0, padx=pad, sticky=tk.W)
         app_warn_label.grid(row=0, column=1, padx=pad, sticky=tk.W)
         self._relaunch_button.grid(row=0, column=2, padx=pad, pady=pad, sticky=tk.EW)
         self._relaunch_button.grid_remove()
-        self._listview.grid(row=2, columnspan=3, sticky=tk.NSEW)
         separator.grid(row=1, columnspan=3, sticky=tk.EW)
+        self._libmpv_info.grid(row=2, column=1, padx=pad, sticky=tk.W)
+        libmpv_update.grid(row=2, column=0, padx=pad, sticky=tk.EW)
+        self._libmpv_download.grid(row=2, column=2, padx=pad, pady=pad, sticky=tk.EW)
+        self._libmpv_download.grid_remove()
+        separator2.grid(row=3, columnspan=3, sticky=tk.EW)
+        self._listview.grid(row=4, columnspan=3, sticky=tk.NSEW)
         frame.columnconfigure(2, weight=1)
-        frame.rowconfigure(2, weight=1)
+        frame.rowconfigure(4, weight=1)
 
-    def _set_relaunch(self, player_relaunch: Callable[[], None]) -> None:
-        def relaunch(_) -> None:
-            self._relaunch_button.unbind("<Button-1>")
-            self._relaunch_button.grid_remove()
-            # give time for the button feedback and ask for instant relaunch
-            self.after(100, player_relaunch, 0)
+    def _set_button_action(self, button: _Button, action: Callable[[], None], *args: Any) -> None:
+        def _action(_) -> None:
+            button.unbind("<Button-1>")
+            button.grid_remove()
+            # give time for the button feedback
+            self.after(100, action, *args)
 
-        self._relaunch_button.grid()
-        self._relaunch_button.bind("<Button-1>", relaunch)
+        button.grid()
+        button.bind("<Button-1>", _action)
 
     def _bind_mouse_hover(self, widget: tk.Widget) -> None:
         def show(_) -> None:
@@ -154,6 +186,23 @@ class _InfosWindow(_StickyWindow):
         widget.bind("<Enter>", show, add="+")
         widget.bind("<Leave>", lambda _: self.hide(), add="+")
 
+    def set_libmpv_download(self, version: str, download: Callable[[], None]) -> None:
+        self._libmpv_download.config(_get_libmpv_download(version).to_tk)
+        self._set_button_action(self._libmpv_download, download)
+        # enable resizing
+        self.geometry("")
+
+    def set_libmpv_version(self, version: str) -> None:
+        self._libmpv_info.config(**_get_libmpv_info(version).to_tk)
+
+    def on_set_libmpv_update_changed(self) -> None:
+        if self._libmpv_update_callback:
+            self._libmpv_update_callback(bool(self._libmpv_update.get()))
+
+    def set_libmpv_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._libmpv_update_callback = callback
+        self._libmpv_update.set(int(is_checked))
+
     def set(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[], None]]) -> bool:
         rows = [_get_row(info) for info in infos]
         if not rows:
@@ -162,7 +211,8 @@ class _InfosWindow(_StickyWindow):
         # add relaunch if not valid
         valid = _are_infos_valid(infos)
         if not valid and player_relaunch:
-            self._set_relaunch(player_relaunch)
+            # instant relaunch
+            self._set_button_action(self._relaunch_button, player_relaunch, 0)
         else:
             self._relaunch_button.grid_remove()
         # enable resizing

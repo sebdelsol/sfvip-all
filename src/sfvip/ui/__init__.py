@@ -1,12 +1,11 @@
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox
-from typing import Any, Callable, Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 from .infos import AppInfo, Info, _InfosWindow
-from .logo import _LogoWindow
+from .logo import _LogoWindow, _PulseReason
 from .splash import _SplashWindow
-from .sticky import Rect, WinState
 from .thread import run_in_thread_with_ui
 
 
@@ -24,11 +23,24 @@ class UI(tk.Tk):
         self._title = f"{app_info.name} v{app_info.version} {app_info.bitness}"
 
     def run_in_thread(self, target: Callable[[], None], *exceptions: type[Exception]) -> None:
-        return run_in_thread_with_ui(self, target, *exceptions)
+        run_in_thread_with_ui(self, target, *exceptions, mainloop=True)
 
     def set_infos(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)
-        self._logo.set_pulse(ok=ok)
+        self._logo.set_pulse(ok=ok, reason=_PulseReason.PROXIES)
+
+    def set_libmpv_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._infos.set_libmpv_update(is_checked, callback)
+
+    def set_libmpv_download(self, version: str, download: Callable[[], None]) -> None:
+        self._infos.set_libmpv_download(version, download)
+        self._logo.set_pulse(ok=False, reason=_PulseReason.DOWNLOAD)
+
+    def set_libmpv_downloading(self) -> None:
+        self._logo.set_pulse(ok=True, reason=_PulseReason.DOWNLOAD)
+
+    def set_libmpv_version(self, version: str) -> None:
+        self._infos.set_libmpv_version(version)
 
     def showinfo(self, message: str) -> None:
         messagebox.showinfo(self._title, message=message)

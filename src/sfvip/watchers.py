@@ -11,7 +11,7 @@ from watchdog.observers import Observer
 from watchdog.observers.api import BaseObserver
 
 from ..winapi import hook, rect, registry, win
-from .ui import Rect, WinState
+from .ui.sticky import Rect, WinState
 
 logger = logging.getLogger(__name__)
 

@@ -1,15 +1,18 @@
 import time
-from typing import Any, Callable
+from typing import Callable, Optional, ParamSpec, TypeVar
 
-_TFunc = Callable[..., Any]
+T = TypeVar("T")
+P = ParamSpec("P")
 
 
-def retry_if_exception(*exceptions: type[Exception], timeout: int) -> Callable[[_TFunc], _TFunc]:
+def retry_if_exception(
+    *exceptions: type[Exception], timeout: int
+) -> Callable[[Callable[P, T]], Callable[P, Optional[T]]]:
     """decorator for retrying when exceptions occur till timeout"""
     _sleep_second = 0.1
 
-    def decorator(func: _TFunc) -> _TFunc:
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def decorator(func: Callable[P, T]) -> Callable[P, Optional[T]]:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> Optional[T]:
             start = time.perf_counter()
             while time.perf_counter() - start <= timeout:
                 try:

@@ -7,10 +7,12 @@ from pathlib import Path
 from typing import Callable, Iterator, Optional
 
 from ...winapi import mutex
-from ..ui import UI, Rect, sticky
+from ..config import Config
+from ..ui import UI, sticky
+from ..update import download_player
+from ..update.libmpv import LibmpvDll
 from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
-from .download import download_player
 from .exception import PlayerError
 from .registry import player_from_registry
 
@@ -31,16 +33,19 @@ class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
         return self._watcher
 
 
+# TODO better wording
 class _PlayerPath:
     """find the player exe"""
 
     _name = "sfvip player"
     _pattern = "*sf*vip*player*.exe"
 
-    def __init__(self, player: Optional[str], ui: UI) -> None:
+    def __init__(self, config: Config, ui: UI) -> None:
+        player = config.player_path
         if not self._valid_exe(player):
             player = self._find_player(ui)
-        self.path = player
+        assert player
+        self.path = config.player_path = player
         logger.info("player is '%s'", self.path)
 
     def _find_player(self, ui: UI) -> str:
@@ -64,6 +69,7 @@ class _PlayerPath:
         for player in player_from_registry(_PlayerPath._name):
             yield player
 
+    # TODO single window for both _player_from_user and _player_from_download
     @staticmethod
     def _player_from_user(ui: UI) -> Iterator[str]:
         ui.showinfo(f"Please find {_PlayerPath._name.capitalize()}")
@@ -78,7 +84,7 @@ class _PlayerPath:
     def _player_from_download(ui: UI) -> Iterator[str]:
         if ui.askyesno(message=f"Download {_PlayerPath._name.capitalize()} ?"):
             logger.info("try to download the player")
-            for player in download_player(_PlayerPath._name, ui):
+            if player := download_player(_PlayerPath._name):
                 yield player
 
 
@@ -89,13 +95,13 @@ class _PlayerRectLoader(PlayerConfig):
     _keys = "Left", "Top", "Width", "Height", _maximized_key
 
     @property
-    def rect(self) -> Rect:
+    def rect(self) -> sticky.Rect:
         if config := self.load():
-            return Rect(*(config[key] for key in _PlayerRectLoader._keys))
-        return Rect()
+            return sticky.Rect(*(config[key] for key in _PlayerRectLoader._keys))
+        return sticky.Rect()
 
     @rect.setter
-    def rect(self, rect: Rect) -> None:
+    def rect(self, rect: sticky.Rect) -> None:
         if rect.valid():
             if config := self.load():
                 if rect.is_maximized:
@@ -122,8 +128,48 @@ class _PlayerWindowWatcher:
             sticky.StickyWindows.withdraw_all()
 
     @property
-    def rect(self) -> Optional[Rect]:
+    def rect(self) -> Optional[sticky.Rect]:
         return sticky.StickyWindows.get_rect()
+
+
+class PlayerLibmpvAutoUpdate:
+    def __init__(self, player_path: str, config: Config, ui: UI) -> None:
+        self._libmpv_dll = LibmpvDll(Path(player_path))
+        self._is_downloading = threading.Event()
+        self._is_checking = threading.Event()
+        self._config = config
+        self._ui = ui
+        ui.set_libmpv_version(self._libmpv_dll.get_version())
+        ui.set_libmpv_update(config.auto_update_libmpv, self._on_auto_update_changed)
+        if config.auto_update_libmpv:
+            self.check_libmpv()
+
+    def _on_auto_update_changed(self, auto_update: bool) -> None:
+        self._config.auto_update_libmpv = auto_update
+        if auto_update:
+            self.check_libmpv()
+
+    def check_libmpv(self) -> None:
+        def check() -> None:
+            if libmpv := self._libmpv_dll.check():
+
+                def download() -> None:
+                    self._is_downloading.set()
+                    self._ui.set_libmpv_downloading()
+                    if libmpv:
+                        if self._libmpv_dll.progress_download(libmpv):
+                            self._ui.set_libmpv_version(version)
+                        else:
+                            self._ui.set_libmpv_download(version, download)
+                    self._is_downloading.clear()
+
+                version = libmpv.get_version()
+                self._ui.set_libmpv_download(version, download)
+            self._is_checking.clear()
+
+        if not (self._is_checking.is_set() or self._is_downloading.is_set()):
+            self._is_checking.set()
+            threading.Thread(target=check, daemon=True).start()
 
 
 class _Launcher:
@@ -131,7 +177,7 @@ class _Launcher:
 
     def __init__(self) -> None:
         self._launch = True
-        self._rect: Optional[Rect] = None
+        self._rect: Optional[sticky.Rect] = None
 
     def want_to_launch(self) -> bool:
         launch = self._launch
@@ -139,12 +185,12 @@ class _Launcher:
         self._launch = False
         return launch
 
-    def set_relaunch(self, rect: Optional[Rect]) -> None:
+    def set_relaunch(self, rect: Optional[sticky.Rect]) -> None:
         self._launch = True
         self._rect = rect
 
     @property
-    def rect(self) -> Optional[Rect]:
+    def rect(self) -> Optional[sticky.Rect]:
         if self._rect and self._rect.valid():
             return self._rect
         return None
@@ -153,8 +199,9 @@ class _Launcher:
 class Player:
     """run the player"""
 
-    def __init__(self, player_path: Optional[str], ui: UI) -> None:
-        self.path = _PlayerPath(player_path, ui).path
+    def __init__(self, config: Config, ui: UI) -> None:
+        self.path = _PlayerPath(config, ui).path
+        PlayerLibmpvAutoUpdate(self.path, config, ui)
         self._window_watcher = _PlayerWindowWatcher()
         self._rect_loader: Optional[_PlayerRectLoader] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
@@ -168,7 +215,7 @@ class Player:
         return False
 
     @property
-    def rect(self) -> Rect:
+    def rect(self) -> sticky.Rect:
         if self._launcher.rect:
             return self._launcher.rect
         assert self._rect_loader is not None

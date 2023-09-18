@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, Collection, NamedTuple, Sequence
+from typing import Any, Collection, NamedTuple, Optional, Sequence
 
 from .style import _Style
 
@@ -95,9 +95,11 @@ class _Button(tk.Button):
     with a mouseover color
     """
 
-    def __init__(self, master: tk.BaseWidget, bg: str, mouseover: str, border: _Border, **kwargs: Any) -> None:
+    def __init__(
+        self, master: tk.BaseWidget, bg: str, mouseover: str, border: Optional[_Border] = None, **kwargs: Any
+    ) -> None:
         # create a frame for the border, note: do not pack
-        self._frame = tk.Frame(master, bg=bg, **_get_border(border))
+        self._frame = tk.Frame(master, bg=bg, **(_get_border(border) if border else {}))
         active = dict(activebackground=bg, activeforeground=kwargs.get("fg", "white"))
         # create the button
         super().__init__(self._frame, bg=bg, bd=0, **active, **kwargs)

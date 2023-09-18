@@ -1,4 +1,5 @@
 import tkinter as tk
+from enum import Enum, auto
 from pathlib import Path
 from typing import Callable
 
@@ -6,6 +7,12 @@ from .fx import _Pulse
 from .infos import _InfosWindow
 from .sticky import Rect, _Offset, _StickyWindow
 from .widgets import _Border, _get_border
+
+
+class _PulseReason(Enum):
+    PROXIES = auto()
+    DOWNLOAD = auto()
+    UNKNOWN = auto()
 
 
 class _LogoTheme:
@@ -28,7 +35,8 @@ class _LogoWindow(_StickyWindow):
         self._logo = tk.Label(self, bg=_LogoTheme.pulse_ok.color1, image=self._image, takefocus=0, **border)
         self._logo.pack()
         self._pulse = _Pulse(self._logo)
-        self.set_pulse(ok=True)
+        self._warn_reasons: set[_PulseReason] = set()
+        self.set_pulse(ok=True, reason=_PulseReason.UNKNOWN)
         self._bind_event("<Map>", self._pulse.start)
         self._bind_event("<Unmap>", self._pulse.stop)
         self._bind_event("<Enter>", self._infos.show)
@@ -41,8 +49,9 @@ class _LogoWindow(_StickyWindow):
 
         self.bind(event_name, on_event)
 
-    def set_pulse(self, ok: bool) -> None:
-        self._pulse.set(*(_LogoTheme.pulse_ok if ok else _LogoTheme.pulse_warn))
+    def set_pulse(self, ok: bool, reason: _PulseReason) -> None:
+        (self._warn_reasons.discard if ok else self._warn_reasons.add)(reason)
+        self._pulse.set(*(_LogoTheme.pulse_warn if self._warn_reasons else _LogoTheme.pulse_ok))
 
     def change_position(self, rect: Rect) -> None:
         super().change_position(rect)
