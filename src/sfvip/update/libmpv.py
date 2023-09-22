@@ -1,24 +1,27 @@
 import calendar
+import filecmp
 import logging
 import shutil
 import tempfile
 import time
 from datetime import datetime
+from io import BytesIO
 from itertools import count
 from pathlib import Path
 from typing import NamedTuple, Optional, Protocol, Self
-from urllib.error import ContentTooShortError, HTTPError, URLError
 
 import feedparser
+import requests
 
 from ...config import ConfigLoader
+from ..ui.progress import ProgressWindow
 from .cpu import Cpu
-from .progress import Progress
+from .download import download_and_unpack, download_in_thread
 
 logger = logging.getLogger(__name__)
 
 
-class FeedEntries(Protocol):
+class _FeedEntries(Protocol):
     class _Entry(Protocol):
         title: str
         link: str
@@ -29,24 +32,17 @@ class FeedEntries(Protocol):
     bozo: bool
 
 
-def _version(cpu_spec: Optional[Cpu.Spec], timestamp: Optional[int]) -> str:
-    if cpu_spec and timestamp:
-        date = datetime.utcfromtimestamp(timestamp).strftime(r"%Y%m%d")
-        return f"{LibmpvLatest.cpu_spec_to_str[cpu_spec]}-{date}"
-    return ""
-
-
 class Libmpv(NamedTuple):
     cpu_spec: Cpu.Spec
     timestamp: int
     url: str
 
     @classmethod
-    def from_entry(cls, cpu_spec: Cpu.Spec, entry: FeedEntries._Entry) -> Self:
+    def from_entry(cls, cpu_spec: Cpu.Spec, entry: _FeedEntries._Entry) -> Self:
         return cls(cpu_spec, calendar.timegm(entry.updated_parsed), entry.link)
 
     def get_version(self):
-        return _version(self.cpu_spec, self.timestamp)
+        return _LibmpvLatest.version(self.cpu_spec, self.timestamp)
 
 
 class LibmpvVersion(ConfigLoader):
@@ -63,11 +59,11 @@ class LibmpvVersion(ConfigLoader):
         return None if self.is64 is None or self.v3 is None else Cpu.Spec(self.is64, self.v3)
 
     def get_version(self):
-        return _version(self.get_cpu_spec(), self.timestamp)
+        return _LibmpvLatest.version(self.get_cpu_spec(), self.timestamp)
 
 
-class LibmpvLatest:
-    cpu_spec_to_str = {
+class _LibmpvLatest:
+    _cpu_spec_to_str = {
         Cpu.Spec(is64=True, v3=True): "x86_64-v3",
         Cpu.Spec(is64=True, v3=False): "x86_64",
         Cpu.Spec(is64=False): "i686",
@@ -76,23 +72,30 @@ class LibmpvLatest:
     _name = "libmpv/mpv-dev-{cpu_spec_str}"
 
     @staticmethod
-    def get(player_exe: Path, latest_version: Optional["LibmpvVersion"] = None) -> Optional["Libmpv"]:
+    def version(cpu_spec: Optional[Cpu.Spec], timestamp: Optional[int]) -> str:
+        if cpu_spec and timestamp:
+            date = datetime.utcfromtimestamp(timestamp).strftime(r"%Y%m%d")
+            return f"{_LibmpvLatest._cpu_spec_to_str[cpu_spec]}-{date}"
+        return ""
+
+    @staticmethod
+    def get(player_exe: Path, latest_version: Optional[LibmpvVersion] = None) -> Optional[Libmpv]:
         logger.info("check lastest libmpv")
-        feed: FeedEntries = feedparser.parse(LibmpvLatest._feed)
-        if feed.status in (200, 302) and not feed.bozo and feed.entries:
-            cpu_spec = (latest_version and latest_version.get_cpu_spec()) or Cpu.spec(player_exe)
-            if cpu_spec:
-                cpu_spec_str = LibmpvLatest.cpu_spec_to_str[cpu_spec]
-                libmpv_name = LibmpvLatest._name.format(cpu_spec_str=cpu_spec_str)
-                libmpvs = (
-                    Libmpv.from_entry(cpu_spec, entry) for entry in feed.entries if libmpv_name in entry.title
-                )
-                if libmpv := next(libmpvs, None):
-                    timestamp = (latest_version and latest_version.timestamp) or 0
-                    if libmpv.timestamp > timestamp:
-                        logger.info("new libmpv found")
-                        return libmpv
-        logger.info("no new libmpv found")
+        with requests.get(_LibmpvLatest._feed, timeout=3) as response:
+            response.raise_for_status()
+            feed: _FeedEntries = feedparser.parse(BytesIO(response.content))
+            if not feed.bozo and feed.entries:
+                cpu_spec = (latest_version and latest_version.get_cpu_spec()) or Cpu.spec(player_exe)
+                if cpu_spec:
+                    cpu_spec_str = _LibmpvLatest._cpu_spec_to_str[cpu_spec]
+                    name = _LibmpvLatest._name.format(cpu_spec_str=cpu_spec_str)
+                    libmpvs = (Libmpv.from_entry(cpu_spec, entry) for entry in feed.entries if name in entry.title)
+                    if libmpv := next(libmpvs, None):
+                        timestamp = (latest_version and latest_version.timestamp) or 0
+                        if libmpv.timestamp > timestamp:
+                            logger.info("new libmpv found")
+                            return libmpv
+            logger.info("no new libmpv found")
         return None
 
 
@@ -108,43 +111,38 @@ class LibmpvDll:
         self._version.update()
         return self._version.get_version()
 
-    @staticmethod
-    def _find_dll_in(path: Path) -> Optional[Path]:
-        dlls = (file for file in path.glob(LibmpvDll.pattern))
-        return next(dlls, None)
+    def check(self) -> Optional[Libmpv]:
+        self._version.update()
+        return _LibmpvLatest.get(self._player_exe, self._version)
 
-    def download(self, libmpv: Libmpv, progress: Progress) -> bool:
+    def _download(self, libmpv: Libmpv, progress: ProgressWindow) -> bool:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_dir = Path(temp_dir)
             archive = temp_dir / "libmpv"
-            progress.download_and_unpack(libmpv.url, archive, temp_dir)
-            if dll := LibmpvDll._find_dll_in(temp_dir):
-                self._libdir.mkdir(parents=True, exist_ok=True)
-                shutil.copy(dll, self._libdir)
-                logger.info("libmpv dll found")
-                self._version.update_from(libmpv)
-                return True
+            if download_and_unpack(libmpv.url, archive, temp_dir, progress):
+                dlls = (file for file in temp_dir.glob(LibmpvDll.pattern))
+                if dll := next(dlls, None):
+                    self._libdir.mkdir(parents=True, exist_ok=True)
+                    shutil.copy(dll, self._libdir)
+                    logger.info("libmpv dll found")
+                    self._version.update_from(libmpv)
+                    return True
             return False
 
-    def check(self) -> Optional[Libmpv]:
-        self._version.update()
-        return LibmpvLatest.get(self._player_exe, self._version)
+    def check_and_download(self, progress: ProgressWindow) -> bool:
+        progress.msg("Check latest libmpv")
+        if libmpv := self.check():
+            return self._download(libmpv, progress)
+        return False
 
-    # TODO factorize with update.download_player
-    # TODO position progress window next to logo window ?
-    def progress_download(self, libmpv: Libmpv) -> bool:
-        def run() -> bool:
-            return self.download(libmpv, progress)
+    def download_in_thread(self, libmpv: Libmpv) -> bool:
+        def download(progress: ProgressWindow) -> bool:
+            return self._download(libmpv, progress)
 
-        exceptions = OSError, URLError, HTTPError, ContentTooShortError, ValueError, shutil.ReadError
-        progress = Progress("Update Libmpv", 400, *exceptions)
         old_dlls = _OldDlls(self._libdir)
         old_dlls.move()
-        try:
-            if progress.run_in_thread(run, *exceptions, mainloop=False):
-                return True
-        except exceptions as err:
-            logger.warning("libmpv download exception %s", err)
+        if download_in_thread("Update Libmpv", download, create_mainloop=False):
+            return True
         old_dlls.restore()
         return False
 
@@ -162,7 +160,7 @@ class _OldDlls:
         for dll in (file for file in self._libdir.glob(_OldDlls._pattern)):
             for i in count(start=1):
                 dst = old_dir / f"{dll.name}.{i}"
-                if not dst.exists():  # TODO check md5, if equal overwrite
+                if not dst.exists() or filecmp.cmp(dll, dst):
                     shutil.move(dll, dst)
                     self._moved_dlls.append((dll, dst))
                     break

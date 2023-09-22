@@ -8,6 +8,8 @@ from .sticky import _Offset, _StickyWindow
 from .style import _Style
 from .widgets import _Border, _Button, _get_border, _ListView, _set_vscrollbar_style
 
+# TODO wrong info window size ???
+
 
 class AppInfo(NamedTuple):
     name: str
@@ -97,11 +99,11 @@ def _get_libmpv_info(version: str = "") -> _Style:
     return _InfoStyle.app(version).color(color)
 
 
-def _get_libmpv_update() -> _Style:
+def _get_libmpv_auto_update() -> _Style:
     return _InfoStyle.app("Auto update Libmpv").grey
 
 
-def _get_libmpv_download(version: str = "") -> _Style:
+def _get_libmpv_download_button(version: str = "") -> _Style:
     return _InfoStyle.app(f"download {version}").no_truncate.white
 
 
@@ -128,7 +130,7 @@ class _InfosWindow(_StickyWindow):
         self._create_widgets(hover_frame, _get_app_info(app_info), _get_app_warn(app_info))
         self._listview.set_headers(_get_infos_headers(app_info.name))
         self._fade = _Fade(self)
-        self._libmpv_update_callback = None
+        self._libmpv_auto_update_callback = None
 
     def _create_widgets(self, frame: tk.Frame, app_info: _Style, app_warn: _Style) -> None:
         pad = _InfoTheme.pad
@@ -140,17 +142,17 @@ class _InfosWindow(_StickyWindow):
         app_warn_label = tk.Label(frame, bg=_InfoTheme.bg_headers, **app_warn.to_tk)
         separator = tk.Frame(frame, bg=_InfoTheme.separator)
         self._libmpv_info = tk.Label(frame, bg=_InfoTheme.bg_headers, **_get_libmpv_info().to_tk)
-        self._libmpv_update = tk.IntVar()
-        libmpv_update = tk.Checkbutton(
+        self._libmpv_auto_update = tk.IntVar()
+        libmpv_auto_update_check = tk.Checkbutton(
             frame,
             bg=_InfoTheme.bg_headers,
             activebackground=_InfoTheme.bg_headers,
-            **(lib_update_style := _get_libmpv_update().to_tk),
+            **(lib_update_style := _get_libmpv_auto_update().to_tk),
             activeforeground=lib_update_style["fg"],
-            variable=self._libmpv_update,
-            command=self.on_set_libmpv_update_changed,
+            variable=self._libmpv_auto_update,
+            command=self.on_libmpv_auto_update_changed,
         )
-        self._libmpv_download = _Button(frame, **_InfoTheme.button, **_get_libmpv_download().to_tk)
+        self._libmpv_download_button = _Button(frame, **_InfoTheme.button, **_get_libmpv_download_button().to_tk)
         separator2 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
         app_info_label.grid(row=0, padx=pad, sticky=tk.W)
@@ -159,9 +161,9 @@ class _InfosWindow(_StickyWindow):
         self._relaunch_button.grid_remove()
         separator.grid(row=1, columnspan=3, sticky=tk.EW)
         self._libmpv_info.grid(row=2, column=1, padx=pad, sticky=tk.W)
-        libmpv_update.grid(row=2, column=0, padx=pad, sticky=tk.EW)
-        self._libmpv_download.grid(row=2, column=2, padx=pad, pady=pad, sticky=tk.EW)
-        self._libmpv_download.grid_remove()
+        libmpv_auto_update_check.grid(row=2, column=0, padx=pad, sticky=tk.EW)
+        self._libmpv_download_button.grid(row=2, column=2, padx=pad, pady=pad, sticky=tk.EW)
+        self._libmpv_download_button.grid_remove()
         separator2.grid(row=3, columnspan=3, sticky=tk.EW)
         self._listview.grid(row=4, columnspan=3, sticky=tk.NSEW)
         frame.columnconfigure(2, weight=1)
@@ -187,21 +189,24 @@ class _InfosWindow(_StickyWindow):
         widget.bind("<Leave>", lambda _: self.hide(), add="+")
 
     def set_libmpv_download(self, version: str, download: Callable[[], None]) -> None:
-        self._libmpv_download.config(_get_libmpv_download(version).to_tk)
-        self._set_button_action(self._libmpv_download, download)
+        self._libmpv_download_button.config(_get_libmpv_download_button(version).to_tk)
+        self._set_button_action(self._libmpv_download_button, download)
         # enable resizing
         self.geometry("")
 
     def set_libmpv_version(self, version: str) -> None:
         self._libmpv_info.config(**_get_libmpv_info(version).to_tk)
+        # enable resizing
+        self.geometry("")
 
-    def on_set_libmpv_update_changed(self) -> None:
-        if self._libmpv_update_callback:
-            self._libmpv_update_callback(bool(self._libmpv_update.get()))
+    def on_libmpv_auto_update_changed(self) -> None:
+        if self._libmpv_auto_update_callback:
+            self._libmpv_auto_update_callback(bool(self._libmpv_auto_update.get()))
 
-    def set_libmpv_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
-        self._libmpv_update_callback = callback
-        self._libmpv_update.set(int(is_checked))
+    def set_libmpv_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._libmpv_auto_update_callback = callback
+        self._libmpv_auto_update.set(int(is_checked))
+        self.on_libmpv_auto_update_changed()
 
     def set(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[], None]]) -> bool:
         rows = [_get_row(info) for info in infos]

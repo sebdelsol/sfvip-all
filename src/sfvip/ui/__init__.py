@@ -6,7 +6,7 @@ from typing import Callable, Optional, Sequence
 from .infos import AppInfo, Info, _InfosWindow
 from .logo import _LogoWindow, _PulseReason
 from .splash import _SplashWindow
-from .thread import run_in_thread_with_ui
+from .thread import ThreadUI
 
 
 class UI(tk.Tk):
@@ -23,14 +23,14 @@ class UI(tk.Tk):
         self._title = f"{app_info.name} v{app_info.version} {app_info.bitness}"
 
     def run_in_thread(self, target: Callable[[], None], *exceptions: type[Exception]) -> None:
-        run_in_thread_with_ui(self, target, *exceptions, mainloop=True)
+        ThreadUI(self, *exceptions, create_mainloop=True).start(target)
 
     def set_infos(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)
         self._logo.set_pulse(ok=ok, reason=_PulseReason.PROXIES)
 
-    def set_libmpv_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
-        self._infos.set_libmpv_update(is_checked, callback)
+    def set_libmpv_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._infos.set_libmpv_auto_update(is_checked, callback)
 
     def set_libmpv_download(self, version: str, download: Callable[[], None]) -> None:
         self._infos.set_libmpv_download(version, download)

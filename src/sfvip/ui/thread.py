@@ -1,47 +1,51 @@
 import threading
 import tkinter as tk
-from typing import Callable, Optional, TypeVar
+from typing import Callable, Optional, ParamSpec, TypeVar
 
-Treturn = TypeVar("Treturn")
+R = TypeVar("R")
+P = ParamSpec("P")
 
 
-def run_in_thread_with_ui(
-    ui: tk.Misc,
-    target: Callable[[], Treturn],
-    *exceptions: type[Exception],
-    mainloop: bool,
-) -> Optional[Treturn]:
-    """
-    run the target function in a thread,
-    handle the tk main loop,
-    any exceptions is re-raised in the main thread
-    """
+class ThreadUI:
+    def __init__(self, ui: tk.Misc, *exceptions: type[Exception], create_mainloop: bool) -> None:
+        self._ui = ui
+        self._exceptions = exceptions
+        self._create_mainloop = create_mainloop
 
-    class Return:
-        value: Optional[Treturn] = None
-        exception: Optional[Exception] = None
+    def start(self, target: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> Optional[R]:
+        """
+        run the target function in a thread,
+        handle the main loop if needed,
+        any exceptions is re-raised in the main thread
+        """
 
-    def run():
+        class Return:
+            value: Optional[R] = None
+            exception: Optional[Exception] = None
+
+        def run():
+            try:
+                Return.value = target(*args, **kwargs)
+            except self._exceptions as exception:
+                Return.exception = exception
+            finally:
+                if self._create_mainloop:
+                    self._ui.after(0, self._ui.quit)
+                else:
+                    self._ui.after(0, self._ui.destroy)
+
+        thread = threading.Thread(target=run)
         try:
-            Return.value = target()
-        except exceptions as exception:
-            Return.exception = exception
-        finally:
-            if mainloop:
-                ui.after(0, ui.quit)
+            thread.start()
+            if self._create_mainloop:
+                self._ui.mainloop()
             else:
-                ui.after(0, ui.destroy)
-
-    thread = threading.Thread(target=run, daemon=not mainloop)
-    try:
-        thread.start()
-        if mainloop:
-            ui.mainloop()
-        else:
-            ui.wait_window(ui)
-    finally:
-        if mainloop:  # TODO can't catch exception if no join, is that an issue ?
-            thread.join()
-        if Return.exception is not None:
-            raise Return.exception
-    return Return.value
+                self._ui.wait_window(self._ui)
+        finally:
+            # do not block the main thread
+            while thread.is_alive():
+                thread.join(timeout=0)
+                self._ui.update()
+            if Return.exception is not None:
+                raise Return.exception
+        return Return.value

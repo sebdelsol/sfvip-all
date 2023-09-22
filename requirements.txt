@@ -5,3 +5,4 @@ watchdog>=3.0.0
 feedparser>=6.0.10
 py7zr>=0.20.6
 py-cpuinfo>=9.0.0
+requests>=2.31.0

@@ -4,7 +4,7 @@ import threading
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable, Iterator, Optional
+from typing import Callable, Iterator, NamedTuple, Optional, Self
 
 from ...winapi import mutex
 from ..config import Config
@@ -33,7 +33,6 @@ class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
         return self._watcher
 
 
-# TODO better wording
 class _PlayerPath:
     """find the player exe"""
 
@@ -132,44 +131,74 @@ class _PlayerWindowWatcher:
         return sticky.StickyWindows.get_rect()
 
 
-class PlayerLibmpvAutoUpdate:
+class _Scheduled(NamedTuple):
+    cancelled: threading.Event
+    after: str
+
+
+class _PlayerLibmpvAutoUpdate:
+    _reschedule_delay_s = 10 * 60
+
     def __init__(self, player_path: str, config: Config, ui: UI) -> None:
         self._libmpv_dll = LibmpvDll(Path(player_path))
-        self._is_downloading = threading.Event()
-        self._is_checking = threading.Event()
+        self._scheduled: list[_Scheduled] = []
+        self._scheduled_lock = threading.Lock()
+        self._is_downloading = threading.Lock()
+        self._is_checking = threading.Lock()
         self._config = config
         self._ui = ui
-        ui.set_libmpv_version(self._libmpv_dll.get_version())
-        ui.set_libmpv_update(config.auto_update_libmpv, self._on_auto_update_changed)
-        if config.auto_update_libmpv:
-            self.check_libmpv()
+
+    def __enter__(self) -> Self:
+        self._ui.set_libmpv_version(self._libmpv_dll.get_version())
+        self._ui.set_libmpv_auto_update(self._config.auto_update_libmpv, self._on_auto_update_changed)
+        return self
+
+    def __exit__(self, *_) -> None:
+        self._cancel_scheduled_checks()
+
+    def _cancel_scheduled_checks(self) -> None:
+        with self._scheduled_lock:
+            for scheduled in self._scheduled:
+                self._ui.after_cancel(scheduled.after)
+                scheduled.cancelled.set()
+            self._scheduled = []
+
+    def _schedule_check(self, delay_s: int) -> None:
+        def check() -> None:
+            threading.Thread(target=self._check, args=(cancelled,), daemon=True).start()
+
+        with self._scheduled_lock:
+            cancelled = threading.Event()
+            after = self._ui.after(delay_s * 1000, check)
+            self._scheduled.append(_Scheduled(cancelled, after))
 
     def _on_auto_update_changed(self, auto_update: bool) -> None:
         self._config.auto_update_libmpv = auto_update
+        self._cancel_scheduled_checks()
         if auto_update:
-            self.check_libmpv()
+            self._schedule_check(0)
 
-    def check_libmpv(self) -> None:
-        def check() -> None:
-            if libmpv := self._libmpv_dll.check():
+    def _check(self, cancelled: threading.Event) -> None:
+        if not (self._is_checking.locked() or self._is_downloading.locked()):
+            with self._is_checking:
+                if libmpv := self._libmpv_dll.check():
+                    if not cancelled.is_set():
 
-                def download() -> None:
-                    self._is_downloading.set()
-                    self._ui.set_libmpv_downloading()
-                    if libmpv:
-                        if self._libmpv_dll.progress_download(libmpv):
-                            self._ui.set_libmpv_version(version)
-                        else:
-                            self._ui.set_libmpv_download(version, download)
-                    self._is_downloading.clear()
+                        def download() -> None:
+                            with self._is_downloading:
+                                self._ui.set_libmpv_downloading()
+                                if libmpv:
+                                    if self._libmpv_dll.download_in_thread(libmpv):
+                                        self._ui.set_libmpv_version(version)
+                                    else:
+                                        self._ui.set_libmpv_download(version, download)
 
-                version = libmpv.get_version()
-                self._ui.set_libmpv_download(version, download)
-            self._is_checking.clear()
-
-        if not (self._is_checking.is_set() or self._is_downloading.is_set()):
-            self._is_checking.set()
-            threading.Thread(target=check, daemon=True).start()
+                        self._cancel_scheduled_checks()
+                        version = libmpv.get_version()
+                        self._ui.set_libmpv_download(version, download)
+                else:
+                    if not cancelled.is_set():
+                        self._schedule_check(_PlayerLibmpvAutoUpdate._reschedule_delay_s)
 
 
 class _Launcher:
@@ -201,7 +230,7 @@ class Player:
 
     def __init__(self, config: Config, ui: UI) -> None:
         self.path = _PlayerPath(config, ui).path
-        PlayerLibmpvAutoUpdate(self.path, config, ui)
+        self._libmpv = _PlayerLibmpvAutoUpdate(self.path, config, ui)
         self._window_watcher = _PlayerWindowWatcher()
         self._rect_loader: Optional[_PlayerRectLoader] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
@@ -234,19 +263,20 @@ class Player:
             set_rect_lock.acquire()
             self._rect_loader.rect = self._launcher.rect
 
-        with _PlayerConfigDirSetting().watch(self.relaunch):
-            with subprocess.Popen([self.path]) as self._process:
-                logger.info("player started")
-                self._window_watcher.start(self._process.pid)
-                if set_rect_lock:
-                    # give time to the player to read its config
-                    time.sleep(0.5)
-                    set_rect_lock.release()
-                yield
-            with self._process_lock:
-                self._process = None
-            logger.info("player stopped")
-            self._window_watcher.stop()
+        with self._libmpv:
+            with _PlayerConfigDirSetting().watch(self.relaunch):
+                with subprocess.Popen([self.path]) as self._process:
+                    logger.info("player started")
+                    self._window_watcher.start(self._process.pid)
+                    if set_rect_lock:
+                        # give time to the player to read its config
+                        time.sleep(0.5)
+                        set_rect_lock.release()
+                    yield
+                with self._process_lock:
+                    self._process = None
+                logger.info("player stopped")
+                self._window_watcher.stop()
 
     def stop(self) -> bool:
         with self._process_lock:

@@ -1,9 +1,10 @@
 import tkinter as tk
+from contextlib import contextmanager
+from enum import Enum
 from tkinter import ttk
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable, Iterator, Self, TypeVar
 
 from .style import _Style
-from .thread import run_in_thread_with_ui
 from .widgets import _Button
 
 Treturn = TypeVar("Treturn")
@@ -63,7 +64,11 @@ class TitleBarWindow(tk.Toplevel):
             widget.bind("<Button-1>", self._click_win)
 
 
-# TODO better progressbar behavior
+class ProgressMode(Enum):
+    PERCENT = "determinate"
+    UNKNOWN = "indeterminate"
+
+
 class ProgressWindow(TitleBarWindow):
     def __init__(self, title: str, width: int, *exceptions: type[Exception]) -> None:
         super().__init__(title=title, width=width, bg=_Theme.bg, quit_method=self.quitting)
@@ -74,33 +79,46 @@ class ProgressWindow(TitleBarWindow):
             self.after(0, self.master.eval, f"tk::PlaceWindow {str(self)} center")
         wait = tk.Label(self, bg=_Theme.bg, **_Theme.wait.to_tk)
         self._label = tk.Label(self, bg=_Theme.bg, text="")
-        self._progressbar = ttk.Progressbar(
-            self, style=_get_bar_style(), orient=tk.HORIZONTAL, mode="determinate", length=width
-        )
+        self._progressbar = ttk.Progressbar(self, style=_get_bar_style(), orient=tk.HORIZONTAL, length=width)
+        self._progress_mode = None
+        self._set_progress_mode(ProgressMode.UNKNOWN)
         wait.pack(pady=(_Theme.space / 2, 0))
-        self._progressbar.pack()
+        self._progressbar.pack(expand=True, fill=tk.BOTH)
         self._label.pack(pady=(0, _Theme.space))
         self._exceptions = exceptions
         self._destroyed = False
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *_) -> None:
+        self.destroy()
 
     def quitting(self) -> None:
         self._destroyed = True
         self.destroy()
 
+    @property
+    def destroyed(self) -> bool:
+        return self._destroyed
+
     def msg(self, text: str) -> None:
         self._label.config(**_Theme.text(text).to_tk)
 
-    def set_percent_progress(self, percent: float) -> None:
-        self._progressbar["value"] = max(0, min(percent, 100))
+    def _set_progress_mode(self, mode: ProgressMode) -> None:
+        if self._progress_mode != mode:
+            if mode == ProgressMode.UNKNOWN:
+                self._progressbar.start(10)
+            else:
+                self._progressbar.stop()
+            self._progressbar["mode"] = mode.value
+            self._progress_mode = mode
 
-    def run_in_thread(
-        self, target: Callable[[], Treturn], *exceptions: type[Exception], mainloop: bool
-    ) -> Optional[Treturn]:
-        exceptions = tk.TclError, *exceptions
-        try:
-            return run_in_thread_with_ui(self, target, *exceptions, mainloop=mainloop)
-        except tk.TclError:
-            # if self is exited by the user
-            return None
-        finally:
-            self.destroy()
+    @contextmanager
+    def show_percent(self) -> Iterator[Callable[[float], None]]:
+        def set_progress(percent: float) -> None:
+            self._set_progress_mode(ProgressMode.PERCENT)
+            self._progressbar["value"] = max(0, min(percent, 100))
+
+        yield set_progress
+        self.after(200, self._set_progress_mode, ProgressMode.UNKNOWN)
