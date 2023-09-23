@@ -5,7 +5,8 @@ from pathlib import Path
 
 from .accounts import AccountsProxies
 from .config import Config
-from .player import Player, PlayerError
+from .player import Player
+from .player.exception import PlayerError
 from .proxies import LocalProxies, LocalproxyError
 from .ui import UI, AppInfo
 

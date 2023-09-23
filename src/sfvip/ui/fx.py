@@ -45,7 +45,7 @@ class _Pulse:
         self._two_pi_frequency = 2 * math.pi
         self._lock = threading.Lock()
 
-    def set(self, color1: str, color2: str, frequency: float):
+    def set(self, color1: str, color2: str, frequency: float) -> None:
         with self._lock:
             self._color1 = _Color.from_str(color1)
             self._color2 = _Color.from_str(color2)

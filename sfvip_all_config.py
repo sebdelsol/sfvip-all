@@ -4,7 +4,10 @@ from src.config import ConfigLoader
 class AppConfig(ConfigLoader):
     class Player:
         path: str | None = None
-        auto_update_libmpv: bool = False
+
+        class Libmpv:
+            auto_update: bool = False
+            retry_minutes: int = 10
 
     class AllCategory:
         name: str = "All"

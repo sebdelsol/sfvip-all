@@ -41,7 +41,7 @@ class Libmpv(NamedTuple):
     def from_entry(cls, cpu_spec: Cpu.Spec, entry: _FeedEntries._Entry) -> Self:
         return cls(cpu_spec, calendar.timegm(entry.updated_parsed), entry.link)
 
-    def get_version(self):
+    def get_version(self) -> Optional[str]:
         return _LibmpvLatest.version(self.cpu_spec, self.timestamp)
 
 
@@ -50,16 +50,23 @@ class LibmpvVersion(ConfigLoader):
     v3: bool | None = None
     timestamp: int | None = None
 
+    def _get_cpu_spec(self) -> Optional[Cpu.Spec]:
+        return None if self.is64 is None or self.v3 is None else Cpu.Spec(self.is64, self.v3)
+
+    def update_cpu_spec(self, player_exe: Path) -> Optional[Cpu.Spec]:
+        cpu_spec = self._get_cpu_spec() or Cpu.spec(player_exe)
+        if cpu_spec:
+            self.update_field("is64", cpu_spec.is64)
+            self.update_field("v3", cpu_spec.v3)
+        return cpu_spec
+
     def update_from(self, libmpv: Libmpv) -> None:
         self.update_field("is64", libmpv.cpu_spec.is64)
         self.update_field("v3", libmpv.cpu_spec.v3)
         self.update_field("timestamp", libmpv.timestamp)
 
-    def get_cpu_spec(self) -> Optional[Cpu.Spec]:
-        return None if self.is64 is None or self.v3 is None else Cpu.Spec(self.is64, self.v3)
-
-    def get_version(self):
-        return _LibmpvLatest.version(self.get_cpu_spec(), self.timestamp)
+    def get_version(self) -> Optional[str]:
+        return _LibmpvLatest.version(self._get_cpu_spec(), self.timestamp)
 
 
 class _LibmpvLatest:
@@ -72,30 +79,26 @@ class _LibmpvLatest:
     _name = "libmpv/mpv-dev-{cpu_spec_str}"
 
     @staticmethod
-    def version(cpu_spec: Optional[Cpu.Spec], timestamp: Optional[int]) -> str:
+    def version(cpu_spec: Optional[Cpu.Spec], timestamp: Optional[int]) -> Optional[str]:
         if cpu_spec and timestamp:
             date = datetime.utcfromtimestamp(timestamp).strftime(r"%Y%m%d")
             return f"{_LibmpvLatest._cpu_spec_to_str[cpu_spec]}-{date}"
-        return ""
+        return None
 
     @staticmethod
-    def get(player_exe: Path, latest_version: Optional[LibmpvVersion] = None) -> Optional[Libmpv]:
-        logger.info("check lastest libmpv")
-        with requests.get(_LibmpvLatest._feed, timeout=3) as response:
-            response.raise_for_status()
-            feed: _FeedEntries = feedparser.parse(BytesIO(response.content))
-            if not feed.bozo and feed.entries:
-                cpu_spec = (latest_version and latest_version.get_cpu_spec()) or Cpu.spec(player_exe)
-                if cpu_spec:
+    def get(cpu_spec: Cpu.Spec) -> Optional[Libmpv]:
+        try:
+            with requests.get(_LibmpvLatest._feed, timeout=3) as response:
+                response.raise_for_status()
+                feed: _FeedEntries = feedparser.parse(BytesIO(response.content))
+                if not feed.bozo and feed.entries:
                     cpu_spec_str = _LibmpvLatest._cpu_spec_to_str[cpu_spec]
                     name = _LibmpvLatest._name.format(cpu_spec_str=cpu_spec_str)
                     libmpvs = (Libmpv.from_entry(cpu_spec, entry) for entry in feed.entries if name in entry.title)
                     if libmpv := next(libmpvs, None):
-                        timestamp = (latest_version and latest_version.timestamp) or 0
-                        if libmpv.timestamp > timestamp:
-                            logger.info("new libmpv found")
-                            return libmpv
-            logger.info("no new libmpv found")
+                        return libmpv
+        except requests.RequestException:
+            pass
         return None
 
 
@@ -106,14 +109,22 @@ class LibmpvDll:
         self._player_exe = player_exe
         self._libdir = player_exe.parent / "lib"
         self._version = LibmpvVersion(self._libdir / "libmpv.json")
-
-    def get_version(self) -> str:
         self._version.update()
+
+    def get_version(self) -> Optional[str]:
         return self._version.get_version()
 
-    def check(self) -> Optional[Libmpv]:
-        self._version.update()
-        return _LibmpvLatest.get(self._player_exe, self._version)
+    def is_new(self, libmpv: Libmpv) -> bool:
+        return libmpv.timestamp > (self._version.timestamp or 0)
+
+    def get_latest_libmpv(self) -> Optional[Libmpv]:
+        logger.info("check lastest libmpv")
+        if cpu_spec := self._version.update_cpu_spec(self._player_exe):
+            if libmpv := _LibmpvLatest.get(cpu_spec):
+                logger.info("libmpv found %s", libmpv.get_version())
+                return libmpv
+        logger.warning("check latest libmpv failed")
+        return None
 
     def _download(self, libmpv: Libmpv, progress: ProgressWindow) -> bool:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -129,9 +140,9 @@ class LibmpvDll:
                     return True
             return False
 
-    def check_and_download(self, progress: ProgressWindow) -> bool:
+    def download_latest(self, progress: ProgressWindow) -> bool:
         progress.msg("Check latest libmpv")
-        if libmpv := self.check():
+        if libmpv := self.get_latest_libmpv():
             return self._download(libmpv, progress)
         return False
 

@@ -23,7 +23,7 @@ class ThreadUI:
             value: Optional[R] = None
             exception: Optional[Exception] = None
 
-        def run():
+        def run() -> None:
             try:
                 Return.value = target(*args, **kwargs)
             except self._exceptions as exception:

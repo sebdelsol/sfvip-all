@@ -33,7 +33,7 @@ class _PlayerUpdate:
 def download_player(player_name: str) -> Optional[str]:
     def download(progress: ProgressWindow) -> bool:
         if _PlayerUpdate(player_exe).download(progress):
-            return LibmpvDll(player_exe).check_and_download(progress)
+            return LibmpvDll(player_exe).download_latest(progress)
         return False
 
     exe_dir = Path(sys.argv[0]).parent

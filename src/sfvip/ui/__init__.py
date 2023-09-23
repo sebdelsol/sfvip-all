@@ -32,14 +32,14 @@ class UI(tk.Tk):
     def set_libmpv_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
         self._infos.set_libmpv_auto_update(is_checked, callback)
 
-    def set_libmpv_download(self, version: str, download: Callable[[], None]) -> None:
+    def set_libmpv_download(self, version: Optional[str], download: Callable[[], None]) -> None:
         self._infos.set_libmpv_download(version, download)
         self._logo.set_pulse(ok=False, reason=_PulseReason.DOWNLOAD)
 
     def set_libmpv_downloading(self) -> None:
         self._logo.set_pulse(ok=True, reason=_PulseReason.DOWNLOAD)
 
-    def set_libmpv_version(self, version: str) -> None:
+    def set_libmpv_version(self, version: Optional[str]) -> None:
         self._infos.set_libmpv_version(version)
 
     def showinfo(self, message: str) -> None:

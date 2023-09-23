@@ -23,9 +23,17 @@ class Config:
         self._config.update_field("Player.path", player_path)
 
     @property
-    def auto_update_libmpv(self) -> bool:
-        return self._config.Player.auto_update_libmpv
+    def libmpv_auto_update(self) -> bool:
+        return self._config.Player.Libmpv.auto_update
 
-    @auto_update_libmpv.setter
-    def auto_update_libmpv(self, auto_update_libmpv: bool) -> None:
-        self._config.update_field("Player.auto_update_libmpv", auto_update_libmpv)
+    @libmpv_auto_update.setter
+    def libmpv_auto_update(self, libmpv_auto_update: bool) -> None:
+        self._config.update_field("Player.Libmpv.auto_update", libmpv_auto_update)
+
+    @property
+    def libmpv_retry_minutes(self) -> int:
+        return self._config.Player.Libmpv.retry_minutes
+
+    @libmpv_retry_minutes.setter
+    def libmpv_retry_minutes(self, retry_minutes: int) -> None:
+        self._config.update_field("Player.Libmpv.retry_minutes", retry_minutes)

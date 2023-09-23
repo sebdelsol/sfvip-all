@@ -8,8 +8,6 @@ from .sticky import _Offset, _StickyWindow
 from .style import _Style
 from .widgets import _Border, _Button, _get_border, _ListView, _set_vscrollbar_style
 
-# TODO wrong info window size ???
-
 
 class AppInfo(NamedTuple):
     name: str
@@ -94,7 +92,7 @@ def _get_app_warn(app_info: AppInfo) -> _Style:
     return _InfoStyle.app_warn(warn).lime_green
 
 
-def _get_libmpv_info(version: str = "") -> _Style:
+def _get_libmpv_info(version: Optional[str] = None) -> _Style:
     version, color = (version, "lime green") if version else ("Unknown version", "red")
     return _InfoStyle.app(version).color(color)
 
@@ -188,13 +186,14 @@ class _InfosWindow(_StickyWindow):
         widget.bind("<Enter>", show, add="+")
         widget.bind("<Leave>", lambda _: self.hide(), add="+")
 
-    def set_libmpv_download(self, version: str, download: Callable[[], None]) -> None:
-        self._libmpv_download_button.config(_get_libmpv_download_button(version).to_tk)
-        self._set_button_action(self._libmpv_download_button, download)
-        # enable resizing
-        self.geometry("")
+    def set_libmpv_download(self, version: Optional[str], download: Callable[[], None]) -> None:
+        if version:
+            self._libmpv_download_button.config(_get_libmpv_download_button(version).to_tk)
+            self._set_button_action(self._libmpv_download_button, download)
+            # enable resizing
+            self.geometry("")
 
-    def set_libmpv_version(self, version: str) -> None:
+    def set_libmpv_version(self, version: Optional[str]) -> None:
         self._libmpv_info.config(**_get_libmpv_info(version).to_tk)
         # enable resizing
         self.geometry("")

@@ -20,23 +20,23 @@ TUnpackFunc = Callable[[Path, Path, TPercentFunc], None]
 
 def _unpack_7z(archive: Path, extract_dir: Path, set_percent: TPercentFunc) -> None:
     class _ExtractCallback(py7zr.callbacks.ExtractCallback):
-        def __init__(self):
+        def __init__(self) -> None:
             self._extracted_size = 0
 
-        def report_end(self, _, wrote_bytes):
+        def report_end(self, _, wrote_bytes) -> None:
             self._extracted_size += int(wrote_bytes)
             set_percent(100 * self._extracted_size / uncompress_size)
 
-        def report_start_preparation(self):
+        def report_start_preparation(self) -> None:
             pass
 
-        def report_start(self, *_):
+        def report_start(self, *_) -> None:
             pass
 
-        def report_postprocess(self):
+        def report_postprocess(self) -> None:
             pass
 
-        def report_warning(self, _):
+        def report_warning(self, _) -> None:
             pass
 
     with py7zr.SevenZipFile(archive) as zf:
