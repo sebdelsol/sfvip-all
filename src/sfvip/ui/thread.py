@@ -30,7 +30,10 @@ class ThreadUI:
                 Return.exception = exception
             finally:
                 if self._create_mainloop:
-                    self._ui.after(0, self._ui.quit)
+                    try:
+                        self._ui.after(0, self._ui.quit)
+                    except RuntimeError:
+                        pass
                 else:
                     self._ui.after(0, self._ui.destroy)
 

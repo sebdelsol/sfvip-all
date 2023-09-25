@@ -1,27 +1,18 @@
-import platform
-import sys
 import tkinter as tk
 from typing import Any, Callable, NamedTuple, Optional, Sequence
 
+from ..app_info import AppInfo
 from .fx import _Fade
 from .sticky import _Offset, _StickyWindow
 from .style import _Style
-from .widgets import _Border, _Button, _get_border, _ListView, _set_vscrollbar_style
-
-
-class AppInfo(NamedTuple):
-    name: str
-    version: str
-    app_64bit: bool = sys.maxsize == (2**63) - 1
-    os_64bit: bool = platform.machine().endswith("64")
-
-    @property
-    def bitness(self) -> str:
-        return "x64" if self.app_64bit else "x86"
-
-    @property
-    def os_bitness(self) -> str:
-        return "x64" if self.os_64bit else "x86"
+from .widgets import (
+    _Border,
+    _Button,
+    _CheckBox,
+    _get_border,
+    _ListView,
+    _set_vscrollbar_style,
+)
 
 
 class Info(NamedTuple):
@@ -36,6 +27,7 @@ class Info(NamedTuple):
 
 class _InfoTheme:
     pad = 2
+    pady = 7
     bg_headers = "#242424"
     bg_rows = "#2A2A2A"
     separator = "#303030"
@@ -76,11 +68,11 @@ def _get_row(info: Info) -> tuple[_Style, ...]:
     )
 
 
-def _get_button_relaunch() -> _Style:
-    return _InfoStyle.stl("Click to relaunch... to fix the proxies").no_truncate.white
+def _get_relaunch_button() -> _Style:
+    return _InfoStyle.stl("Relaunch to fix the proxies").no_truncate.white
 
 
-def _get_app_info(app_info: AppInfo) -> _Style:
+def _get_app_version(app_info: AppInfo) -> _Style:
     return _InfoStyle.app(f"{app_info.name} v{app_info.version} {app_info.bitness}").grey
 
 
@@ -92,24 +84,32 @@ def _get_app_warn(app_info: AppInfo) -> _Style:
     return _InfoStyle.app_warn(warn).lime_green
 
 
-def _get_libmpv_info(version: Optional[str] = None) -> _Style:
-    version, color = (version, "lime green") if version else ("Unknown version", "red")
-    return _InfoStyle.app(version).color(color)
+def _get_app_install_button(version: str = "") -> _Style:
+    return _InfoStyle.app(f"Install v{version}").no_truncate.white
+
+
+def _get_app_auto_update() -> _Style:
+    return _InfoStyle.app("Check update").grey
+
+
+def _get_libmpv_version(version: Optional[str] = None) -> _Style:
+    version = version if version else "unknown version"
+    return _InfoStyle.app(f"Libmpv {version}").grey
 
 
 def _get_libmpv_auto_update() -> _Style:
-    return _InfoStyle.app("Auto update Libmpv").grey
+    return _InfoStyle.app("Check update").grey
 
 
-def _get_libmpv_download_button(version: str = "") -> _Style:
-    return _InfoStyle.app(f"download {version}").no_truncate.white
+def _get_libmpv_install_button(version: str = "") -> _Style:
+    return _InfoStyle.app(f"Install {version}").no_truncate.white
 
 
 def _are_infos_valid(infos: Sequence[Info]) -> bool:
     return all(info.is_valid for info in infos)
 
 
-class _InfosWindow(_StickyWindow):
+class _ProxiesWindow(_StickyWindow):
     """installed proxies infos"""
 
     _offset = _Offset(regular=(-36, 36), maximized=(2, 35))
@@ -121,51 +121,23 @@ class _InfosWindow(_StickyWindow):
         self.attributes("-alpha", 0.0)
         self.maxsize(-1, _InfosWindow._max_height)
         # create a frame for hovering detection
-        hover_frame = tk.Frame(self, bg=_InfoTheme.bg_headers)
-        hover_frame.pack(fill="both", expand=True)
-        self._bind_mouse_hover(hover_frame)
-        # create the widgets
-        self._create_widgets(hover_frame, _get_app_info(app_info), _get_app_warn(app_info))
-        self._listview.set_headers(_get_infos_headers(app_info.name))
+        self._frame = tk.Frame(self, bg=_InfoTheme.bg_headers)
+        self._frame.pack(fill="both", expand=True)
+        self._bind_mouse_hover(self._frame)
         self._fade = _Fade(self)
-        self._libmpv_auto_update_callback = None
-
-    def _create_widgets(self, frame: tk.Frame, app_info: _Style, app_warn: _Style) -> None:
-        pad = _InfoTheme.pad
-        _set_vscrollbar_style(**_InfoTheme.listview_scrollbar)
         # widgets
-        self._relaunch_button = _Button(frame, **_InfoTheme.button, **_get_button_relaunch().to_tk)
-        self._listview = _ListView(frame, **_InfoTheme.listview, pad=pad)
-        app_info_label = tk.Label(frame, bg=_InfoTheme.bg_headers, **app_info.to_tk)
-        app_warn_label = tk.Label(frame, bg=_InfoTheme.bg_headers, **app_warn.to_tk)
-        separator = tk.Frame(frame, bg=_InfoTheme.separator)
-        self._libmpv_info = tk.Label(frame, bg=_InfoTheme.bg_headers, **_get_libmpv_info().to_tk)
-        self._libmpv_auto_update = tk.IntVar()
-        libmpv_auto_update_check = tk.Checkbutton(
-            frame,
-            bg=_InfoTheme.bg_headers,
-            activebackground=_InfoTheme.bg_headers,
-            **(lib_update_style := _get_libmpv_auto_update().to_tk),
-            activeforeground=lib_update_style["fg"],
-            variable=self._libmpv_auto_update,
-            command=self.on_libmpv_auto_update_changed,
-        )
-        self._libmpv_download_button = _Button(frame, **_InfoTheme.button, **_get_libmpv_download_button().to_tk)
-        separator2 = tk.Frame(frame, bg=_InfoTheme.separator)
-        # layout
-        app_info_label.grid(row=0, padx=pad, sticky=tk.W)
-        app_warn_label.grid(row=0, column=1, padx=pad, sticky=tk.W)
-        self._relaunch_button.grid(row=0, column=2, padx=pad, pady=pad, sticky=tk.EW)
+        self._relaunch_button = _Button(self._frame, **_InfoTheme.button, **_get_relaunch_button().to_tk)
+        self._app_button = _Button(self._frame, **_InfoTheme.button, **_get_app_install_button().to_tk)
+        self._listview = _ListView(self._frame, **_InfoTheme.listview, pad=_InfoTheme.pad)
+        self._listview.set_headers(_get_infos_headers(app_info.name))
+        _set_vscrollbar_style(**_InfoTheme.listview_scrollbar)
+
+    def _layout(self, row: int) -> None:
+        self._relaunch_button.grid(row=row, columnspan=3, padx=_InfoTheme.pad, pady=_InfoTheme.pady, sticky=tk.EW)
         self._relaunch_button.grid_remove()
-        separator.grid(row=1, columnspan=3, sticky=tk.EW)
-        self._libmpv_info.grid(row=2, column=1, padx=pad, sticky=tk.W)
-        libmpv_auto_update_check.grid(row=2, column=0, padx=pad, sticky=tk.EW)
-        self._libmpv_download_button.grid(row=2, column=2, padx=pad, pady=pad, sticky=tk.EW)
-        self._libmpv_download_button.grid_remove()
-        separator2.grid(row=3, columnspan=3, sticky=tk.EW)
-        self._listview.grid(row=4, columnspan=3, sticky=tk.NSEW)
-        frame.columnconfigure(2, weight=1)
-        frame.rowconfigure(4, weight=1)
+        row += 1
+        self._listview.grid(row=row, columnspan=3, sticky=tk.NSEW)
+        self._frame.rowconfigure(row, weight=1)
 
     def _set_button_action(self, button: _Button, action: Callable[[], None], *args: Any) -> None:
         def _action(_) -> None:
@@ -185,27 +157,6 @@ class _InfosWindow(_StickyWindow):
 
         widget.bind("<Enter>", show, add="+")
         widget.bind("<Leave>", lambda _: self.hide(), add="+")
-
-    def set_libmpv_download(self, version: Optional[str], download: Callable[[], None]) -> None:
-        if version:
-            self._libmpv_download_button.config(_get_libmpv_download_button(version).to_tk)
-            self._set_button_action(self._libmpv_download_button, download)
-            # enable resizing
-            self.geometry("")
-
-    def set_libmpv_version(self, version: Optional[str]) -> None:
-        self._libmpv_info.config(**_get_libmpv_info(version).to_tk)
-        # enable resizing
-        self.geometry("")
-
-    def on_libmpv_auto_update_changed(self) -> None:
-        if self._libmpv_auto_update_callback:
-            self._libmpv_auto_update_callback(bool(self._libmpv_auto_update.get()))
-
-    def set_libmpv_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
-        self._libmpv_auto_update_callback = callback
-        self._libmpv_auto_update.set(int(is_checked))
-        self.on_libmpv_auto_update_changed()
 
     def set(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[], None]]) -> bool:
         rows = [_get_row(info) for info in infos]
@@ -228,3 +179,76 @@ class _InfosWindow(_StickyWindow):
 
     def hide(self) -> None:
         self._fade.fade(fade_duration_ms=250, out=True, wait_ms=100)
+
+
+class _InfosWindow(_ProxiesWindow):
+    def __init__(self, app_info: AppInfo) -> None:
+        super().__init__(app_info)
+        pad = _InfoTheme.pad
+        pady = _InfoTheme.pady
+        frame = self._frame
+        # widgets
+        app_warn_label = tk.Label(frame, bg=_InfoTheme.bg_headers, **_get_app_warn(app_info).to_tk)
+        separator = tk.Frame(frame, bg=_InfoTheme.separator)
+        self._app_button = _Button(frame, **_InfoTheme.button, **_get_app_install_button().to_tk)
+        app_version = tk.Label(frame, bg=_InfoTheme.bg_headers, **_get_app_version(app_info).to_tk)
+        self._app_update = _CheckBox(frame, bg=_InfoTheme.bg_headers, text=_get_app_auto_update())
+        separator2 = tk.Frame(frame, bg=_InfoTheme.separator)
+        self._libmpv_version = tk.Label(frame, bg=_InfoTheme.bg_headers, **_get_libmpv_version().to_tk)
+        self._libmpv_update = _CheckBox(frame, bg=_InfoTheme.bg_headers, text=_get_libmpv_auto_update())
+        self._libmpv_button = _Button(frame, **_InfoTheme.button, **_get_libmpv_install_button().to_tk)
+        separator3 = tk.Frame(frame, bg=_InfoTheme.separator)
+        # layout
+        row = 0
+        app_warn_label.grid(row=row, columnspan=3, padx=pad, sticky=tk.W)
+        row += 1
+        separator.grid(row=row, columnspan=3, sticky=tk.EW)
+        row += 1
+        app_version.grid(row=row, padx=pad, sticky=tk.W)
+        self._app_update.grid(row=row, column=1, padx=pad, sticky=tk.EW)
+        self._app_button.grid(row=row, column=2, padx=pad, pady=pady, sticky=tk.EW)
+        self._app_button.grid_remove()
+        row += 1
+        separator2.grid(row=row, columnspan=3, sticky=tk.EW)
+        row += 1
+        self._libmpv_version.grid(row=row, column=0, padx=pad, sticky=tk.W)
+        self._libmpv_update.grid(row=row, column=1, padx=pad, sticky=tk.EW)
+        self._libmpv_button.grid(row=row, column=2, padx=pad, pady=pady, sticky=tk.EW)
+        self._libmpv_button.grid_remove()
+        row += 1
+        separator3.grid(row=row, columnspan=3, sticky=tk.EW)
+        row += 1
+        super()._layout(row=6)
+        frame.columnconfigure(2, weight=1)
+
+    def _set_button(
+        self,
+        button: _Button,
+        version: Optional[str],
+        get_text: Callable[[str], _Style],
+        action: Optional[Callable[[], None]],
+    ) -> None:
+        if version and action:
+            button.config(**get_text(version).to_tk)
+            self._set_button_action(button, action)
+        else:
+            button.grid_remove()
+        # enable resizing
+        self.geometry("")
+
+    def set_app_install(self, version: Optional[str], install: Optional[Callable[[], None]]) -> None:
+        self._set_button(self._app_button, version, _get_app_install_button, install)
+
+    def set_app_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._app_update.set_callback(is_checked, callback)
+
+    def set_libmpv_version(self, version: Optional[str]) -> None:
+        self._libmpv_version.config(**_get_libmpv_version(version).to_tk)
+        # enable resizing
+        self.geometry("")
+
+    def set_libmpv_install(self, version: Optional[str], install: Optional[Callable[[], None]]) -> None:
+        self._set_button(self._libmpv_button, version, _get_libmpv_install_button, install)
+
+    def set_libmpv_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._libmpv_update.set_callback(is_checked, callback)

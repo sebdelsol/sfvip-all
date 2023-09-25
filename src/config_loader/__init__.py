@@ -55,13 +55,13 @@ class ConfigLoader:
         # always save if the config file needs some fixes
         self.save()
 
-    def update_field(self, path_str: str, value: Any) -> None:
+    def _update_field(self, path_str: str, value: Any) -> bool:
         fields = path_str.split(".")
         *path, field = fields
         config: Self | SimpleNamespace = self
         for name in path:
             if not hasattr(config, name):
-                return
+                return True
             config = getattr(config, name)
         if hasattr(config, field):
             if getattr(config, field) != value:
@@ -71,7 +71,19 @@ class ConfigLoader:
                 if not hint or isinstance(value, hint):
                     setattr(config, field, value)
                     logger.info("%s.%s updated", self._name, ".".join(fields))
-                    self.save()
+                    return True
+        return False
+
+    def update_field(self, path_str: str, value: Any) -> None:
+        if self._update_field(path_str, value):
+            self.save()
+
+    def update_fields(self, *paths_values: tuple[str, Any]) -> None:
+        updated = False
+        for path, value in paths_values:
+            updated |= self._update_field(path, value)
+        if updated:
+            self.save()
 
     def _im_newer(self) -> bool:
         # launched by nuitka ?

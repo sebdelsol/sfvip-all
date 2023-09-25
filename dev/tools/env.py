@@ -2,7 +2,7 @@ import subprocess
 import sys
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Iterator, Optional, Sequence
 
 from tap import Tap
 
@@ -28,6 +28,10 @@ class PythonEnv:
     @property
     def exe(self) -> Path:
         return self._exe
+
+    @property
+    def path_str(self) -> str:
+        return str(self._env_path.resolve())
 
     @property
     def requirements(self) -> Sequence[str]:
@@ -70,7 +74,7 @@ class PythonEnv:
             return False
         return True
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return "".join(
             (
                 Title("In "),
@@ -95,11 +99,13 @@ class EnvArgs(Tap):
             self.x64, self.x86 = True, True
 
     def get_python_envs(self, environments: CfgEnvironments) -> list[PythonEnv]:
-        envs = []
-        if self.x64:
-            envs.append(PythonEnv(environments, want_64=True))
-        if self.x86:
-            envs.append(PythonEnv(environments, want_64=False))
-        if not envs:
-            envs.append(PythonEnv(environments))
-        return envs
+        return [PythonEnv(environments, bitness) for bitness in self.get_bitness()]
+
+    def get_bitness(self) -> Iterator[bool | None]:
+        if self.x64 or self.x86:
+            if self.x64:
+                yield True
+            if self.x86:
+                yield False
+        else:
+            yield None

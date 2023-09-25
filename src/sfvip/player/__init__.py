@@ -6,12 +6,12 @@ from contextlib import contextmanager
 from typing import Callable, Iterator, Optional
 
 from ...winapi import mutex
-from ..config import Config
+from ..app_config import Config
 from ..ui import UI, sticky
 from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
+from .libmpv_updater import PlayerLibmpvAutoUpdater
 from .path import PlayerPath
-from .update import PlayerLibmpvAutoUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +103,7 @@ class Player:
 
     def __init__(self, config: Config, ui: UI) -> None:
         self.path = PlayerPath(config, ui).path
-        self._libmpv = PlayerLibmpvAutoUpdate(self.path, config, ui)
+        self._libmpv_updater = PlayerLibmpvAutoUpdater(self.path, config, ui)
         self._window_watcher = _PlayerWindowWatcher()
         self._rect_loader: Optional[_PlayerRectLoader] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
@@ -136,7 +136,7 @@ class Player:
             set_rect_lock.acquire()
             self._rect_loader.rect = self._launcher.rect
 
-        with self._libmpv:
+        with self._libmpv_updater:
             with _PlayerConfigDirSetting().watch(self.relaunch):
                 with subprocess.Popen([self.path]) as self._process:
                     logger.info("player started")

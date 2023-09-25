@@ -34,6 +34,22 @@ class Config:
     def libmpv_retry_minutes(self) -> int:
         return self._config.Player.Libmpv.retry_minutes
 
-    @libmpv_retry_minutes.setter
-    def libmpv_retry_minutes(self, retry_minutes: int) -> None:
-        self._config.update_field("Player.Libmpv.retry_minutes", retry_minutes)
+    @property
+    def libmpv_requests_timeout(self) -> int:
+        return self._config.Player.Libmpv.requests_timeout
+
+    @property
+    def app_auto_update(self) -> bool:
+        return self._config.App.auto_update
+
+    @app_auto_update.setter
+    def app_auto_update(self, app_auto_update: bool) -> None:
+        self._config.update_field("App.auto_update", app_auto_update)
+
+    @property
+    def app_retry_minutes(self) -> int:
+        return self._config.App.retry_minutes
+
+    @property
+    def app_requests_timeout(self) -> int:
+        return self._config.App.requests_timeout

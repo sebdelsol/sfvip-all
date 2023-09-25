@@ -1,9 +1,14 @@
+## 1.3.0
+* _Sfvip All_ auto update option.
+* User's exit stops any installation.
+* Bump _mitmproxy_ to 10.1.0 (rustup is no longer needed).
+
 ## 1.2.9
-* Libmpv auto update option.
+* _Libmpv_ auto update option.
 * Download window mimics _Sfvip Player_ UI.
 
 ## 1.2.8
-* Detection of x86-64-v3 architecture for libmpv download.
+* Detection of x86-64-v3 architecture for _Libmpv_ download.
 * Fix wrong bitness in the Proxies window.
 
 ## 1.2.7

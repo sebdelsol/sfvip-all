@@ -5,6 +5,7 @@
             "name": "Python : current file",
             "type": "python",
             "request": "launch",
+            "subProcess": true,
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": false,

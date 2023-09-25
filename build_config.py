@@ -13,14 +13,16 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.2.9"
+    version = "1.3.0"
     dir = "build"
     nuitka_args = (
+        "--include-plugin-directory={python_env}/Lib/site-packages/mitmproxy_windows",
         f"--force-stderr-spec=%PROGRAM%/../{name} - %TIME%.log",
         "--enable-plugin=tk-inter",
         "--disable-console",
     )
     files = Splash, Logo
+    update = "update_{bitness}.json"
 
 
 class Environments:
@@ -43,9 +45,10 @@ class Post:
     dst = f"{Build.dir}/{Build.version}/post.txt"
 
 
+class Github:
+    owner = "sebdelsol"
+    repo = "sfvip-all"
+
+
 class Templates:
     all = Readme, Post
-
-    class Github:
-        owner = "sebdelsol"
-        repo = "sfvip-all"

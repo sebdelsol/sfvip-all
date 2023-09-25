@@ -13,10 +13,10 @@ from typing import NamedTuple, Optional, Protocol, Self
 import feedparser
 import requests
 
-from ...config import ConfigLoader
-from ..ui.progress import ProgressWindow
+from ....config_loader import ConfigLoader
+from ...downloader import download_and_unpack, download_in_thread
+from ...ui.progress import ProgressWindow
 from .cpu import Cpu
-from .download import download_and_unpack, download_in_thread
 
 logger = logging.getLogger(__name__)
 
@@ -56,14 +56,15 @@ class LibmpvVersion(ConfigLoader):
     def update_cpu_spec(self, player_exe: Path) -> Optional[Cpu.Spec]:
         cpu_spec = self._get_cpu_spec() or Cpu.spec(player_exe)
         if cpu_spec:
-            self.update_field("is64", cpu_spec.is64)
-            self.update_field("v3", cpu_spec.v3)
+            self.update_fields(("is64", cpu_spec.is64), ("v3", cpu_spec.v3))
         return cpu_spec
 
     def update_from(self, libmpv: Libmpv) -> None:
-        self.update_field("is64", libmpv.cpu_spec.is64)
-        self.update_field("v3", libmpv.cpu_spec.v3)
-        self.update_field("timestamp", libmpv.timestamp)
+        self.update_fields(
+            ("is64", libmpv.cpu_spec.is64),
+            ("v3", libmpv.cpu_spec.v3),
+            ("timestamp", libmpv.timestamp),
+        )
 
     def get_version(self) -> Optional[str]:
         return _LibmpvLatest.version(self._get_cpu_spec(), self.timestamp)
@@ -78,6 +79,9 @@ class _LibmpvLatest:
     _feed = "https://sourceforge.net/projects/mpv-player-windows/rss?path=/libmpv"
     _name = "libmpv/mpv-dev-{cpu_spec_str}"
 
+    def __init__(self, timeout: int) -> None:
+        self._timeout = timeout
+
     @staticmethod
     def version(cpu_spec: Optional[Cpu.Spec], timestamp: Optional[int]) -> Optional[str]:
         if cpu_spec and timestamp:
@@ -85,10 +89,9 @@ class _LibmpvLatest:
             return f"{_LibmpvLatest._cpu_spec_to_str[cpu_spec]}-{date}"
         return None
 
-    @staticmethod
-    def get(cpu_spec: Cpu.Spec) -> Optional[Libmpv]:
+    def get(self, cpu_spec: Cpu.Spec) -> Optional[Libmpv]:
         try:
-            with requests.get(_LibmpvLatest._feed, timeout=3) as response:
+            with requests.get(_LibmpvLatest._feed, timeout=self._timeout) as response:
                 response.raise_for_status()
                 feed: _FeedEntries = feedparser.parse(BytesIO(response.content))
                 if not feed.bozo and feed.entries:
@@ -105,9 +108,11 @@ class _LibmpvLatest:
 class LibmpvDll:
     pattern = "*mpv*.dll"
 
-    def __init__(self, player_exe: Path) -> None:
+    def __init__(self, player_exe: Path, timeout: int) -> None:
+        self._timeout = timeout
         self._player_exe = player_exe
         self._libdir = player_exe.parent / "lib"
+        self._libmpv_latest = _LibmpvLatest(timeout)
         self._version = LibmpvVersion(self._libdir / "libmpv.json")
         self._version.update()
 
@@ -118,19 +123,19 @@ class LibmpvDll:
         return libmpv.timestamp > (self._version.timestamp or 0)
 
     def get_latest_libmpv(self) -> Optional[Libmpv]:
-        logger.info("check lastest libmpv")
+        logger.info("get lastest libmpv")
         if cpu_spec := self._version.update_cpu_spec(self._player_exe):
-            if libmpv := _LibmpvLatest.get(cpu_spec):
+            if libmpv := self._libmpv_latest.get(cpu_spec):
                 logger.info("libmpv found %s", libmpv.get_version())
                 return libmpv
-        logger.warning("check latest libmpv failed")
+        logger.warning("get latest libmpv failed")
         return None
 
     def _download(self, libmpv: Libmpv, progress: ProgressWindow) -> bool:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_dir = Path(temp_dir)
             archive = temp_dir / "libmpv"
-            if download_and_unpack(libmpv.url, archive, temp_dir, progress):
+            if download_and_unpack(libmpv.url, archive, temp_dir, self._timeout, progress):
                 dlls = (file for file in temp_dir.glob(LibmpvDll.pattern))
                 if dll := next(dlls, None):
                     self._libdir.mkdir(parents=True, exist_ok=True)

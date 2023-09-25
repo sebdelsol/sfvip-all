@@ -1,5 +1,6 @@
-from build_config import Environments, Templates
-from builder import Builder, Templater
+from build_config import Environments, Github, Templates
+from dev.builder import Builder
+from dev.templater import Templater
 
 
 class Build:
@@ -11,6 +12,7 @@ class Build:
     version = "0.3"
     nuitka_args = ["--enable-console"]
     files = []
+    update = ""
 
 
 class Readme:
@@ -29,5 +31,5 @@ Environments.X86.requirements = []  # type: ignore
 
 
 if __name__ == "__main__":
-    Builder(Build, Environments).build_all()
-    Templater(Build, Environments, Templates).create_all()
+    Builder(Build, Environments, Github).build_all()
+    Templater(Build, Environments, Templates, Github).create_all()

@@ -1,5 +1,5 @@
 # packages to run the app for both environments
-mitmproxy>=9.0.1
+mitmproxy>=10.1.0
 watchdog>=3.0.0
 # for downloading the player
 feedparser>=6.0.10

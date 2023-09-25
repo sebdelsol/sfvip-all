@@ -18,6 +18,7 @@ class CfgBuild(Protocol):
     company: str
     version: str
     dir: str
+    update: str
 
     @property
     def files(self) -> Sequence[CfgFile | CfgFileResize]:
@@ -26,6 +27,11 @@ class CfgBuild(Protocol):
     @property
     def nuitka_args(self) -> Sequence[str]:
         ...
+
+
+class CfgGithub(Protocol):
+    owner: str
+    repo: str
 
 
 class _CfgTemplate(Protocol):
@@ -37,10 +43,6 @@ class CfgTemplates(Protocol):
     @property
     def all(self) -> Sequence[_CfgTemplate]:
         ...
-
-    class Github(Protocol):
-        owner: str
-        repo: str
 
 
 class _CfgEnvironment(Protocol):

@@ -70,8 +70,16 @@ class ProgressMode(Enum):
 
 
 class ProgressWindow(TitleBarWindow):
+    _instances: set["ProgressWindow"] = set()
+
+    @classmethod
+    def quit_all(cls) -> None:
+        for instance in ProgressWindow._instances.copy():
+            instance.destroy()
+
     def __init__(self, title: str, width: int, *exceptions: type[Exception]) -> None:
-        super().__init__(title=title, width=width, bg=_Theme.bg, quit_method=self.quitting)
+        super().__init__(title=title, width=width, bg=_Theme.bg, quit_method=self.destroy)
+        ProgressWindow._instances.add(self)
         self.overrideredirect(True)  # turns off title bar, geometry
         self.attributes("-topmost", True)
         self.resizable(False, False)
@@ -94,9 +102,11 @@ class ProgressWindow(TitleBarWindow):
     def __exit__(self, *_) -> None:
         self.destroy()
 
-    def quitting(self) -> None:
-        self._destroyed = True
-        self.destroy()
+    def destroy(self) -> None:
+        ProgressWindow._instances.discard(self)
+        if not self._destroyed:
+            self._destroyed = True
+            super().destroy()
 
     @property
     def destroyed(self) -> bool:

@@ -4,10 +4,10 @@ import winreg
 from pathlib import Path
 from typing import Any, Callable, Iterator, NamedTuple, Optional
 
-from ..config import Config
+from ..app_config import Config
 from ..registry import Registry
 from ..ui import UI
-from ..update import download_player
+from .download import download_player
 from .exception import PlayerError
 
 logger = logging.getLogger(__name__)
@@ -50,20 +50,22 @@ class PlayerPath:
     _pattern = "*sf*vip*player*.exe"
 
     def __init__(self, config: Config, ui: UI) -> None:
+        self._ui = ui
+        self._config = config
         player = config.player_path
         if not self._valid_exe(player):
-            player = self._find_player(ui)
+            player = self._find_player()
         assert player
         self.path = config.player_path = player
         logger.info("player is '%s'", self.path)
 
-    def _find_player(self, ui: UI) -> str:
+    def _find_player(self) -> str:
         for find_player_method in (
             self._player_from_registry,
             self._player_from_user,
             self._player_from_download,
         ):
-            for player in find_player_method(ui):
+            for player in find_player_method():
                 if self._valid_exe(player):
                     return player
         raise PlayerError("Sfvip Player not found")
@@ -73,25 +75,23 @@ class PlayerPath:
         return bool(path and (_path := Path(path)).is_file() and _path.match(PlayerPath._pattern))
 
     @staticmethod
-    def _player_from_registry(_) -> Iterator[str]:
+    def _player_from_registry() -> Iterator[str]:
         logger.info("try to find the player in the registry")
         for player in player_from_registry(PlayerPath._name):
             yield player
 
     # TODO single window for both _player_from_user and _player_from_download
-    @staticmethod
-    def _player_from_user(ui: UI) -> Iterator[str]:
-        ui.showinfo(f"Please find {PlayerPath._name.capitalize()}")
+    def _player_from_user(self) -> Iterator[str]:
+        self._ui.showinfo(f"Please find {PlayerPath._name.capitalize()}")
         while True:
             logger.info("ask the user to find the player")
-            if player := ui.find_file(PlayerPath._name, PlayerPath._pattern):
+            if player := self._ui.find_file(PlayerPath._name, PlayerPath._pattern):
                 yield player
-            if not ui.askretry(message=f"{PlayerPath._name.capitalize()} not found, try again ?"):
+            if not self._ui.askretry(message=f"{PlayerPath._name.capitalize()} not found, try again ?"):
                 break
 
-    @staticmethod
-    def _player_from_download(ui: UI) -> Iterator[str]:
-        if ui.askyesno(message=f"Download {PlayerPath._name.capitalize()} ?"):
+    def _player_from_download(self) -> Iterator[str]:
+        if self._ui.askyesno(message=f"Download {PlayerPath._name.capitalize()} ?"):
             logger.info("try to download the player")
-            if player := download_player(PlayerPath._name):
+            if player := download_player(PlayerPath._name, timeout=self._config.app_requests_timeout):
                 yield player

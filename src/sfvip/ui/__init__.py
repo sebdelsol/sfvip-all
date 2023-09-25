@@ -5,6 +5,7 @@ from typing import Callable, Optional, Sequence
 
 from .infos import AppInfo, Info, _InfosWindow
 from .logo import _LogoWindow, _PulseReason
+from .progress import ProgressWindow
 from .splash import _SplashWindow
 from .thread import ThreadUI
 
@@ -21,23 +22,42 @@ class UI(tk.Tk):
         self._infos = _InfosWindow(app_info)
         self._logo = _LogoWindow(logo_path, self._infos)
         self._title = f"{app_info.name} v{app_info.version} {app_info.bitness}"
+        self._has_quit = False
+
+    def quit(self) -> None:
+        if not self._has_quit:
+            self._has_quit = True
+            self.after(0, super().quit)
+            ProgressWindow.quit_all()
 
     def run_in_thread(self, target: Callable[[], None], *exceptions: type[Exception]) -> None:
         ThreadUI(self, *exceptions, create_mainloop=True).start(target)
 
     def set_infos(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)
-        self._logo.set_pulse(ok=ok, reason=_PulseReason.PROXIES)
+        self._logo.set_pulse(ok=ok, reason=_PulseReason.RESTART_FOR_PROXIES)
+
+    def set_app_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._infos.set_app_auto_update(is_checked, callback)
+
+    def set_app_installing(self) -> None:
+        self._logo.set_pulse(ok=True, reason=_PulseReason.UPDATE_APP)
+
+    def set_app_install(self, version: Optional[str] = None, install: Optional[Callable[[], None]] = None) -> None:
+        self._infos.set_app_install(version, install)
+        self._logo.set_pulse(ok=not bool(version and install), reason=_PulseReason.UPDATE_APP)
 
     def set_libmpv_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
         self._infos.set_libmpv_auto_update(is_checked, callback)
 
-    def set_libmpv_download(self, version: Optional[str], download: Callable[[], None]) -> None:
-        self._infos.set_libmpv_download(version, download)
-        self._logo.set_pulse(ok=False, reason=_PulseReason.DOWNLOAD)
+    def set_libmpv_install(
+        self, version: Optional[str] = None, install: Optional[Callable[[], None]] = None
+    ) -> None:
+        self._infos.set_libmpv_install(version, install)
+        self._logo.set_pulse(ok=not bool(version and install), reason=_PulseReason.DOWNLOAD_LIBMPV)
 
-    def set_libmpv_downloading(self) -> None:
-        self._logo.set_pulse(ok=True, reason=_PulseReason.DOWNLOAD)
+    def set_libmpv_installing(self) -> None:
+        self._logo.set_pulse(ok=True, reason=_PulseReason.DOWNLOAD_LIBMPV)
 
     def set_libmpv_version(self, version: Optional[str]) -> None:
         self._infos.set_libmpv_version(version)

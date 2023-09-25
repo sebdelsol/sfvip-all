@@ -18,7 +18,7 @@ SfvipUserProxy --remove
 [![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8.2-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-94-informational)
+![Sloc](https://img.shields.io/badge/Sloc-96-informational)
 
 ```console
 python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--mingw]

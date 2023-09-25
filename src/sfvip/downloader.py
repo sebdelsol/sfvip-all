@@ -9,8 +9,8 @@ import py7zr.callbacks
 import py7zr.exceptions
 import requests
 
-from ..ui.progress import ProgressWindow
-from ..ui.thread import ThreadUI
+from .ui.progress import ProgressWindow
+from .ui.thread import ThreadUI
 
 logger = logging.getLogger(__name__)
 
@@ -60,32 +60,42 @@ _mimeTypes_to_unpack_method = {
 }
 
 
-def _download_archive(url: str, archive: Path, set_percent: TPercentFunc) -> Optional[TUnpackFunc]:
-    with requests.get(url, stream=True, timeout=3) as response:
+def _download(url: str, path: Path, timeout: int, set_percent: TPercentFunc) -> Optional[requests.Response]:
+    with requests.get(url, stream=True, timeout=timeout) as response:
         response.raise_for_status()
-        mimetype = response.headers.get("Content-Type")
-        total_size = int(response.headers.get("Content-Length", 0))
-        if mimetype and total_size:
-            if unpack_func := _mimeTypes_to_unpack_method.get(mimetype):
-                with archive.open("wb") as f:
-                    chunk_size = 1024 * 8
-                    for i, chunk in enumerate(response.iter_content(chunk_size=chunk_size)):
-                        set_percent(100 * i * chunk_size / total_size)
-                        f.write(chunk)
-                return unpack_func
+        if total_size := int(response.headers.get("Content-Length", 0)):
+            with path.open("wb") as f:
+                chunk_size = 1024 * 128
+                for i, chunk in enumerate(response.iter_content(chunk_size=chunk_size)):
+                    set_percent(100 * i * chunk_size / total_size)
+                    f.write(chunk)
+            return response
     return None
 
 
-def download_and_unpack(url: str, archive: Path, extract_dir: Path, progress: ProgressWindow) -> bool:
+def download_and_unpack(
+    url: str, archive: Path, extract_dir: Path, timeout: int, progress: ProgressWindow
+) -> bool:
     progress.msg(f"Download {archive.name}")
     logger.info("download %s", archive.name)
     with progress.show_percent() as set_percent:
-        if unpack_func := _download_archive(url, archive, set_percent):
-            progress.msg(f"Extract {archive.name}")
-            logger.info("extract %s", archive.name)
-            unpack_func(archive, extract_dir, set_percent)
-            if not progress.destroyed:
-                return True
+        if response := _download(url, archive, timeout, set_percent):
+            if mimetype := response.headers.get("Content-Type"):
+                if unpack_func := _mimeTypes_to_unpack_method.get(mimetype):
+                    progress.msg(f"Extract {archive.name}")
+                    logger.info("extract %s", archive.name)
+                    unpack_func(archive, extract_dir, set_percent)
+                    if not progress.destroyed:
+                        return True
+    return False
+
+
+def download_to(url: str, path: Path, timeout: int, progress: ProgressWindow) -> bool:
+    progress.msg(f"Download {path.name}")
+    logger.info("download %s", path.name)
+    with progress.show_percent() as set_percent:
+        if _download(url, path, timeout, set_percent):
+            return True
     return False
 
 
@@ -95,6 +105,7 @@ def download_in_thread(title: str, download_func: Callable[[ProgressWindow], boo
         OSError,
         ValueError,
         FileNotFoundError,
+        FileExistsError,
         PermissionError,
         requests.RequestException,
         py7zr.exceptions.ArchiveError,

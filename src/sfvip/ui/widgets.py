@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from typing import Any, Collection, NamedTuple, Optional, Sequence
+from typing import Any, Callable, Collection, NamedTuple, Optional, Sequence
 
 from .style import _Style
 
@@ -60,7 +60,7 @@ class _VscrollCanvas(tk.Canvas):
     use _VAutoScrollableCanvas.frame to populate it
     """
 
-    def __init__(self, master: tk.BaseWidget, **kwargs) -> None:
+    def __init__(self, master: tk.BaseWidget, **kwargs: Any) -> None:
         super().__init__(master, bd=0, highlightthickness=0, **kwargs)  # w/o border
         # set the vertical scrollbar
         vscrollbar = _AutoScrollbar(master, orient="vertical")
@@ -183,3 +183,29 @@ class _ListView(tk.Frame):
         for column, width in enumerate(self._widths):
             self._frame_headers.columnconfigure(column, minsize=width)
             self._frame_rows.columnconfigure(column, minsize=width)
+
+
+class _CheckBox(tk.Checkbutton):
+    def __init__(self, master: tk.BaseWidget, bg: str, text: _Style, **kwargs: Any) -> None:
+        self._checked = tk.BooleanVar()
+        self._changed_callback = None
+        text_style = text.to_tk
+        kwargs.update(text_style)
+        super().__init__(
+            master,
+            bg=bg,
+            activebackground=bg,
+            activeforeground=text_style["fg"],
+            variable=self._checked,
+            command=self._on_check_changed,
+            **kwargs,
+        )
+
+    def _on_check_changed(self) -> None:
+        if self._changed_callback:
+            self._changed_callback(self._checked.get())
+
+    def set_callback(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._changed_callback = callback
+        self._checked.set(is_checked)
+        self._on_check_changed()

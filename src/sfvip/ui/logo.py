@@ -10,8 +10,9 @@ from .widgets import _Border, _get_border
 
 
 class _PulseReason(Enum):
-    PROXIES = auto()
-    DOWNLOAD = auto()
+    RESTART_FOR_PROXIES = auto()
+    UPDATE_APP = auto()
+    DOWNLOAD_LIBMPV = auto()
     UNKNOWN = auto()
 
 

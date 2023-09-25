@@ -1,6 +1,9 @@
-from build_config import Build, Environments, Templates
-from builder import Builder, Templater
+from build_config import Build, Environments, Github, Templates
+from dev.builder import Builder
+from dev.publisher import Publisher
+from dev.templater import Templater
 
 if __name__ == "__main__":
-    Builder(Build, Environments).build_all()
-    Templater(Build, Environments, Templates).create_all()
+    Builder(Build, Environments, Github).build_all()
+    Templater(Build, Environments, Templates, Github).create_all()
+    Publisher(Build, Github).show_published_version()
