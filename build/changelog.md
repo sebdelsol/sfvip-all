@@ -1,3 +1,6 @@
+## 1.3.01
+* Bump _mitmproxy\_rs_ to 0.3.11
+
 ## 1.3.0
 * _Sfvip All_ auto update option.
 * User's exit stops any installation.

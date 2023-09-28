@@ -41,11 +41,12 @@ class CleanFilesIn:
 def run_app(
     at_last_register: AltLastRegisterT, app_info: AppInfo, splash: Path, logo: Path, keep_logs: int
 ) -> None:
+    logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
     ui = UI(app_info, splash, logo)
     try:
-        logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
         exe_dir = Path(sys.argv[0]).parent
-        CleanFilesIn(exe_dir).keep(1, f"{app_info.name}*.old.exe")
+        clean_files = CleanFilesIn(exe_dir)
+        clean_files.keep(1, f"{app_info.name}*.old.exe")
         config = Config(app_info.roaming)
         player = Player(config, ui)
         app_updater = AppUpdater(app_info, config.app_requests_timeout, at_last_register)
@@ -64,7 +65,7 @@ def run_app(
             ui.quit()
 
         ui.run_in_thread(run, PlayerError, LocalproxyError)
-        CleanFilesIn(exe_dir).keep(keep_logs, f"{app_info.name} - *.log")
+        clean_files.keep(keep_logs, f"{app_info.name} - *.log")
 
     except PlayerError as err:
         ui.showinfo(f"{err}\nPlease launch Sfvip Player at least once !")
