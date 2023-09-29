@@ -3,7 +3,6 @@ import sys
 from pathlib import Path
 
 from .accounts import AccountsProxies
-from .app_config import Config
 from .app_info import AppInfo
 from .app_updater import AltLastRegisterT, AppAutoUpdater, AppUpdater
 from .player import Player
@@ -43,20 +42,22 @@ def run_app(
 ) -> None:
     logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
     ui = UI(app_info, splash, logo)
+    app_config = app_info.config
+    app_config.update()
+
     try:
         exe_dir = Path(sys.argv[0]).parent
         clean_files = CleanFilesIn(exe_dir)
         clean_files.keep(1, f"{app_info.name}*.old.exe")
-        config = Config(app_info.roaming)
-        player = Player(config, ui)
-        app_updater = AppUpdater(app_info, config.app_requests_timeout, at_last_register)
-        app_auto_updater = AppAutoUpdater(app_updater, config, ui, player.stop)
+        player = Player(app_config, ui)
+        app_updater = AppUpdater(app_info, at_last_register)
+        app_auto_updater = AppAutoUpdater(app_updater, app_config, ui, player.stop)
 
         def run() -> None:
             while player.want_to_launch():
                 ui.splash.show(player.rect)
                 accounts_proxies = AccountsProxies(app_info.roaming, ui)
-                with LocalProxies(config.all_category, accounts_proxies.upstreams) as local_proxies:
+                with LocalProxies(app_config.AllCategory, accounts_proxies.upstreams) as local_proxies:
                     with accounts_proxies.set(local_proxies.by_upstreams) as restore_accounts_proxies:
                         with app_auto_updater:
                             with player.run():

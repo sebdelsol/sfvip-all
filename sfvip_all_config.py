@@ -1,7 +1,7 @@
 from src.config_loader import ConfigLoader
 
 
-class AppConfig(ConfigLoader):
+class AppDefaultConfig(ConfigLoader):
     class App:
         auto_update: bool = True
         retry_minutes: int = 10

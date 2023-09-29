@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import IO, Any, Callable, Optional, Self
 
 from ...winapi import mutex
-from ..registry import Registry
-from ..retry import retry_if_exception
+from ..tools.retry import RetryIfException
 from ..watchers import FileWatcher, RegistryWatcher
 from .exception import PlayerError
+from .registry import Registry
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class PlayerConfigDirFile(type(Path())):
     def get_watcher(self) -> FileWatcher:
         return _PlayerConfigDir.watcher_for(self._filename)
 
-    @retry_if_exception(json.JSONDecodeError, PermissionError, timeout=1)
+    @RetryIfException(json.JSONDecodeError, PermissionError, timeout=1)
     def open_and_do(self, mode: str, do: Callable[[IO[str]], None]) -> Any:
         if self.is_file():
             with self._lock:

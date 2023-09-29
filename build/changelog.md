@@ -1,3 +1,7 @@
+## 1.3.02
+* Better ConfigLoader
+* Minor bug fixes.
+
 ## 1.3.01
 * Bump _mitmproxy\_rs_ to 0.3.11
 

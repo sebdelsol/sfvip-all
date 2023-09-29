@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from ..winapi import mutex, pids
-from .retry import retry_if_exception
+from .tools.retry import RetryIfException
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +19,12 @@ class SharedProxiesToRestore(dict[str, dict[str, str]]):
         logger.info("shared proxies to restore is '%s'", self._path)
         super().__init__()
 
-    @retry_if_exception(json.JSONDecodeError, PermissionError, FileNotFoundError, TypeError, timeout=1)
+    @RetryIfException(json.JSONDecodeError, PermissionError, FileNotFoundError, TypeError, timeout=1)
     def _load(self) -> None:
         with self._path.open("r", encoding="utf-8") as f:
             self |= json.load(f)
 
-    @retry_if_exception(json.JSONDecodeError, PermissionError, timeout=1)
+    @RetryIfException(json.JSONDecodeError, PermissionError, timeout=1)
     def _save(self) -> None:
         with self._path.open("w", encoding="utf-8") as f:
             json.dump(self, f, indent=2)

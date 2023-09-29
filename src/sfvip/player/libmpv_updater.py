@@ -2,31 +2,31 @@ import threading
 from pathlib import Path
 from typing import Self
 
-from ..app_config import Config
-from ..scheduler import Scheduler
+from ..app_info import AppConfig
+from ..tools.scheduler import Scheduler
 from ..ui import UI
-from .download.libmpv import LibmpvDll
+from .libmpv_dll import LibmpvDll
 
 
 class PlayerLibmpvAutoUpdater:
-    def __init__(self, player_path: str, config: Config, ui: UI) -> None:
-        self._libmpv_dll = LibmpvDll(Path(player_path), config.libmpv_requests_timeout)
+    def __init__(self, player_path: str, app_config: AppConfig, ui: UI) -> None:
+        self._libmpv_dll = LibmpvDll(Path(player_path), app_config.Player.Libmpv.requests_timeout)
         self._is_installing = threading.Lock()
         self._is_checking = threading.Lock()
         self._scheduler = Scheduler(ui)
-        self._config = config
+        self._app_config = app_config
         self._ui = ui
 
     def __enter__(self) -> Self:
         self._ui.set_libmpv_version(self._libmpv_dll.get_version())
-        self._ui.set_libmpv_auto_update(self._config.libmpv_auto_update, self._on_auto_update_changed)
+        self._ui.set_libmpv_auto_update(self._app_config.Player.Libmpv.auto_update, self._on_auto_update_changed)
         return self
 
     def __exit__(self, *_) -> None:
         self._scheduler.cancel_all()
 
     def _on_auto_update_changed(self, auto_update: bool) -> None:
-        self._config.libmpv_auto_update = auto_update
+        self._app_config.Player.Libmpv.auto_update = auto_update
         self._scheduler.cancel_all()
         if auto_update:
             self._scheduler.next(self._check, 0)
@@ -53,4 +53,4 @@ class PlayerLibmpvAutoUpdater:
                             self._ui.set_libmpv_install(version, install)
                 else:
                     if not cancelled.is_set():
-                        self._scheduler.next(self._check, self._config.libmpv_retry_minutes * 60)
+                        self._scheduler.next(self._check, self._app_config.Player.Libmpv.retry_minutes * 60)

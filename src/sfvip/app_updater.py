@@ -10,11 +10,10 @@ from typing import Any, Callable, NamedTuple, Optional, Self
 
 import requests
 
-from .app_config import Config
-from .app_info import AppInfo
-from .downloader import download_in_thread, download_to
-from .exe_tools import compute_md5, is64_exe
-from .scheduler import Scheduler
+from .app_info import AppConfig, AppInfo
+from .tools.downloader import download_in_thread, download_to
+from .tools.exe import compute_md5, is64_exe
+from .tools.scheduler import Scheduler
 from .ui import UI
 from .ui.progress import ProgressWindow
 
@@ -81,8 +80,8 @@ AltLastRegisterT = Callable[[Callable[[], None]], None]
 
 
 class AppUpdater:
-    def __init__(self, app_info: AppInfo, timeout: int, at_last_register: AltLastRegisterT) -> None:
-        self._timeout = timeout
+    def __init__(self, app_info: AppInfo, at_last_register: AltLastRegisterT) -> None:
+        self._timeout = app_info.config.App.requests_timeout
         self._app_info = app_info
         self._at_last_register = at_last_register
         self._latest_update = AppLastestUpdate(app_info.update_url.format(bitness=app_info.bitness))
@@ -93,7 +92,7 @@ class AppUpdater:
     def get_update(self) -> Optional[AppUpdate]:
         logger.info("check lastest %s version", self._app_info.name)
         if update := self._latest_update.get(self._timeout):
-            logger.info("%s %s found", self._app_info.name, update.version)
+            logger.info("found update %s %s", self._app_info.name, update.version)
             return update
         logger.warning("check latest %s failed", self._app_info.name)
         return None
@@ -142,7 +141,9 @@ class AppUpdater:
 
 
 class AppAutoUpdater:
-    def __init__(self, app_updater: AppUpdater, config: Config, ui: UI, stop_player: Callable[[], bool]) -> None:
+    def __init__(
+        self, app_updater: AppUpdater, config: AppConfig, ui: UI, stop_player: Callable[[], bool]
+    ) -> None:
         self._app_updater = app_updater
         self._is_installing = threading.Lock()
         self._is_checking = threading.Lock()
@@ -152,14 +153,14 @@ class AppAutoUpdater:
         self._ui = ui
 
     def __enter__(self) -> Self:
-        self._ui.set_app_auto_update(self._config.app_auto_update, self._on_auto_update_changed)
+        self._ui.set_app_auto_update(self._config.App.auto_update, self._on_auto_update_changed)
         return self
 
     def __exit__(self, *_) -> None:
         self._scheduler.cancel_all()
 
     def _on_auto_update_changed(self, auto_update: bool) -> None:
-        self._config.app_auto_update = auto_update
+        self._config.App.auto_update = auto_update
         self._scheduler.cancel_all()
         if auto_update:
             self._scheduler.next(self._check, 0)
@@ -187,4 +188,4 @@ class AppAutoUpdater:
                 else:
                     # reschedule only if we can't get an update
                     if not cancelled.is_set():
-                        self._scheduler.next(self._check, self._config.app_retry_minutes * 60)
+                        self._scheduler.next(self._check, self._config.App.retry_minutes * 60)

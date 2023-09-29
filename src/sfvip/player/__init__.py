@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from typing import Callable, Iterator, Optional
 
 from ...winapi import mutex
-from ..app_config import Config
+from ..app_info import AppConfig
 from ..ui import UI, sticky
 from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
@@ -101,9 +101,9 @@ class _Launcher:
 class Player:
     """run the player"""
 
-    def __init__(self, config: Config, ui: UI) -> None:
-        self.path = PlayerPath(config, ui).path
-        self._libmpv_updater = PlayerLibmpvAutoUpdater(self.path, config, ui)
+    def __init__(self, app_config: AppConfig, ui: UI) -> None:
+        self.path = PlayerPath(app_config, ui).path
+        self._libmpv_updater = PlayerLibmpvAutoUpdater(self.path, app_config, ui)
         self._window_watcher = _PlayerWindowWatcher()
         self._rect_loader: Optional[_PlayerRectLoader] = None
         self._process: Optional[subprocess.Popen[bytes]] = None

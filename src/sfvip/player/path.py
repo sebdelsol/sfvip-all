@@ -4,11 +4,11 @@ import winreg
 from pathlib import Path
 from typing import Any, Callable, Iterator, NamedTuple, Optional
 
-from ..app_config import Config
-from ..registry import Registry
+from ..app_info import AppConfig
 from ..ui import UI
-from .download import download_player
+from .downloader import download_player
 from .exception import PlayerError
+from .registry import Registry
 
 logger = logging.getLogger(__name__)
 
@@ -49,14 +49,14 @@ class PlayerPath:
     _name = "sfvip player"
     _pattern = "*sf*vip*player*.exe"
 
-    def __init__(self, config: Config, ui: UI) -> None:
+    def __init__(self, app_config: AppConfig, ui: UI) -> None:
         self._ui = ui
-        self._config = config
-        player = config.player_path
+        self._app_config = app_config
+        player = app_config.Player.path
         if not self._valid_exe(player):
             player = self._find_player()
         assert player
-        self.path = config.player_path = player
+        self.path = app_config.Player.path = player
         logger.info("player is '%s'", self.path)
 
     def _find_player(self) -> str:
@@ -93,5 +93,5 @@ class PlayerPath:
     def _player_from_download(self) -> Iterator[str]:
         if self._ui.askyesno(message=f"Download {PlayerPath._name.capitalize()} ?"):
             logger.info("try to download the player")
-            if player := download_player(PlayerPath._name, timeout=self._config.app_requests_timeout):
+            if player := download_player(PlayerPath._name, timeout=self._app_config.App.requests_timeout):
                 yield player

@@ -22,7 +22,7 @@ def _line_back() -> None:
     print("\033[F", end="")
 
 
-def _clear_lines(n: int) -> None:
+def clear_lines(n: int) -> None:
     for _ in range(n):
         _line_clear()
         _line_back()
@@ -75,10 +75,10 @@ class CommandMonitor:
                     n_lines = 0
                     ok = False
                 else:
-                    _clear_lines(n_lines)
+                    clear_lines(n_lines)
                     lines = textwrap.wrap(line.text, width=self._width)
                     n_lines = len(lines)
                     for text in lines:
                         print(out(text))
-            _clear_lines(n_lines)
+            clear_lines(n_lines)
         return ok and process.returncode == 0

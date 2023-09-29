@@ -7,8 +7,8 @@ from types import SimpleNamespace
 from typing import IO, Callable, Iterator, Optional
 
 from .player.config import PlayerDatabase
-from .retry import retry_if_exception
 from .shared import SharedEventTime, SharedProxiesToRestore
+from .tools.retry import RetryIfException
 from .ui import UI, Info
 
 logger = logging.getLogger(__name__)
@@ -89,7 +89,7 @@ class _Database:
             return self._database.stat().st_atime
         return float("inf")
 
-    @retry_if_exception(_NotExternallyAccessedYet, timeout=5)
+    @RetryIfException(_NotExternallyAccessedYet, timeout=5)
     def wait_being_read(self) -> None:
         if self._database.is_file():
             if self._atime <= self._accessed_by_me:
