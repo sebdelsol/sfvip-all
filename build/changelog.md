@@ -1,5 +1,10 @@
+## 1.3.03
+* Bump _Nuitka_ to 1.8.3.
+* keep cleaning ConfigLoader.
+
 ## 1.3.02
-* Better ConfigLoader
+* Add PE fixes to mitigate AV false positives.
+* Way better ConfigLoader
 * Minor bug fixes.
 
 ## 1.3.01

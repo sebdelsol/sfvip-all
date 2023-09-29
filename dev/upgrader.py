@@ -81,6 +81,7 @@ class Upgrader:
             Low(f"{'eagerly' if eager else 'only needed'} for"),
             Ok(", ".join(self._python_env.requirements)),
         )
+        self._install("pip")  # upgrade pip
         to_install: list[_Pckg] = self._install_all_packages(eager, dry_run=True)
         while True:
             n = len(to_install)

@@ -1,5 +1,7 @@
 from build_config import Build, Github
+from dev.cleaner import clean_old_build
 from dev.publisher import Publisher
 
 if __name__ == "__main__":
-    Publisher(Build, Github).publish_all()
+    if Publisher(Build, Github).publish_all():
+        clean_old_build(Build, Github)

@@ -47,7 +47,7 @@ class Publisher:
 
     def __init__(self, build: CfgBuild, github: CfgGithub) -> None:
         self.build = build
-        self.github_path = f"{github.owner}/{github.repo}"
+        self.github = github
 
     def _update_path(self, is_64: bool) -> Path:
         return Path(self.build.dir) / self.build.update.format(bitness=get_bitness_str(is_64))
@@ -60,8 +60,9 @@ class Publisher:
                 fix_pe(exe_path)
                 update_path = self._update_path(is_64)
                 with update_path.open(mode="w", encoding=Publisher.encoding) as f:
+                    github_path = f"{self.github.owner}/{self.github.repo}"
                     update = AppUpdate(
-                        url=f"https://github.com/{self.github_path}/raw/master/{quote(exe_name)}",
+                        url=f"https://github.com/{github_path}/raw/master/{quote(exe_name)}",
                         md5=compute_md5(exe_path),
                         version=self.build.version,
                     )
@@ -70,7 +71,7 @@ class Publisher:
             else:
                 print(Warn("Publish update failed"), Ok(exe_name))
 
-    def publish_all(self) -> None:
+    def publish_all(self) -> bool:
         args = Args().parse_args()
         if not args.info:
             if args.version:
@@ -80,6 +81,7 @@ class Publisher:
                     is_64 = sys.maxsize == (2**63) - 1
                 self.publish(is_64)
         self.show_published_version()
+        return not args.info
 
     def get_published(self) -> Iterator[Published]:
         if self.build.update:

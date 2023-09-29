@@ -10,6 +10,41 @@ from ..winapi import mutex
 
 logger = logging.getLogger(__name__)
 
+"""
+### How to use. ###
+# Create a subclass of ConfigLoader
+class DefaultConfig(ConfigLoader):
+    a_bool: bool = True
+
+    class Nested:
+        a_bool: Optional[bool] = None
+        a_string: str = "I'm a string"
+
+        class NestedDeeper:
+            where_am_I : str = "Uh ?"
+
+# Instantiate it to link this config to a json file
+config = DefaultConfig(Path("config.json"))
+
+# The json file is read or created with default's values
+config.update()  # "config.json" file is created since it doesn't exist
+
+# IDE autocomplete works !
+print(config.a_bool)  # True
+
+# Set an attribute. It'll be skipped if the wrong type
+config.Nested.a_bool = "I want to be true"
+print(config.Nested.a_bool)  # still None
+
+# Set an attribute. It'll be automatically saved if changed
+config.Nested.a_string = "Lorem Ipsum ..."
+config.load()
+print(config.Nested.a_string)  # "Lorem Ipsum ..."
+
+# Go deeper 
+print(config.Nested.NestedDeeper.where_am_I)  # "Uh ?"
+"""
+
 
 def _is_public_attribute(key: str, value: Any) -> bool:
     return not key.startswith("_") and not isinstance(value, (MethodType, FunctionType))
@@ -28,29 +63,29 @@ class _ProxyNamespace(SimpleNamespace):
         self._config = config
         super().__init__(**kwargs)
 
-    def __getattribute__(self, __name: str) -> Any:
-        attr = super().__getattribute__(__name)
-        if _is_public_attribute(__name, attr) and isinstance(attr, _ProxyNamespace):
-            self._config.append_path(__name)
-        return attr
+    def __getattribute__(self, key: str) -> Any:
+        attr_value = super().__getattribute__(key)
+        if _is_public_attribute(key, attr_value) and isinstance(attr_value, _ProxyNamespace):
+            self._config.append_path(key)
+        return attr_value
 
-    def __setattr__(self, __name: str, __value: Any) -> None:
+    def __setattr__(self, key: str, value: Any) -> None:
         try:
-            attr = super().__getattribute__(__name)
-            if _is_public_attribute(__name, attr) and not isinstance(attr, _ProxyNamespace):
-                self._config.setattr(__name, __value)
+            attr_value = super().__getattribute__(key)
+            if _is_public_attribute(key, attr_value) and not isinstance(attr_value, _ProxyNamespace):
+                self._config.setattr(key, value)
         except AttributeError:
-            super().__setattr__(__name, __value)
+            super().__setattr__(key, value)
 
-    def setattr(self, __name: str, __value: Any) -> None:
-        super().__setattr__(__name, __value)
+    def setattr(self, key: str, value: Any) -> None:
+        super().__setattr__(key, value)
 
-    def getattr(self, __name: str) -> Any:
-        return super().__getattribute__(__name)
+    def getattr(self, key: str) -> Any:
+        return super().__getattribute__(key)
 
-    def hasattr(self, __name: str) -> bool:
+    def hasattr(self, key: str) -> bool:
         try:
-            super().__getattribute__(__name)
+            super().__getattribute__(key)
             return True
         except AttributeError:
             return False
@@ -71,7 +106,7 @@ class ConfigLoader:
 
     __slots__ = "_inner", "_file", "_path", "_name", "_file_lock", "_base_proxy"
     _default: Optional[type] = None
-    _module_file = None
+    _module_file: Optional[str] = None
 
     def __init_subclass__(cls) -> None:
         if not cls._default:
@@ -91,61 +126,61 @@ class ConfigLoader:
         assert self._default  # not None if it has been correctly inherited
         self._to_simplenamespace(self._base_proxy, self._default)
 
-    def append_path(self, __name: str) -> None:
-        self._path.append(__name)
+    def append_path(self, key: str) -> None:
+        self._path.append(key)
 
     def clear_path(self) -> None:
         self._path = []
 
-    def __getattribute__(self, __name: str) -> Any:
-        if __name in ConfigLoader._not_in_inner:
-            return super().__getattribute__(__name)
+    def __getattribute__(self, key: str) -> Any:
+        if key in ConfigLoader._not_in_inner:
+            return super().__getattribute__(key)
         try:
-            attr = self._base_proxy.getattr(__name)
-            if _is_public_attribute(__name, attr) and isinstance(attr, _ProxyNamespace):
+            attr_value = self._base_proxy.getattr(key)
+            if _is_public_attribute(key, attr_value) and isinstance(attr_value, _ProxyNamespace):
                 self.clear_path()
-                self.append_path(__name)
+                self.append_path(key)
         except AttributeError:
-            attr = super().__getattribute__(__name)
-        return attr
+            attr_value = super().__getattribute__(key)
+        return attr_value
 
-    def __setattr__(self, __name: str, __value: Any) -> None:
-        if __name in ConfigLoader._not_in_inner:
-            super().__setattr__(__name, __value)
+    def __setattr__(self, key: str, value: Any) -> None:
+        if key in ConfigLoader._not_in_inner:
+            super().__setattr__(key, value)
         try:
-            attr = self._base_proxy.getattr(__name)
-            if _is_public_attribute(__name, attr) and not isinstance(attr, _ProxyNamespace):
+            attr_value = self._base_proxy.getattr(key)
+            if _is_public_attribute(key, attr_value) and not isinstance(attr_value, _ProxyNamespace):
                 self.clear_path()
-                self.setattr(__name, __value)
+                self.setattr(key, value)
         except AttributeError:
-            super().__setattr__(__name, __value)
+            super().__setattr__(key, value)
 
-    def setattr(self, __name: str, __value: Any) -> None:
+    def setattr(self, key: str, value: Any) -> None:
         proxy: _ProxyNamespace = self._base_proxy
-        for path in self._path:
-            if not proxy.hasattr(path):
+        for _key in self._path:
+            if not proxy.hasattr(_key):
                 break
-            proxy = proxy.getattr(path)
+            proxy = proxy.getattr(_key)
         else:
-            if proxy.hasattr(__name):
-                if proxy.getattr(__name) != __value:
-                    if is_right_type(proxy, __name, __value):
-                        logger.info("%s.%s updated", self._name, ".".join((*self._path, __name)))
-                        proxy.setattr(__name, __value)
-                        self._save()
+            if proxy.hasattr(key):
+                if proxy.getattr(key) != value:
+                    if is_right_type(proxy, key, value):
+                        logger.info("%s.%s updated", self._name, ".".join((*self._path, key)))
+                        proxy.setattr(key, value)
+                        self.save()
         self.clear_path()
 
     def _open(self, mode: str) -> IO[str]:
         with self._file_lock:
             return self._file.open(mode, encoding="utf-8")
 
-    def _save(self) -> None:
+    def save(self) -> None:
         self._file.parent.mkdir(parents=True, exist_ok=True)
         with self._open("w") as f:
             json.dump(self._dict_from(self._base_proxy), f, indent=2)
         logger.info("%s saved to '%s'", self._name, self._file)
 
-    def _load(self) -> None:
+    def load(self) -> None:
         with self._open("r") as f:
             self._map_dict_to(self._base_proxy, json.load(f))
         logger.info("%s loaded from '%s'", self._name, self._file)
@@ -153,11 +188,11 @@ class ConfigLoader:
     def update(self) -> None:
         try:
             if not self._im_newer():
-                self._load()
+                self.load()
         except (json.JSONDecodeError, FileNotFoundError):
             pass
         # always save if the config file needs some fixes
-        self._save()
+        self.save()
 
     def _im_newer(self) -> bool:
         # launched by nuitka ?
@@ -188,7 +223,7 @@ class ConfigLoader:
                     proxy.setattr(key, value)
 
     def _to_simplenamespace(self, proxy: _ProxyNamespace, obj: type) -> None:
-        """recursively turn a class into _ProxyNamespac with typing hints & default values"""
+        """recursively turn a class into _ProxyNamespace with typing hints & default values"""
         for key, value in _public_attributes(obj.__dict__):
             if isinstance(value, type):
                 proxy_value = _ProxyNamespace(self)

@@ -5,9 +5,9 @@ So you can easily **search your entire catalog**.
 <img src="ressources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-1.3.02-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.02/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.02/x64/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.3.03-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.03/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.03/x64/Sfvip%20All.zip)
 
-[<img src="https://img.shields.io/badge/Version-1.3.02-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.02/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.02/x86/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.3.03-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.03/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.03/x86/Sfvip%20All.zip)
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
@@ -20,21 +20,19 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.2-lightgrey)](https://nuitka.net/)
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.3-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-3925-informational)
+![Sloc](https://img.shields.io/badge/Sloc-3956-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment
-Create a [***Python x64***](https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe) ***environment***.  
-Call it ***.sfvip64*** or you have to set ***[`Environments.X64.path`](/build_config.py#L30)*** appropriately.
+With [***Python 3.11.5 x64***](https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe) or above.  
+Set ***[`Environments.X64.path`](/build_config.py#L30)*** appropriately if you use a different environement.  
 ```console
 python -m venv .sfvip64
 .sfvip64\scripts\activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt -r requirements.dev.txt
+python -m upgrade --x64
 ```
-
 ### Run locally
 ```console
 python -m sfvip_all
@@ -54,9 +52,14 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 <img src="ressources/VS.png">
 
 ### Build an **x86** version
-Create a [***Python x86***](https://www.python.org/ftp/python/3.11.5/python-3.11.5.exe) [***environment***](#Create-an-x64-environment).  
-Call it ***.sfvip86*** or you have to set ***[`Environments.X86.path`](/build_config.py#L34)*** appropriately.  
-You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
+With [***Python 3.11.5 x86***](https://www.python.org/ftp/python/3.11.5/python-3.11.5.exe) or above.  
+Set ***[`Environments.X86.path`](/build_config.py#L34)*** appropriately if you use a different environement.  
+```console
+python -m venv .sfvip86
+.sfvip86\scripts\activate
+python -m upgrade --x86
+```
+You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the ***x86*** version of mitmproxy:  
 ```console
 rustup target add i686-pc-windows-msvc
 ```
