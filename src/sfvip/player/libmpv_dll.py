@@ -14,8 +14,8 @@ import feedparser
 import requests
 
 from ...config_loader import ConfigLoader
-from ..tools.downloader import download_and_unpack, download_in_thread
-from ..ui.progress import ProgressWindow
+from ..tools.downloader import download_and_unpack, exceptions
+from ..ui.window import AskWindow, ProgressWindow
 from .cpu import Cpu
 
 logger = logging.getLogger(__name__)
@@ -152,16 +152,26 @@ class LibmpvDll:
             return self._download(libmpv, progress)
         return False
 
-    def download_in_thread(self, libmpv: Libmpv) -> bool:
-        def download(progress: ProgressWindow) -> bool:
+    def download(self, libmpv: Libmpv) -> bool:
+        def _download() -> bool:
             return self._download(libmpv, progress)
 
         old_dlls = _OldDlls(self._libdir)
         old_dlls.move()
-        if download_in_thread("Update Libmpv", download, create_mainloop=False):
+        progress = ProgressWindow("Update Libmpv")
+        if progress.run_in_thread(_download, *exceptions):
             return True
         old_dlls.restore()
         return False
+
+    @staticmethod
+    def ask_restart() -> bool:
+        def _ask_restart() -> bool:
+            ask_win.wait_window()
+            return bool(ask_win.ok)
+
+        ask_win = AskWindow("Install Libmpv", "Restart to install Libmpv ?", "Restart", "Cancel")
+        return bool(ask_win.run_in_thread(_ask_restart, *exceptions))
 
 
 class _OldDlls:

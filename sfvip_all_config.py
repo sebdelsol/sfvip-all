@@ -8,7 +8,7 @@ class AppDefaultConfig(ConfigLoader):
         requests_timeout: int = 3
 
     class Player:
-        path: str | None = None
+        exe: str | None = None
 
         class Libmpv:
             auto_update: bool = True

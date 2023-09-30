@@ -138,7 +138,7 @@ class AccountsProxies:
                 account.Name = names.unique(account.Name)
                 if account.HttpProxy in proxies:
                     account.HttpProxy = proxies[account.HttpProxy]
-                    logger.info("%s %s proxy to '%s'", msg, account.Name, account.HttpProxy)
+                    logger.info("%s user %s proxy to '%s'", msg, account.Name, account.HttpProxy)
             self._database.save()
 
     def _infos(self, proxies: dict[str, str]) -> tuple[Info, ...]:
@@ -149,10 +149,10 @@ class AccountsProxies:
         )
 
     @contextmanager
-    def set(self, proxies: dict[str, str]) -> Iterator[Callable[[Callable[[], None]], None]]:
+    def set(self, proxies: dict[str, str]) -> Iterator[Callable[[Callable[[int], None]], None]]:
         """set proxies, infos and provide a method to restore the proxies"""
 
-        def set_infos(player_relaunch: Optional[Callable[[], None]] = None) -> None:
+        def set_infos(player_relaunch: Optional[Callable[[int], None]] = None) -> None:
             infos = self._infos(proxies)
             self._ui.set_infos(infos, player_relaunch)
 
@@ -163,7 +163,7 @@ class AccountsProxies:
         def restore_proxies() -> None:
             self._set_proxies(proxies_to_restore.all, "restore")
 
-        def restore_after_being_read(player_relaunch: Callable[[], None]) -> None:
+        def restore_after_being_read(player_relaunch: Callable[[int], None]) -> None:
             def on_modified(last_modified: float) -> None:
                 # to prevent recursion check it occured after any modification done by any instance
                 if last_modified > self._database.shared_self_modified_time:

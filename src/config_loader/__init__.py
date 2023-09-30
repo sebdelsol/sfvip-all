@@ -64,15 +64,15 @@ class _ProxyNamespace(SimpleNamespace):
         super().__init__(**kwargs)
 
     def __getattribute__(self, key: str) -> Any:
-        attr_value = super().__getattribute__(key)
-        if _is_public_attribute(key, attr_value) and isinstance(attr_value, _ProxyNamespace):
+        attr = super().__getattribute__(key)
+        if _is_public_attribute(key, attr) and isinstance(attr, _ProxyNamespace):
             self._config.append_path(key)
-        return attr_value
+        return attr
 
     def __setattr__(self, key: str, value: Any) -> None:
         try:
-            attr_value = super().__getattribute__(key)
-            if _is_public_attribute(key, attr_value) and not isinstance(attr_value, _ProxyNamespace):
+            attr = super().__getattribute__(key)
+            if _is_public_attribute(key, attr) and not isinstance(attr, _ProxyNamespace):
                 self._config.setattr(key, value)
         except AttributeError:
             super().__setattr__(key, value)
@@ -124,7 +124,7 @@ class ConfigLoader:
         # turn all config nested classes into _ProxyNamespace instances
         self._base_proxy: _ProxyNamespace = _ProxyNamespace(self)
         assert self._default  # not None if it has been correctly inherited
-        self._to_simplenamespace(self._base_proxy, self._default)
+        self._to_proxy(self._base_proxy, self._default)
 
     def append_path(self, key: str) -> None:
         self._path.append(key)
@@ -136,20 +136,20 @@ class ConfigLoader:
         if key in ConfigLoader._not_in_inner:
             return super().__getattribute__(key)
         try:
-            attr_value = self._base_proxy.getattr(key)
-            if _is_public_attribute(key, attr_value) and isinstance(attr_value, _ProxyNamespace):
+            attr = self._base_proxy.getattr(key)
+            if _is_public_attribute(key, attr) and isinstance(attr, _ProxyNamespace):
                 self.clear_path()
                 self.append_path(key)
         except AttributeError:
-            attr_value = super().__getattribute__(key)
-        return attr_value
+            attr = super().__getattribute__(key)
+        return attr
 
     def __setattr__(self, key: str, value: Any) -> None:
         if key in ConfigLoader._not_in_inner:
             super().__setattr__(key, value)
         try:
-            attr_value = self._base_proxy.getattr(key)
-            if _is_public_attribute(key, attr_value) and not isinstance(attr_value, _ProxyNamespace):
+            attr = self._base_proxy.getattr(key)
+            if _is_public_attribute(key, attr) and not isinstance(attr, _ProxyNamespace):
                 self.clear_path()
                 self.setattr(key, value)
         except AttributeError:
@@ -177,12 +177,12 @@ class ConfigLoader:
     def save(self) -> None:
         self._file.parent.mkdir(parents=True, exist_ok=True)
         with self._open("w") as f:
-            json.dump(self._dict_from(self._base_proxy), f, indent=2)
+            json.dump(self._as_dict(self._base_proxy), f, indent=2)
         logger.info("%s saved to '%s'", self._name, self._file)
 
     def load(self) -> None:
         with self._open("r") as f:
-            self._map_dict_to(self._base_proxy, json.load(f))
+            self._from_dict(self._base_proxy, json.load(f))
         logger.info("%s loaded from '%s'", self._name, self._file)
 
     def update(self) -> None:
@@ -200,35 +200,35 @@ class ConfigLoader:
             return False
         return bool(self._module_file and getmtime(self._module_file) > getmtime(self._file))
 
-    def _dict_from(self, proxy: _ProxyNamespace) -> dict[str, Any]:
+    def _as_dict(self, proxy: _ProxyNamespace) -> dict[str, Any]:
         """recursively get a dict from _ProxyNamespace with fields validation & default values"""
         dct = {}
         for key, value in _public_attributes(proxy.__dict__):
             if proxy.hasattr(key):
                 if isinstance(value, _ProxyNamespace):
-                    dct[key] = self._dict_from(value)
+                    dct[key] = self._as_dict(value)
                 elif is_right_type(proxy, key, value):
                     dct[key] = value
                 else:
                     dct[key] = proxy.__defaults__[key]
         return dct
 
-    def _map_dict_to(self, proxy: _ProxyNamespace, dct: dict[str, Any]) -> None:
+    def _from_dict(self, proxy: _ProxyNamespace, dct: dict[str, Any]) -> None:
         """recursively map a dict to _ProxyNamespace with fields validation & default values"""
         for key, value in _public_attributes(dct):
             if proxy.hasattr(key):
                 if isinstance(value, dict) and isinstance(ns := getattr(proxy, key), _ProxyNamespace):
-                    self._map_dict_to(ns, cast(dict[str, Any], value))
+                    self._from_dict(ns, cast(dict[str, Any], value))
                 elif is_right_type(proxy, key, value):
                     proxy.setattr(key, value)
 
-    def _to_simplenamespace(self, proxy: _ProxyNamespace, obj: type) -> None:
+    def _to_proxy(self, proxy: _ProxyNamespace, obj: type) -> None:
         """recursively turn a class into _ProxyNamespace with typing hints & default values"""
         for key, value in _public_attributes(obj.__dict__):
             if isinstance(value, type):
                 proxy_value = _ProxyNamespace(self)
                 proxy.setattr(key, proxy_value)
-                self._to_simplenamespace(proxy_value, value)
+                self._to_proxy(proxy_value, value)
             else:
                 proxy.setattr(key, value)
         # set hints & defaults values

@@ -30,7 +30,6 @@ if __name__ == "__main__":
     from build_config import Build, Github, Logo, Splash
     from src.sfvip import AppInfo, run_app
 
-    # TODO ask before hard relaunch
     # for debug purpose only
     if len(sys.argv) > 1 and sys.argv[1] == "fakev0":
         Build.version = "0"

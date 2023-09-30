@@ -10,8 +10,8 @@ from ..app_info import AppConfig
 from ..ui import UI, sticky
 from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
+from .find_exe import PlayerExe
 from .libmpv_updater import PlayerLibmpvAutoUpdater
-from .path import PlayerPath
 
 logger = logging.getLogger(__name__)
 
@@ -102,8 +102,8 @@ class Player:
     """run the player"""
 
     def __init__(self, app_config: AppConfig, ui: UI) -> None:
-        self.path = PlayerPath(app_config, ui).path
-        self._libmpv_updater = PlayerLibmpvAutoUpdater(self.path, app_config, ui)
+        self.exe = PlayerExe(app_config, ui).exe
+        self._libmpv_updater = PlayerLibmpvAutoUpdater(self.exe, app_config, ui, self.relaunch)
         self._window_watcher = _PlayerWindowWatcher()
         self._rect_loader: Optional[_PlayerRectLoader] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
@@ -125,7 +125,7 @@ class Player:
 
     @contextmanager
     def run(self) -> Iterator[None]:
-        assert self.path is not None
+        assert self.exe is not None
         assert self._rect_loader is not None
 
         set_rect_lock = None
@@ -138,7 +138,7 @@ class Player:
 
         with self._libmpv_updater:
             with _PlayerConfigDirSetting().watch(self.relaunch):
-                with subprocess.Popen([self.path]) as self._process:
+                with subprocess.Popen([self.exe]) as self._process:
                     logger.info("player started")
                     self._window_watcher.start(self._process.pid)
                     if set_rect_lock:

@@ -7,5 +7,5 @@ from dev.templater import Templater
 if __name__ == "__main__":
     Builder(Build, Environments, Github).build_all()
     Templater(Build, Environments, Templates, Github).create_all()
-    Publisher(Build, Github).show_published_version()
+    Publisher(Build, Github).show_versions()
     clean_old_build(Build, Github)

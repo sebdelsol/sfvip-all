@@ -12,7 +12,7 @@ from .widgets import _Border, _get_border
 class _PulseReason(Enum):
     RESTART_FOR_PROXIES = auto()
     UPDATE_APP = auto()
-    DOWNLOAD_LIBMPV = auto()
+    UPDATE_LIBMPV = auto()
     UNKNOWN = auto()
 
 

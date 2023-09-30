@@ -1,3 +1,7 @@
+## 1.3.04
+* Ask to restart after _Libmpv_ or _Sfvip All_ update.
+* Simpler user experience for finding or downloading _Sfvip Player_.
+
 ## 1.3.03
 * Bump _Nuitka_ to 1.8.3.
 * keep cleaning ConfigLoader.

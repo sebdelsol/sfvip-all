@@ -16,7 +16,7 @@ def clean_old_build(build: CfgBuild, github: CfgGithub):
     suffixes = ".zip", ".exe"
     print(Title("Clean Old"), Low(" and ").join(Ok(f"{build.name}{suffix}") for suffix in suffixes))
     unavailable = UNAVAILABLE.format(github_path=f"{github.owner}/{github.repo}")
-    publisheds = tuple(Publisher(build, github).get_published())
+    publisheds = tuple(Publisher(build, github).get_local_versions())
     kept = False
     for file in Path(build.dir).rglob(f"{build.name}.*"):
         if file.suffix in suffixes:

@@ -9,13 +9,23 @@ import py7zr.callbacks
 import py7zr.exceptions
 import requests
 
-from ..ui.progress import ProgressWindow
-from ..ui.thread import ThreadUI
+from ..ui.window import ProgressWindow
 
 logger = logging.getLogger(__name__)
 
 TPercentFunc = Callable[[float], None]
 TUnpackFunc = Callable[[Path, Path, TPercentFunc], None]
+exceptions = (
+    tk.TclError,
+    OSError,
+    ValueError,
+    FileNotFoundError,
+    FileExistsError,
+    PermissionError,
+    requests.RequestException,
+    py7zr.exceptions.ArchiveError,
+    zipfile.BadZipFile,
+)
 
 
 def _unpack_7z(archive: Path, extract_dir: Path, set_percent: TPercentFunc) -> None:
@@ -95,26 +105,6 @@ def download_to(url: str, path: Path, timeout: int, progress: ProgressWindow) ->
     logger.info("download %s", path.name)
     with progress.show_percent() as set_percent:
         if _download(url, path, timeout, set_percent):
-            return True
-    return False
-
-
-def download_in_thread(title: str, download_func: Callable[[ProgressWindow], bool], create_mainloop: bool) -> bool:
-    exceptions = (
-        tk.TclError,
-        OSError,
-        ValueError,
-        FileNotFoundError,
-        FileExistsError,
-        PermissionError,
-        requests.RequestException,
-        py7zr.exceptions.ArchiveError,
-        zipfile.BadZipFile,
-    )
-    with ProgressWindow(title, 400, *exceptions) as progress:
-        try:
-            if ThreadUI(progress, *exceptions, create_mainloop=create_mainloop).start(download_func, progress):
+            if not progress.destroyed:
                 return True
-        except exceptions as err:
-            logger.warning("%s %s %s", title, type(err).__name__, err)
     return False

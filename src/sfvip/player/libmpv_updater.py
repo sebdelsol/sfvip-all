@@ -1,19 +1,25 @@
 import threading
 from pathlib import Path
-from typing import Self
+from typing import Callable, Self
 
 from ..app_info import AppConfig
+from ..tools.guardian import ThreadGuardian
 from ..tools.scheduler import Scheduler
 from ..ui import UI
 from .libmpv_dll import LibmpvDll
 
+# prevent execution if already in use in another thread
+_updating = ThreadGuardian()
+
 
 class PlayerLibmpvAutoUpdater:
-    def __init__(self, player_path: str, app_config: AppConfig, ui: UI) -> None:
+    def __init__(
+        self, player_path: str, app_config: AppConfig, ui: UI, relaunch_player: Callable[[int], None]
+    ) -> None:
         self._libmpv_dll = LibmpvDll(Path(player_path), app_config.Player.Libmpv.requests_timeout)
-        self._is_installing = threading.Lock()
-        self._is_checking = threading.Lock()
-        self._scheduler = Scheduler(ui)
+        self._relaunch_player = relaunch_player
+        self._installed_version = None
+        self._scheduler = Scheduler()
         self._app_config = app_config
         self._ui = ui
 
@@ -31,26 +37,37 @@ class PlayerLibmpvAutoUpdater:
         if auto_update:
             self._scheduler.next(self._check, 0)
         else:
-            self._ui.set_libmpv_install()
+            self._ui.set_libmpv_update()
 
+    @_updating
     def _check(self, cancelled: threading.Event) -> None:
-        if not (self._is_checking.locked() or self._is_installing.locked()):
-            with self._is_checking:
-                if libmpv := self._libmpv_dll.get_latest_libmpv():
-                    if not cancelled.is_set():
-                        if self._libmpv_dll.is_new(libmpv):
+        libmpv = self._libmpv_dll.get_latest_libmpv()
+        if not cancelled.is_set():
+            self._scheduler.cancel_all()
+            if libmpv:
+                version = libmpv.get_version()
 
-                            def install() -> None:
-                                with self._is_installing:
-                                    self._ui.set_libmpv_installing()
-                                    if self._libmpv_dll.download_in_thread(libmpv):  # type: ignore
-                                        self._ui.set_libmpv_version(version)
-                                    else:
-                                        self._ui.set_libmpv_install(version, install)
+                @_updating
+                def install() -> None:
+                    self._ui.set_libmpv_updating()
+                    if self._libmpv_dll.ask_restart():
+                        self._installed_version = None
+                        self._relaunch_player(0)
+                    else:
+                        self._installed_version = version
+                        self._ui.set_libmpv_update("Install", install, version)
 
-                            self._scheduler.cancel_all()
-                            version = libmpv.get_version()
-                            self._ui.set_libmpv_install(version, install)
-                else:
-                    if not cancelled.is_set():
-                        self._scheduler.next(self._check, self._app_config.Player.Libmpv.retry_minutes * 60)
+                @_updating
+                def download() -> None:
+                    self._ui.set_libmpv_updating()
+                    if self._libmpv_dll.download(libmpv):  # type: ignore
+                        install()
+                    else:
+                        self._ui.set_libmpv_update("Download", download, version)
+
+                if self._libmpv_dll.is_new(libmpv):
+                    self._ui.set_libmpv_update("Download", download, version)
+                elif self._installed_version == version:
+                    self._ui.set_libmpv_update("Install", install, version)
+            else:
+                self._scheduler.next(self._check, self._app_config.Player.Libmpv.retry_minutes * 60)

@@ -44,11 +44,11 @@ def run_app(
     ui = UI(app_info, splash, logo)
     app_config = app_info.config
     app_config.update()
+    clean_files = CleanFilesIn(Path(sys.argv[0]).parent)  # in exe dir
+    clean_files.keep(1, f"{app_info.name}*.{AppUpdater.old_exe}")
+    clean_files.keep(1, f"{app_info.name}*.{AppUpdater.update_exe}")
 
     try:
-        exe_dir = Path(sys.argv[0]).parent
-        clean_files = CleanFilesIn(exe_dir)
-        clean_files.keep(1, f"{app_info.name}*.old.exe")
         player = Player(app_config, ui)
         app_updater = AppUpdater(app_info, at_last_register)
         app_auto_updater = AppAutoUpdater(app_updater, app_config, ui, player.stop)
@@ -63,14 +63,15 @@ def run_app(
                             with player.run():
                                 restore_accounts_proxies(player.relaunch)
                                 ui.splash.hide(fade_duration_ms=1000, wait_ms=1000)
-            ui.quit()
 
         ui.run_in_thread(run, PlayerError, LocalproxyError)
-        clean_files.keep(keep_logs, f"{app_info.name} - *.log")
 
     except PlayerError as err:
-        ui.showinfo(f"{err}\nPlease launch Sfvip Player at least once !")
+        ui.showinfo(str(err))
         logger.warning(str(err))
     except LocalproxyError as err:
-        ui.showinfo(f"{err}")
+        ui.showinfo(str(err))
         logger.warning(str(err))
+    finally:
+        ui.quit()
+        clean_files.keep(keep_logs, f"{app_info.name} - *.log")

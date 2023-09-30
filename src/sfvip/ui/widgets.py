@@ -95,11 +95,20 @@ class _Button(tk.Button):
     with a mouseover color
     """
 
+    #
+    # pylint: disable=too-many-arguments
     def __init__(
-        self, master: tk.BaseWidget, bg: str, mouseover: str, border: Optional[_Border] = None, **kwargs: Any
+        self,
+        master: tk.BaseWidget,
+        bg: str,
+        mouseover: str,
+        border: Optional[_Border] = None,
+        attached_to: Optional[tk.Frame] = None,
+        **kwargs: Any
     ) -> None:
         # create a frame for the border, note: do not pack
         self._frame = tk.Frame(master, bg=bg, **(_get_border(border) if border else {}))
+        self._attached_to = attached_to if attached_to else self._frame
         active = dict(activebackground=bg, activeforeground=kwargs.get("fg", "white"))
         # create the button
         super().__init__(self._frame, bg=bg, bd=0, **active, **kwargs)
@@ -110,12 +119,18 @@ class _Button(tk.Button):
 
     def grid(self, **kwargs) -> None:
         self._frame.grid(**kwargs)
+        if self._attached_to:
+            self._attached_to.grid()
 
     def grid_remove(self) -> None:
         self._frame.grid_remove()
+        if self._attached_to:
+            self._attached_to.grid_remove()
 
     def pack(self, **kwargs) -> None:
         self._frame.pack(**kwargs)
+        if self._attached_to:
+            self._attached_to.pack()
 
 
 class _ListView(tk.Frame):
@@ -186,16 +201,14 @@ class _ListView(tk.Frame):
 
 
 class _CheckBox(tk.Checkbutton):
-    def __init__(self, master: tk.BaseWidget, bg: str, text: _Style, **kwargs: Any) -> None:
+    def __init__(self, master: tk.BaseWidget, bg: str, **kwargs: Any) -> None:
         self._checked = tk.BooleanVar()
         self._changed_callback = None
-        text_style = text.to_tk
-        kwargs.update(text_style)
         super().__init__(
             master,
             bg=bg,
             activebackground=bg,
-            activeforeground=text_style["fg"],
+            activeforeground=kwargs.get("fg", "white"),
             variable=self._checked,
             command=self._on_check_changed,
             **kwargs,

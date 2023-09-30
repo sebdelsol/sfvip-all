@@ -2,7 +2,6 @@ import logging
 import os
 import shutil
 import sys
-import tempfile
 import threading
 from functools import total_ordering
 from pathlib import Path
@@ -11,11 +10,12 @@ from typing import Any, Callable, NamedTuple, Optional, Self
 import requests
 
 from .app_info import AppConfig, AppInfo
-from .tools.downloader import download_in_thread, download_to
+from .tools.downloader import download_to, exceptions
 from .tools.exe import compute_md5, is64_exe
+from .tools.guardian import ThreadGuardian
 from .tools.scheduler import Scheduler
 from .ui import UI
-from .ui.progress import ProgressWindow
+from .ui.window import AskWindow, ProgressWindow
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +80,9 @@ AltLastRegisterT = Callable[[Callable[[], None]], None]
 
 
 class AppUpdater:
+    old_exe = "old.exe"
+    update_exe = "update.exe"
+
     def __init__(self, app_info: AppInfo, at_last_register: AltLastRegisterT) -> None:
         self._timeout = app_info.config.App.requests_timeout
         self._app_info = app_info
@@ -92,35 +95,29 @@ class AppUpdater:
     def get_update(self) -> Optional[AppUpdate]:
         logger.info("check lastest %s version", self._app_info.name)
         if update := self._latest_update.get(self._timeout):
-            logger.info("found update %s %s", self._app_info.name, update.version)
+            logger.info("found update %s %s %s", self._app_info.name, update.version, self._app_info.bitness)
             return update
         logger.warning("check latest %s failed", self._app_info.name)
         return None
 
-    def _download(self, update: AppUpdate, progress: ProgressWindow) -> bool:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_dir = Path(temp_dir)
-            temp_exe = temp_dir / f"{self._app_info.name} v{update.version} {self._app_info.bitness}"
-            if download_to(update.url, temp_exe, self._timeout, progress):
-                if is64_exe(temp_exe) == self._app_info.app_64bit:
-                    if compute_md5(temp_exe) == update.md5:
-                        if not progress.destroyed:
-                            logger.info("install %s", temp_exe.name)
-                            self._install(temp_exe)
-                            return True
-            return False
-
-    def _install(self, updated_exe: Path) -> None:
+    def _get_current_exe(self) -> Path:
         if "__compiled__" in globals():  # launched by nuitka ?
             # might have been called without its .exe extension
-            current_exe = Path(sys.argv[0]).with_suffix(".exe")
-        else:  # for debug purpose only
-            current_exe = Path(sys.argv[0]).parent / f"{self._app_info.name}.exe"
+            return Path(sys.argv[0]).with_suffix(".exe")
+        # for debug purpose only
+        return Path(sys.argv[0]).parent / f"{self._app_info.name}.exe"
+
+    def is_a_valid_update(self, exe: Path, update: AppUpdate) -> bool:
+        return exe.exists() and is64_exe(exe) == self._app_info.app_64bit and compute_md5(exe) == update.md5
+
+    def _install(self, update_exe: Path) -> None:
+        current_exe = self._get_current_exe()
         if current_exe.exists():
-            old = current_exe.with_suffix(f".{self._app_info.version}.{self._app_info.bitness}.old.exe")
-            old.unlink(missing_ok=True)
-            current_exe.rename(old)
-        shutil.copy(updated_exe, current_exe)
+            old_suffix = f".{self._app_info.version}.{self._app_info.bitness}.{AppUpdater.old_exe}"
+            old_exe = current_exe.with_suffix(old_suffix)
+            old_exe.unlink(missing_ok=True)
+            current_exe.rename(old_exe)
+        shutil.copy(update_exe, current_exe)
 
         # replace current process with the current exe
         def launch() -> None:
@@ -131,13 +128,41 @@ class AppUpdater:
         # register to be launched after all the cleanup
         self._at_last_register(launch)
 
-    def download_in_thread(self, update: AppUpdate) -> bool:
-        def download(progress: ProgressWindow) -> bool:
-            return self._download(update, progress)
+    def _download(self, update_exe: Path, update: AppUpdate) -> bool:
+        def download() -> bool:
+            if download_to(update.url, update_exe, self._timeout, progress):
+                if self.is_a_valid_update(update_exe, update):
+                    return True
+            return False
 
-        if download_in_thread(f"Update {self._app_info.name}", download, create_mainloop=False):
+        update_exe.unlink(missing_ok=True)
+        progress = ProgressWindow(f"Download {self._app_info.name}")
+        if progress.run_in_thread(download, *exceptions):
             return True
+        update_exe.unlink(missing_ok=True)
         return False
+
+    def install(self, update: AppUpdate) -> bool:
+        update_suffix = f".{update.version}.{self._app_info.bitness}.{AppUpdater.update_exe}"
+        update_exe = self._get_current_exe().with_suffix(update_suffix)
+        if not self.is_a_valid_update(update_exe, update):
+            if not self._download(update_exe, update):
+                return False
+
+        def ask_and_install() -> bool:
+            ask_win.wait_window()
+            if ask_win.ok:
+                logger.info("install %s", update_exe.name)
+                self._install(update_exe)
+            return bool(ask_win.ok)
+
+        title = f"Install {self._app_info.name}"
+        ask_win = AskWindow(title, f"Restart to install version {update.version} ?", "Restart", "Cancel")
+        return bool(ask_win.run_in_thread(ask_and_install, *exceptions))
+
+
+# prevent execution if already in use in another thread
+_updating = ThreadGuardian()
 
 
 class AppAutoUpdater:
@@ -145,10 +170,8 @@ class AppAutoUpdater:
         self, app_updater: AppUpdater, config: AppConfig, ui: UI, stop_player: Callable[[], bool]
     ) -> None:
         self._app_updater = app_updater
-        self._is_installing = threading.Lock()
-        self._is_checking = threading.Lock()
         self._stop_player = stop_player
-        self._scheduler = Scheduler(ui)
+        self._scheduler = Scheduler()
         self._config = config
         self._ui = ui
 
@@ -165,27 +188,27 @@ class AppAutoUpdater:
         if auto_update:
             self._scheduler.next(self._check, 0)
         else:
-            self._ui.set_app_install()
+            self._ui.set_app_update()
 
+    @_updating
     def _check(self, cancelled: threading.Event) -> None:
-        if not (self._is_checking.locked() or self._is_installing.locked()):
-            with self._is_checking:
-                if update := self._app_updater.get_update():
-                    if not cancelled.is_set():
-                        if self._app_updater.is_new(update):
+        update = self._app_updater.get_update()
+        if not cancelled.is_set():
+            self._scheduler.cancel_all()
+            if update:
+                if self._app_updater.is_new(update):
 
-                            def install() -> None:
-                                with self._is_installing:
-                                    assert update
-                                    self._ui.set_app_installing()
-                                    if self._app_updater.download_in_thread(update):
-                                        self._stop_player()
-                                    else:
-                                        self._ui.set_app_install(update.version, install)
+                    @_updating
+                    def install() -> None:
+                        assert update
+                        self._ui.set_app_updating()
+                        if self._app_updater.install(update):
+                            self._stop_player()
+                        else:
+                            self._ui.set_app_update("Install", install, update.version)
 
-                            self._scheduler.cancel_all()
-                            self._ui.set_app_install(update.version, install)
-                else:
-                    # reschedule only if we can't get an update
-                    if not cancelled.is_set():
-                        self._scheduler.next(self._check, self._config.App.retry_minutes * 60)
+                    self._ui.set_app_update("Download", install, update.version)
+            else:
+                # reschedule only if we can't get an update
+                if not cancelled.is_set():
+                    self._scheduler.next(self._check, self._config.App.retry_minutes * 60)

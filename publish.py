@@ -3,5 +3,7 @@ from dev.cleaner import clean_old_build
 from dev.publisher import Publisher
 
 if __name__ == "__main__":
-    if Publisher(Build, Github).publish_all():
+    publisher = Publisher(Build, Github)
+    if publisher.publish_all():
         clean_old_build(Build, Github)
+    publisher.show_versions()
