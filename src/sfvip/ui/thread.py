@@ -1,6 +1,5 @@
 import threading
 import tkinter as tk
-from contextlib import suppress
 from typing import Callable, Optional, ParamSpec, TypeVar
 
 R = TypeVar("R")
@@ -46,27 +45,24 @@ class ThreadUI:
             except self._exceptions as exception:
                 Return.exception = exception
             finally:
-                with suppress(tk.TclError):
-                    if self._create_mainloop:
-                        self._ui.after(0, self._ui.quit)
-                    else:
-                        self._ui.after(0, self._ui.destroy)
+                if self._create_mainloop:
+                    self._ui.after(0, self._ui.quit)
+                else:
+                    self._ui.after(0, self._ui.destroy)
 
         thread = threading.Thread(target=run)
         try:
             thread.start()
-            with suppress(tk.TclError):
-                if self._create_mainloop:
-                    with ThreadUI._is_main_loop_running:
-                        self._ui.mainloop()
-                else:
-                    self._ui.wait_window(self._ui)
+            if self._create_mainloop:
+                with ThreadUI._is_main_loop_running:
+                    self._ui.mainloop()
+            else:
+                self._ui.wait_window(self._ui)
         finally:
             # do not block the main thread
-            with suppress(tk.TclError):
-                while thread.is_alive():
-                    thread.join(timeout=0)
-                    self._ui.update()
+            while thread.is_alive():
+                thread.join(timeout=0)
+                self._ui.update()
             if Return.exception is not None:
                 raise Return.exception
         return Return.value

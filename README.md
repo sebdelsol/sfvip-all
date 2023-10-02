@@ -1,13 +1,13 @@
-# <img src="ressources/Sfvip%20All.png" width="40" align="center"> Sfvip All
+# <img src="resources/Sfvip%20All.png" width="40" align="center"> Sfvip All
 ***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** with a local proxy that inserts an _All_ category into _Live_, _Series_ and _Vod_.  
 So you can easily **search your entire catalog**.
 
-<img src="ressources/all.png">
+<img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-1.3.04-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.04/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.04/x64/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.3.05-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.05/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.05/x64/Sfvip%20All.zip)
 
-[<img src="https://img.shields.io/badge/Version-1.3.04-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.04/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.04/x86/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.3.05-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.05/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.05/x86/Sfvip%20All.zip)
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
@@ -22,7 +22,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.5-fbdf79)](https://www.python.org/downloads/release/python-3115/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8.3-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-4155-informational)
+![Sloc](https://img.shields.io/badge/Sloc-4196-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment
@@ -47,9 +47,9 @@ _The recommended option._
 ```console
 python -m build
 ```
-You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](ressources/.vsconfig):
+You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig):
 
-<img src="ressources/VS.png">
+<img src="resources/VS.png">
 
 ### Build an **x86** version
 With [***Python 3.11.5 x86***](https://www.python.org/ftp/python/3.11.5/python-3.11.5.exe) or above.  

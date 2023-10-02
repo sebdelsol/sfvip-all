@@ -107,8 +107,12 @@ class AppUpdater:
         # for debug purpose only
         return Path(sys.argv[0]).parent / f"{self._app_info.name}.exe"
 
-    def is_a_valid_update(self, exe: Path, update: AppUpdate) -> bool:
+    def _is_a_valid_update(self, exe: Path, update: AppUpdate) -> bool:
         return exe.exists() and is64_exe(exe) == self._app_info.app_64bit and compute_md5(exe) == update.md5
+
+    def _update_exe(self, update: AppUpdate) -> Path:
+        update_suffix = f".{update.version}.{self._app_info.bitness}.{AppUpdater.update_exe}"
+        return self._get_current_exe().with_suffix(update_suffix)
 
     def _install(self, update_exe: Path) -> None:
         current_exe = self._get_current_exe()
@@ -128,27 +132,26 @@ class AppUpdater:
         # register to be launched after all the cleanup
         self._at_last_register(launch)
 
-    def _download(self, update_exe: Path, update: AppUpdate) -> bool:
-        def download() -> bool:
+    def download_available(self, update: AppUpdate) -> bool:
+        update_exe = self._update_exe(update)
+        return self._is_a_valid_update(update_exe, update)
+
+    def download(self, update: AppUpdate) -> bool:
+        def _download() -> bool:
             if download_to(update.url, update_exe, self._timeout, progress):
-                if self.is_a_valid_update(update_exe, update):
+                if self._is_a_valid_update(update_exe, update):
                     return True
             return False
 
+        update_exe = self._update_exe(update)
         update_exe.unlink(missing_ok=True)
         progress = ProgressWindow(f"Download {self._app_info.name}")
-        if progress.run_in_thread(download, *exceptions):
+        if progress.run_in_thread(_download, *exceptions):
             return True
         update_exe.unlink(missing_ok=True)
         return False
 
     def install(self, update: AppUpdate) -> bool:
-        update_suffix = f".{update.version}.{self._app_info.bitness}.{AppUpdater.update_exe}"
-        update_exe = self._get_current_exe().with_suffix(update_suffix)
-        if not self.is_a_valid_update(update_exe, update):
-            if not self._download(update_exe, update):
-                return False
-
         def ask_and_install() -> bool:
             ask_win.wait_window()
             if ask_win.ok:
@@ -156,6 +159,7 @@ class AppUpdater:
                 self._install(update_exe)
             return bool(ask_win.ok)
 
+        update_exe = self._update_exe(update)
         title = f"Install {self._app_info.name}"
         ask_win = AskWindow(title, f"Restart to install version {update.version} ?", "Restart", "Cancel")
         return bool(ask_win.run_in_thread(ask_and_install, *exceptions))
@@ -202,12 +206,27 @@ class AppAutoUpdater:
                     def install() -> None:
                         assert update
                         self._ui.set_app_updating()
-                        if self._app_updater.install(update):
-                            self._stop_player()
+                        if self._app_updater.download_available(update):
+                            if self._app_updater.install(update):
+                                self._stop_player()
+                            else:
+                                self._ui.set_app_update("Install", install, update.version)
                         else:
-                            self._ui.set_app_update("Install", install, update.version)
+                            download()
 
-                    self._ui.set_app_update("Download", install, update.version)
+                    @_updating
+                    def download() -> None:
+                        assert update
+                        self._ui.set_app_updating()
+                        if self._app_updater.download(update):
+                            install()
+                        else:
+                            self._ui.set_app_update("Download", download, update.version)
+
+                    if self._app_updater.download_available(update):
+                        self._ui.set_app_update("Install", install, update.version)
+                    else:
+                        self._ui.set_app_update("Download", download, update.version)
             else:
                 # reschedule only if we can't get an update
                 if not cancelled.is_set():

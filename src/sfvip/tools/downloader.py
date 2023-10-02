@@ -31,11 +31,15 @@ exceptions = (
 def _unpack_7z(archive: Path, extract_dir: Path, set_percent: TPercentFunc) -> None:
     class _ExtractCallback(py7zr.callbacks.ExtractCallback):
         def __init__(self) -> None:
-            self._extracted_size = 0
+            self.extracted_size = 0
+            self.failed = False
 
         def report_end(self, _, wrote_bytes) -> None:
-            self._extracted_size += int(wrote_bytes)
-            set_percent(100 * self._extracted_size / uncompress_size)
+            self.extracted_size += int(wrote_bytes)
+            try:
+                set_percent(100 * self.extracted_size / uncompress_size)
+            except tk.TclError:
+                self.failed = True
 
         def report_start_preparation(self) -> None:
             pass
@@ -51,7 +55,10 @@ def _unpack_7z(archive: Path, extract_dir: Path, set_percent: TPercentFunc) -> N
 
     with py7zr.SevenZipFile(archive) as zf:
         uncompress_size: int = zf.archiveinfo().uncompressed  # type: ignore
-        zf.extractall(path=extract_dir, callback=_ExtractCallback())
+        callback = _ExtractCallback()
+        zf.extractall(path=extract_dir, callback=callback)
+    if callback.failed:
+        raise py7zr.exceptions.ArchiveError("progress failed")
 
 
 def _unpack_zip(archive: Path, extract_dir: Path, set_percent: TPercentFunc) -> None:

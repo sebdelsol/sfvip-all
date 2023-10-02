@@ -9,7 +9,13 @@ from urllib.parse import quote
 from .tools.color import Ok, Title, Warn
 from .tools.dist import get_dist_name
 from .tools.env import PythonEnv, get_bitness_str
-from .tools.protocols import CfgBuild, CfgEnvironments, CfgGithub, CfgTemplates
+from .tools.protocols import (
+    CfgBuild,
+    CfgEnvironments,
+    CfgGithub,
+    CfgTemplate,
+    CfgTemplates,
+)
 
 
 def _get_version_of(environments: CfgEnvironments, name: str, get_version: Callable[[PythonEnv], str]) -> str:
@@ -54,12 +60,9 @@ def _get_attr_link(obj: Any, attr: str) -> str:
 
 
 class Templater:
-    _encoding = "utf-8"
+    encoding = "utf-8"
 
-    def __init__(
-        self, build: CfgBuild, environments: CfgEnvironments, templates: CfgTemplates, github: CfgGithub
-    ) -> None:
-        self.templates = templates.all
+    def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
         python_version = _get_python_version(environments)
         dist_name32 = get_dist_name(build, is_64=False)
         dist_name64 = get_dist_name(build, is_64=True)
@@ -83,13 +86,13 @@ class Templater:
             name=build.name,
         )
 
-    def _apply_template(self, src: Path, dst: Path) -> None:
+    def create(self, template: CfgTemplate) -> None:
+        src, dst = Path(template.src), Path(template.dst)
         print(Title("Create"), Ok(dst.as_posix()))
-        template_text = src.read_text(encoding=Templater._encoding).format(**self.template_format)
+        text = src.read_text(encoding=Templater.encoding).format(**self.template_format)
         dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_text(template_text, encoding=Templater._encoding)
+        dst.write_text(text, encoding=Templater.encoding)
 
-    def create_all(self) -> None:
-        if self.templates:
-            for template in self.templates:
-                self._apply_template(Path(template.src), Path(template.dst))
+    def create_all(self, templates: CfgTemplates) -> None:
+        for template in templates.all:
+            self.create(template)

@@ -1,5 +1,4 @@
 import tkinter as tk
-from contextlib import suppress
 from pathlib import Path
 from tkinter import filedialog
 from typing import Callable, Optional, Sequence
@@ -31,12 +30,10 @@ class UI(tk.Tk):
             self._has_quit = True
             _Window.quit_all()
             ThreadUI.quit()
-            with suppress(tk.TclError):
-                super().quit()
+            super().quit()
 
     def run_in_thread(self, target: Callable[[], None], *exceptions: type[Exception]) -> None:
-        with suppress(tk.TclError):
-            ThreadUI(self, *exceptions).start(target)
+        ThreadUI(self, *exceptions).start(target)
 
     def set_infos(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[int], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)

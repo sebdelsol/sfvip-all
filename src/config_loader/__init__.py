@@ -11,7 +11,7 @@ from ..winapi import mutex
 logger = logging.getLogger(__name__)
 
 """
-### How to use. ###
+### How to use ###
 # Create a subclass of ConfigLoader
 class DefaultConfig(ConfigLoader):
     a_bool: bool = True
@@ -26,17 +26,17 @@ class DefaultConfig(ConfigLoader):
 # Instantiate it to link this config to a json file
 config = DefaultConfig(Path("config.json"))
 
-# The json file is read or created with default's values
-config.update()  # "config.json" file is created since it doesn't exist
+# The json file is read or created with default values
+config.update()  # "config.json" file is created with default values if it doesn't exist
 
-# IDE autocomplete works !
+# IDE auto complete still works !
 print(config.a_bool)  # True
 
-# Set an attribute. It'll be skipped if the wrong type
+# Set an attribute: it'll be skipped if the wrong type
 config.Nested.a_bool = "I want to be true"
 print(config.Nested.a_bool)  # still None
 
-# Set an attribute. It'll be automatically saved if changed
+# Set an attribute: it'll be automatically saved if changed
 config.Nested.a_string = "Lorem Ipsum ..."
 config.load()
 print(config.Nested.a_string)  # "Lorem Ipsum ..."

@@ -2,18 +2,23 @@ import json
 import msvcrt
 import tempfile
 from pathlib import Path
-from typing import NamedTuple, Optional
+from typing import Iterator, NamedTuple, Optional
 
 from .tools.color import Low, Ok, Title, Warn
 from .tools.columns import Columns, Justify
 from .tools.command import CommandMonitor
-from .tools.env import PythonEnv
+from .tools.env import PythonEnv, RequiredBy
 
 
 class _Pckg(NamedTuple):
     name: str
     version: str
     url: Optional[str]
+    required_by: list[str]
+
+    @property
+    def required_by_text(self) -> str:
+        return f"required by {', '.join(self.required_by)}" if self.required_by else ""
 
 
 class _PckgsColumns(Columns[_Pckg]):
@@ -33,12 +38,13 @@ class Upgrader:
 
     def __init__(self, python_env: PythonEnv) -> None:
         self._python_env = python_env
+        self._required_by = RequiredBy(python_env)
 
     def _install(self, *options: str) -> bool:
         pip = CommandMonitor(self._python_env.exe, *Upgrader._pip_install, *options)
         return pip.run(out=Title, err=Warn)
 
-    def _install_all_packages(self, eager: bool, dry_run: bool) -> list[_Pckg]:
+    def _install_all_packages(self, eager: bool, dry_run: bool) -> Iterator[_Pckg]:
         """install all requirements, return what's been installed"""
         with tempfile.TemporaryDirectory() as temp_dir:
             report_file = Path(temp_dir) / "report.json"
@@ -51,16 +57,11 @@ class Upgrader:
                 if report_file.exists():
                     with report_file.open(mode="r", encoding="utf8") as f:
                         report = json.load(f)
-                    return [
-                        _Pckg(
-                            name=data["name"],
-                            version=data["version"],
-                            url=pckg.get("download_info", {}).get("url"),
-                        )
-                        for pckg in report["install"]
-                        if (data := pckg.get("metadata"))
-                    ]
-        return []
+                    for pckg in report["install"]:
+                        name = pckg["metadata"]["name"]
+                        version = pckg["metadata"]["version"]
+                        url = pckg["download_info"]["url"]
+                        yield _Pckg(name=name, version=version, url=url, required_by=self._required_by.get(name))
 
     def _install_package(self, pckg: _Pckg) -> bool:
         """install one pckg constrained by all other pckgs' versions in the environment"""
@@ -82,7 +83,7 @@ class Upgrader:
             Ok(", ".join(self._python_env.requirements)),
         )
         self._install("pip")  # upgrade pip
-        to_install: list[_Pckg] = self._install_all_packages(eager, dry_run=True)
+        to_install: list[_Pckg] = list(self._install_all_packages(eager, dry_run=True))
         while True:
             n = len(to_install)
             if n > 0:
@@ -90,7 +91,7 @@ class Upgrader:
                 columns.add_no_column(lambda i: Title(f"{i + 1}."), Justify.RIGHT)
                 columns.add_attr_column(lambda pckg: Ok(pckg.name), Justify.LEFT)
                 columns.add_attr_column(lambda pckg: Warn(pckg.version), Justify.LEFT)
-                print()
+                columns.add_attr_column(lambda pckg: Low(pckg.required_by_text), Justify.LEFT)
                 pckg_plural = "s" if len(columns.rows) > 1 else ""
                 print(Title("Install"), Ok(f"package{pckg_plural}:"))
                 for row in columns.rows:
@@ -98,7 +99,6 @@ class Upgrader:
             else:
                 print(Title("Requirements"), Ok("up-to-date"))
                 break
-            print()
             print(*Upgrader._prompt, end="", sep="")
             match _flushed_input(Title()).lower():
                 case "e":

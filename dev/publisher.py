@@ -27,7 +27,7 @@ class Args(EnvArgs):
 
 def fix_pe(exe: Path) -> None:
     # https://practicalsecurityanalytics.com/pe-checksum/
-    print(Title("Fixing PE"), Ok(str(exe)))
+    print(Title("Fixing PE Checksum"), Ok(str(exe)))
     with pefile.PE(exe) as pe:
         pe.OPTIONAL_HEADER.CheckSum = pe.generate_checksum()  # type: ignore
     pe.write(exe)
@@ -45,6 +45,10 @@ class Published(NamedTuple):
         return Published(url=update.url, md5=update.md5, version=update.version, is_64=is_64)
 
 
+def is_exe_valid(exe: Path, md5: str, is_64: bool) -> bool:
+    return exe.exists() and compute_md5(exe) == md5 and is64_exe(exe) == is_64
+
+
 class Publisher:
     encoding = "utf-8"
     timeout = 5
@@ -54,17 +58,17 @@ class Publisher:
         self.github = github
         self.app_info = AppInfo.from_build(self.build, self.github)
 
-    def _update_path(self, is_64: bool) -> Path:
+    def _update_json(self, is_64: bool) -> Path:
         return Path(self.build.dir) / self.build.update.format(bitness=get_bitness_str(is_64))
 
     def publish(self, is_64: bool) -> None:
         if self.build.update:
             exe_name = f"{get_dist_name(self.build, is_64=is_64)}.exe"
             exe_path = Path(exe_name)
-            if exe_path.exists() and is_64 == is64_exe(exe_path):
+            if exe_path.exists() and is64_exe(exe_path) == is_64:
                 fix_pe(exe_path)
-                update_path = self._update_path(is_64)
-                with update_path.open(mode="w", encoding=Publisher.encoding) as f:
+                update_json = self._update_json(is_64)
+                with update_json.open(mode="w", encoding=Publisher.encoding) as f:
                     github_path = f"{self.github.owner}/{self.github.repo}"
                     update = AppUpdate(
                         url=f"https://github.com/{github_path}/raw/master/{quote(exe_name)}",
@@ -87,28 +91,31 @@ class Publisher:
                 self.publish(is_64)
         return not args.info
 
-    def get_local_versions(self) -> Iterator[Published]:
+    def _get_all_builds(self) -> Iterator[bool]:
         if self.build.update:
             for is_64 in True, False:
-                update_path = self._update_path(is_64)
-                if update_path.exists():
-                    with update_path.open(mode="r", encoding=Publisher.encoding) as f:
-                        if update := AppUpdate.from_json(json.load(f)):
-                            exe = Path(f"{get_dist_name_from_version(self.build, is_64, update.version)}.exe")
-                            if exe.exists() and compute_md5(exe) == update.md5:
-                                yield Published.from_update(update, is_64)
+                yield is_64
+
+    def get_local_versions(self) -> Iterator[Published]:
+        for is_64 in self._get_all_builds():
+            update_json = self._update_json(is_64)
+            if update_json.exists():
+                with update_json.open(mode="r", encoding=Publisher.encoding) as f:
+                    if update := AppUpdate.from_json(json.load(f)):
+                        exe = Path(f"{get_dist_name_from_version(self.build, is_64, update.version)}.exe")
+                        if is_exe_valid(exe, update.md5, is_64):
+                            yield Published.from_update(update, is_64)
 
     def get_online_versions(self) -> Iterator[Published]:
-        if self.build.update:
-            for is_64 in True, False:
-                latest_update = AppLastestUpdate(self.app_info.update_url.format(bitness=get_bitness_str(is_64)))
-                if update := latest_update.get(timeout=Publisher.timeout):
+        for is_64 in self._get_all_builds():
+            latest_update = AppLastestUpdate(self.app_info.update_url.format(bitness=get_bitness_str(is_64)))
+            if update := latest_update.get(timeout=Publisher.timeout):
+                with requests.get(update.url, timeout=Publisher.timeout) as response:
                     with tempfile.TemporaryDirectory() as temp_dir:
                         exe = Path(temp_dir) / "exe"
-                        with requests.get(update.url, timeout=Publisher.timeout) as response:
-                            with exe.open("wb") as f:
-                                f.write(response.content)
-                        if exe.exists() and compute_md5(exe) == update.md5:
+                        with exe.open("wb") as f:
+                            f.write(response.content)
+                        if is_exe_valid(exe, update.md5, is_64):
                             yield Published.from_update(update, is_64)
 
     def _show_versions(self, publisheds: Iterator[Published]) -> None:
@@ -119,6 +126,7 @@ class Publisher:
                 Ok(f". {self.build.name}"),
                 version_color(f"v{published.version}"),
                 Ok(get_bitness_str(published.is_64)),
+                Low(published.md5),
             )
             nothing_published = False
         if nothing_published:

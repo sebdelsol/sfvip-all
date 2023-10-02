@@ -5,7 +5,7 @@ from dev.templater import Templater
 
 class Build:
     main = "user_proxy_cmd/cmd.py"
-    ico = "ressources/Sfvip All.png"
+    ico = "resources/Sfvip All.png"
     dir = "user_proxy_cmd/build"
     name = "SfvipUserProxy"
     company = "sebdelsol"
@@ -16,12 +16,12 @@ class Build:
 
 
 class Readme:
-    src = "user_proxy_cmd/ressources/README_template.md"
+    src = "user_proxy_cmd/resources/README_template.md"
     dst = "user_proxy_cmd/README.md"
 
 
 class Post:
-    src = "user_proxy_cmd/ressources/post_template.txt"
+    src = "user_proxy_cmd/resources/post_template.txt"
     dst = f"{Build.dir}/{Build.version}/post.txt"
 
 
@@ -32,4 +32,4 @@ Environments.X86.requirements = []  # type: ignore
 
 if __name__ == "__main__":
     Builder(Build, Environments, Github).build_all()
-    Templater(Build, Environments, Templates, Github).create_all()
+    Templater(Build, Environments, Github).create_all(Templates)

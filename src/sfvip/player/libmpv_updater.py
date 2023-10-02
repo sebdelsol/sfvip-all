@@ -59,8 +59,9 @@ class PlayerLibmpvAutoUpdater:
 
                 @_updating
                 def download() -> None:
+                    assert libmpv
                     self._ui.set_libmpv_updating()
-                    if self._libmpv_dll.download(libmpv):  # type: ignore
+                    if self._libmpv_dll.download(libmpv):
                         install()
                     else:
                         self._ui.set_libmpv_update("Download", download, version)

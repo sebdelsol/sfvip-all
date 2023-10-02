@@ -1,7 +1,7 @@
 import logging
 import threading
 import tkinter as tk
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
 from tkinter import ttk
@@ -74,11 +74,10 @@ class _Window(tk.Toplevel):
 
     def destroy(self) -> None:
         with _Window._instances_lock:
-            _Window._instances.discard(self)
             if not self._destroyed:
+                _Window._instances.discard(self)
                 self._destroyed = True
-                with suppress(tk.TclError):
-                    super().destroy()
+                super().destroy()
 
     @property
     def destroyed(self) -> bool:
@@ -129,6 +128,18 @@ class _TitleBarWindow(_Window):
             widget.bind("<B1-Motion>", move_window)
 
 
+class MessageWindow(_TitleBarWindow):
+    # pylint: disable=too-many-arguments
+    def __init__(self, title: str, message: str, width: int = 400) -> None:
+        super().__init__(title=title, width=width, bg=_Theme.bg)
+        label = tk.Label(self, bg=_Ask.bg, **_Ask.text(message).to_tk)
+        ok_button = _Button(
+            self, **_Ask.button, width=10, mouseover="lime green", **_Ask.text("Ok").to_tk, command=self.destroy
+        )
+        label.pack(pady=_Ask.space)
+        ok_button.pack(padx=_Ask.button_pad, pady=_Ask.button_pad)
+
+
 class AskWindow(_TitleBarWindow):
     # pylint: disable=too-many-arguments
     def __init__(self, title: str, message: str, ok: str, cancel: str, width: int = 400) -> None:
@@ -164,18 +175,6 @@ class AskWindow(_TitleBarWindow):
         return self._ok
 
 
-class MessageWindow(_TitleBarWindow):
-    # pylint: disable=too-many-arguments
-    def __init__(self, title: str, message: str, width: int = 400) -> None:
-        super().__init__(title=title, width=width, bg=_Theme.bg)
-        label = tk.Label(self, bg=_Ask.bg, **_Ask.text(message).to_tk)
-        ok_button = _Button(
-            self, **_Ask.button, width=10, mouseover="lime green", **_Ask.text("Ok").to_tk, command=self.destroy
-        )
-        label.pack(pady=_Ask.space)
-        ok_button.pack(padx=_Ask.button_pad, pady=_Ask.button_pad)
-
-
 class ProgressMode(Enum):
     PERCENT = "determinate"
     UNKNOWN = "indeterminate"
@@ -205,7 +204,6 @@ class ProgressWindow(_TitleBarWindow):
             self._progressbar["mode"] = mode.value
             self._progress_mode = mode
 
-    # TODO uncatched TclError ??
     @contextmanager
     def show_percent(self) -> Iterator[Callable[[float], None]]:
         def set_progress(percent: float) -> None:

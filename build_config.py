@@ -1,19 +1,19 @@
 class Splash:
-    path = "ressources/Sfvip All.png"
+    path = "resources/Sfvip All.png"
 
 
 class Logo:
-    path = "ressources/logo.png"
-    src = "ressources/Sfvip All.png"
+    path = "resources/logo.png"
+    src = "resources/Sfvip All.png"
     resize = 28, 28
 
 
 class Build:
-    ico = "ressources/Sfvip All.png"
+    ico = "resources/Sfvip All.png"
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.3.04"
+    version = "1.3.05"
     dir = "build"
     nuitka_args = (
         "--include-plugin-directory={python_env}/Lib/site-packages/mitmproxy_windows",
@@ -36,12 +36,12 @@ class Environments:
 
 
 class Readme:
-    src = "ressources/README_template.md"
+    src = "resources/README_template.md"
     dst = "README.md"
 
 
 class Post:
-    src = "ressources/post_template.txt"
+    src = "resources/post_template.txt"
     dst = f"{Build.dir}/{Build.version}/post.txt"
 
 

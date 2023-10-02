@@ -1,3 +1,7 @@
+## 1.3.05
+* Handle correctly already downloaded _Sfvip All_ update.
+* Minor bug fixes.
+
 ## 1.3.04
 * Ask to restart after _Libmpv_ or _Sfvip All_ update.
 * Simpler user experience for finding or downloading _Sfvip Player_.
@@ -8,19 +12,19 @@
 
 ## 1.3.02
 * Add PE fixes to mitigate AV false positives.
-* Way better ConfigLoader
+* Enhanced ConfigLoader.
 * Minor bug fixes.
 
 ## 1.3.01
 * Bump _mitmproxy\_rs_ to 0.3.11
 
 ## 1.3.0
-* _Sfvip All_ auto update option.
+* _Sfvip All_ check update option.
 * User's exit stops any installation.
 * Bump _mitmproxy_ to 10.1.0 (rustup is no longer needed).
 
 ## 1.2.9
-* _Libmpv_ auto update option.
+* _Libmpv_ check update option.
 * Download window mimics _Sfvip Player_ UI.
 
 ## 1.2.8
@@ -29,7 +33,7 @@
 
 ## 1.2.7
 * Bump _mitmproxy_ to 10.0.0.
-* Upgrade always respects dependencies.
+* The upgrader always respects dependencies.
 * Logs for _Sfvip Player_ download. 
 
 ## 1.2.6

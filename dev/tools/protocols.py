@@ -34,14 +34,14 @@ class CfgGithub(Protocol):
     repo: str
 
 
-class _CfgTemplate(Protocol):
+class CfgTemplate(Protocol):
     src: str
     dst: str
 
 
 class CfgTemplates(Protocol):
     @property
-    def all(self) -> Sequence[_CfgTemplate]:
+    def all(self) -> Sequence[CfgTemplate]:
         ...
 
 

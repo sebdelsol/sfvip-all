@@ -60,20 +60,23 @@ class Builder:
         self.build_zip = not (args.nozip or args.nobuild)
         self.upgrade = args.upgrade
         self.build = build
-        self.nuitka_args = (
-            *(("--onefile",) if self.build_exe else ()),
-            f"--windows-file-version={build.version}",
-            f"--windows-company-name={build.company}",
-            "--mingw64" if args.mingw else "--clang",
-            f"--windows-icon-from-ico={build.ico}",
-            f"--output-filename={build.name}.exe",
-            *IncludeFiles(build.files).all,
-            "--assume-yes-for-downloads",
-            "--python-flag=-OO",
-            *build.nuitka_args,
-            "--standalone",
-            build.main,
-        )
+        if self.build_exe or self.build_zip:
+            self.nuitka_args = (
+                *(("--onefile",) if self.build_exe else ()),
+                f"--windows-file-version={build.version}",
+                f"--windows-company-name={build.company}",
+                "--mingw64" if args.mingw else "--clang",
+                f"--windows-icon-from-ico={build.ico}",
+                f"--output-filename={build.name}.exe",
+                *IncludeFiles(build.files).all,
+                "--assume-yes-for-downloads",
+                "--python-flag=-OO",
+                *build.nuitka_args,
+                "--standalone",
+                build.main,
+            )
+        else:
+            self.nuitka_args = ()
 
     def _build(self, python_env: PythonEnv) -> Iterator[str]:
         def _built(ext: Literal["exe", "zip"]) -> str:
@@ -111,7 +114,7 @@ class Builder:
                 return
         print(Warn("Build failed"), Ok(name))
 
-    def build_all(self) -> None:
+    def build_all(self) -> bool:
         builts = []
         if self.build_exe or self.build_zip:
             for python_env in self.python_envs:
@@ -123,3 +126,4 @@ class Builder:
                 build = f"{get_dist_name(self.build, is_64)}.{ext}"
                 if build not in builts:
                     print(Warn("Not built"), Ok(build))
+        return self.build_exe

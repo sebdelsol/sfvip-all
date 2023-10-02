@@ -4,6 +4,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Iterator, Optional, Sequence
 
+import pkg_resources
 from tap import Tap
 
 from .color import Low, Ok, Title, Warn
@@ -32,6 +33,10 @@ class PythonEnv:
     @property
     def path_str(self) -> str:
         return str(self._env_path.resolve())
+
+    @property
+    def site_packages(self) -> str:
+        return str((self._env_path / "lib" / "site-packages").resolve())
 
     @property
     def requirements(self) -> Sequence[str]:
@@ -109,3 +114,14 @@ class EnvArgs(Tap):
                 yield False
         else:
             yield None
+
+
+class RequiredBy:
+    def __init__(self, python_env: PythonEnv) -> None:
+        self._required_by: dict[str, list[str]] = {}
+        for pckg in pkg_resources.WorkingSet((python_env.site_packages,)):
+            for required in pckg.requires():
+                self._required_by.setdefault(required.project_name, []).append(pckg.project_name)
+
+    def get(self, name: str) -> list[str]:
+        return self._required_by.get(name.lower().replace("_", "-"), [])

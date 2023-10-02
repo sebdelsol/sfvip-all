@@ -2,7 +2,7 @@
 ***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** with a local proxy that inserts an _All_ category into _Live_, _Series_ and _Vod_.  
 So you can easily **search your entire catalog**.
 
-<img src="ressources/all.png">
+<img src="resources/all.png">
 
 # Download
 [<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe64_link}) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/{github_path}/raw/master/{archive64_link})
@@ -47,9 +47,9 @@ _The recommended option._
 ```console
 python -m build
 ```
-You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](ressources/.vsconfig):
+You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig):
 
-<img src="ressources/VS.png">
+<img src="resources/VS.png">
 
 ### Build an **x86** version
 With [***Python {py_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) or above.  
