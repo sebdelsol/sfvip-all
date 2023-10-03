@@ -31,7 +31,7 @@ Set ***{env_x64_decl}*** appropriately if you use a different environement.
 ```console
 python -m venv {env_x64}
 {env_x64}\scripts\activate
-python -m upgrade --x64
+python -m pip install -r requirements.txt -r requirements.dev.txt
 ```
 ### Run locally
 ```console
@@ -57,7 +57,7 @@ Set ***{env_x86_decl}*** appropriately if you use a different environement.
 ```console
 python -m venv {env_x86}
 {env_x86}\scripts\activate
-python -m upgrade --x86
+python -m pip install -r requirements.txt -r requirements.dev.txt -r requirements.x86.txt
 ```
 You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the ***x86*** version of mitmproxy:  
 ```console
@@ -74,4 +74,9 @@ python -m upgrade [--x86 | --x64 | --both] [--noeager]
 ### Publish an update
 ```console
 python -m publish [--x86 | --x64 | --both] [--version VERSION] [--info]
+```
+
+### Translate the UI
+```console
+python -m translate [--force-update]
 ```

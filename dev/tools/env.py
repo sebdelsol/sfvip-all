@@ -22,13 +22,12 @@ class PythonEnv:
         # use current Python bitness if not specified
         self._want_64 = sys.maxsize == (2**63) - 1 if want_64 is None else want_64
         env_cfg = environments.X64 if self._want_64 else environments.X86
-        self._env_path = Path(env_cfg.path)
-        self._exe = self._env_path / "scripts" / "python.exe"
         self._requirements = env_cfg.requirements
+        self._env_path = Path(env_cfg.path)
 
-    @property
+    @cached_property
     def exe(self) -> Path:
-        return self._exe
+        return self._env_path / "scripts" / "python.exe"
 
     @property
     def path_str(self) -> str:
@@ -43,9 +42,9 @@ class PythonEnv:
         return self._requirements
 
     def run_python(self, *args: str) -> Optional[str]:
-        if self._exe.exists():
+        if self.exe.exists():
             try:
-                return subprocess.run([self._exe, *args], check=True, capture_output=True, text=True).stdout
+                return subprocess.run([self.exe, *args], check=True, capture_output=True, text=True).stdout
             except subprocess.CalledProcessError:
                 return None
         return None
@@ -70,7 +69,7 @@ class PythonEnv:
         return PythonEnv.undefined_version
 
     def check(self) -> bool:
-        if not self._exe.exists():
+        if not self.exe.exists():
             print(Warn("No Python exe found !"))
             return False
         if self.is_64 != self._want_64:

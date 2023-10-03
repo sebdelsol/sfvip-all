@@ -14,6 +14,7 @@ import feedparser
 import requests
 
 from ...config_loader import ConfigLoader
+from ..localization import LOC
 from ..tools.downloader import download_and_unpack, exceptions
 from ..ui.window import AskWindow, ProgressWindow
 from .cpu import Cpu
@@ -147,7 +148,7 @@ class LibmpvDll:
             return False
 
     def download_latest(self, progress: ProgressWindow) -> bool:
-        progress.msg("Check latest libmpv")
+        progress.msg(LOC.CheckLastestLibmpv)
         if libmpv := self.get_latest_libmpv():
             return self._download(libmpv, progress)
         return False
@@ -158,7 +159,7 @@ class LibmpvDll:
 
         old_dlls = _OldDlls(self._libdir)
         old_dlls.move()
-        progress = ProgressWindow("Update Libmpv")
+        progress = ProgressWindow(f"{LOC.Update} Libmpv")
         if progress.run_in_thread(_download, *exceptions):
             return True
         old_dlls.restore()
@@ -170,7 +171,7 @@ class LibmpvDll:
             ask_win.wait_window()
             return bool(ask_win.ok)
 
-        ask_win = AskWindow("Install Libmpv", "Restart to install Libmpv ?", "Restart", "Cancel")
+        ask_win = AskWindow(f"{LOC.Install} Libmpv", LOC.RestartInstall % "Libmpv", LOC.Restart, LOC.Cancel)
         return bool(ask_win.run_in_thread(_ask_restart, *exceptions))
 
 

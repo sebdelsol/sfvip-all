@@ -7,6 +7,7 @@ from pathlib import Path
 from tkinter import ttk
 from typing import Any, Callable, Iterator, Optional, TypeVar
 
+from ..localization import LOC
 from .style import _Style
 from .thread import ThreadUI
 from .widgets import _Border, _Button, _get_border
@@ -17,7 +18,7 @@ Treturn = TypeVar("Treturn")
 
 class _Theme:
     text = _Style().font("Calibri").font_size(10).max_width(30).no_truncate.white
-    wait = text("Please wait").bigger(6)
+    wait = text.copy().bigger(6)
     bg = "#2A2A2A"
     border = _Border(bg="#808080", size=1, relief="")
     space = 30
@@ -65,9 +66,9 @@ class _Window(tk.Toplevel):
             for instance in cls._instances.copy():
                 instance.destroy()
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, force: bool = False, **kwargs: Any) -> None:
         with _Window._instances_lock:
-            if not _Window._has_quit:
+            if not _Window._has_quit or force:
                 super().__init__(*args, **kwargs)
                 _Window._instances.add(self)
                 self._destroyed = False
@@ -130,8 +131,8 @@ class _TitleBarWindow(_Window):
 
 class MessageWindow(_TitleBarWindow):
     # pylint: disable=too-many-arguments
-    def __init__(self, title: str, message: str, width: int = 400) -> None:
-        super().__init__(title=title, width=width, bg=_Theme.bg)
+    def __init__(self, title: str, message: str, width: int = 400, force: bool = False) -> None:
+        super().__init__(title=title, width=width, bg=_Theme.bg, force=force)
         label = tk.Label(self, bg=_Ask.bg, **_Ask.text(message).to_tk)
         ok_button = _Button(
             self, **_Ask.button, width=10, mouseover="lime green", **_Ask.text("Ok").to_tk, command=self.destroy
@@ -183,7 +184,7 @@ class ProgressMode(Enum):
 class ProgressWindow(_TitleBarWindow):
     def __init__(self, title: str, width: int = 400) -> None:
         super().__init__(title=title, width=width, bg=_Theme.bg)
-        wait = tk.Label(self, bg=_Theme.bg, **_Theme.wait.to_tk)
+        wait = tk.Label(self, bg=_Theme.bg, **_Theme.wait(LOC.PleaseWait).to_tk)
         self._label = tk.Label(self, bg=_Theme.bg, text="")
         self._progressbar = ttk.Progressbar(self, style=_get_bar_style(), orient=tk.HORIZONTAL, length=width)
         self._progress_mode = None

@@ -5,8 +5,9 @@ from pathlib import Path
 from .accounts import AccountsProxies
 from .app_info import AppInfo
 from .app_updater import AltLastRegisterT, AppAutoUpdater, AppUpdater
-from .player import Player
-from .player.exception import PlayerError
+from .localization import LOC
+from .player import Player, PLayerLanguageLoader
+from .player.exception import PlayerConfigError, PlayerError
 from .proxies import LocalProxies, LocalproxyError
 from .ui import UI
 
@@ -37,10 +38,20 @@ class CleanFilesIn:
                 self._unlink(file)
 
 
+# TODO test no sfvip player config or database
+# TODO launch with a fake database ??? or launch and kill the player ?
+
+Exceptions = PlayerError, LocalproxyError, PlayerConfigError
+
+
 def run_app(
     at_last_register: AltLastRegisterT, app_info: AppInfo, splash: Path, logo: Path, keep_logs: int
 ) -> None:
     logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
+    try:
+        LOC.set_language(PLayerLanguageLoader().language)
+    except PlayerConfigError:
+        pass
     ui = UI(app_info, splash, logo)
     app_config = app_info.config
     app_config.update()
@@ -54,6 +65,7 @@ def run_app(
         app_auto_updater = AppAutoUpdater(app_updater, app_config, ui, player.stop)
 
         def run() -> None:
+            # TODO test error here
             while player.want_to_launch():
                 ui.splash.show(player.rect)
                 accounts_proxies = AccountsProxies(app_info.roaming, ui)
@@ -64,13 +76,11 @@ def run_app(
                                 restore_accounts_proxies(player.relaunch)
                                 ui.splash.hide(fade_duration_ms=1000, wait_ms=1000)
 
-        ui.run_in_thread(run, PlayerError, LocalproxyError)
+        ui.run_in_thread(run, *Exceptions)
 
-    except PlayerError as err:
-        ui.showinfo(str(err))
-        logger.warning(str(err))
-    except LocalproxyError as err:
-        ui.showinfo(str(err))
+    except Exceptions as err:
+        # TODO remove force ??
+        ui.showinfo(str(err), force=True)
         logger.warning(str(err))
     finally:
         ui.quit()

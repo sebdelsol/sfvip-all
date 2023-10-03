@@ -2,3 +2,4 @@ __pycache__/
 .sfvip*/
 temp/
 *.log
+secret.py

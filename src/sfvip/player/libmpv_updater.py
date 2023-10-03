@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Callable, Self
 
 from ..app_info import AppConfig
+from ..localization import LOC
 from ..tools.guardian import ThreadGuardian
 from ..tools.scheduler import Scheduler
 from ..ui import UI
@@ -55,7 +56,7 @@ class PlayerLibmpvAutoUpdater:
                         self._relaunch_player(0)
                     else:
                         self._installed_version = version
-                        self._ui.set_libmpv_update("Install", install, version)
+                        self._ui.set_libmpv_update(LOC.Install, install, version)
 
                 @_updating
                 def download() -> None:
@@ -64,11 +65,11 @@ class PlayerLibmpvAutoUpdater:
                     if self._libmpv_dll.download(libmpv):
                         install()
                     else:
-                        self._ui.set_libmpv_update("Download", download, version)
+                        self._ui.set_libmpv_update(LOC.Download, download, version)
 
                 if self._libmpv_dll.is_new(libmpv):
-                    self._ui.set_libmpv_update("Download", download, version)
+                    self._ui.set_libmpv_update(LOC.Download, download, version)
                 elif self._installed_version == version:
-                    self._ui.set_libmpv_update("Install", install, version)
+                    self._ui.set_libmpv_update(LOC.Install, install, version)
             else:
                 self._scheduler.next(self._check, self._app_config.Player.Libmpv.retry_minutes * 60)

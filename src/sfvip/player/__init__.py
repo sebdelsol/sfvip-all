@@ -30,6 +30,16 @@ class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
         return self._watcher
 
 
+class PLayerLanguageLoader(PlayerConfig):
+    language_key = "Language"
+
+    @property
+    def language(self) -> Optional[str]:
+        if config := self.load():
+            return config[PLayerLanguageLoader.language_key]
+        return None
+
+
 class _PlayerRectLoader(PlayerConfig):
     """load & save the player's window position"""
 

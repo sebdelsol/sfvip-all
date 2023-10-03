@@ -6,9 +6,10 @@ from pathlib import Path
 from typing import IO, Any, Callable, Optional, Self
 
 from ...winapi import mutex
+from ..localization import LOC
 from ..tools.retry import RetryIfException
 from ..watchers import FileWatcher, RegistryWatcher
-from .exception import PlayerError
+from .exception import PlayerConfigError
 from .registry import Registry
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,8 @@ class _PlayerConfigDir:
         if path and (path := Path(path)).is_dir():
             logger.info("player config dir is '%s'", path)
             return path
-        raise PlayerError("Sfvip Player configuration directory not found")
+        raise PlayerConfigError(LOC.PlayerConfigNotFound)
+        # TODO fallback to app roaming Path(os.environ["APPDATA"]) / "SFVIP-Player"
 
     @classmethod
     @cache
@@ -56,7 +58,7 @@ class PlayerConfigDirSettingWatcher:
             try:
                 PlayerConfigDirSettingWatcher._watcher_sigleton = RegistryWatcher(*_PlayerConfigDir._from_registry)
             except FileNotFoundError as err:
-                raise PlayerError("Sfvip Player configuration directory not found") from err
+                raise PlayerConfigError(LOC.PlayerConfigNotFound) from err
         self._watcher = self._watcher_sigleton
 
     @staticmethod

@@ -9,6 +9,7 @@ import py7zr.callbacks
 import py7zr.exceptions
 import requests
 
+from ..localization import LOC
 from ..ui.window import ProgressWindow
 
 logger = logging.getLogger(__name__)
@@ -93,13 +94,13 @@ def _download(url: str, path: Path, timeout: int, set_percent: TPercentFunc) -> 
 def download_and_unpack(
     url: str, archive: Path, extract_dir: Path, timeout: int, progress: ProgressWindow
 ) -> bool:
-    progress.msg(f"Download {archive.name}")
+    progress.msg(f"{LOC.Download} {archive.name}")
     logger.info("download %s", archive.name)
     with progress.show_percent() as set_percent:
         if response := _download(url, archive, timeout, set_percent):
             if mimetype := response.headers.get("Content-Type"):
                 if unpack_func := _mimeTypes_to_unpack_method.get(mimetype):
-                    progress.msg(f"Extract {archive.name}")
+                    progress.msg(f"{LOC.Extract} {archive.name}")
                     logger.info("extract %s", archive.name)
                     unpack_func(archive, extract_dir, set_percent)
                     if not progress.destroyed:
@@ -108,7 +109,7 @@ def download_and_unpack(
 
 
 def download_to(url: str, path: Path, timeout: int, progress: ProgressWindow) -> bool:
-    progress.msg(f"Download {path.name}")
+    progress.msg(f"{LOC.Download} {path.name}")
     logger.info("download %s", path.name)
     with progress.show_percent() as set_percent:
         if _download(url, path, timeout, set_percent):

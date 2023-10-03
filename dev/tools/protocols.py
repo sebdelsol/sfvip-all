@@ -62,3 +62,11 @@ class CfgEnvironments(Protocol):
     @property
     def X64(self) -> _CfgEnvironment:
         ...
+
+
+class CfgTexts(Protocol):
+    language: str
+
+    @staticmethod
+    def as_dict() -> dict[str, str]:
+        ...

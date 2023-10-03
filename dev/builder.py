@@ -48,7 +48,12 @@ class IncludeFiles:
     @property
     def all(self) -> Iterator[str]:
         self._create_all()
-        return (f"--include-data-file={file.path}={file.path}" for file in self._files)
+        for file in self._files:
+            path = Path(file.path)
+            if path.is_dir():
+                yield f"--include-data-dir={file.path}={file.path}"
+            elif path.is_file():
+                yield f"--include-data-file={file.path}={file.path}"
 
 
 class Builder:

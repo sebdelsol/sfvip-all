@@ -2,6 +2,7 @@ import tkinter as tk
 from typing import Any, Callable, NamedTuple, Optional, Sequence
 
 from ..app_info import AppInfo
+from ..localization import LOC
 from .fx import _Fade
 from .sticky import _Offset, _StickyWindow
 from .style import _Style
@@ -50,11 +51,11 @@ class _InfoStyle:
 
 def _get_infos_headers(app_name: str) -> tuple[_Style, ...]:
     return (
-        _InfoStyle.name("User").bigger(2).bold,
+        _InfoStyle.name(LOC.User).bigger(2).bold,
         _InfoStyle.blank,
-        _InfoStyle.proxy(f"{app_name} Proxy").bigger(2).bold,
+        _InfoStyle.proxy(LOC.Proxy % app_name).bigger(2).bold,
         _InfoStyle.blank,
-        _InfoStyle.upstream("User Proxy").bigger(2).bold,
+        _InfoStyle.upstream(LOC.UserProxy).bigger(2).bold,
     )
 
 
@@ -62,14 +63,14 @@ def _get_row(info: Info) -> tuple[_Style, ...]:
     return (
         _InfoStyle.name(info.name) if info.name else _InfoStyle.name("-").grey,
         _InfoStyle.arrow if info.name else _InfoStyle.blank,
-        _InfoStyle.proxy(info.proxy) if info.proxy else _InfoStyle.stl("No Proxy").red,
+        _InfoStyle.proxy(info.proxy) if info.proxy else _InfoStyle.stl(LOC.NoProxy).red,
         _InfoStyle.arrow if info.upstream else _InfoStyle.blank,
         _InfoStyle.upstream(info.upstream) if info.upstream else _InfoStyle.stl("-").grey,
     )
 
 
 def _get_relaunch_button() -> _Style:
-    return _InfoStyle.stl("Relaunch to fix the proxies").no_truncate.white
+    return _InfoStyle.stl(LOC.RestartFixProxy).no_truncate.white
 
 
 def _get_app_version(app_info: AppInfo) -> _Style:
@@ -78,9 +79,9 @@ def _get_app_version(app_info: AppInfo) -> _Style:
 
 def _get_app_warn(app_info: AppInfo) -> _Style:
     if app_info.app_64bit != app_info.os_64bit:
-        warn = f"You should use the {app_info.os_bitness} version"
+        warn = LOC.ShouldUseVersion % app_info.os_bitness
         return _InfoStyle.app_warn(warn).red
-    warn = "Search your whole catalog"
+    warn = LOC.SearchWholeCatalog
     return _InfoStyle.app_warn(warn).lime_green
 
 
@@ -89,16 +90,16 @@ def _get_app_button_text(action: Optional[str] = None, version: Optional[str] = 
 
 
 def _get_app_auto_update() -> _Style:
-    return _InfoStyle.app("Check update").grey
+    return _InfoStyle.app(LOC.CheckUpdate).grey
 
 
 def _get_libmpv_version(version: Optional[str] = None) -> _Style:
-    version = version if version else "unknown version"
+    version = version if version else LOC.UnknownVersion
     return _InfoStyle.app(f"Libmpv {version}").grey
 
 
 def _get_libmpv_auto_update() -> _Style:
-    return _InfoStyle.app("Check update").grey
+    return _InfoStyle.app(LOC.CheckUpdate).grey
 
 
 def _get_libmpv_button_text(action: Optional[str] = None, version: Optional[str] = None) -> _Style:

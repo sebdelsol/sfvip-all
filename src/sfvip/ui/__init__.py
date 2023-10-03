@@ -72,12 +72,12 @@ class UI(tk.Tk):
     def set_libmpv_version(self, version: Optional[str]) -> None:
         self._infos.set_libmpv_version(version)
 
-    def showinfo(self, message: str) -> None:
+    def showinfo(self, message: str, force: bool = False) -> None:
         def _showinfo() -> bool:
             message_win.wait_window()
             return True
 
-        message_win = MessageWindow(self._title, message)
+        message_win = MessageWindow(self._title, message, force=force)
         message_win.run_in_thread(_showinfo)
 
     def ask(self, message: str, ok: str, cancel: str) -> Optional[bool]:

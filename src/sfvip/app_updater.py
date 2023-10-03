@@ -10,6 +10,7 @@ from typing import Any, Callable, NamedTuple, Optional, Self
 import requests
 
 from .app_info import AppConfig, AppInfo
+from .localization import LOC
 from .tools.downloader import download_to, exceptions
 from .tools.exe import compute_md5, is64_exe
 from .tools.guardian import ThreadGuardian
@@ -145,7 +146,7 @@ class AppUpdater:
 
         update_exe = self._update_exe(update)
         update_exe.unlink(missing_ok=True)
-        progress = ProgressWindow(f"Download {self._app_info.name}")
+        progress = ProgressWindow(f"{LOC.Download} {self._app_info.name}")
         if progress.run_in_thread(_download, *exceptions):
             return True
         update_exe.unlink(missing_ok=True)
@@ -160,8 +161,8 @@ class AppUpdater:
             return bool(ask_win.ok)
 
         update_exe = self._update_exe(update)
-        title = f"Install {self._app_info.name}"
-        ask_win = AskWindow(title, f"Restart to install version {update.version} ?", "Restart", "Cancel")
+        title = f"{LOC.Install} {self._app_info.name}"
+        ask_win = AskWindow(title, LOC.RestartInstall % f"v{update.version}", LOC.Restart, LOC.Cancel)
         return bool(ask_win.run_in_thread(ask_and_install, *exceptions))
 
 
@@ -210,7 +211,7 @@ class AppAutoUpdater:
                             if self._app_updater.install(update):
                                 self._stop_player()
                             else:
-                                self._ui.set_app_update("Install", install, update.version)
+                                self._ui.set_app_update(LOC.Install, install, update.version)
                         else:
                             download()
 
@@ -221,12 +222,12 @@ class AppAutoUpdater:
                         if self._app_updater.download(update):
                             install()
                         else:
-                            self._ui.set_app_update("Download", download, update.version)
+                            self._ui.set_app_update(LOC.Download, download, update.version)
 
                     if self._app_updater.download_available(update):
-                        self._ui.set_app_update("Install", install, update.version)
+                        self._ui.set_app_update(LOC.Install, install, update.version)
                     else:
-                        self._ui.set_app_update("Download", download, update.version)
+                        self._ui.set_app_update(LOC.Download, download, update.version)
             else:
                 # reschedule only if we can't get an update
                 if not cancelled.is_set():

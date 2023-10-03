@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterator, NamedTuple, Optional
 
 from ..app_info import AppConfig
+from ..localization import LOC
 from ..ui import UI
 from .downloader import download_player
 from .exception import PlayerError
@@ -57,7 +58,7 @@ class PlayerExe:
             for exe in find_exe():
                 if (path := Path(exe)).is_file() and path.match(PlayerExe._pattern):
                     return exe
-        raise PlayerError("Sfvip Player not found")
+        raise PlayerError(LOC.PlayerNotFound)
 
     def _from_config(self) -> Iterator[str]:
         if exe := self._app_config.Player.exe:
@@ -73,7 +74,7 @@ class PlayerExe:
 
     def _from_file_or_download(self) -> Iterator[str]:
         while True:
-            ok = self._ui.ask(f"{PlayerExe._name.capitalize()} not found\nFind or download it", "Find", "Download")
+            ok = self._ui.ask(f"{LOC.PlayerNotFound}\n{LOC.FindOrDownload}", LOC.Find, LOC.Download)
             if ok is None:
                 break
             if ok:

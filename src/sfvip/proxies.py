@@ -5,6 +5,7 @@ from urllib.parse import urlparse, urlsplit, urlunsplit
 from ..mitm import MitmLocalProxy, Mode, validate_upstream
 from ..mitm.addon import AllCategory, SfVipAddOn
 from ..winapi import mutex
+from .localization import LOC
 
 
 class LocalproxyError(Exception):
@@ -20,7 +21,7 @@ def _find_port(excluded_ports: set[int]) -> int:
                 if port not in excluded_ports:
                     return port
             except socket.error as e:
-                raise LocalproxyError("No socket port available !") from e
+                raise LocalproxyError(LOC.NoSocketPort) from e
 
 
 def _ports_from(urls: set[str]) -> set[int]:
@@ -76,7 +77,7 @@ class LocalProxies:
                     self._mitm_proxy.start()
                     # wait for proxies running so we're sure ports are bound
                     if not addon.wait_running(timeout=5):
-                        raise LocalproxyError("Can't start local proxies !")
+                        raise LocalproxyError(LOC.CantStartProxies)
             return self
 
     def __exit__(self, *_) -> None:

@@ -8,6 +8,10 @@ class Logo:
     resize = 28, 28
 
 
+class Translations:
+    path = "translations"
+
+
 class Build:
     ico = "resources/Sfvip All.png"
     main = "sfvip_all.py"
@@ -21,7 +25,7 @@ class Build:
         "--enable-plugin=tk-inter",
         "--disable-console",
     )
-    files = Splash, Logo
+    files = Splash, Logo, Translations
     update = "update_{bitness}.json"
 
 
