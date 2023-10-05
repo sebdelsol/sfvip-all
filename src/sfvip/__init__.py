@@ -7,7 +7,7 @@ from .app_info import AppInfo
 from .app_updater import AltLastRegisterT, AppAutoUpdater, AppUpdater
 from .localization import LOC
 from .player import Player, PLayerLanguageLoader
-from .player.exception import PlayerConfigError, PlayerError
+from .player.exception import PlayerNotFoundError
 from .proxies import LocalProxies, LocalproxyError
 from .ui import UI
 
@@ -29,7 +29,7 @@ class CleanFilesIn:
     def keep(self, keep: int, pattern: str) -> None:
         # remove empty files
         files = self._path.glob(pattern)
-        files = [file for file in files if not (file.stat().st_size == 0 and self._unlink(file))]
+        files = [file for file in files if file.stat().st_size or not self._unlink(file)]
         # keep only #keep files
         if len(files) > keep:
             logger.info("keep the last %d '%s' files", keep, pattern)
@@ -38,34 +38,24 @@ class CleanFilesIn:
                 self._unlink(file)
 
 
-# TODO test no sfvip player config or database
-# TODO launch with a fake database ??? or launch and kill the player ?
-
-Exceptions = PlayerError, LocalproxyError, PlayerConfigError
+exceptions = PlayerNotFoundError, LocalproxyError
 
 
-def run_app(
-    at_last_register: AltLastRegisterT, app_info: AppInfo, splash: Path, logo: Path, keep_logs: int
-) -> None:
+def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: int) -> None:
     logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
-    try:
-        LOC.set_language(PLayerLanguageLoader().language)
-    except PlayerConfigError:
-        pass
-    ui = UI(app_info, splash, logo)
+    LOC.set_language(PLayerLanguageLoader().language).apply_language(app_info.translations)
+    ui = UI(app_info)
     app_config = app_info.config
     app_config.update()
     clean_files = CleanFilesIn(Path(sys.argv[0]).parent)  # in exe dir
     clean_files.keep(1, f"{app_info.name}*.{AppUpdater.old_exe}")
     clean_files.keep(1, f"{app_info.name}*.{AppUpdater.update_exe}")
-
     try:
         player = Player(app_config, ui)
         app_updater = AppUpdater(app_info, at_last_register)
         app_auto_updater = AppAutoUpdater(app_updater, app_config, ui, player.stop)
 
         def run() -> None:
-            # TODO test error here
             while player.want_to_launch():
                 ui.splash.show(player.rect)
                 accounts_proxies = AccountsProxies(app_info.roaming, ui)
@@ -76,11 +66,10 @@ def run_app(
                                 restore_accounts_proxies(player.relaunch)
                                 ui.splash.hide(fade_duration_ms=1000, wait_ms=1000)
 
-        ui.run_in_thread(run, *Exceptions)
+        ui.run_in_thread(run, *exceptions)
 
-    except Exceptions as err:
-        # TODO remove force ??
-        ui.showinfo(str(err), force=True)
+    except exceptions as err:
+        ui.showinfo(str(err), force_create=True)
         logger.warning(str(err))
     finally:
         ui.quit()

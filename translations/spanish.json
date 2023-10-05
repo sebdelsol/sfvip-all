@@ -15,12 +15,11 @@
   "Find": "Buscar",
   "CheckUpdate": "Comprobar actualizaci\u00f3n",
   "UnknownVersion": "Versi\u00f3n desconocida",
-  "PleaseWait": "Espere",
+  "PleaseWait": "Espere...",
   "CheckLastestLibmpv": "Comprobar \u00faltima libmpv",
   "RestartInstall": "Reiniciar para instalar %s ?",
-  "FindOrDownload": "Buscar o descargar",
+  "FindOrDownload": "Encu\u00e9ntralo o desc\u00e1rgalo",
   "NoSocketPort": "\u00a1No hay puerto socket disponible !",
-  "CantStartProxies": "No se pueden iniciar proxies locales",
-  "PlayerConfigNotFound": "No se encuentra el directorio de configuraci\u00f3n de Sfvip Player",
-  "PlayerNotFound": "Sfvip Player no encontrado"
+  "CantStartProxies": "\u00a1No se pueden iniciar proxies locales !",
+  "NotFound": "%s no encontrado"
 }

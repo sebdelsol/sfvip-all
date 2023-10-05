@@ -1,6 +1,2 @@
-class PlayerError(Exception):
-    pass
-
-
-class PlayerConfigError(Exception):
+class PlayerNotFoundError(Exception):
     pass

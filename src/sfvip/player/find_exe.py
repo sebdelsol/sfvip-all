@@ -8,7 +8,7 @@ from ..app_info import AppConfig
 from ..localization import LOC
 from ..ui import UI
 from .downloader import download_player
-from .exception import PlayerError
+from .exception import PlayerNotFoundError
 from .registry import Registry
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class PlayerExe:
             for exe in find_exe():
                 if (path := Path(exe)).is_file() and path.match(PlayerExe._pattern):
                     return exe
-        raise PlayerError(LOC.PlayerNotFound)
+        raise PlayerNotFoundError(LOC.NotFound % PlayerExe._name.title())
 
     def _from_config(self) -> Iterator[str]:
         if exe := self._app_config.Player.exe:
@@ -74,7 +74,11 @@ class PlayerExe:
 
     def _from_file_or_download(self) -> Iterator[str]:
         while True:
-            ok = self._ui.ask(f"{LOC.PlayerNotFound}\n{LOC.FindOrDownload}", LOC.Find, LOC.Download)
+            ok = self._ui.ask(
+                f"{LOC.NotFound % PlayerExe._name.title()}\n{LOC.FindOrDownload}",
+                LOC.Find,
+                LOC.Download,
+            )
             if ok is None:
                 break
             if ok:

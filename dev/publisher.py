@@ -8,7 +8,7 @@ from urllib.parse import quote
 import pefile
 import requests
 
-from src.sfvip.app_info import AppInfo
+from src.sfvip.app_info import get_app_update_url, get_github_raw
 from src.sfvip.app_updater import AppLastestUpdate, AppUpdate
 from src.sfvip.tools.exe import compute_md5, is64_exe
 
@@ -55,8 +55,8 @@ class Publisher:
 
     def __init__(self, build: CfgBuild, github: CfgGithub) -> None:
         self.build = build
-        self.github = github
-        self.app_info = AppInfo.from_build(self.build, self.github)
+        self.github_raw = get_github_raw(github)
+        self.update_url = get_app_update_url(build, github)
 
     def _update_json(self, is_64: bool) -> Path:
         return Path(self.build.dir) / self.build.update.format(bitness=get_bitness_str(is_64))
@@ -69,9 +69,8 @@ class Publisher:
                 fix_pe(exe_path)
                 update_json = self._update_json(is_64)
                 with update_json.open(mode="w", encoding=Publisher.encoding) as f:
-                    github_path = f"{self.github.owner}/{self.github.repo}"
                     update = AppUpdate(
-                        url=f"https://github.com/{github_path}/raw/master/{quote(exe_name)}",
+                        url=f"{self.github_raw}/{quote(exe_name)}",
                         md5=compute_md5(exe_path),
                         version=self.build.version,
                     )
@@ -108,7 +107,7 @@ class Publisher:
 
     def get_online_versions(self) -> Iterator[Published]:
         for is_64 in self._get_all_builds():
-            latest_update = AppLastestUpdate(self.app_info.update_url.format(bitness=get_bitness_str(is_64)))
+            latest_update = AppLastestUpdate(self.update_url.format(bitness=get_bitness_str(is_64)))
             if update := latest_update.get(timeout=Publisher.timeout):
                 with requests.get(update.url, timeout=Publisher.timeout) as response:
                     with tempfile.TemporaryDirectory() as temp_dir:

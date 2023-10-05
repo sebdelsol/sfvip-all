@@ -66,9 +66,9 @@ class _Window(tk.Toplevel):
             for instance in cls._instances.copy():
                 instance.destroy()
 
-    def __init__(self, *args: Any, force: bool = False, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, force_create: bool = False, **kwargs: Any) -> None:
         with _Window._instances_lock:
-            if not _Window._has_quit or force:
+            if not _Window._has_quit or force_create:
                 super().__init__(*args, **kwargs)
                 _Window._instances.add(self)
                 self._destroyed = False
@@ -131,8 +131,8 @@ class _TitleBarWindow(_Window):
 
 class MessageWindow(_TitleBarWindow):
     # pylint: disable=too-many-arguments
-    def __init__(self, title: str, message: str, width: int = 400, force: bool = False) -> None:
-        super().__init__(title=title, width=width, bg=_Theme.bg, force=force)
+    def __init__(self, title: str, message: str, width: int = 400, force_create: bool = False) -> None:
+        super().__init__(title=title, width=width, bg=_Theme.bg, force_create=force_create)
         label = tk.Label(self, bg=_Ask.bg, **_Ask.text(message).to_tk)
         ok_button = _Button(
             self, **_Ask.button, width=10, mouseover="lime green", **_Ask.text("Ok").to_tk, command=self.destroy

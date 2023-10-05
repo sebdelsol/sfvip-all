@@ -15,12 +15,11 @@
   "Find": "Bul",
   "CheckUpdate": "G\u00fcncellemeyi kontrol edin",
   "UnknownVersion": "Bilinmeyen versiyon",
-  "PleaseWait": "L\u00fctfen bekleyin",
+  "PleaseWait": "L\u00fctfen bekleyin...",
   "CheckLastestLibmpv": "En son libmpv'yi kontrol edin",
-  "RestartInstall": "s'yi y\u00fcklemek i\u00e7in yeniden ba\u015flat?",
+  "RestartInstall": "s'yi y\u00fcklemek i\u00e7in yeniden ba\u015flat\u0131n m\u0131?",
   "FindOrDownload": "Bulun veya indirin",
   "NoSocketPort": "Kullan\u0131labilir soket portu yok !",
   "CantStartProxies": "Yerel proxy'ler ba\u015flat\u0131lam\u0131yor !",
-  "PlayerConfigNotFound": "Sfvip Player yap\u0131land\u0131rma dizini bulunamad\u0131",
-  "PlayerNotFound": "Sfvip Oynat\u0131c\u0131 bulunamad\u0131"
+  "NotFound": "s bulunamad\u0131"
 }

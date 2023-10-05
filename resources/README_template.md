@@ -78,5 +78,5 @@ python -m publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 
 ### Translate the UI
 ```console
-python -m translate [--force-update]
+python -m translate [--force]
 ```

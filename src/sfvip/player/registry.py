@@ -18,8 +18,8 @@ class Registry:
 
     @staticmethod
     def value_by_name(hkey: int, path: str, name: str) -> Optional[Any]:
-        with suppress(WindowsError, FileNotFoundError), winreg.OpenKey(hkey, path) as k:
-            value = winreg.QueryValueEx(k, name)[0]
+        with suppress(WindowsError, FileNotFoundError), winreg.OpenKey(hkey, path) as key:
+            value = winreg.QueryValueEx(key, name)[0]
             return value
         return None
 
@@ -32,3 +32,9 @@ class Registry:
                 if substring in name:
                     names.append(name)
         return names
+
+    @staticmethod
+    def create_key(hkey: int, path: str, name: str, value: str) -> None:
+        with suppress(WindowsError), winreg.CreateKey(hkey, path) as key:
+            with suppress(WindowsError), winreg.OpenKey(hkey, path, 0, winreg.KEY_WRITE) as key:
+                winreg.SetValueEx(key, name, 0, winreg.REG_SZ, value)

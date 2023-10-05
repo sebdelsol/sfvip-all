@@ -13,15 +13,15 @@ from .window import AskWindow, MessageWindow, _Window
 class UI(tk.Tk):
     """basic UI with a tk mainloop, the app has to run in a thread"""
 
-    def __init__(self, app_info: AppInfo, splash_path: Path, logo_path: Path) -> None:
+    def __init__(self, app_info: AppInfo) -> None:
         super().__init__()
         self.withdraw()  # we rely on some _StickyWindow instead
-        self._splash_img = tk.PhotoImage(file=splash_path)  # keep a reference for tk
+        self._splash_img = tk.PhotoImage(file=app_info.splash)  # keep a reference for tk
         self.wm_iconphoto(True, self._splash_img)
         self.splash = _SplashWindow(self._splash_img)
         self._infos = _InfosWindow(app_info)
-        self._logo = _LogoWindow(logo_path, self._infos)
-        _Window.set_logo(logo_path)
+        self._logo = _LogoWindow(app_info.logo, self._infos)
+        _Window.set_logo(app_info.logo)
         self._title = f"{app_info.name} v{app_info.version} {app_info.bitness}"
         self._has_quit = False
 
@@ -72,12 +72,12 @@ class UI(tk.Tk):
     def set_libmpv_version(self, version: Optional[str]) -> None:
         self._infos.set_libmpv_version(version)
 
-    def showinfo(self, message: str, force: bool = False) -> None:
+    def showinfo(self, message: str, force_create: bool = False) -> None:
         def _showinfo() -> bool:
             message_win.wait_window()
             return True
 
-        message_win = MessageWindow(self._title, message, force=force)
+        message_win = MessageWindow(self._title, message, force_create=force_create)
         message_win.run_in_thread(_showinfo)
 
     def ask(self, message: str, ok: str, cancel: str) -> Optional[bool]:

@@ -1,15 +1,14 @@
 import json
 import logging
+import os
 import winreg
 from functools import cache
 from pathlib import Path
 from typing import IO, Any, Callable, Optional, Self
 
 from ...winapi import mutex
-from ..localization import LOC
 from ..tools.retry import RetryIfException
 from ..watchers import FileWatcher, RegistryWatcher
-from .exception import PlayerConfigError
 from .registry import Registry
 
 logger = logging.getLogger(__name__)
@@ -19,6 +18,7 @@ class _PlayerConfigDir:
     """cached player config dir, provide system wide locks and watchers for its files"""
 
     _from_registry = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
+    _from_roaming = Path(os.environ["APPDATA"]) / "SFVIP-Player"
 
     @classmethod
     @cache
@@ -27,8 +27,9 @@ class _PlayerConfigDir:
         if path and (path := Path(path)).is_dir():
             logger.info("player config dir is '%s'", path)
             return path
-        raise PlayerConfigError(LOC.PlayerConfigNotFound)
-        # TODO fallback to app roaming Path(os.environ["APPDATA"]) / "SFVIP-Player"
+        path = _PlayerConfigDir._from_roaming
+        path.mkdir(parents=True, exist_ok=True)
+        return path
 
     @classmethod
     @cache
@@ -55,10 +56,10 @@ class PlayerConfigDirSettingWatcher:
 
     def __init__(self) -> None:
         if PlayerConfigDirSettingWatcher._watcher_sigleton is None:
-            try:
-                PlayerConfigDirSettingWatcher._watcher_sigleton = RegistryWatcher(*_PlayerConfigDir._from_registry)
-            except FileNotFoundError as err:
-                raise PlayerConfigError(LOC.PlayerConfigNotFound) from err
+            path = _PlayerConfigDir._from_registry
+            if not Registry.value_by_name(*path):
+                Registry.create_key(*path, str(_PlayerConfigDir.path()))
+            PlayerConfigDirSettingWatcher._watcher_sigleton = RegistryWatcher(*_PlayerConfigDir._from_registry)
         self._watcher = self._watcher_sigleton
 
     @staticmethod

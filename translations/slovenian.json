@@ -15,12 +15,11 @@
   "Find": "Poi\u0161\u010di",
   "CheckUpdate": "Preveri posodobitev",
   "UnknownVersion": "Neznana razli\u010dica",
-  "PleaseWait": "Prosimo, po\u010dakajte",
-  "CheckLastestLibmpv": "Preverite najnovej\u0161e libmpv",
+  "PleaseWait": "Po\u010dakajte...",
+  "CheckLastestLibmpv": "Preverite najnovej\u0161o razli\u010dico libmpv",
   "RestartInstall": "Ponovni zagon za namestitev %s ?",
   "FindOrDownload": "Poi\u0161\u010dite ali prenesite",
   "NoSocketPort": "Vti\u010dnica ni na voljo !",
   "CantStartProxies": "Ni mogo\u010de zagnati lokalnih posrednikov !",
-  "PlayerConfigNotFound": "Konfiguracijski imenik predvajalnika Sfvip ni najden",
-  "PlayerNotFound": "Sfvip Player ni bil najden"
+  "NotFound": "%s ni najden"
 }

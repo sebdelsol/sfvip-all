@@ -1,5 +1,6 @@
 ## 1.3.06
 * _Sfvip All_ is translated in every _Sfvip Player_ languages.
+* Fix bug when _Sfvip Player_ has never been launched.
 * Bump _Python_ to 3.11.6.
 
 ## 1.3.05

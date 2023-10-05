@@ -15,12 +15,11 @@
   "Find": "Find",
   "CheckUpdate": "Check update",
   "UnknownVersion": "Unknown version",
-  "PleaseWait": "Please wait",
+  "PleaseWait": "Please wait...",
   "CheckLastestLibmpv": "Check latest libmpv",
   "RestartInstall": "Restart to install %s ?",
   "FindOrDownload": "Find or download it",
   "NoSocketPort": "No socket port available !",
   "CantStartProxies": "Can't start local proxies !",
-  "PlayerConfigNotFound": "Sfvip Player configuration directory not found",
-  "PlayerNotFound": "Sfvip Player not found"
+  "NotFound": "%s not found"
 }

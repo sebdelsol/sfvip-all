@@ -3,7 +3,7 @@ import json
 import locale
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Self
 
 from .languages import all_languages, code_to_languages, languages_typo
 from .texts import Texts
@@ -21,25 +21,23 @@ class _LOC(Texts):
     encoding = "utf-8"
 
     def __init__(self) -> None:
-        lang, country = get_windows_language().split("_")
-        language = code_to_languages.get(lang)
+        lang_code, country_code = get_windows_language().split("_")
+        language = code_to_languages.get(lang_code)
         if not language:
-            language = code_to_languages.get(country)
+            language = code_to_languages.get(country_code)
             if not language:
                 language = Texts.language
         self._language = language
-        self._apply_language()
 
-    def set_language(self, language: Optional[str]) -> None:
+    def set_language(self, language: Optional[str]) -> Self:
         if language:
             language = languages_typo.get(language.lower(), language.lower())
             if language in all_languages:
                 self._language = language
-                self._apply_language()
+        return self
 
-    def _apply_language(self) -> None:
-        assert self._language
-        translation_json = (Path("translations") / self._language).with_suffix(".json")
+    def apply_language(self, translations: Path) -> None:
+        translation_json = translations / f"{self._language}.json"
         if translation_json.exists():
             try:
                 with translation_json.open("r", encoding=_LOC.encoding) as f:
@@ -47,8 +45,10 @@ class _LOC(Texts):
                 logger.info("%s translation loaded", self._language)
                 for key, value in translation.items():
                     setattr(_LOC, key, value)
+                return
             except json.JSONDecodeError:
-                logger.warning("can't load %s translation", self._language)
+                pass
+        logger.warning("can't load %s translation", self._language)
 
 
 LOC = _LOC()

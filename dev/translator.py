@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Optional
 
 from deep_translator import DeeplTranslator, GoogleTranslator
-from deep_translator.base import BaseTranslator
 from tap import Tap
 
 from secret import DEEPL_KEY
@@ -12,63 +11,77 @@ from secret import DEEPL_KEY
 from .tools.color import Low, Ok, Title, Warn
 from .tools.protocols import CfgFile, CfgTexts
 
-deepl_kwargs = dict(api_key=DEEPL_KEY, use_free_api=True)
-
 
 class Args(Tap):
-    force_update: bool = False  # force to update translations
+    force: bool = False  # force to update translations
+    language: str = ""  # language to update, all by default
+
+
+deepl_kwargs = dict(api_key=DEEPL_KEY, use_free_api=True)
+deepl_supported_langs = DeeplTranslator(**deepl_kwargs).get_supported_languages()  # type: ignore
 
 
 class Translator:
     separator = "\n"
+    prefix = "- "
 
-    def __init__(self, translator: BaseTranslator) -> None:
-        self.translator = translator
+    def __init__(self, source: str, target: str) -> None:
+        """prefer DeepL if available"""
+        if source in deepl_supported_langs and target in deepl_supported_langs:
+            self.translator = DeeplTranslator(source, target, **deepl_kwargs)  # type: ignore
+        else:
+            self.translator = GoogleTranslator(source, target)
+
+    @property
+    def name(self) -> str:
+        return self.translator.__class__.__name__
 
     def translate(self, *texts: str) -> Optional[list[str]]:
-        to_translate = self.separator.join(f"- {text}" for text in texts)
-        translated: str = self.translator.translate(to_translate)
-        if translated:
-            translated_texts = [text[2:] for text in translated.split(self.separator)]
-            if len(translated_texts) == len(texts):
-                return translated_texts
+        """
+        translate all texts as a whole to give context
+        add a prefix to all textes keep Capitalization
+        """
+        to_translate = Translator.separator.join(f"{Translator.prefix}{text}" for text in texts)
+        translation: str = self.translator.translate(to_translate)
+        if translation:
+            prefix_len = len(Translator.prefix)
+            translations = [text[prefix_len:] for text in translation.split(Translator.separator)]
+            if len(translations) == len(texts):
+                return translations
         return None
 
 
-def get_class_mtime(obj: type) -> float:
-    module_file = sys.modules[obj.__module__].__file__
-    assert module_file
-    return Path(module_file).stat().st_mtime
+class IsNewer:
+    def __init__(self, obj: type) -> None:
+        module_file = sys.modules[obj.__module__].__file__
+        assert module_file
+        self.obj_mtime = Path(module_file).stat().st_mtime
+
+    def than(self, file: Path) -> bool:
+        return not file.exists() or file.stat().st_mtime < self.obj_mtime
 
 
 def translate(texts: CfgTexts, all_languages: tuple[str, ...], translation_dir: CfgFile) -> None:
-    args = Args().parse_args()
-    supported_langs = DeeplTranslator(**deepl_kwargs).get_supported_languages()  # type: ignore
     assert isinstance(texts, type)
-    texts_mtime = get_class_mtime(texts)
-    for target_language in all_languages:
-        to_translate = texts.as_dict().values()
-
-        _json = (Path(translation_dir.path) / target_language).with_suffix(".json")
-        if args.force_update or not _json.exists() or _json.stat().st_mtime < texts_mtime:
+    is_newer_texts = IsNewer(texts)
+    args = Args().parse_args()
+    languages = [args.language] if args.language and args.language in all_languages else all_languages
+    for target_language in languages:
+        json_file = Path(translation_dir.path) / f"{target_language}.json"
+        if args.force or is_newer_texts.than(json_file):
+            to_translate = texts.as_dict().values()
             if target_language == texts.language:
-                translated = to_translate
-                translator_name = "No translator"
+                translation = to_translate
+                name = "No translator"
             else:
-                translator_kwargs = dict(source=texts.language, target=target_language)
-                translator = (
-                    DeeplTranslator(**translator_kwargs, **deepl_kwargs)  # type: ignore
-                    if texts.language in supported_langs and target_language in supported_langs
-                    else GoogleTranslator(**translator_kwargs)  # type: ignore
-                )
-                translator_name = translator.__class__.__name__
-                translated = Translator(translator).translate(*to_translate)
-            if translated:
-                print(Title("Translate to"), Ok(target_language), Low(translator_name))
-                translation = dict(zip(texts.as_dict(), translated))
-                with _json.open("w", encoding="utf-8") as f:
-                    json.dump(translation, f, indent=2)
+                translator = Translator(texts.language, target_language)
+                translation = translator.translate(*to_translate)
+                name = translator.name
+            if translation:
+                print(Title("Translate to"), Ok(target_language), Low(name))
+                with json_file.open("w", encoding="utf-8") as f:
+                    json.dump(dict(zip(texts.as_dict(), translation)), f, indent=2)
             else:
-                print(Warn("No translation for"), Ok(target_language), Low(translator_name))
+                print(Warn("Translation failed for"), Ok(target_language), Low(name))
         else:
             print(Warn("Already translated to"), Ok(target_language))

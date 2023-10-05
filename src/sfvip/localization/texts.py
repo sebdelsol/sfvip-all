@@ -20,14 +20,13 @@ class Texts(NamedTuple):
     Find: str = "Find"
     CheckUpdate: str = "Check update"
     UnknownVersion: str = "Unknown version"
-    PleaseWait: str = "Please wait"
+    PleaseWait: str = "Please wait..."
     CheckLastestLibmpv: str = "Check latest libmpv"
     RestartInstall: str = "Restart to install %s ?"
     FindOrDownload: str = "Find or download it"
     NoSocketPort: str = "No socket port available !"
     CantStartProxies: str = "Can't start local proxies !"
-    PlayerConfigNotFound: str = "Sfvip Player configuration directory not found"
-    PlayerNotFound: str = "Sfvip Player not found"
+    NotFound: str = "%s not found"
 
     @staticmethod
     def as_dict() -> dict[str, str]:

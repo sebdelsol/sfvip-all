@@ -4,6 +4,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
+    # done before everything else is imported
+    # to be sure it'll be the very last to execute
     import atexit
     from typing import Callable
 
@@ -19,15 +21,13 @@ if __name__ == "__main__":
         def register(self, last_action: Callable[[], None]) -> None:
             self._last_action = last_action
 
-    # done before everything else is imported
-    # to be sure it'll be the very last to execute
     at_very_last = AtVeryLast()
 
     # reduce what's imported in the proxies process
     import sys
     from pathlib import Path
 
-    from build_config import Build, Github, Logo, Splash
+    from build_config import Build, Github
     from src.sfvip import AppInfo, run_app
 
     # for debug purpose only
@@ -35,12 +35,9 @@ if __name__ == "__main__":
         Build.version = "0"
 
     logger.info("main process started")
-    app_dir = Path(__file__).parent
     run_app(
         at_very_last.register,
-        AppInfo.from_build(Build, Github),
-        app_dir / Splash.path,
-        app_dir / Logo.path,
+        AppInfo.from_build(Build, Github, app_dir=Path(__file__).parent),
         keep_logs=6,
     )
     logger.info("main process exit")
