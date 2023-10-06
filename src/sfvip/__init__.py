@@ -38,18 +38,18 @@ class CleanFilesIn:
                 self._unlink(file)
 
 
-exceptions = PlayerNotFoundError, LocalproxyError
-
-
 def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: int) -> None:
+    exceptions = PlayerNotFoundError, LocalproxyError
+
     logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
     LOC.set_language(PLayerLanguageLoader().language).apply_language(app_info.translations)
     ui = UI(app_info)
-    app_config = app_info.config
-    app_config.update()
+    app_config = app_info.config.update()
+
     clean_files = CleanFilesIn(Path(sys.argv[0]).parent)  # in exe dir
     clean_files.keep(1, f"{app_info.name}*.{AppUpdater.old_exe}")
     clean_files.keep(1, f"{app_info.name}*.{AppUpdater.update_exe}")
+
     try:
         player = Player(app_config, ui)
         app_updater = AppUpdater(app_info, at_last_register)

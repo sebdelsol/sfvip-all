@@ -3,7 +3,7 @@ from dev.tools.env import EnvArgs
 from dev.upgrader import Upgrader
 
 
-# comments are automatically turned into argparse help
+# comments are turned into argparse help
 class Args(EnvArgs):
     noeager: bool = False  # upgrade only needed packages
 

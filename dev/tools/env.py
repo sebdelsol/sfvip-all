@@ -93,6 +93,7 @@ class PythonEnv:
         )
 
 
+# comments are turned into argparse help
 class EnvArgs(Tap):
     both: bool = False  # x64 and x86 versions
     x86: bool = False  # x86 version

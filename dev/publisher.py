@@ -19,7 +19,7 @@ from .tools.env import EnvArgs, get_bitness_str
 from .tools.protocols import CfgBuild, CfgGithub
 
 
-# comments are automatically turned into argparse help
+# comments are turned into argparse help
 class Args(EnvArgs):
     version: str = ""  # version published (current if none)
     info: bool = False  # info about what's been published locally and on github

@@ -19,7 +19,7 @@ from .tools.protocols import (
 from .upgrader import Upgrader
 
 
-# comments are automatically turned into argparse help
+# comments are turned into argparse help
 class Args(EnvArgs):
     nobuild: bool = False  # update readme and post only
     readme: bool = False  # update readme and post only

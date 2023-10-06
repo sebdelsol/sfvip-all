@@ -1,8 +1,11 @@
+## 1.3.09
+* Enhance UI presentation.
+
 ## 1.3.08
-* A better translator for better translations.
+* Enhance translator for better translations.
 
 ## 1.3.07
-* Fix translation bug for non latin alphabet languages.
+* Fix translation bug for non latin alphabet.
 
 ## 1.3.06
 * _Sfvip All_ is translated in every _Sfvip Player_ languages.

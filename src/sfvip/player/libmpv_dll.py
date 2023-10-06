@@ -115,8 +115,7 @@ class LibmpvDll:
         self._player_exe = player_exe
         self._libdir = player_exe.parent / "lib"
         self._libmpv_latest = _LibmpvLatest(timeout)
-        self._version = LibmpvVersion(self._libdir / "libmpv.json")
-        self._version.update()
+        self._version = LibmpvVersion(self._libdir / "libmpv.json").update()
 
     def get_version(self) -> Optional[str]:
         return self._version.get_version()

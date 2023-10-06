@@ -12,6 +12,7 @@ from .tools.color import Low, Ok, Title, Warn
 from .tools.protocols import CfgFile, CfgTexts
 
 
+# comments are turned into argparse help
 class Args(Tap):
     force: bool = False  # force to update translations
     language: str = ""  # language to update, all by default

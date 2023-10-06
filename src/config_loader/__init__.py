@@ -4,7 +4,7 @@ import sys
 from os.path import getmtime
 from pathlib import Path
 from types import FunctionType, MappingProxyType, MethodType, SimpleNamespace
-from typing import IO, Any, Iterator, Optional, cast, get_type_hints
+from typing import IO, Any, Iterator, Optional, Self, cast, get_type_hints
 
 from ..winapi import mutex
 
@@ -185,7 +185,7 @@ class ConfigLoader:
             self._from_dict(self._base_proxy, json.load(f))
         logger.info("%s loaded from '%s'", self._name, self._file)
 
-    def update(self) -> None:
+    def update(self) -> Self:
         try:
             if not self._im_newer():
                 self.load()
@@ -193,6 +193,7 @@ class ConfigLoader:
             pass
         # always save if the config file needs some fixes
         self.save()
+        return self
 
     def _im_newer(self) -> bool:
         # launched by nuitka ?

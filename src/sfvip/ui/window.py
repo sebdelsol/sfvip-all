@@ -22,6 +22,7 @@ class _Theme:
     bg = "#2A2A2A"
     border = _Border(bg="#808080", size=1, relief="")
     space = 30
+    padx = 10
 
 
 def _get_bar_style() -> str:
@@ -137,7 +138,7 @@ class MessageWindow(_TitleBarWindow):
         ok_button = _Button(
             self, **_Ask.button, width=10, mouseover="lime green", **_Ask.text("Ok").to_tk, command=self.destroy
         )
-        label.pack(pady=_Ask.space)
+        label.pack(pady=_Ask.space, padx=_Theme.padx)
         ok_button.pack(padx=_Ask.button_pad, pady=_Ask.button_pad)
 
 
@@ -158,7 +159,7 @@ class AskWindow(_TitleBarWindow):
         frame.pack(expand=True, fill=tk.BOTH)
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=1)
-        label.grid(row=0, columnspan=2, pady=_Ask.space, sticky=tk.EW)
+        label.grid(row=0, columnspan=2, padx=_Theme.padx, pady=_Ask.space, sticky=tk.EW)
         pad = _Ask.button_pad
         ok_button.grid(row=1, column=0, padx=pad, pady=pad, sticky=tk.E)
         cancel_button.grid(row=1, column=1, padx=pad, pady=pad, sticky=tk.W)
@@ -191,7 +192,7 @@ class ProgressWindow(_TitleBarWindow):
         self._set_progress_mode(ProgressMode.UNKNOWN)
         wait.pack(pady=(_Theme.space / 2, 0))
         self._progressbar.pack(expand=True, fill=tk.BOTH)
-        self._label.pack(pady=(0, _Theme.space))
+        self._label.pack(padx=_Theme.padx, pady=(0, _Theme.space))
 
     def msg(self, text: str) -> None:
         self._label.config(**_Theme.text(text).to_tk)
