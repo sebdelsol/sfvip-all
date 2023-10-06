@@ -17,7 +17,7 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.3.07"
+    version = "1.3.08"
     dir = "build"
     nuitka_args = (
         "--include-plugin-directory={python_env}/Lib/site-packages/mitmproxy_windows",

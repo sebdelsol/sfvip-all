@@ -1,3 +1,6 @@
+## 1.3.08
+* A better translator for better translations.
+
 ## 1.3.07
 * Fix translation bug for non latin alphabet languages.
 

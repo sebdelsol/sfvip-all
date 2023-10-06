@@ -1,14 +1,14 @@
 {
   "User": "Χρήστης",
-  "UserProxy": "Μεσολάβηση χρήστη",
-  "NoProxy": "Λείπει ο πληρεξούσιος μεσολάβησης",
+  "UserProxy": "User Proxy χρήστη",
+  "NoProxy": "Λείπει το proxy",
   "Proxy": "%s Proxy",
-  "RestartFixProxy": "Επανεκκίνηση για να διορθώσετε τα proxy",
+  "RestartFixProxy": "Επανεκκίνηση για να διορθώσετε τα proxies",
   "ShouldUseVersion": "Θα πρέπει να χρησιμοποιήσετε την έκδοση %s",
   "SearchWholeCatalog": "Αναζητήστε ολόκληρο τον κατάλογό σας",
   "Download": "Λήψη",
   "Install": "Εγκατάσταση",
-  "Extract": "Απόσπασμα",
+  "Extract": "Αποσύνδεση",
   "Update": "Ενημέρωση",
   "Restart": "Επανεκκίνηση",
   "Cancel": "Ακύρωση",
@@ -17,9 +17,9 @@
   "UnknownVersion": "Άγνωστη έκδοση",
   "PleaseWait": "Παρακαλώ περιμένετε",
   "CheckLastestLibmpv": "Ελέγξτε την τελευταία ενημέρωση libmpv",
-  "RestartInstall": "Επανεκκίνηση για την εγκατάσταση %s ?",
-  "SearchOrDownload": "Αναζήτηση ή λήψη",
-  "NoSocketPort": "Δεν υπάρχει διαθέσιμη θύρα υποδοχής !",
-  "CantStartProxies": "Δεν μπορεί να ξεκινήσει τοπικά proxies !",
-  "NotFound": "Το %s δεν βρέθηκε"
+  "RestartInstall": "Θέλετε να κάνετε επανεκκίνηση για να εγκαταστήσετε το %s",
+  "SearchOrDownload": "Θέλετε να το αναζητήσετε ή να το κατεβάσετε",
+  "NoSocketPort": "Δεν υπάρχει διαθέσιμη θύρα υποδοχής!",
+  "CantStartProxies": "Δεν μπορεί να ξεκινήσει το τοπικό proxies!",
+  "NotFound": "%s δεν βρέθηκε."
 }

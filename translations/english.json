@@ -17,8 +17,8 @@
   "UnknownVersion": "Unknown version",
   "PleaseWait": "Please wait",
   "CheckLastestLibmpv": "Check latest libmpv update",
-  "RestartInstall": "Restart to install %s ?",
-  "SearchOrDownload": "Search or download it",
+  "RestartInstall": "Do you want to restart to install %s ?",
+  "SearchOrDownload": "Do you want to Search or download it ?",
   "NoSocketPort": "No socket port available !",
   "CantStartProxies": "Can't start local proxies !",
   "NotFound": "%s not found"

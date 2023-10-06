@@ -1,6 +1,6 @@
 code_to_languages = dict(
-    en="english",
     bg="bulgarian",
+    en="english",
     fr="french",
     de="german",
     el="greek",

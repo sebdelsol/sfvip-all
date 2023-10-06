@@ -65,7 +65,7 @@ rustup target add i686-pc-windows-msvc
 ```
 ### Build a specific version
 ```console
-python -m build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--mingw] [--upgrade] [--publish]
+python -m build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--upgrade] [--publish] [--mingw]
 ```
 ### Upgrade dependencies
 ```console
@@ -77,6 +77,7 @@ python -m publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```
 
 ### Translate the UI
+You need a [***DeepL API key***](https://www.deepl.com/en/docs-api/).
 ```console
-python -m translate [--force]
+python -m translate [--force] [--language LANGUAGE]
 ```
