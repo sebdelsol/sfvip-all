@@ -1,6 +1,9 @@
+## 1.3.07
+* Fix translation bug for non latin alphabet languages.
+
 ## 1.3.06
 * _Sfvip All_ is translated in every _Sfvip Player_ languages.
-* Fix bug when _Sfvip Player_ has never been launched.
+* Fix bug when _Sfvip Player_ had never been launched once.
 * Bump _Python_ to 3.11.6.
 
 ## 1.3.05

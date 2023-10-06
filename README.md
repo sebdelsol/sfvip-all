@@ -5,9 +5,9 @@ So you can easily **search your entire catalog**.
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-1.3.06-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.06/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.06/x64/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.3.07-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.07/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.07/x64/Sfvip%20All.zip)
 
-[<img src="https://img.shields.io/badge/Version-1.3.06-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.06/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.06/x86/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.3.07-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.07/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.07/x86/Sfvip%20All.zip)
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
@@ -22,7 +22,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.6-fbdf79)](https://www.python.org/downloads/release/python-3116/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8.3-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-4412-informational)
+![Sloc](https://img.shields.io/badge/Sloc-4414-informational)
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment

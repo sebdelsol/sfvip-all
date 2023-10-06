@@ -22,8 +22,8 @@ deepl_supported_langs = DeeplTranslator(**deepl_kwargs).get_supported_languages(
 
 
 class Translator:
-    separator = "\n"
-    prefix = "- "
+    marker_replace = "%s", "000"
+    separator = "\n- "
 
     def __init__(self, source: str, target: str) -> None:
         """prefer DeepL if available"""
@@ -39,15 +39,18 @@ class Translator:
     def translate(self, *texts: str) -> Optional[list[str]]:
         """
         translate all texts as a whole to give context
-        add a prefix to all textes keep Capitalization
+        replace %s with our own non translated marker
         """
-        to_translate = Translator.separator.join(f"{Translator.prefix}{text}" for text in texts)
-        translation: str = self.translator.translate(to_translate)
+        marker, marker_replacement = Translator.marker_replace
+        is_markers = [marker in text for i, text in enumerate(texts)]
+        bundle = Translator.separator.join(text for text in texts).replace(marker, marker_replacement)
+        translation: str = self.translator.translate(bundle)
         if translation:
-            prefix_len = len(Translator.prefix)
-            translations = [text[prefix_len:] for text in translation.split(Translator.separator)]
+            translation = translation.replace(marker_replacement, marker)
+            translations = translation.split(Translator.separator)
             if len(translations) == len(texts):
-                return translations
+                if all((marker in text) == is_marker for text, is_marker in zip(translations, is_markers)):
+                    return translations
         return None
 
 
@@ -69,18 +72,17 @@ def translate(texts: CfgTexts, all_languages: tuple[str, ...], translation_dir: 
     for target_language in languages:
         json_file = Path(translation_dir.path) / f"{target_language}.json"
         if args.force or is_newer_texts.than(json_file):
-            to_translate = texts.as_dict().values()
+            texts_values = texts.as_dict().values()
             if target_language == texts.language:
-                translation = to_translate
                 name = "No translator"
             else:
                 translator = Translator(texts.language, target_language)
-                translation = translator.translate(*to_translate)
+                texts_values = translator.translate(*texts_values)
                 name = translator.name
-            if translation:
+            if texts_values:
                 print(Title("Translate to"), Ok(target_language), Low(name))
                 with json_file.open("w", encoding="utf-8") as f:
-                    json.dump(dict(zip(texts.as_dict(), translation)), f, indent=2)
+                    json.dump(dict(zip(texts.as_dict(), texts_values)), f, ensure_ascii=False, indent=2)
             else:
                 print(Warn("Translation failed for"), Ok(target_language), Low(name))
         else:

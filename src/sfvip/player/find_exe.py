@@ -75,8 +75,8 @@ class PlayerExe:
     def _from_file_or_download(self) -> Iterator[str]:
         while True:
             ok = self._ui.ask(
-                f"{LOC.NotFound % PlayerExe._name.title()}\n{LOC.FindOrDownload}",
-                LOC.Find,
+                f"{LOC.NotFound % PlayerExe._name.title()}\n{LOC.SearchOrDownload}",
+                LOC.Search,
                 LOC.Download,
             )
             if ok is None:
