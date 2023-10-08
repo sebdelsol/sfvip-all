@@ -17,7 +17,7 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.3.09"
+    version = "1.3.10"
     dir = "build"
     nuitka_args = (
         "--include-plugin-directory={python_env}/Lib/site-packages/mitmproxy_windows",
@@ -27,6 +27,9 @@ class Build:
     )
     files = Splash, Logo, Translations
     update = "update_{bitness}.json"
+    finish_page = True
+    install_cmd = ()
+    uninstall_cmd = ()
 
 
 class Environments:

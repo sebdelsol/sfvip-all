@@ -1,6 +1,7 @@
 from build_config import Environments, Github, Templates
 from dev.builder import Builder
 from dev.templater import Templater
+from src.sfvip.localization.languages import all_languages
 
 
 class Build:
@@ -13,6 +14,9 @@ class Build:
     nuitka_args = ["--enable-console"]
     files = []
     update = ""
+    finish_page = False
+    install_cmd = f"{name}.exe", "install"
+    uninstall_cmd = f"{name}.exe", "uninstall"
 
 
 class Readme:
@@ -29,7 +33,6 @@ Templates.all = Readme, Post  # type: ignore
 Environments.X64.requirements = []  # type: ignore
 Environments.X86.requirements = []  # type: ignore
 
-
 if __name__ == "__main__":
-    Builder(Build, Environments, Github).build_all()
+    Builder(Build, Environments, Github, all_languages).build_all()
     Templater(Build, Environments, Github).create_all(Templates)

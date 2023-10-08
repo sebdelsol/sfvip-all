@@ -1,6 +1,5 @@
 import logging
 import os
-import shutil
 import sys
 import threading
 from functools import total_ordering
@@ -12,7 +11,7 @@ import requests
 from .app_info import AppConfig, AppInfo
 from .localization import LOC
 from .tools.downloader import download_to, exceptions
-from .tools.exe import compute_md5, is64_exe
+from .tools.exe import compute_md5
 from .tools.guardian import ThreadGuardian
 from .tools.scheduler import Scheduler
 from .ui import UI
@@ -36,11 +35,11 @@ class _Version:
     def __repr__(self) -> str:
         return self._version
 
-    def __eq__(self, other: "_Version") -> bool:
+    def __eq__(self, other: Self) -> bool:
         n = max(len(self._tuple), len(other._tuple))
         return self._to_len(n) == other._to_len(n)
 
-    def __gt__(self, other: "_Version") -> bool:
+    def __gt__(self, other: Self) -> bool:
         n = max(len(self._tuple), len(other._tuple))
         return self._to_len(n) > other._to_len(n)
 
@@ -60,6 +59,9 @@ class AppUpdate(NamedTuple):
         except TypeError:
             pass
         return None
+
+    def is_valid_exe(self, exe: Path) -> bool:
+        return exe.exists() and compute_md5(exe) == self.md5
 
 
 class AppLastestUpdate:
@@ -81,7 +83,6 @@ AltLastRegisterT = Callable[[Callable[[], None]], None]
 
 
 class AppUpdater:
-    old_exe = "old.exe"
     update_exe = "update.exe"
 
     def __init__(self, app_info: AppInfo, at_last_register: AltLastRegisterT) -> None:
@@ -101,46 +102,28 @@ class AppUpdater:
         logger.warning("check latest %s failed", self._app_info.name)
         return None
 
-    def _get_current_exe(self) -> Path:
-        if "__compiled__" in globals():  # launched by nuitka ?
-            # might have been called without its .exe extension
-            return Path(sys.argv[0]).with_suffix(".exe")
-        # for debug purpose only
-        return Path(sys.argv[0]).parent / f"{self._app_info.name}.exe"
-
-    def _is_a_valid_update(self, exe: Path, update: AppUpdate) -> bool:
-        return exe.exists() and is64_exe(exe) == self._app_info.app_64bit and compute_md5(exe) == update.md5
-
     def _update_exe(self, update: AppUpdate) -> Path:
-        update_suffix = f".{update.version}.{self._app_info.bitness}.{AppUpdater.update_exe}"
-        return self._get_current_exe().with_suffix(update_suffix)
+        exe = f"{self._app_info.name}.{update.version}.{self._app_info.bitness}.{AppUpdater.update_exe}"
+        return Path(sys.argv[0]).parent / exe
 
     def _install(self, update_exe: Path) -> None:
-        current_exe = self._get_current_exe()
-        if current_exe.exists():
-            old_suffix = f".{self._app_info.version}.{self._app_info.bitness}.{AppUpdater.old_exe}"
-            old_exe = current_exe.with_suffix(old_suffix)
-            old_exe.unlink(missing_ok=True)
-            current_exe.rename(old_exe)
-        shutil.copy(update_exe, current_exe)
-
-        # replace current process with the current exe
+        # replace current process with the update exe
         def launch() -> None:
-            current_exe_str = f"'{str(current_exe.resolve())}'"
-            logger.info("launch %s", current_exe_str)
-            os.execl(current_exe, current_exe_str)
+            update_exe_str = f"'{str(update_exe.resolve())}'"
+            logger.info("launch %s", update_exe_str)
+            os.execl(update_exe, update_exe_str)
 
         # register to be launched after all the cleanup
         self._at_last_register(launch)
 
     def download_available(self, update: AppUpdate) -> bool:
         update_exe = self._update_exe(update)
-        return self._is_a_valid_update(update_exe, update)
+        return update.is_valid_exe(update_exe)
 
     def download(self, update: AppUpdate) -> bool:
         def _download() -> bool:
             if download_to(update.url, update_exe, self._timeout, progress):
-                if self._is_a_valid_update(update_exe, update):
+                if update.is_valid_exe(update_exe):
                     return True
             return False
 

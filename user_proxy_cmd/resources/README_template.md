@@ -9,9 +9,9 @@ _Remove it:_
 ```
 
 # Download
-[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe64_link}) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/{github_path}/raw/master/{archive64_link})
+[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/{github_path}/raw/master/{exe64_link})
 
-[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe32_link}) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/{github_path}/raw/master/{archive32_link})
+[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/{github_path}/raw/master/{exe32_link})
 
 
 # Build
@@ -20,6 +20,8 @@ _Remove it:_
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
 
+You'll need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
+
 ```console
-python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--mingw]
+python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--mingw]
 ```

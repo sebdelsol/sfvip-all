@@ -53,6 +53,7 @@ class AppInfo(NamedTuple):
     logo: Path
     splash: Path
     translations: Path
+    current_dir = Path(sys.argv[0]).parent
     app_64bit: bool = sys.maxsize == (2**63) - 1
     os_64bit: bool = platform.machine().endswith("64")
 

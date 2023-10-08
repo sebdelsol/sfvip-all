@@ -1,19 +1,18 @@
 import json
 import sys
 import tempfile
+from enum import Enum
 from pathlib import Path
-from typing import Iterator, NamedTuple, Self
+from typing import Iterator, NamedTuple, Self, Sequence
 from urllib.parse import quote
 
-import pefile
 import requests
 
 from src.sfvip.app_info import get_app_update_url, get_github_raw
 from src.sfvip.app_updater import AppLastestUpdate, AppUpdate
-from src.sfvip.tools.exe import compute_md5, is64_exe
+from src.sfvip.tools.exe import compute_md5
 
 from .tools.color import Low, Ok, Title, Warn
-from .tools.command import clear_lines
 from .tools.dist import get_dist_name, get_dist_name_from_version
 from .tools.env import EnvArgs, get_bitness_str
 from .tools.protocols import CfgBuild, CfgGithub
@@ -25,13 +24,22 @@ class Args(EnvArgs):
     info: bool = False  # info about what's been published locally and on github
 
 
-def fix_pe(exe: Path) -> None:
-    # https://practicalsecurityanalytics.com/pe-checksum/
-    print(Title("Fixing PE Checksum"), Ok(str(exe)))
-    with pefile.PE(exe) as pe:
-        pe.OPTIONAL_HEADER.CheckSum = pe.generate_checksum()  # type: ignore
-    pe.write(exe)
-    clear_lines(1)
+class Valid(Enum):
+    OK = Ok("Valid")
+    NOTFOUND = Warn("Exe not found")
+    MD5 = Warn("Wrong md5 Exe")
+    ERROR = Warn("Can't open Exe")
+
+    @classmethod
+    def check_exe(cls, exe: Path, md5: str) -> Self:
+        if not exe.exists():
+            return cls.NOTFOUND
+        try:
+            if compute_md5(exe) != md5:
+                return cls.MD5
+        except OSError:
+            return cls.ERROR
+        return cls.OK
 
 
 class Published(NamedTuple):
@@ -39,14 +47,17 @@ class Published(NamedTuple):
     md5: str
     version: str
     is_64: bool
+    valid: Valid
 
     @classmethod
-    def from_update(cls, update: AppUpdate, is_64: bool) -> Self:
-        return Published(url=update.url, md5=update.md5, version=update.version, is_64=is_64)
-
-
-def is_exe_valid(exe: Path, md5: str, is_64: bool) -> bool:
-    return exe.exists() and compute_md5(exe) == md5 and is64_exe(exe) == is_64
+    def from_update(cls, update: AppUpdate, exe: Path, is_64: bool) -> Self:
+        return Published(
+            is_64=is_64,
+            url=update.url,
+            md5=update.md5,
+            version=update.version,
+            valid=Valid.check_exe(exe, update.md5),
+        )
 
 
 class Publisher:
@@ -65,8 +76,8 @@ class Publisher:
         if self.build.update:
             exe_name = f"{get_dist_name(self.build, is_64=is_64)}.exe"
             exe_path = Path(exe_name)
-            if exe_path.exists() and is64_exe(exe_path) == is_64:
-                fix_pe(exe_path)
+            if exe_path.exists():
+                # fix_pe(exe_path)
                 update_json = self._update_json(is_64)
                 with update_json.open(mode="w", encoding=Publisher.encoding) as f:
                     update = AppUpdate(
@@ -102,8 +113,7 @@ class Publisher:
                 with update_json.open(mode="r", encoding=Publisher.encoding) as f:
                     if update := AppUpdate.from_json(json.load(f)):
                         exe = Path(f"{get_dist_name_from_version(self.build, is_64, update.version)}.exe")
-                        if is_exe_valid(exe, update.md5, is_64):
-                            yield Published.from_update(update, is_64)
+                        yield Published.from_update(update, exe, is_64)
 
     def get_online_versions(self) -> Iterator[Published]:
         for is_64 in self._get_all_builds():
@@ -114,11 +124,10 @@ class Publisher:
                         exe = Path(temp_dir) / "exe"
                         with exe.open("wb") as f:
                             f.write(response.content)
-                        if is_exe_valid(exe, update.md5, is_64):
-                            yield Published.from_update(update, is_64)
+                        yield Published.from_update(update, exe, is_64)
 
-    def _show_versions(self, publisheds: Iterator[Published]) -> None:
-        nothing_published = True
+    def _show_versions(self, publisheds: Iterator[Published], old: Sequence[Published] = ()) -> list[Published]:
+        all_publisheds = []
         for published in publisheds:
             version_color = Ok if published.version == self.build.version else Warn
             print(
@@ -126,13 +135,16 @@ class Publisher:
                 version_color(f"v{published.version}"),
                 Ok(get_bitness_str(published.is_64)),
                 Low(published.md5),
+                published.valid.value,
+                Ok(f'- {"Newer!" if published not in old else "Already published"}' if old else ""),
             )
-            nothing_published = False
-        if nothing_published:
+            all_publisheds.append(published)
+        if not all_publisheds:
             print(Warn(". None"))
+        return all_publisheds
 
     def show_versions(self) -> None:
-        print(Title("Locally"), Ok("published updates"))
-        self._show_versions(self.get_local_versions())
         print(Title("Online"), Ok("published updates"))
-        self._show_versions(self.get_online_versions())
+        online_versions = self._show_versions(self.get_online_versions())
+        print(Title("Locally"), Ok("published updates"))
+        self._show_versions(self.get_local_versions(), online_versions)

@@ -5,17 +5,15 @@ So you can easily **search your entire catalog**.
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe64_link}) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/{github_path}/raw/master/{archive64_link})
+[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/{github_path}/raw/master/{exe64_link})
 
-[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/{github_path}/raw/master/{exe32_link}) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/{github_path}/raw/master/{archive32_link})
+[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/{github_path}/raw/master/{exe32_link})
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[^1]:_**{name}** might be slow to start its first run because it unzips in a cached folder._  
-_**{name}** might trigger your antivirus because even Nuitka build are not exempt from it._  
-_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
+[^1]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._
 
 # Build
@@ -23,6 +21,8 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
+
+You'll need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment
@@ -65,7 +65,7 @@ rustup target add i686-pc-windows-msvc
 ```
 ### Build a specific version
 ```console
-python -m build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--upgrade] [--publish] [--mingw]
+python -m build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish] [--mingw]
 ```
 ### Upgrade dependencies
 ```console

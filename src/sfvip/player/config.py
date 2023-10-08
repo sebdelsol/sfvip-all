@@ -52,15 +52,16 @@ class _PlayerConfigDir:
 class PlayerConfigDirSettingWatcher:
     """registry watcher of the player config dir"""
 
-    _watcher_sigleton: Optional[RegistryWatcher] = None
+    _watcher: RegistryWatcher
 
     def __init__(self) -> None:
-        if PlayerConfigDirSettingWatcher._watcher_sigleton is None:
+        try:
+            PlayerConfigDirSettingWatcher._watcher
+        except AttributeError:
             path = _PlayerConfigDir._from_registry
             if not Registry.value_by_name(*path):
                 Registry.create_key(*path, str(_PlayerConfigDir.path()))
-            PlayerConfigDirSettingWatcher._watcher_sigleton = RegistryWatcher(*_PlayerConfigDir._from_registry)
-        self._watcher = self._watcher_sigleton
+            PlayerConfigDirSettingWatcher._watcher = RegistryWatcher(*_PlayerConfigDir._from_registry)
 
     @staticmethod
     def has_changed() -> None:

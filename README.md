@@ -5,29 +5,29 @@ So you can easily **search your entire catalog**.
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-1.3.09-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.09/x64/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.09/x64/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.3.10-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.10/x64/Sfvip%20All.exe)
 
-[<img src="https://img.shields.io/badge/Version-1.3.09-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/Exe-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.09/x86/Sfvip%20All.exe) <sup>or</sup> [<img src="https://img.shields.io/badge/Zip-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.09/x86/Sfvip%20All.zip)
+[<img src="https://img.shields.io/badge/Version-1.3.10-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.10/x86/Sfvip%20All.exe)
 
 Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
 
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[^1]:_**Sfvip All** might be slow to start its first run because it unzips in a cached folder._  
-_**Sfvip All** might trigger your antivirus because even Nuitka build are not exempt from it._  
-_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
+[^1]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.6-fbdf79)](https://www.python.org/downloads/release/python-3116/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.3-lightgrey)](https://nuitka.net/)
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.4-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-4418-informational)
+![Sloc](https://img.shields.io/badge/Sloc-4685-informational)
+
+You'll need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
 
 Check the [***build config***](build_config.py).
 ### Create an x64 environment
 With [***Python 3.11.6 x64***](https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe) or above.  
-Set ***[`Environments.X64.path`](/build_config.py#L34)*** appropriately if you use a different environement.  
+Set ***[`Environments.X64.path`](/build_config.py#L37)*** appropriately if you use a different environement.  
 ```console
 python -m venv .sfvip64
 .sfvip64\scripts\activate
@@ -53,7 +53,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 ### Build an **x86** version
 With [***Python 3.11.6 x86***](https://www.python.org/ftp/python/3.11.6/python-3.11.6.exe) or above.  
-Set ***[`Environments.X86.path`](/build_config.py#L38)*** appropriately if you use a different environement.  
+Set ***[`Environments.X86.path`](/build_config.py#L41)*** appropriately if you use a different environement.  
 ```console
 python -m venv .sfvip86
 .sfvip86\scripts\activate
@@ -65,7 +65,7 @@ rustup target add i686-pc-windows-msvc
 ```
 ### Build a specific version
 ```console
-python -m build [--x86 | --x64 | --both] [--nobuild | --noexe | --nozip] [--upgrade] [--publish] [--mingw]
+python -m build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish] [--mingw]
 ```
 ### Upgrade dependencies
 ```console

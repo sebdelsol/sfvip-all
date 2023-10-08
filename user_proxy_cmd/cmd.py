@@ -2,10 +2,13 @@ import argparse
 import json
 import logging
 import re
+import sys
 import winreg
 from contextlib import suppress
 from pathlib import Path
 from types import SimpleNamespace
+
+from sys_path import add_to_sys_path, broadcast_sys_path_change, remove_from_sys_path
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -80,7 +83,26 @@ class Users:
             self._save()
 
 
+INSTAL_ARG = {"install": True, "uninstall": False}
+
+
+def installer() -> None:
+    if len(sys.argv) == 2:
+        exe_dir = str(Path(sys.argv[0]).parent.absolute())
+        install = INSTAL_ARG.get(sys.argv[1])
+        if install is not None:
+            remove_from_sys_path(exe_dir)
+            if install:
+                logging.info("add itself to path")
+                add_to_sys_path(exe_dir)
+            else:
+                logging.info("remove itself from path")
+            broadcast_sys_path_change()
+            sys.exit(0)
+
+
 if __name__ == "__main__":
+    installer()
     parser = argparse.ArgumentParser()
     gp = parser.add_mutually_exclusive_group(required=True)
     gp.add_argument("url", nargs="?", help="add a global user proxy url")

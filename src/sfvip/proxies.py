@@ -12,6 +12,7 @@ class LocalproxyError(Exception):
     pass
 
 
+# TODO mutex when looking for ports
 def _find_port(excluded_ports: set[int]) -> int:
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -43,6 +44,7 @@ def _fix_upstream(url: str) -> Optional[str]:
     return None
 
 
+# TODO translate "All"
 class LocalProxies:
     """start a local proxy for each upstream proxies (no upstream proxy count as one)"""
 

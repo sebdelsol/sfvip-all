@@ -1,3 +1,5 @@
+[SIZE=10px]Ovo nije zvanična verzija sjajnog Sfvip Plaier-a (preuzmite ga [URL='https://epg.serbianforum.org/Alati/SFVipPlayer/sfplayer.html']ovde[/URL]), već pokretač koji dodaje zanimljive funkcije.[/SIZE]
+
 [B][SIZE=20px]{name}[/B][/SIZE] {version}
 [SIZE=10px][I]Pretražite ceo katalog / Search your whole catalog[/I][/SIZE]
 [HR][/HR]

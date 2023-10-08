@@ -81,4 +81,4 @@ class CommandMonitor:
                     for text in lines:
                         print(out(text))
             clear_lines(n_lines)
-        return ok and process.returncode == 0
+        return ok and not process.returncode

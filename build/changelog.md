@@ -1,3 +1,7 @@
+## 1.3.10
+* Change the distribution & update strategy to mitigate the AV issue.
+* Bump _Nuitka_ to 1.8.4.
+
 ## 1.3.09
 * Enhance UI presentation.
 

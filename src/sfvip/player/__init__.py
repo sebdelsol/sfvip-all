@@ -25,7 +25,6 @@ class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
         player_relaunch()
 
     def watch(self, player_relaunch: Callable[[], None]) -> RegistryWatcher:
-        assert self._watcher is not None
         self._watcher.add_callback(self._on_modified, player_relaunch)
         return self._watcher
 
@@ -147,7 +146,7 @@ class Player:
             self._rect_loader.rect = self._launcher.rect
 
         with self._libmpv_updater:
-            with _PlayerConfigDirSetting().watch(self.relaunch):
+            with _PlayerConfigDirSetting().watch(self.relaunch):  # pylint: disable=not-context-manager
                 with subprocess.Popen([self.exe]) as self._process:
                     logger.info("player started")
                     self._window_watcher.start(self._process.pid)

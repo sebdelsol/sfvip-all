@@ -40,16 +40,12 @@ class CleanFilesIn:
 
 def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: int) -> None:
     exceptions = PlayerNotFoundError, LocalproxyError
-
     logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
     LOC.set_language(PLayerLanguageLoader().language).apply_language(app_info.translations)
     ui = UI(app_info)
     app_config = app_info.config.update()
-
-    clean_files = CleanFilesIn(Path(sys.argv[0]).parent)  # in exe dir
-    clean_files.keep(1, f"{app_info.name}*.{AppUpdater.old_exe}")
-    clean_files.keep(1, f"{app_info.name}*.{AppUpdater.update_exe}")
-
+    cleanfiles = CleanFilesIn(app_info.current_dir)
+    cleanfiles.keep(1, f"{app_info.name}*.{AppUpdater.update_exe}")
     try:
         player = Player(app_config, ui)
         app_updater = AppUpdater(app_info, at_last_register)
@@ -67,10 +63,9 @@ def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: in
                                 ui.splash.hide(fade_duration_ms=1000, wait_ms=1000)
 
         ui.run_in_thread(run, *exceptions)
-
     except exceptions as err:
         ui.showinfo(str(err), force_create=True)
         logger.warning(str(err))
     finally:
         ui.quit()
-        clean_files.keep(keep_logs, f"{app_info.name} - *.log")
+        cleanfiles.keep(keep_logs, f"{app_info.name} - *.log")

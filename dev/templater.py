@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import quote
 
-from .tools.color import Ok, Title, Warn
+from .tools.color import Low, Ok, Title, Warn
 from .tools.dist import get_dist_name
 from .tools.env import PythonEnv, get_bitness_str
 from .tools.protocols import (
@@ -72,8 +72,6 @@ class Templater:
             py_version_compact=python_version.replace(".", ""),
             nuitka_version=_get_nuitka_version(environments),
             github_path=f"{github.owner}/{github.repo}",
-            archive64_link=quote(f"{dist_name64}.zip"),
-            archive32_link=quote(f"{dist_name32}.zip"),
             sloc=_get_sloc(Path(build.main).parent),
             exe64_link=quote(f"{dist_name64}.exe"),
             exe32_link=quote(f"{dist_name32}.exe"),
@@ -88,7 +86,7 @@ class Templater:
 
     def create(self, template: CfgTemplate) -> None:
         src, dst = Path(template.src), Path(template.dst)
-        print(Title("Create"), Ok(dst.as_posix()))
+        print(Title("Create"), Ok(dst.as_posix()), Low(f"from {src.as_posix()}"))
         text = src.read_text(encoding=Templater.encoding).format(**self.template_format)
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(text, encoding=Templater.encoding)

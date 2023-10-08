@@ -1,4 +1,4 @@
-from typing import Protocol, Sequence, runtime_checkable
+from typing import Optional, Protocol, Sequence, runtime_checkable
 
 
 class CfgFile(Protocol):
@@ -8,7 +8,7 @@ class CfgFile(Protocol):
 @runtime_checkable
 class CfgFileResize(CfgFile, Protocol):
     src: str
-    resize: tuple[int, int]
+    resize: Optional[tuple[int, int]]
 
 
 class CfgBuild(Protocol):
@@ -19,6 +19,15 @@ class CfgBuild(Protocol):
     version: str
     dir: str
     update: str
+    finish_page: bool
+
+    @property
+    def install_cmd(self) -> Sequence[str]:
+        ...
+
+    @property
+    def uninstall_cmd(self) -> Sequence[str]:
+        ...
 
     @property
     def files(self) -> Sequence[CfgFile | CfgFileResize]:

@@ -2,5 +2,7 @@
 deep-translator>=1.11.4
 imageio>=2.31.1
 nuitka>=1.7.7
-pefile>=2023.2.7
+# pefile>=2023.2.7
+# requests-toolbelt>=1.0.0
+# tqdm>=4.66.1
 typed-argument-parser>=1.8.1

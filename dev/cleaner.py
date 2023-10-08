@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from .publisher import Publisher
-from .tools.color import Low, Ok, Title, Warn
+from .tools.color import Ok, Title, Warn
 from .tools.env import get_bitness_str
 from .tools.protocols import CfgBuild, CfgGithub
 
@@ -14,7 +14,7 @@ https://github.com/{github_path}#download
 
 def clean_old_build(build: CfgBuild, github: CfgGithub):
     suffixes = ".zip", ".exe"
-    print(Title("Clean Old"), Low(" and ").join(Ok(f"{build.name}{suffix}") for suffix in suffixes))
+    print(Title("Clean Old"), Ok("builts"))
     unavailable = UNAVAILABLE.format(github_path=f"{github.owner}/{github.repo}")
     publisheds = tuple(Publisher(build, github).get_local_versions())
     kept = False
