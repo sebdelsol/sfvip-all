@@ -3,7 +3,8 @@ import json
 import logging
 import multiprocessing
 from dataclasses import dataclass
-from typing import Any, Optional, Protocol
+from enum import Enum
+from typing import Any, NamedTuple, Optional
 
 from mitmproxy import http
 from mitmproxy.coretypes.multidict import MultiDictView
@@ -11,9 +12,10 @@ from mitmproxy.coretypes.multidict import MultiDictView
 logger = logging.getLogger(__name__)
 
 
-class AllCategory(Protocol):
-    name: str
-    inject_in_live: bool
+class AllCategoryName(NamedTuple):
+    live: Optional[str]
+    vod: str
+    series: str
 
 
 @dataclass
@@ -22,6 +24,12 @@ class Panel:
     get_category: str
     all_category_name: str
     all_category_id: str = "0"
+
+
+class PanelType(Enum):
+    LIVE = "live"
+    VOD = "vod"
+    SERIES = "series"
 
 
 def _is_api_request(request: http.Request) -> bool:
@@ -67,17 +75,20 @@ def _log(verb: str, panel: Panel, action: str) -> None:
 class SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
-    def __init__(self, all_category: AllCategory) -> None:
-        def get_panel(name: str, streams: bool = True) -> Panel:
+    def __init__(self, all_name: AllCategoryName) -> None:
+        def get_panel(panel_type: PanelType, all_category_name: str, streams: bool = True) -> Panel:
             return Panel(
-                get_categories=f"get_{name}_categories",
-                get_category=f"get_{name}{'_streams' if streams else ''}",
-                all_category_name=all_category.name,
+                get_categories=f"get_{panel_type.value}_categories",
+                get_category=f"get_{panel_type.value}{'_streams' if streams else ''}",
+                all_category_name=all_category_name,
             )
 
-        panels = get_panel("vod"), get_panel("series", streams=False)
-        if all_category.inject_in_live:
-            panels = *panels, get_panel("live")
+        panels = [
+            get_panel(PanelType.VOD, all_name.vod),
+            get_panel(PanelType.SERIES, all_name.series, streams=False),
+        ]
+        if all_name.live:
+            panels.append(get_panel(PanelType.LIVE, all_name.live))
         self._category_panel = {panel.get_category: panel for panel in panels}
         self._categories_panel = {panel.get_categories: panel for panel in panels}
         self._running = multiprocessing.Event()

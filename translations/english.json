@@ -21,5 +21,8 @@
   "SearchOrDownload": "Do you want to Search or download it ?",
   "NoSocketPort": "No socket port available !",
   "CantStartProxies": "Can't start local proxies !",
-  "NotFound": "%s not found"
+  "NotFound": "%s not found",
+  "AllSeries": "All Series",
+  "AllMovies": "All Movies",
+  "AllChannels": "All Channels"
 }

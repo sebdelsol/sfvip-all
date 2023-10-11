@@ -3,7 +3,7 @@ from typing import Optional, Self
 from urllib.parse import urlparse, urlsplit, urlunsplit
 
 from ..mitm import MitmLocalProxy, Mode, validate_upstream
-from ..mitm.addon import AllCategory, SfVipAddOn
+from ..mitm.addon import AllCategoryName, SfVipAddOn
 from ..winapi import mutex
 from .localization import LOC
 
@@ -12,7 +12,6 @@ class LocalproxyError(Exception):
     pass
 
 
-# TODO mutex when looking for ports
 def _find_port(excluded_ports: set[int]) -> int:
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -44,14 +43,17 @@ def _fix_upstream(url: str) -> Optional[str]:
     return None
 
 
-# TODO translate "All"
 class LocalProxies:
     """start a local proxy for each upstream proxies (no upstream proxy count as one)"""
 
     _localhost = "http://127.0.0.1:{port}"
 
-    def __init__(self, all_category: AllCategory, upstreams: set[str]) -> None:
-        self._all_category = all_category
+    def __init__(self, inject_in_live: bool, upstreams: set[str]) -> None:
+        self._all_name = AllCategoryName(
+            live=LOC.AllChannels if inject_in_live else None,
+            series=LOC.AllSeries,
+            vod=LOC.AllMovies,
+        )
         self._upstreams = upstreams
         self._by_upstreams: dict[str, str] = {}
         self._mitm_proxy: Optional[MitmLocalProxy] = None
@@ -74,7 +76,7 @@ class LocalProxies:
                         modes.add(Mode(port=port, upstream=upstream_fixed))
                         self._by_upstreams[upstream] = LocalProxies._localhost.format(port=port)
                 if modes:
-                    addon = SfVipAddOn(self._all_category)
+                    addon = SfVipAddOn(self._all_name)
                     self._mitm_proxy = MitmLocalProxy(addon, modes)
                     self._mitm_proxy.start()
                     # wait for proxies running so we're sure ports are bound

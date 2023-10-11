@@ -15,11 +15,14 @@
   "Search": "Rechercher",
   "CheckUpdate": "Vérifier les mises à jour",
   "UnknownVersion": "Version inconnue",
-  "PleaseWait": "Veuillez patienter",
+  "PleaseWait": "Veuillez attendre",
   "CheckLastestLibmpv": "Vérifier la dernière mise à jour de libmpv",
   "RestartInstall": "Voulez-vous redémarrer pour installer %s ?",
   "SearchOrDownload": "Voulez-vous le rechercher ou le télécharger ?",
   "NoSocketPort": "Aucun port de socket disponible !",
   "CantStartProxies": "Impossible de démarrer les proxies locaux !",
-  "NotFound": "%s introuvable"
+  "NotFound": "%s introuvable",
+  "AllSeries": "Toutes les séries",
+  "AllMovies": "Tous les films",
+  "AllChannels": "Toutes les chaînes"
 }

@@ -18,8 +18,11 @@
   "PleaseWait": "Počakajte",
   "CheckLastestLibmpv": "Preverite najnovejšo posodobitev libmpv",
   "RestartInstall": "Ali želite ponovno zagnati za namestitev %s ?",
-  "SearchOrDownload": "Ali jo želite poiskati ali prenesti ?",
-  "NoSocketPort": "Na voljo ni vtičnic !",
+  "SearchOrDownload": "Ali želite iskati ali jo prenesti ?",
+  "NoSocketPort": "Vtičnica ni na voljo !",
   "CantStartProxies": "Ni mogoče zagnati lokalnih proxy !",
-  "NotFound": "%s ni najden"
+  "NotFound": "%s ni najden",
+  "AllSeries": "Vse serije",
+  "AllMovies": "Vsi filmi",
+  "AllChannels": "Vsi kanali"
 }

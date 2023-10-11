@@ -12,40 +12,48 @@ from .virus_scan import VirusScan
 
 
 def get_cmd(name: str, cmd: Sequence[str]) -> dict[str, str | int]:
-    if cmd:
-        has_cmd, cmd_name, *args = True, *cmd
-    else:
-        has_cmd, cmd_name, *args = False, "", ""
     return {
-        f"has_{name}": int(has_cmd),
-        name: cmd_name,
-        f"{name}_arg": " ".join(args),
+        f"has_{name}_cmd": int(bool(cmd)),
+        f"{name}_cmd": cmd[0] if cmd else "",
+        f"{name}_cmd_arg": " ".join(cmd[1:]) if cmd else "",
     }
+
+
+def get_languages(all_languages: Sequence[str]) -> str:
+    lang_macro = '!insertmacro MUI_LANGUAGE "%s"'
+    lang_macros = (lang_macro % lang.capitalize() for lang in all_languages)
+    return "\n".join(("languages", *lang_macros))  # 1st line is a comment
+
+
+def get_version(version: str, length: int) -> str:
+    versions = version.split(".")
+    if len(versions) < length:
+        versions.extend((["0"] * (length - len(versions))))
+    return ".".join(versions[:length])
 
 
 class NSIS:
     regkey64 = winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\NSIS"
     regkey = winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\NSIS"
-    lang_macro = '!insertmacro MUI_LANGUAGE "{lang}"'
     template = Path(__file__).parent / "installer_template.nsi"
     exe = "makensis.exe"
     nsis_arg = "/V4"
     encoding = "utf-8"
+    version_length = 4
 
     def __init__(self, build: CfgBuild, all_languages: Sequence[str], do_run: bool) -> None:
         self.build = build
         self.do_run = do_run
         self.virus_scan = VirusScan()
-        lang_macros = (NSIS.lang_macro.format(lang=lang.capitalize()) for lang in all_languages)
         self.format = dict(
-            finish_page=int(build.finish_page),
-            **get_cmd("install_cmd", build.install_cmd),
-            **get_cmd("uninstall_cmd", build.uninstall_cmd),
+            finish_page=int(build.install_finish_page),
+            **get_cmd("install", build.install_cmd),
+            **get_cmd("uninstall", build.uninstall_cmd),
             name=build.name,
-            version=build.version,
+            version=get_version(build.version, NSIS.version_length),
             company=build.company,
             ico=to_ico(build.ico),
-            languages="\n".join(("languages", *lang_macros)),  # 1st line is a comment
+            languages=get_languages(all_languages),
             dist=f"{Path(build.main).stem}.dist",
         )
 

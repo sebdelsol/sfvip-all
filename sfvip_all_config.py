@@ -16,5 +16,4 @@ class AppDefaultConfig(ConfigLoader):
             requests_timeout: int = 3
 
     class AllCategory:
-        name: str = "All"
-        inject_in_live: bool = True
+        inject_in_live: bool = False

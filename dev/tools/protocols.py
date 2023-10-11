@@ -19,7 +19,7 @@ class CfgBuild(Protocol):
     version: str
     dir: str
     update: str
-    finish_page: bool
+    install_finish_page: bool
 
     @property
     def install_cmd(self) -> Sequence[str]:

@@ -1,9 +1,11 @@
 ; https://stackoverflow.com/questions/2565215/checking-if-the-application-is-running-in-nsis-before-uninstalling
 ; TODO check alreadyrunning
 
-!define PRODUCT_NAME "{name}"
-!define PRODUCT_VERSION "{version}"
-!define PRODUCT_PUBLISHER "{company}"
+VIProductVersion "{version}"
+VIFileVersion "{version}"
+VIAddVersionKey "FileVersion" "{version}"
+VIAddVersionKey "ProductName" "{name}"
+VIAddVersionKey "CompanyName" "{company}"
 
 ; modern
 !include "MUI2.nsh"

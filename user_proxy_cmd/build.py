@@ -14,7 +14,7 @@ class Build:
     nuitka_args = ["--enable-console"]
     files = []
     update = ""
-    finish_page = False
+    install_finish_page = False
     install_cmd = f"{name}.exe", "install"
     uninstall_cmd = f"{name}.exe", "uninstall"
 

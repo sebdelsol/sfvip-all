@@ -21,5 +21,8 @@
   "SearchOrDownload": "Czy chcesz go wyszukać lub pobrać?",
   "NoSocketPort": "Brak dostępnego portu gniazda!",
   "CantStartProxies": "Nie można uruchomić lokalnych serwerów proxy!",
-  "NotFound": "Nie znaleziono %s"
+  "NotFound": "%s nie znaleziono",
+  "AllSeries": "Wszystkie seriale",
+  "AllMovies": "Wszystkie filmy",
+  "AllChannels": "Wszystkie kanały"
 }

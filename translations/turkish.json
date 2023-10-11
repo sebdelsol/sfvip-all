@@ -3,7 +3,7 @@
   "UserProxy": "Kullanıcı Proxy",
   "NoProxy": "Proxy eksik",
   "Proxy": "%s Proxy",
-  "RestartFixProxy": "Proxy'leri düzeltmek için yeniden başlat",
+  "RestartFixProxy": "Proxy'leri düzeltmek için yeniden başlatın",
   "ShouldUseVersion": "%s sürümünü kullanmalısınız",
   "SearchWholeCatalog": "Tüm kataloğunuzu arayın",
   "Download": "İndir",
@@ -16,10 +16,13 @@
   "CheckUpdate": "Güncellemeleri kontrol et",
   "UnknownVersion": "Bilinmeyen sürüm",
   "PleaseWait": "Lütfen bekleyin",
-  "CheckLastestLibmpv": "En son libmpv güncellemesini kontrol et",
-  "RestartInstall": "%s'i yüklemek için yeniden başlatmak istiyor musunuz?",
+  "CheckLastestLibmpv": "En son libmpv güncellemesini kontrol edin",
+  "RestartInstall": "%s yüklemek için yeniden başlatmak istiyor musunuz?",
   "SearchOrDownload": "Aramak veya indirmek istiyor musunuz?",
   "NoSocketPort": "Kullanılabilir soket bağlantı noktası yok!",
   "CantStartProxies": "Yerel proxy'ler başlatılamıyor!",
-  "NotFound": "%s bulunamadı"
+  "NotFound": "%s bulunamadı",
+  "AllSeries": "Tüm Diziler",
+  "AllMovies": "Tüm Filmler",
+  "AllChannels": "Tüm Kanallar"
 }

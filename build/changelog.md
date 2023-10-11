@@ -1,3 +1,6 @@
+## 1.3.11
+* All categories translations in vod & series panels.
+
 ## 1.3.10
 * Change the distribution & update strategy to mitigate the AV issue.
 * Bump _Nuitka_ to 1.8.4.

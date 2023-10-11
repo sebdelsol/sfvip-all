@@ -27,6 +27,9 @@ class Texts(NamedTuple):
     NoSocketPort: str = "No socket port available !"
     CantStartProxies: str = "Can't start local proxies !"
     NotFound: str = "%s not found"
+    AllSeries: str = "All Series"
+    AllMovies: str = "All Movies"
+    AllChannels: str = "All Channels"
 
     @staticmethod
     def as_dict() -> dict[str, str]:

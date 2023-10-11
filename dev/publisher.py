@@ -62,7 +62,7 @@ class Published(NamedTuple):
 
 class Publisher:
     encoding = "utf-8"
-    timeout = 5
+    timeout = 10
 
     def __init__(self, build: CfgBuild, github: CfgGithub) -> None:
         self.build = build

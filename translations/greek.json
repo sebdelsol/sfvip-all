@@ -1,9 +1,9 @@
 {
   "User": "Χρήστης",
-  "UserProxy": "User Proxy χρήστη",
-  "NoProxy": "Λείπει το proxy",
-  "Proxy": "%s Proxy",
-  "RestartFixProxy": "Επανεκκίνηση για να διορθώσετε τα proxies",
+  "UserProxy": "Μεσολάβηση χρήστη",
+  "NoProxy": "Λείπει ο μεσολάβησης",
+  "Proxy": "%s μεσολάβηση",
+  "RestartFixProxy": "Επανεκκίνηση για να διορθώσετε τις μεσολάβησης",
   "ShouldUseVersion": "Θα πρέπει να χρησιμοποιήσετε την έκδοση %s",
   "SearchWholeCatalog": "Αναζητήστε ολόκληρο τον κατάλογό σας",
   "Download": "Λήψη",
@@ -17,9 +17,12 @@
   "UnknownVersion": "Άγνωστη έκδοση",
   "PleaseWait": "Παρακαλώ περιμένετε",
   "CheckLastestLibmpv": "Ελέγξτε την τελευταία ενημέρωση libmpv",
-  "RestartInstall": "Θέλετε να κάνετε επανεκκίνηση για να εγκαταστήσετε το %s",
-  "SearchOrDownload": "Θέλετε να το αναζητήσετε ή να το κατεβάσετε",
+  "RestartInstall": "Θέλετε να κάνετε επανεκκίνηση για να εγκαταστήσετε την %s",
+  "SearchOrDownload": "Θέλετε να την αναζητήσετε ή να την κατεβάσετε",
   "NoSocketPort": "Δεν υπάρχει διαθέσιμη θύρα υποδοχής!",
-  "CantStartProxies": "Δεν μπορεί να ξεκινήσει το τοπικό proxies!",
-  "NotFound": "%s δεν βρέθηκε."
+  "CantStartProxies": "Δεν μπορούν να ξεκινήσουν οι τοπικές μεσολάβησης!",
+  "NotFound": "%s δεν βρέθηκε",
+  "AllSeries": "Όλες οι σειρές",
+  "AllMovies": "Όλες οι ταινίες",
+  "AllChannels": "Όλα τα κανάλια"
 }
