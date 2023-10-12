@@ -1,13 +1,12 @@
 import shutil
-from pathlib import Path
 
-from src.sfvip.tools.exe import is64_exe
+from src.sfvip.utils.exe import is64_exe
 
-from ..tools.color import Title, Warn
-from ..tools.command import CommandMonitor
-from ..tools.dist import get_dist_temp
-from ..tools.env import PythonEnv
-from ..tools.protocols import CfgBuild
+from ..utils.color import Title, Warn
+from ..utils.command import CommandMonitor
+from ..utils.dist import Dist
+from ..utils.env import PythonEnv
+from ..utils.protocols import CfgBuild
 from .files import IncludeFiles
 
 
@@ -15,7 +14,7 @@ class Nuitka:
     def __init__(self, build: CfgBuild, mingw: bool, do_run: bool) -> None:
         self.build = build
         self.do_run = do_run
-
+        self.dist = Dist(build)
         if do_run:
             self.args = (
                 *(f"--enable-plugin={plugin}" for plugin in build.nuitka_plugins),
@@ -38,15 +37,27 @@ class Nuitka:
         else:
             self.args = ()
 
+    def clean_logs(self, python_env: PythonEnv) -> None:
+        dist = self.dist.dist_dir(python_env)
+        if self.build.logs_dir:
+            logs_dir = dist / self.build.logs_dir
+            if logs_dir.is_dir():
+                shutil.rmtree(logs_dir)
+            logs_dir.mkdir(parents=True)
+
+    def check_exe(self, python_env: PythonEnv) -> bool:
+        dist = self.dist.dist_dir(python_env)
+        exe = dist / f"{self.build.name}.exe"
+        return dist.is_dir() and is64_exe(exe) == python_env.is_64
+
     def run(self, python_env: PythonEnv) -> bool:
-        dist_temp = get_dist_temp(self.build, python_env.is_64)
         if self.do_run:
             print(Title("Build by Nuitka"))
             nuitka = CommandMonitor(
                 python_env.exe,
                 "-m",
                 "nuitka",
-                f"--output-dir={dist_temp}",
+                f"--output-dir={self.dist.build_dir(python_env)}",
                 *(
                     f"--include-plugin-directory={python_env.path_str}/Lib/site-packages/{plugin_dir}"
                     for plugin_dir in self.build.nuitka_plugin_dirs
@@ -57,13 +68,8 @@ class Nuitka:
                 return False
         else:
             print(Warn("Skip Build by Nuitka"))
-        # check dist exist and the exe inside is the right bitness
-        dist = Path(dist_temp) / f"{Path(self.build.main).stem}.dist"
-        # create and clean the logs directory (needed if we launch the app in dist)
-        if self.build.logs_dir:
-            logs_dir = dist / self.build.logs_dir
-            if logs_dir.is_dir():
-                shutil.rmtree(logs_dir)
-            logs_dir.mkdir(parents=True)
-        exe = dist / f"{self.build.name}.exe"
-        return dist.is_dir() and is64_exe(exe) == python_env.is_64
+
+        if self.check_exe(python_env):
+            self.clean_logs(python_env)
+            return True
+        return False

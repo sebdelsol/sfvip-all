@@ -18,7 +18,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-lightgrey)](https://nuitka.net/)
-[![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
+[![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
 
 Check the [***build config***](build_config.py).  
@@ -29,7 +29,7 @@ Set ***{env_x64_decl}*** appropriately if you use a different environement.
 ```console
 python -m venv {env_x64}
 {env_x64}\scripts\activate
-python -m pip install -r requirements.txt -r requirements.dev.txt
+python -m pip install -r {requirements_x64}
 ```
 ### Run locally
 ```console
@@ -38,12 +38,12 @@ python -m {script_main}
 ### Build with ***Mingw64***
 _The easiest option._
 ```console
-python -m build --mingw
+python -m dev.build --mingw
 ```
 ### Build with ***Clang***
 _The recommended option._
 ```console
-python -m build
+python -m dev.build
 ```
 You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig):
 
@@ -55,27 +55,27 @@ Set ***{env_x86_decl}*** appropriately if you use a different environement.
 ```console
 python -m venv {env_x86}
 {env_x86}\scripts\activate
-python -m pip install -r requirements.txt -r requirements.dev.txt -r requirements.x86.txt
+python -m pip install -r {requirements_x86}
 ```
-You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the ***x86*** version of mitmproxy:  
+You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
 ```console
 rustup target add i686-pc-windows-msvc
 ```
 ### Build a specific version
 ```console
-python -m build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish] [--mingw]
+python -m dev.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish] [--mingw]
 ```
 ### Upgrade dependencies
 ```console
-python -m upgrade [--x86 | --x64 | --both] [--noeager]
+python -m dev.upgrade [--x86 | --x64 | --both] [--noeager]
 ```
 ### Publish an update
 ```console
-python -m publish [--x86 | --x64 | --both] [--version VERSION] [--info]
+python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```
 
-### Translate the UI
+### Translations
 You need a [***DeepL API key***](https://www.deepl.com/en/docs-api/).
 ```console
-python -m translate [--force] [--language LANGUAGE]
+python -m dev.translate [--force] [--language LANGUAGE]
 ```

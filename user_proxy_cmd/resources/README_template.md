@@ -17,11 +17,11 @@ _Remove it:_
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-lightgrey)](https://nuitka.net/)
-[![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
+[![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
 
-You'll need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
+You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
 
 ```console
-python -m user_proxy_cmd.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--mingw]
+python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--mingw]
 ```

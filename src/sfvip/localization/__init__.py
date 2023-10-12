@@ -3,9 +3,9 @@ import json
 import locale
 import logging
 from pathlib import Path
-from typing import Optional, Self
+from typing import Optional, Sequence
 
-from .languages import all_languages, code_to_languages, languages_typo
+from .languages import code_to_languages, languages_typo
 from .texts import Texts
 
 logger = logging.getLogger(__name__)
@@ -32,16 +32,27 @@ class _LOC(Texts):
 
     def __init__(self) -> None:
         self._language = _get_default_language()
+        self._translations = None
 
-    def set_language(self, language: Optional[str]) -> Self:
+    @property
+    def all_languages(self) -> Sequence[str]:
+        return tuple(code_to_languages.values())
+
+    def set_tranlastions(self, translations: Path) -> None:
+        self._translations = translations
+
+    def set_language(self, language: Optional[str]) -> None:
         if language:
             language = languages_typo.get(language.lower(), language.lower())
-            if language in all_languages:
+            if language in self.all_languages:
                 self._language = language
-        return self
+        self._apply_language()
 
-    def apply_language(self, translations: Path) -> None:
-        translation_json = translations / f"{self._language}.json"
+    def _apply_language(self) -> None:
+        if self._translations is None:
+            logger.warning("no translations found")
+            return
+        translation_json = self._translations / f"{self._language}.json"
         try:
             with translation_json.open("r", encoding=_LOC._encoding) as f:
                 translation: dict[str, str] = json.load(f)

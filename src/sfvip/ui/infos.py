@@ -49,7 +49,7 @@ class _InfoStyle:
     app = stl.copy().smaller(2)
 
 
-def _get_infos_headers(app_name: str) -> tuple[_Style, ...]:
+def _get_infos_headers(app_name: str) -> Sequence[_Style]:
     return (
         _InfoStyle.name(LOC.User).bigger(2).bold,
         _InfoStyle.blank,
@@ -59,7 +59,7 @@ def _get_infos_headers(app_name: str) -> tuple[_Style, ...]:
     )
 
 
-def _get_row(info: Info) -> tuple[_Style, ...]:
+def _get_row(info: Info) -> Sequence[_Style]:
     return (
         _InfoStyle.name(info.name) if info.name else _InfoStyle.name("-").grey,
         _InfoStyle.arrow if info.name else _InfoStyle.blank,

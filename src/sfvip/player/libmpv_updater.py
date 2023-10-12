@@ -4,9 +4,9 @@ from typing import Callable, Self
 
 from ..app_info import AppConfig
 from ..localization import LOC
-from ..tools.guardian import ThreadGuardian
-from ..tools.scheduler import Scheduler
 from ..ui import UI
+from ..utils.guardian import ThreadGuardian
+from ..utils.scheduler import Scheduler
 from .libmpv_dll import LibmpvDll
 
 # prevent execution if already in use in another thread

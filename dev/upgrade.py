@@ -1,6 +1,7 @@
 from build_config import Environments
-from dev.tools.env import EnvArgs
-from dev.upgrader import Upgrader
+
+from .tools.upgrader import Upgrader
+from .tools.utils.env import EnvArgs
 
 
 # comments are turned into argparse help

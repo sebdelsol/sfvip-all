@@ -1,10 +1,6 @@
 {
     // pylint
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
-    "python.linting.pylintArgs": [
-        "--enable=F,E,W,R,C", // show Fatal, Error, Warning, Refactor, Convention
-        "--good-names-rgxs=^[_a-z][_a-z0-9]?$",
+    "pylint.args": [
         "--disable=missing-module-docstring",
         "--disable=missing-class-docstring",
         "--disable=missing-function-docstring",
@@ -13,8 +9,17 @@
         "--load-plugins=pylint.extensions.no_self_use",
         "--max-line-length=115"
     ],
-    // type checking
+    "pylint.severity" : { 
+        "convention": "Warning", 
+        "error": "Error", 
+        "fatal": "Error", 
+        "refactor": "Warning", 
+        "warning": "Warning", 
+        "info": "Warning" 
+    },
+    // type checking (pylance)
     "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticMode": "workspace",
     // black
     "black-formatter.args": [
         "--line-length=115"
@@ -38,6 +43,4 @@
     "python.envFile": "${workspaceFolder}/.sfvip64/", 
     "python.terminal.activateEnvironment": true,
     "python.terminal.activateEnvInCurrentTerminal": true,
-    // https://github.com/microsoft/tsdoc/issues/253#issuecomment-1536531668
-    "json.validate.enable": false
 }

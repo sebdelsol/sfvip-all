@@ -88,7 +88,7 @@ INSTAL_IN_PATH_ARG = {"install": True, "uninstall": False}
 
 def install_in_path() -> None:
     if len(sys.argv) == 2:
-        exe_dir = str(Path(sys.argv[0]).parent.absolute())
+        exe_dir = str(Path(sys.argv[0]).parent.resolve())
         install = INSTAL_IN_PATH_ARG.get(sys.argv[1])
         if install is not None:
             remove_from_sys_path(exe_dir)

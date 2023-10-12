@@ -85,3 +85,16 @@ class CfgTexts(Protocol):
     @staticmethod
     def as_dict() -> dict[str, str]:
         ...
+
+
+class CfgLOC(Protocol):
+    @property
+    def AlreadyRunning(self) -> str:  # pylint: disable=invalid-name
+        ...
+
+    @property
+    def all_languages(self) -> Sequence[str]:
+        ...
+
+    def set_language(self, language: Optional[str]) -> None:
+        ...

@@ -50,6 +50,10 @@ class PythonEnv:
         return None
 
     @cached_property
+    def bitness_str(self) -> str:
+        return get_bitness_str(self.is_64)
+
+    @cached_property
     def is_64(self) -> bool:
         script = "import sys; print(int(sys.maxsize == (2**63) - 1))"
         if is_64 := self.run_python("-c", script):
@@ -82,7 +86,7 @@ class PythonEnv:
         return "".join(
             (
                 Title("In "),
-                Ok(get_bitness_str(self.is_64)),
+                Ok(self.bitness_str),
                 Title(" Python "),
                 Ok(self.python_version),
                 Title(" environment "),
@@ -114,6 +118,14 @@ class EnvArgs(Tap):
                 yield False
         else:
             yield None
+
+
+class PythonEnvs:
+    def __init__(self, environments: CfgEnvironments, args: Optional[EnvArgs] = None) -> None:
+        self.asked = args.get_python_envs(environments) if args else []
+        self.all = [PythonEnv(environments, bitness) for bitness in (True, False)]
+        self.x64 = PythonEnv(environments, True)
+        self.x86 = PythonEnv(environments, False)
 
 
 class RequiredBy:

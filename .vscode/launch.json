@@ -10,9 +10,18 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "suppressMultipleSessionWarning": true,
-            "env": {
-                "PYDEVD_DISABLE_FILE_VALIDATION": "1" // remove debugger warning
-              },
+            "autoReload": {"enable": true}
+        },
+        {
+            "name": "Python : current module",
+            "type": "python",
+            "request": "launch",
+            "subProcess": true,
+            "module": "${relativeFileDirname}.${fileBasenameNoExtension}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "autoReload": {"enable": true},
+            "env": {"PYDEVD_DISABLE_FILE_VALIDATION": "1"} // remove debugger warning
         }
     ]
 }

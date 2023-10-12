@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import quote
 
-from .tools.color import Low, Ok, Title, Warn
-from .tools.dist import get_dist_name
-from .tools.env import PythonEnv, get_bitness_str
-from .tools.protocols import (
+from .utils.color import Low, Ok, Title, Warn
+from .utils.dist import Dist
+from .utils.env import PythonEnv, PythonEnvs, get_bitness_str
+from .utils.protocols import (
     CfgBuild,
     CfgEnvironments,
     CfgGithub,
@@ -64,17 +64,19 @@ class Templater:
 
     def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
         python_version = _get_python_version(environments)
-        dist_name32 = get_dist_name(build, is_64=False)
-        dist_name64 = get_dist_name(build, is_64=True)
+        dist = Dist(build)
+        python_envs = PythonEnvs(environments)
         self.template_format = dict(
+            exe64_link=quote(str(dist.installer_exe(python_envs.x64).as_posix())),
+            exe32_link=quote(str(dist.installer_exe(python_envs.x86).as_posix())),
+            requirements_x64=" -r ".join(environments.X64.requirements),
+            requirements_x86=" -r ".join(environments.X86.requirements),
             env_x64_decl=_get_attr_link(environments.X64, "path"),
             env_x86_decl=_get_attr_link(environments.X86, "path"),
             py_version_compact=python_version.replace(".", ""),
             nuitka_version=_get_nuitka_version(environments),
             github_path=f"{github.owner}/{github.repo}",
             sloc=_get_sloc(Path(build.main).parent),
-            exe64_link=quote(f"{dist_name64}.exe"),
-            exe32_link=quote(f"{dist_name32}.exe"),
             script_main=Path(build.main).stem,
             env_x64=environments.X64.path,
             env_x86=environments.X86.path,

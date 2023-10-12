@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from ..winapi import mutex, pids
-from .tools.retry import RetryIfException
+from .utils.retry import RetryIfException
 
 logger = logging.getLogger(__name__)
 

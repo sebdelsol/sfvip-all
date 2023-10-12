@@ -24,5 +24,6 @@
   "NotFound": "%s bulunamadı",
   "AllSeries": "Tüm Diziler",
   "AllMovies": "Tüm Filmler",
-  "AllChannels": "Tüm Kanallar"
+  "AllChannels": "Tüm Kanallar",
+  "AlreadyRunning": "%s çalışıyor. Lütfen önce onu kapatın"
 }

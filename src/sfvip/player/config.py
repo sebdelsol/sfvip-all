@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import IO, Any, Callable, Optional, Self
 
 from ...winapi import mutex
-from ..tools.retry import RetryIfException
+from ..utils.retry import RetryIfException
 from ..watchers import FileWatcher, RegistryWatcher
 from .registry import Registry
 

@@ -24,5 +24,6 @@
   "NotFound": "%s δεν βρέθηκε",
   "AllSeries": "Όλες οι σειρές",
   "AllMovies": "Όλες οι ταινίες",
-  "AllChannels": "Όλα τα κανάλια"
+  "AllChannels": "Όλα τα κανάλια",
+  "AlreadyRunning": "%s τρέχει. Παρακαλούμε κλείστε το πρώτα"
 }

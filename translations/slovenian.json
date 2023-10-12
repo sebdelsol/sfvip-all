@@ -24,5 +24,6 @@
   "NotFound": "%s ni najden",
   "AllSeries": "Vse serije",
   "AllMovies": "Vsi filmi",
-  "AllChannels": "Vsi kanali"
+  "AllChannels": "Vsi kanali",
+  "AlreadyRunning": "%s deluje. Prosimo, da ga najprej zaprete"
 }

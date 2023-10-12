@@ -14,4 +14,3 @@ code_to_languages = dict(
 )
 
 languages_typo = {"poland": "polish"}
-all_languages = tuple(code_to_languages.values())

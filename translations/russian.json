@@ -24,5 +24,6 @@
   "NotFound": "%s не найден",
   "AllSeries": "Все серии",
   "AllMovies": "Все фильмы",
-  "AllChannels": "Все каналы"
+  "AllChannels": "Все каналы",
+  "AlreadyRunning": "%s запущен. Пожалуйста, сначала закройте его"
 }

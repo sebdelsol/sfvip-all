@@ -5,7 +5,7 @@ from typing import NamedTuple, Optional
 
 from cpuinfo.cpuinfo import _get_cpu_info_from_cpuid
 
-from ..tools.exe import is64_exe
+from ..utils.exe import is64_exe
 
 logger = logging.getLogger(__name__)
 

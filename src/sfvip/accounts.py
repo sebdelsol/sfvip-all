@@ -4,12 +4,12 @@ import re
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
-from typing import IO, Callable, Iterator, Optional
+from typing import IO, Callable, Iterator, Optional, Sequence
 
 from .player.config import PlayerDatabase
 from .shared import SharedEventTime, SharedProxiesToRestore
-from .tools.retry import RetryIfException
 from .ui import UI, Info
+from .utils.retry import RetryIfException
 
 logger = logging.getLogger(__name__)
 
@@ -141,7 +141,7 @@ class AccountsProxies:
                     logger.info("%s user %s proxy to '%s'", msg, account.Name, account.HttpProxy)
             self._database.save()
 
-    def _infos(self, proxies: dict[str, str]) -> tuple[Info, ...]:
+    def _infos(self, proxies: dict[str, str]) -> Sequence[Info]:
         self._database.load()
         return tuple(
             Info(account.Name, proxies.get(account.HttpProxy, ""), account.HttpProxy)

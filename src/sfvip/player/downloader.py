@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Optional
 
 from ..app_info import AppInfo
-from ..tools.downloader import download_and_unpack, exceptions
 from ..ui.window import ProgressWindow
+from ..utils.downloader import download_and_unpack, exceptions
 from .cpu import Cpu
 from .libmpv_dll import LibmpvDll
 

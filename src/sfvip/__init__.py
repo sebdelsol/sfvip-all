@@ -4,11 +4,11 @@ from .accounts import AccountsProxies
 from .app_info import AppInfo
 from .app_updater import AltLastRegisterT, AppAutoUpdater, AppUpdater
 from .localization import LOC
-from .player import Player, PLayerLanguageLoader
+from .player import Player, PlayerLanguageLoader
 from .player.exception import PlayerNotFoundError
 from .proxies import LocalProxies, LocalproxyError
-from .tools.clean_files import CleanFilesIn
 from .ui import UI
+from .utils.clean_files import CleanFilesIn
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: int) -> None:
     exceptions = PlayerNotFoundError, LocalproxyError
     logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
-    LOC.set_language(PLayerLanguageLoader().language).apply_language(app_info.translations)
+    LOC.set_tranlastions(app_info.translations)
+    LOC.set_language(PlayerLanguageLoader().language)
     ui = UI(app_info)
     app_config = app_info.config.update()
     try:

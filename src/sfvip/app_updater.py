@@ -9,13 +9,13 @@ import requests
 
 from .app_info import AppConfig, AppInfo
 from .localization import LOC
-from .tools.clean_files import CleanFilesIn
-from .tools.downloader import download_to, exceptions
-from .tools.exe import compute_md5
-from .tools.guardian import ThreadGuardian
-from .tools.scheduler import Scheduler
 from .ui import UI
 from .ui.window import AskWindow, ProgressWindow
+from .utils.clean_files import CleanFilesIn
+from .utils.downloader import download_to, exceptions
+from .utils.exe import compute_md5
+from .utils.guardian import ThreadGuardian
+from .utils.scheduler import Scheduler
 
 logger = logging.getLogger(__name__)
 

@@ -1,15 +1,15 @@
 import json
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 from deep_translator import DeeplTranslator, GoogleTranslator
 from tap import Tap
 
-from secret import DEEPL_KEY
+from api_keys import DEEPL_KEY
 
-from .tools.color import Low, Ok, Title, Warn
-from .tools.protocols import CfgFile, CfgTexts
+from .utils.color import Low, Ok, Title, Warn
+from .utils.protocols import CfgFile, CfgTexts
 
 
 # comments are turned into argparse help
@@ -68,7 +68,7 @@ class IsNewer:
         return not file.exists() or file.stat().st_mtime < self.obj_mtime
 
 
-def translate(texts: CfgTexts, all_languages: tuple[str, ...], translation_dir: CfgFile) -> None:
+def translate(texts: CfgTexts, all_languages: Sequence[str], translation_dir: CfgFile) -> None:
     assert isinstance(texts, type)
     is_newer_texts = IsNewer(texts)
     args = Args().parse_args()

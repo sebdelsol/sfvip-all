@@ -1,8 +1,10 @@
-from build_config import Environments, Github, Templates
-from dev.builder import Builder
-from dev.cleaner import clean_old_build
-from dev.templater import Templater
-from src.sfvip.localization.languages import all_languages
+from pathlib import Path
+
+from build_config import Environments, Github, Templates, Translations
+from dev.tools.builder import Builder
+from dev.tools.cleaner import clean_old_build
+from dev.tools.templater import Templater
+from src.sfvip.localization import LOC
 
 
 class Build:
@@ -38,8 +40,9 @@ Environments.X64.requirements = []  # type: ignore
 Environments.X86.requirements = []  # type: ignore
 
 if __name__ == "__main__":
-    if Builder(Build, Environments, Github, all_languages).build_all():
+    LOC.set_tranlastions(Path(Translations.path))
+    if Builder(Build, Environments, Github, LOC).build_all():
         Templater(Build, Environments, Github).create_all(Templates)
-        clean_old_build(Build, Github, Readme)
+        clean_old_build(Build, Environments, Github, Readme)
     else:
         Templater(Build, Environments, Github).create(Readme)

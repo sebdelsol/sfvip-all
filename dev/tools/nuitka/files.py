@@ -4,9 +4,9 @@ from typing import Iterator, Sequence
 
 from PIL import Image
 
-from ..tools.color import Low, Ok, Title
-from ..tools.dist import to_ico
-from ..tools.protocols import CfgFile, CfgFileResize
+from ..utils.color import Low, Ok, Title
+from ..utils.dist import to_ico
+from ..utils.protocols import CfgFile, CfgFileResize
 
 
 class IncludeFiles:

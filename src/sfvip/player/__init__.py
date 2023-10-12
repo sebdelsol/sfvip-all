@@ -29,13 +29,13 @@ class _PlayerConfigDirSetting(PlayerConfigDirSettingWatcher):
         return self._watcher
 
 
-class PLayerLanguageLoader(PlayerConfig):
+class PlayerLanguageLoader(PlayerConfig):
     language_key = "Language"
 
     @property
     def language(self) -> Optional[str]:
         if config := self.load():
-            return config[PLayerLanguageLoader.language_key]
+            return config[PlayerLanguageLoader.language_key]
         return None
 
 
@@ -146,7 +146,7 @@ class Player:
             self._rect_loader.rect = self._launcher.rect
 
         with self._libmpv_updater:
-            with _PlayerConfigDirSetting().watch(self.relaunch):  # pylint: disable=not-context-manager
+            with _PlayerConfigDirSetting().watch(self.relaunch):
                 with subprocess.Popen([self.exe]) as self._process:
                     logger.info("player started")
                     self._window_watcher.start(self._process.pid)

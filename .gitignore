@@ -2,4 +2,4 @@ __pycache__/
 .sfvip*/
 temp/
 *.log
-secret.py
+api_keys.py

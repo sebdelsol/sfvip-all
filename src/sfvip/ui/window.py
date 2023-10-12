@@ -131,7 +131,6 @@ class _TitleBarWindow(_Window):
 
 
 class MessageWindow(_TitleBarWindow):
-    # pylint: disable=too-many-arguments
     def __init__(self, title: str, message: str, width: int = 400, force_create: bool = False) -> None:
         super().__init__(title=title, width=width, bg=_Theme.bg, force_create=force_create)
         label = tk.Label(self, bg=_Ask.bg, **_Ask.text(message).to_tk)

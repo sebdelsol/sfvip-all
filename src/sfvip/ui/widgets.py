@@ -95,7 +95,6 @@ class _Button(tk.Button):
     with a mouseover color
     """
 
-    #
     # pylint: disable=too-many-arguments
     def __init__(
         self,

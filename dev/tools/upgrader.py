@@ -4,10 +4,10 @@ import tempfile
 from pathlib import Path
 from typing import Iterator, NamedTuple, Optional
 
-from .tools.color import Low, Ok, Title, Warn
-from .tools.columns import Columns, Justify
-from .tools.command import CommandMonitor
-from .tools.env import PythonEnv, RequiredBy
+from .utils.color import Low, Ok, Title, Warn
+from .utils.columns import Columns, Justify
+from .utils.command import CommandMonitor
+from .utils.env import PythonEnv, RequiredBy
 
 
 class _Pckg(NamedTuple):

@@ -1,13 +1,14 @@
-from typing import Sequence
+from pathlib import Path
+from typing import Optional
 
 from .nsis import NSIS
 from .nuitka import Nuitka
 from .publisher import Publisher
-from .tools.color import Low, Ok, Title, Warn
-from .tools.dist import get_bitness_str, get_dist_name
-from .tools.env import EnvArgs, PythonEnv
-from .tools.protocols import CfgBuild, CfgEnvironments, CfgGithub
 from .upgrader import Upgrader
+from .utils.color import Ok, Title, Warn
+from .utils.dist import Dist
+from .utils.env import EnvArgs, PythonEnv, PythonEnvs
+from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub, CfgLOC
 
 
 # comments are turned into argparse help
@@ -34,25 +35,17 @@ class Args(EnvArgs):
 
 
 class Builder:
-    with_nuitka = Low("with"), Ok("Nuitka")
-    with_NSIS = Low("with"), Ok("NSIS")
-
-    def __init__(
-        self,
-        build: CfgBuild,
-        environments: CfgEnvironments,
-        github: CfgGithub,
-        all_languages: Sequence[str],
-    ) -> None:
+    def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub, loc: CfgLOC) -> None:
         self.build = build
         self.args = Args().parse_args()
-        self.nsis = NSIS(build, all_languages, self.args.installer)
-        self.publisher = Publisher(build, github)
+        self.dist = Dist(build)
         self.nuitka = Nuitka(build, self.args.mingw, self.args.build)
-        self.python_envs = self.args.get_python_envs(environments)
+        self.nsis = NSIS(build, loc, self.args.installer)
+        self.publisher = Publisher(build, environments, github)
+        self.python_envs = PythonEnvs(environments, self.args)
 
-    def build_in(self, python_env: PythonEnv) -> str:
-        name = f"{self.build.name} v{self.build.version} {get_bitness_str(python_env.is_64)}"
+    def build_in(self, python_env: PythonEnv) -> Optional[Path]:
+        name = f"{self.build.name} v{self.build.version} {python_env.bitness_str}"
         print(python_env)
         print(Title("Building"), Ok(name))
         if python_env.check():
@@ -61,23 +54,23 @@ class Builder:
             if self.nuitka.run(python_env):
                 if built := self.nsis.run(python_env):
                     if self.args.publish:
-                        self.publisher.publish(python_env.is_64)
+                        self.publisher.publish(python_env)
                 return built
         print(Warn("Build failed"), Ok(name))
-        return ""
+        return None
 
     def build_all(self) -> bool:
         builts = []
         if self.args.build or self.args.installer:
             print()
-            for python_env in self.python_envs:
+            for python_env in self.python_envs.asked:
                 if built := self.build_in(python_env):
                     builts.append(built)
                     print()
+
         not_builts = []
-        for is_64 in (True, False):
-            build = f"{get_dist_name(self.build, is_64)}.exe"
-            if build not in builts:
+        for python_env in self.python_envs.all:
+            if (build := self.dist.installer_exe(python_env)) not in builts:
                 not_builts.append(build)
         if not_builts:
             print(Title("Not built:"))

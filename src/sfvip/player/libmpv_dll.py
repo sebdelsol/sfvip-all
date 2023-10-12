@@ -15,8 +15,8 @@ import requests
 
 from ...config_loader import ConfigLoader
 from ..localization import LOC
-from ..tools.downloader import download_and_unpack, exceptions
 from ..ui.window import AskWindow, ProgressWindow
+from ..utils.downloader import download_and_unpack, exceptions
 from .cpu import Cpu
 
 logger = logging.getLogger(__name__)

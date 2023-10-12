@@ -1,3 +1,8 @@
+## 1.4.0
+* Check _Sfvip All_ is not running when installing or uninstalling.
+* Overwrite already installed file when needed.
+* Builder overhaul.
+
 ## 1.3.12
 * Logs are easier found.
 

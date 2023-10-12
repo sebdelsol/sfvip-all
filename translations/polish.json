@@ -24,5 +24,6 @@
   "NotFound": "%s nie znaleziono",
   "AllSeries": "Wszystkie seriale",
   "AllMovies": "Wszystkie filmy",
-  "AllChannels": "Wszystkie kanały"
+  "AllChannels": "Wszystkie kanały",
+  "AlreadyRunning": "%s jest uruchomiony. Zamknij go najpierw"
 }

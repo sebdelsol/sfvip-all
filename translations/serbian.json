@@ -24,5 +24,6 @@
   "NotFound": "%s није пронађено",
   "AllSeries": "Алл Сериес",
   "AllMovies": "Сви филмови",
-  "AllChannels": "Сви канали"
+  "AllChannels": "Сви канали",
+  "AlreadyRunning": "%s ради. Прво га затворите"
 }
