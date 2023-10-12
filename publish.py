@@ -1,9 +1,9 @@
-from build_config import Build, Github
+from build_config import Build, Github, Readme
 from dev.cleaner import clean_old_build
 from dev.publisher import Publisher
 
 if __name__ == "__main__":
     publisher = Publisher(Build, Github)
     if publisher.publish_all():
-        clean_old_build(Build, Github)
+        clean_old_build(Build, Github, Readme)
     publisher.show_versions()

@@ -1,3 +1,6 @@
+## 1.3.12
+* Logs are easier found.
+
 ## 1.3.11
 * All categories translations in vod & series panels.
 

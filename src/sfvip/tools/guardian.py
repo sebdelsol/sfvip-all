@@ -32,7 +32,7 @@ class ThreadGuardian:
         with self._lock:
             if self._used_by == threading.get_ident():
                 self._count -= 1
-                if self._count == 0:
+                if not self._count:
                     self._used_by = None
 
     def __call__(self, func: Callable[P, None]) -> Callable[P, None]:

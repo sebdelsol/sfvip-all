@@ -44,15 +44,17 @@ class NSIS:
     def __init__(self, build: CfgBuild, all_languages: Sequence[str], do_run: bool) -> None:
         self.build = build
         self.do_run = do_run
-        self.virus_scan = VirusScan()
+        self.virus_scan = VirusScan(update=do_run)
         self.format = dict(
             finish_page=int(build.install_finish_page),
             **get_cmd("install", build.install_cmd),
             **get_cmd("uninstall", build.uninstall_cmd),
+            has_logs=int(bool(build.logs_dir)),
+            logs_dir=str(Path(build.logs_dir)),
             name=build.name,
             version=get_version(build.version, NSIS.version_length),
             company=build.company,
-            ico=to_ico(build.ico),
+            ico=str(Path(to_ico(build.ico))),
             languages=get_languages(all_languages),
             dist=f"{Path(build.main).stem}.dist",
         )
@@ -75,7 +77,7 @@ class NSIS:
             f.write(code)
         return str(script.resolve())
 
-    def create_dist(self, python_env: PythonEnv) -> str:
+    def copy_installer(self, python_env: PythonEnv) -> str:
         dist_temp = get_dist_temp(self.build, python_env.is_64)
         dist_name = get_dist_name(self.build, python_env.is_64)
         Path(dist_name).parent.mkdir(parents=True, exist_ok=True)
@@ -93,7 +95,7 @@ class NSIS:
             if nsis.run(out=Title, err=Warn):
                 dist_temp = get_dist_temp(self.build, python_env.is_64)
                 if self.virus_scan.run_on(Path(dist_temp)):
-                    return self.create_dist(python_env)
+                    return self.copy_installer(python_env)
         else:
             print(Warn("Skip Installer by NSIS"))
         return ""

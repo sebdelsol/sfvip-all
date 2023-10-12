@@ -4,7 +4,7 @@ import winreg
 from pathlib import Path
 from typing import Any, Callable, Iterator, NamedTuple, Optional
 
-from ..app_info import AppConfig
+from ..app_info import AppInfo
 from ..localization import LOC
 from ..ui import UI
 from .downloader import download_player
@@ -43,10 +43,11 @@ class PlayerExe:
     _name = "sfvip player"
     _pattern = "*sf*vip*player*.exe"
 
-    def __init__(self, app_config: AppConfig, ui: UI) -> None:
+    def __init__(self, app_info: AppInfo, ui: UI) -> None:
         self._ui = ui
-        self._app_config = app_config
-        self._exe = app_config.Player.exe = self._find()
+        self._app_info = app_info
+        self._app_config = app_info.config
+        self._exe = app_info.config.Player.exe = self._find()
         logger.info("player is '%s'", self._exe)
 
     @property
@@ -86,7 +87,7 @@ class PlayerExe:
                 exe = self._ui.find_file(PlayerExe._name, PlayerExe._pattern)
             else:
                 logger.info("try to download the player")
-                exe = download_player(PlayerExe._name, timeout=self._app_config.App.requests_timeout)
+                exe = download_player(PlayerExe._name, self._app_info, self._app_config.App.requests_timeout)
             if exe:
                 yield exe
                 break

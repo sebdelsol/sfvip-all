@@ -1,9 +1,15 @@
+# pylint: disable=wrong-import-position
 # use a separate named package to reduce what's imported by multiproccessing
+if "__compiled__" in globals():
+    # remove warning when launched by nuitka
+    import warnings  # fmt: skip
+    warnings.simplefilter("ignore")  # fmt: skip
+
 import asyncio
 import logging
 import multiprocessing
 import threading
-from typing import Any, NamedTuple, Protocol
+from typing import Any, NamedTuple, Protocol, Sequence
 
 from mitmproxy import http, options
 from mitmproxy.addons import (
@@ -24,7 +30,7 @@ logging.getLogger("mitmproxy.proxy.server").setLevel(logging.WARNING)
 
 # use only the needed addons,
 # Note: use addons.default_addons() instead if any issues
-def _minimum_addons() -> tuple[Any, ...]:
+def _minimum_addons() -> Sequence[Any]:
     return (
         core.Core(),
         disable_h2c.DisableH2C(),

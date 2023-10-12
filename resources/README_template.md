@@ -9,8 +9,7 @@ So you can easily **search your entire catalog**.
 
 [<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/{github_path}/raw/master/{exe32_link})
 
-Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
-
+Check the [***changelog***](build/changelog.md) and the ***notes***[^1].  
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
 [^1]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
@@ -22,9 +21,8 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
 
+Check the [***build config***](build_config.py).  
 You'll need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
-
-Check the [***build config***](build_config.py).
 ### Create an x64 environment
 With [***Python {py_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) or above.  
 Set ***{env_x64_decl}*** appropriately if you use a different environement.  

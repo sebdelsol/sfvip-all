@@ -12,13 +12,20 @@ class Scan(NamedTuple):
 
     def __repr__(self) -> str:
         if self.is_clean:
-            return Ok("clean")
-        return f"{Warn('detected')} {Low(','.join(self.threats))}"
+            return Ok("Clean")
+        return f"{Warn('Detected:')} {Low(','.join(self.threats))}"
 
 
 class VirusScan:
     defender = Path(os.environ["ProgramFiles"]) / "Windows Defender" / "MpCmdRun"
-    args = "-Scan -ScanType 3 -DisableRemediation -Trace -Level 0x10".split()
+    scan_args = "-Scan -ScanType 3 -DisableRemediation -Trace -Level 0x10".split()
+    update_args = "-SignatureUpdate -MMPC".split()
+
+    def __init__(self, update: bool) -> None:
+        if update:
+            print(Title("Update"), Low("virus signatures definitions"))
+            defender_update = VirusScan.defender, *VirusScan.update_args
+            subprocess.run(defender_update, timeout=30, capture_output=True, text=True, check=True)
 
     @staticmethod
     def get_threats(stdout: str) -> Iterator[str]:
@@ -27,13 +34,13 @@ class VirusScan:
                 yield line.split()[-1]
 
     def run_on(self, file: Path) -> bool:
-        print(Title("Scan virus"), Low(str(file)), end=" ")
-        defender = VirusScan.defender, *VirusScan.args, "-File", file.absolute()
+        print(Title("Scan virus"), Ok(str(file.as_posix())), end=" ")
+        defender = VirusScan.defender, *VirusScan.scan_args, "-File", file.absolute()
         process = subprocess.run(defender, timeout=30, capture_output=True, text=True, check=False)
         threats = tuple(self.get_threats(process.stdout))
         scan = Scan(
             threats=threats,
             is_clean=not (process.returncode or threats),
         )
-        print(scan)
+        print(Low("-"), scan)
         return scan.is_clean

@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 import threading
 from functools import total_ordering
 from pathlib import Path
@@ -10,6 +9,7 @@ import requests
 
 from .app_info import AppConfig, AppInfo
 from .localization import LOC
+from .tools.clean_files import CleanFilesIn
 from .tools.downloader import download_to, exceptions
 from .tools.exe import compute_md5
 from .tools.guardian import ThreadGuardian
@@ -83,13 +83,14 @@ AltLastRegisterT = Callable[[Callable[[], None]], None]
 
 
 class AppUpdater:
-    update_exe = "update.exe"
+    update_ext = "update.exe"
 
     def __init__(self, app_info: AppInfo, at_last_register: AltLastRegisterT) -> None:
         self._timeout = app_info.config.App.requests_timeout
         self._app_info = app_info
         self._at_last_register = at_last_register
         self._latest_update = AppLastestUpdate(app_info.update_url.format(bitness=app_info.bitness))
+        self._clean()
 
     def is_new(self, update: AppUpdate) -> bool:
         return _Version(update.version) > _Version(self._app_info.version)
@@ -102,9 +103,12 @@ class AppUpdater:
         logger.warning("check latest %s failed", self._app_info.name)
         return None
 
+    def _clean(self) -> None:
+        CleanFilesIn(self._app_info.current_dir).keep(1, f"{self._app_info.name}.*.{AppUpdater.update_ext}")
+
     def _update_exe(self, update: AppUpdate) -> Path:
-        exe = f"{self._app_info.name}.{update.version}.{self._app_info.bitness}.{AppUpdater.update_exe}"
-        return Path(sys.argv[0]).parent / exe
+        exe = f"{self._app_info.name}.{update.version}.{self._app_info.bitness}.{AppUpdater.update_ext}"
+        return self._app_info.current_dir / exe
 
     def _install(self, update_exe: Path) -> None:
         # replace current process with the update exe

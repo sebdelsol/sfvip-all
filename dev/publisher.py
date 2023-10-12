@@ -136,7 +136,7 @@ class Publisher:
                 Ok(get_bitness_str(published.is_64)),
                 Low(published.md5),
                 published.valid.value,
-                Ok(f'- {"Newer!" if published not in old else "Already published"}' if old else ""),
+                f"{Low('-')} {Ok('Already published') if published in old else Title('New')}" if old else "",
             )
             all_publisheds.append(published)
         if not all_publisheds:

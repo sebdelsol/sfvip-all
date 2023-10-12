@@ -20,6 +20,7 @@ class BuildUpdate(Protocol):
 class Build(BuildUpdate, Protocol):
     name: str
     version: str
+    logs_dir: str
 
     @property
     def files(self) -> Sequence[Files]:
@@ -53,13 +54,15 @@ class AppInfo(NamedTuple):
     logo: Path
     splash: Path
     translations: Path
-    current_dir = Path(sys.argv[0]).parent
+    logs_dir: Path
+    current_dir: Path
     app_64bit: bool = sys.maxsize == (2**63) - 1
     os_64bit: bool = platform.machine().endswith("64")
 
     @classmethod
     def from_build(cls, build: Build, github: Github, app_dir: Path = Path()) -> Self:
         roaming = Path(os.environ["APPDATA"]) / build.name
+        current_dir = Path(sys.argv[0]).parent
         files = {file.__name__: app_dir / file.path for file in build.files}
         return cls(
             name=build.name,
@@ -70,6 +73,8 @@ class AppInfo(NamedTuple):
             logo=files["Logo"],
             splash=files["Splash"],
             translations=files["Translations"],
+            logs_dir=current_dir / build.logs_dir,
+            current_dir=current_dir,
         )
 
     @property

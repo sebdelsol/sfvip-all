@@ -1,10 +1,10 @@
 import logging
 import shutil
-import sys
 import tempfile
 from pathlib import Path
 from typing import Optional
 
+from ..app_info import AppInfo
 from ..tools.downloader import download_and_unpack, exceptions
 from ..ui.window import ProgressWindow
 from .cpu import Cpu
@@ -30,14 +30,14 @@ class _PlayerUpdater:
         return False
 
 
-def download_player(player_name: str, timeout: int) -> Optional[str]:
+def download_player(player_name: str, app_info: AppInfo, timeout: int) -> Optional[str]:
     def download() -> bool:
         if _PlayerUpdater(player_exe).download(timeout, progress):
             return LibmpvDll(player_exe, timeout).download_latest(progress)
         return False
 
-    exe_dir = Path(sys.argv[0]).parent
-    player_dir = exe_dir / f"{player_name.capitalize()} {_PlayerUpdater.bitness}"
+    # in parent dir so it will be kept when uninstalling
+    player_dir = app_info.current_dir.parent / f"{player_name.capitalize()} {_PlayerUpdater.bitness}"
     player_exe = player_dir / f"{player_name}.exe"
     progress = ProgressWindow(f"Download {player_dir.name}")
     if progress.run_in_thread(download, *exceptions):

@@ -83,13 +83,13 @@ class Users:
             self._save()
 
 
-INSTAL_ARG = {"install": True, "uninstall": False}
+INSTAL_IN_PATH_ARG = {"install": True, "uninstall": False}
 
 
-def installer() -> None:
+def install_in_path() -> None:
     if len(sys.argv) == 2:
         exe_dir = str(Path(sys.argv[0]).parent.absolute())
-        install = INSTAL_ARG.get(sys.argv[1])
+        install = INSTAL_IN_PATH_ARG.get(sys.argv[1])
         if install is not None:
             remove_from_sys_path(exe_dir)
             if install:
@@ -102,7 +102,7 @@ def installer() -> None:
 
 
 if __name__ == "__main__":
-    installer()
+    install_in_path()
     parser = argparse.ArgumentParser()
     gp = parser.add_mutually_exclusive_group(required=True)
     gp.add_argument("url", nargs="?", help="add a global user proxy url")

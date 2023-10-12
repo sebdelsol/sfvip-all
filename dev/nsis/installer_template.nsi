@@ -40,6 +40,9 @@ Section
     SetOverwrite ifnewer
     SetOutPath "$InstDir"
     File /r "{dist}"
+    !if {has_logs}
+        CreateDirectory "$InstDir\{dist}\{logs_dir}"
+    !endif
     WriteUninstaller "$InstDir\uninstall.exe"
     ; Add/remove programs
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\{name} {bitness}" "DisplayName" "{name} {bitness}"
@@ -64,6 +67,9 @@ Section "Uninstall"
     !endif
     DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\{name} {bitness}"
     RMDir /r "$InstDir\{dist}"
+    !if {has_logs}
+        RMDir /r "$InstDir\{dist}\{logs_dir}"
+    !endif
     Delete "$InstDir\uninstall.exe"
     ; Delete "$DESKTOP\{name} {bitness}.lnk"
     Delete "$SMPROGRAMS\{name} {bitness}.lnk"

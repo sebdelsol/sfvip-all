@@ -32,6 +32,14 @@ class PanelType(Enum):
     SERIES = "series"
 
 
+def get_panel(panel_type: PanelType, all_category_name: str, streams: bool = True) -> Panel:
+    return Panel(
+        get_categories=f"get_{panel_type.value}_categories",
+        get_category=f"get_{panel_type.value}{'_streams' if streams else ''}",
+        all_category_name=all_category_name,
+    )
+
+
 def _is_api_request(request: http.Request) -> bool:
     return "player_api.php?" in request.path
 
@@ -76,13 +84,6 @@ class SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
     def __init__(self, all_name: AllCategoryName) -> None:
-        def get_panel(panel_type: PanelType, all_category_name: str, streams: bool = True) -> Panel:
-            return Panel(
-                get_categories=f"get_{panel_type.value}_categories",
-                get_category=f"get_{panel_type.value}{'_streams' if streams else ''}",
-                all_category_name=all_category_name,
-            )
-
         panels = [
             get_panel(PanelType.VOD, all_name.vod),
             get_panel(PanelType.SERIES, all_name.series, streams=False),

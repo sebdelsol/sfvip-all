@@ -5,12 +5,11 @@ So you can easily **search your entire catalog**.
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-1.3.11-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.11/x64/Sfvip%20All.exe)
+[<img src="https://img.shields.io/badge/Version-1.3.12-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.12/x64/Sfvip%20All.exe)
 
-[<img src="https://img.shields.io/badge/Version-1.3.11-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.11/x86/Sfvip%20All.exe)
+[<img src="https://img.shields.io/badge/Version-1.3.12-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.12/x86/Sfvip%20All.exe)
 
-Check the [***changelog***](build/changelog.md) and the ***notes***[^1].
-
+Check the [***changelog***](build/changelog.md) and the ***notes***[^1].  
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
 [^1]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
@@ -20,14 +19,13 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.6-fbdf79)](https://www.python.org/downloads/release/python-3116/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8.4-lightgrey)](https://nuitka.net/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-4694-informational)
+![Sloc](https://img.shields.io/badge/Sloc-4752-informational)
 
+Check the [***build config***](build_config.py).  
 You'll need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
-
-Check the [***build config***](build_config.py).
 ### Create an x64 environment
 With [***Python 3.11.6 x64***](https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe) or above.  
-Set ***[`Environments.X64.path`](/build_config.py#L37)*** appropriately if you use a different environement.  
+Set ***[`Environments.X64.path`](/build_config.py#L35)*** appropriately if you use a different environement.  
 ```console
 python -m venv .sfvip64
 .sfvip64\scripts\activate
@@ -53,7 +51,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 ### Build an **x86** version
 With [***Python 3.11.6 x86***](https://www.python.org/ftp/python/3.11.6/python-3.11.6.exe) or above.  
-Set ***[`Environments.X86.path`](/build_config.py#L41)*** appropriately if you use a different environement.  
+Set ***[`Environments.X86.path`](/build_config.py#L39)*** appropriately if you use a different environement.  
 ```console
 python -m venv .sfvip86
 .sfvip86\scripts\activate

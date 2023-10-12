@@ -1,0 +1,8 @@
+[SIZE=10px]Ovo nije zvanična verzija sjajnog Sfvip Plaier-a (preuzmite ga [URL='https://epg.serbianforum.org/Alati/SFVipPlayer/sfplayer.html']ovde[/URL]), već pokretač koji dodaje zanimljive funkcije.[/SIZE]
+
+[B][SIZE=20px]Sfvip All[/B][/SIZE] 1.3.12
+[SIZE=10px][I]Pretražite ceo katalog / Search your whole catalog[/I][/SIZE]
+[HR][/HR]
+[URL='https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.12/x64/Sfvip%20All.exe'][B]x64[/B][/URL] - [URL='https://github.com/sebdelsol/sfvip-all/raw/master/build/1.3.12/x86/Sfvip%20All.exe'][B]x86[/B][/URL] - [URL='https://github.com/sebdelsol/sfvip-all/blob/master/build/changelog.md'][B]Changelog[/B][/URL] - [URL='https://github.com/sebdelsol/sfvip-all'][B]Github[/B][/URL]  
+[HR][/HR]
+[SIZE=10px][I]Dodajte ⭐ ako vam odgovara / Add a ⭐ if you like it[/I][/SIZE]

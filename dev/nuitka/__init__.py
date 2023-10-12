@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 from src.sfvip.tools.exe import is64_exe
@@ -14,8 +15,11 @@ class Nuitka:
     def __init__(self, build: CfgBuild, mingw: bool, do_run: bool) -> None:
         self.build = build
         self.do_run = do_run
-        self.args = (
-            (
+
+        if do_run:
+            self.args = (
+                *(f"--enable-plugin={plugin}" for plugin in build.nuitka_plugins),
+                "--enable-console" if build.enable_console else "--disable-console",
                 f"--company-name={build.company}",
                 f"--file-version={build.version}",
                 f"--product-version={build.version}",
@@ -25,13 +29,14 @@ class Nuitka:
                 *IncludeFiles(build.files, build.ico).all,
                 "--assume-yes-for-downloads",
                 "--python-flag=-OO",
-                *build.nuitka_args,
                 "--standalone",
                 build.main,
             )
-            if do_run
-            else ()
-        )
+            if build.logs_dir:
+                logs = f"--force-stderr-spec=%PROGRAM%/../{build.logs_dir}/{build.name} - %TIME%.log"
+                self.args = logs, *self.args
+        else:
+            self.args = ()
 
     def run(self, python_env: PythonEnv) -> bool:
         dist_temp = get_dist_temp(self.build, python_env.is_64)
@@ -42,7 +47,11 @@ class Nuitka:
                 "-m",
                 "nuitka",
                 f"--output-dir={dist_temp}",
-                *(arg.format(python_env=python_env.path_str) for arg in self.args),
+                *(
+                    f"--include-plugin-directory={python_env.path_str}/Lib/site-packages/{plugin_dir}"
+                    for plugin_dir in self.build.nuitka_plugin_dirs
+                ),
+                *self.args,
             )
             if not nuitka.run(out=Title):
                 return False
@@ -50,5 +59,11 @@ class Nuitka:
             print(Warn("Skip Build by Nuitka"))
         # check dist exist and the exe inside is the right bitness
         dist = Path(dist_temp) / f"{Path(self.build.main).stem}.dist"
+        # create and clean the logs directory (needed if we launch the app in dist)
+        if self.build.logs_dir:
+            logs_dir = dist / self.build.logs_dir
+            if logs_dir.is_dir():
+                shutil.rmtree(logs_dir)
+            logs_dir.mkdir(parents=True)
         exe = dist / f"{self.build.name}.exe"
         return dist.is_dir() and is64_exe(exe) == python_env.is_64

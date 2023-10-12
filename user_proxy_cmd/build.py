@@ -1,5 +1,6 @@
 from build_config import Environments, Github, Templates
 from dev.builder import Builder
+from dev.cleaner import clean_old_build
 from dev.templater import Templater
 from src.sfvip.localization.languages import all_languages
 
@@ -10,9 +11,12 @@ class Build:
     dir = "user_proxy_cmd/build"
     name = "SfvipUserProxy"
     company = "sebdelsol"
-    version = "0.3"
-    nuitka_args = ["--enable-console"]
-    files = []
+    version = "0.4"
+    logs_dir = ""
+    enable_console = True
+    nuitka_plugins = ()
+    nuitka_plugin_dirs = ()
+    files = ()
     update = ""
     install_finish_page = False
     install_cmd = f"{name}.exe", "install"
@@ -34,5 +38,8 @@ Environments.X64.requirements = []  # type: ignore
 Environments.X86.requirements = []  # type: ignore
 
 if __name__ == "__main__":
-    Builder(Build, Environments, Github, all_languages).build_all()
-    Templater(Build, Environments, Github).create_all(Templates)
+    if Builder(Build, Environments, Github, all_languages).build_all():
+        Templater(Build, Environments, Github).create_all(Templates)
+        clean_old_build(Build, Github, Readme)
+    else:
+        Templater(Build, Environments, Github).create(Readme)

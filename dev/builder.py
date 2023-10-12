@@ -59,21 +59,29 @@ class Builder:
             if self.args.upgrade:
                 Upgrader(python_env).check(eager=True)
             if self.nuitka.run(python_env):
-                if dist := self.nsis.run(python_env):
+                if built := self.nsis.run(python_env):
                     if self.args.publish:
                         self.publisher.publish(python_env.is_64)
-                return dist
+                return built
         print(Warn("Build failed"), Ok(name))
         return ""
 
     def build_all(self) -> bool:
+        builts = []
         if self.args.build or self.args.installer:
-            builts = [built for python_env in self.python_envs if (built := self.build_in(python_env))]
-        else:
-            builts = []
-        # missing built versions
-        for is_64 in True, False:
+            print()
+            for python_env in self.python_envs:
+                if built := self.build_in(python_env):
+                    builts.append(built)
+                    print()
+        not_builts = []
+        for is_64 in (True, False):
             build = f"{get_dist_name(self.build, is_64)}.exe"
             if build not in builts:
-                print(Warn("Not built"), Ok(build))
-        return self.args.installer
+                not_builts.append(build)
+        if not_builts:
+            print(Title("Not built:"))
+            for build in not_builts:
+                print(Warn(f". {build}"))
+        # has some exe been created ?
+        return bool(builts and self.args.installer)

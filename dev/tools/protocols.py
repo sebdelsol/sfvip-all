@@ -19,6 +19,8 @@ class CfgBuild(Protocol):
     version: str
     dir: str
     update: str
+    logs_dir: str
+    enable_console: bool
     install_finish_page: bool
 
     @property
@@ -34,7 +36,11 @@ class CfgBuild(Protocol):
         ...
 
     @property
-    def nuitka_args(self) -> Sequence[str]:
+    def nuitka_plugins(self) -> Sequence[str]:
+        ...
+
+    @property
+    def nuitka_plugin_dirs(self) -> Sequence[str]:
         ...
 
 

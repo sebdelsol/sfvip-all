@@ -9,6 +9,6 @@ if __name__ == "__main__":
     if Builder(Build, Environments, Github, all_languages).build_all():
         Templater(Build, Environments, Github).create_all(Templates)
         Publisher(Build, Github).show_versions()
-        clean_old_build(Build, Github)
+        clean_old_build(Build, Github, Readme)
     else:
         Templater(Build, Environments, Github).create(Readme)

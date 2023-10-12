@@ -17,14 +17,12 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.3.11"
+    version = "1.3.12"
     dir = "build"
-    nuitka_args = (
-        "--include-plugin-directory={python_env}/Lib/site-packages/mitmproxy_windows",
-        f"--force-stderr-spec=%PROGRAM%/../{name} - %TIME%.log",
-        "--enable-plugin=tk-inter",
-        "--disable-console",
-    )
+    enable_console = False
+    logs_dir = "../logs"
+    nuitka_plugins = ("tk-inter",)
+    nuitka_plugin_dirs = ("mitmproxy_windows",)
     files = Splash, Logo, Translations
     update = "update_{bitness}.json"
     install_finish_page = True
