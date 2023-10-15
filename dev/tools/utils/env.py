@@ -18,12 +18,13 @@ def get_bitness_str(is_64: bool) -> str:
 class PythonEnv:
     undefined_version = "undefined"
 
-    def __init__(self, environments: CfgEnvironments, want_64: bool | None = None) -> None:
+    def __init__(self, environments: CfgEnvironments, want_64: Optional[bool] = None) -> None:
         # use current Python bitness if not specified
         self._want_64 = sys.maxsize == (2**63) - 1 if want_64 is None else want_64
-        env_cfg = environments.X64 if self._want_64 else environments.X86
-        self._requirements = env_cfg.requirements
-        self._env_path = Path(env_cfg.path)
+        environment = environments.X64 if self._want_64 else environments.X86
+        self._requirements = environments.requirements
+        self._constraints = environment.constraints
+        self._env_path = Path(environment.path)
 
     @cached_property
     def exe(self) -> Path:
@@ -40,6 +41,10 @@ class PythonEnv:
     @property
     def requirements(self) -> Sequence[str]:
         return self._requirements
+
+    @property
+    def constraints(self) -> Sequence[str]:
+        return self._constraints
 
     def run_python(self, *args: str) -> Optional[str]:
         if self.exe.exists():

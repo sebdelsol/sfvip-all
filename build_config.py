@@ -31,13 +31,15 @@ class Build:
 
 
 class Environments:
+    requirements = "requirements.txt", "requirements.dev.txt"
+
     class X64:
         path = ".sfvip64"
-        requirements = "requirements.txt", "requirements.dev.txt"
+        constraints = ()
 
     class X86:
         path = ".sfvip86"
-        requirements = "requirements.txt", "requirements.dev.txt", "requirements.x86.txt"
+        constraints = ("constraints.x86.txt",)
 
 
 class Readme:

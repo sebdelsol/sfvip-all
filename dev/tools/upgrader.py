@@ -52,7 +52,8 @@ class Upgrader:
                 *(("--dry-run",) if dry_run else ()),
                 *("--report", str(report_file)),
                 *("--upgrade-strategy", "eager" if eager else "only-if-needed"),
-                *sum((("-r", req_file) for req_file in self._python_env.requirements), ()),
+                *sum((("-r", requirements) for requirements in self._python_env.requirements), ()),
+                *sum((("-c", constraints) for constraints in self._python_env.constraints), ()),
             ):
                 if report_file.exists():
                     with report_file.open(mode="r", encoding="utf8") as f:
@@ -80,7 +81,7 @@ class Upgrader:
         print(
             *(Title("Check"), Ok("packages")),
             Low(f"{'eagerly' if eager else 'only needed'} for"),
-            Ok(", ".join(self._python_env.requirements)),
+            Ok(", ".join((*self._python_env.requirements, *self._python_env.constraints))),
         )
         self._install("pip")  # upgrade pip
         to_install: list[_Pckg] = list(self._install_all_packages(eager, dry_run=True))
@@ -105,7 +106,7 @@ class Upgrader:
                     print(Title("Exit"))
                     break
                 case "a":
-                    print(Title("Install all"), Ok(f"package{pckg_plural}"))
+                    print(Title("Install all"), Ok("packages"))
                     installed = self._install_all_packages(eager, dry_run=False)
                     to_install = [pckg for pckg in to_install if pckg not in installed]
                 case choice if choice.isdigit() and 0 <= (i := int(choice) - 1) < n:

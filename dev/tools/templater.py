@@ -59,6 +59,12 @@ def _get_attr_link(obj: Any, attr: str) -> str:
     return ""
 
 
+def _get_requirements(python_env: PythonEnv) -> str:
+    requirements = (f"-r {requirements}" for requirements in python_env.requirements)
+    constraints = (f"-c {constraints}" for constraints in python_env.constraints)
+    return " ".join((*requirements, *constraints))
+
+
 class Templater:
     encoding = "utf-8"
 
@@ -69,8 +75,8 @@ class Templater:
         self.template_format = dict(
             exe64_link=quote(str(dist.installer_exe(python_envs.x64).as_posix())),
             exe32_link=quote(str(dist.installer_exe(python_envs.x86).as_posix())),
-            requirements_x64=" -r ".join(environments.X64.requirements),
-            requirements_x86=" -r ".join(environments.X86.requirements),
+            requirements_x64=_get_requirements(python_envs.x64),
+            requirements_x86=_get_requirements(python_envs.x86),
             env_x64_decl=_get_attr_link(environments.X64, "path"),
             env_x86_decl=_get_attr_link(environments.X86, "path"),
             py_version_compact=python_version.replace(".", ""),

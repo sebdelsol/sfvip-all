@@ -36,8 +36,9 @@ class Post:
 
 
 Templates.all = Readme, Post  # type: ignore
-Environments.X64.requirements = []  # type: ignore
-Environments.X86.requirements = []  # type: ignore
+Environments().requirements = ()  # type: ignore
+Environments.X64.constraints = ()  # type: ignore
+Environments.X86.constraints = ()  # type: ignore
 
 if __name__ == "__main__":
     LOC.set_tranlastions(Path(Translations.path))

@@ -64,11 +64,15 @@ class _CfgEnvironment(Protocol):
     path: str
 
     @property
-    def requirements(self) -> Sequence[str]:
+    def constraints(self) -> Sequence[str]:
         ...
 
 
 class CfgEnvironments(Protocol):
+    @property
+    def requirements(self) -> Sequence[str]:
+        ...
+
     # pylint: disable=invalid-name
     @property
     def X86(self) -> _CfgEnvironment:
