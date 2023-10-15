@@ -24,7 +24,7 @@ class VirusScan:
 
     def __init__(self, update: bool) -> None:
         if update:
-            print(Title("Update"), Low("virus signatures definitions"))
+            print(Title("Update"), Low("virus signatures"))
             self.run(*VirusScan.update_args, check=True)
 
     @staticmethod

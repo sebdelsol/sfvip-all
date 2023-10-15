@@ -11,22 +11,19 @@ Name "[[name]] [[version]] [[bitness]]"
 OutFile "[[installer]]"
 RequestExecutionLevel user
 InstallDir "$LocalAppData\Programs\[[name]] [[bitness]]"
-SetCompressor /SOLID bzip2 ; /SOLID lzma trigger AV...
+SetCompressor bzip2 ; /SOLID lzma trigger AV...
 Unicode true
 ManifestDPIAware true
 ShowInstDetails hide
 ShowUninstDetails hide
 
-
 !define MUI_ICON "[[dist]]\[[ico]]"
 !define MUI_UNICON "[[dist]]\[[ico]]"
-!if [[finish_page]]
-    !define MUI_FINISHPAGE_RUN 
-    !define MUI_FINISHPAGE_RUN_FUNCTION "RunApp"
-!endif
 
 !insertmacro MUI_PAGE_INSTFILES
 !if [[finish_page]]
+    !define MUI_FINISHPAGE_RUN 
+    !define MUI_FINISHPAGE_RUN_FUNCTION "RunApp"
     !insertmacro MUI_PAGE_FINISH
 !endif
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -35,10 +32,29 @@ ShowUninstDetails hide
 
 ; [[already_running]]
 
+!if [[is_64]]
+    !define System "sysnative"
+!else
+    !define System "system32"
+!endif
+!define PowerShell "$Windir\${System}\WindowsPowerShell\v1.0\powershell.exe"
+!define GetProcess "Get-Process '[[name]]' -ErrorAction SilentlyContinue"
+!define CheckPath "Where-Object {$_.Path -eq '$InstDir\[[dist]]\[[name]].exe'}"
+
+!macro AbortIfAppRunning
+    retry:
+        nsExec::ExecToStack "${PowerShell} exit (${GetProcess} | ${CheckPath}).Count"
+        Pop $0
+        StrCmp $0 "0" notRunning
+            MessageBox MB_RETRYCANCEL|MB_ICONSTOP "$(already_running)" IDRETRY retry
+            Abort
+    notRunning:
+!macroend
+
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\[[name]] [[bitness]]"
 
 Section
-    Call AbortIfAppRunning
+    !insertmacro AbortIfAppRunning
     SectionIn RO ; Read-only
     SetOverwrite ifdiff
     SetOutPath "$InstDir"
@@ -64,7 +80,7 @@ Section
 SectionEnd
 
 Section "Uninstall"
-    Call un.AbortIfAppRunning
+    !insertmacro AbortIfAppRunning
     !if [[has_uninstall_cmd]]
         nsExec::ExecToLog '"$InstDir\[[dist]]\[[uninstall_cmd]]" [[uninstall_cmd_arg]]'
     !endif
@@ -79,21 +95,9 @@ SectionEnd
 
 !if [[finish_page]]
     Function RunApp
-    ; exe working directory
-    SetOutPath "$InstDir\[[dist]]"
-    Exec "$InstDir\[[dist]]\[[name]].exe"
+        ; exe working directory
+        SetOutPath "$InstDir\[[dist]]"
+        Exec "$InstDir\[[dist]]\[[name]].exe"
     FunctionEnd
 !endif
 
-!macro MACROAbortIfAppRunning un
-    Function ${un}AbortIfAppRunning
-        nsExec::ExecToStack 'cmd /c tasklist /FI "IMAGENAME eq [[name]].exe" | find "[[name]].exe"'
-        Pop $0
-        StrCmp $0 1 notRunning
-            MessageBox MB_OK|MB_ICONEXCLAMATION "$(already_running)"
-            Abort
-        notRunning:
-    FunctionEnd
-!macroend
-!insertmacro MACROAbortIfAppRunning ""
-!insertmacro MACROAbortIfAppRunning "un."

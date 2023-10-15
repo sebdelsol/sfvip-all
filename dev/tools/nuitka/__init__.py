@@ -2,7 +2,7 @@ import shutil
 
 from src.sfvip.utils.exe import is64_exe
 
-from ..utils.color import Title, Warn
+from ..utils.color import Ok, Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.dist import Dist
 from ..utils.env import PythonEnv
@@ -52,7 +52,7 @@ class Nuitka:
 
     def run(self, python_env: PythonEnv) -> bool:
         if self.do_run:
-            print(Title("Build by Nuitka"))
+            print(Title("Build by Nuitka"), Ok(python_env.package_version("nuitka")))
             nuitka = CommandMonitor(
                 python_env.exe,
                 "-m",

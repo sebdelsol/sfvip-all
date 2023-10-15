@@ -1,3 +1,7 @@
+## 1.4.1
+* Better check for installing or uninstalling.
+* Less AV false positives.
+
 ## 1.4.0
 * Check _Sfvip All_ is not running when installing or uninstalling.
 * Overwrite already installed file when needed.

@@ -12,7 +12,7 @@ from src.sfvip.app_updater import AppLastestUpdate, AppUpdate
 from src.sfvip.utils.exe import compute_md5
 
 from .utils.color import Low, Ok, Title, Warn
-from .utils.dist import Dist
+from .utils.dist import Dist, repr_size
 from .utils.env import EnvArgs, PythonEnv, PythonEnvs, get_bitness_str
 from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub
 
@@ -47,6 +47,7 @@ class Published(NamedTuple):
     version: str
     is_64: bool
     valid: Valid
+    size: str
 
     @classmethod
     def from_update(cls, update: AppUpdate, exe: Path, is_64: bool) -> Self:
@@ -56,6 +57,7 @@ class Published(NamedTuple):
             md5=update.md5,
             version=update.version,
             valid=Valid.check_exe(exe, update.md5),
+            size=repr_size(exe),
         )
 
 
@@ -131,10 +133,11 @@ class Publisher:
                 Ok(f". {self.build.name}"),
                 version_color(f"v{published.version}"),
                 Ok(get_bitness_str(published.is_64)),
-                Low(published.md5),
-                published.valid.value,
-                f"{Low('-')} {Ok('Already published') if published in old else Title('New')}" if old else "",
+                Low(f"- {published.md5} - {published.size}"),
+                Ok(f"+ {published.valid.value}"),
+                (Ok("+ Already published") if published in old else Title("+ New")) if old else "",
             )
+
             all_publisheds.append(published)
         if not all_publisheds:
             print(Warn(". None"))

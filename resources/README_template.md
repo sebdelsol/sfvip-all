@@ -1,6 +1,6 @@
 # <img src="{ico_link}" width="40" align="center"> {name}
 ***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** with a local proxy that inserts an _All_ category into _Live_, _Series_ and _Vod_.  
-So you can easily **search your entire catalog**.
+So you can easily **search your entire catalog**. It also **updates [mpv player](https://mpv.io/)** so you can enjoy its last features.
 
 <img src="resources/all.png">
 
@@ -17,12 +17,13 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-lightgrey)](https://nuitka.net/)
+[![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-informational)](https://nuitka.net/)
+[![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational)](https://nsis.sourceforge.io/Download)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
 
 Check the [***build config***](build_config.py).  
-You'll need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
+You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
 ### Create an x64 environment
 With [***Python {py_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) or above.  
 Set ***{env_x64_decl}*** appropriately if you use a different environement.  

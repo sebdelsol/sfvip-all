@@ -11,15 +11,15 @@ from .ui import UI
 from .utils.clean_files import CleanFilesIn
 
 logger = logging.getLogger(__name__)
+exceptions = PlayerNotFoundError, LocalproxyError
 
 
 def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: int) -> None:
-    exceptions = PlayerNotFoundError, LocalproxyError
     logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
     LOC.set_tranlastions(app_info.translations)
     LOC.set_language(PlayerLanguageLoader().language)
-    ui = UI(app_info)
     app_config = app_info.config.update()
+    ui = UI(app_info)
     try:
         player = Player(app_info, ui)
         app_updater = AppUpdater(app_info, at_last_register)

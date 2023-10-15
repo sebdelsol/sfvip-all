@@ -16,11 +16,12 @@ SfvipUserProxy --remove
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.6-fbdf79)](https://www.python.org/downloads/release/python-3116/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.4-lightgrey)](https://nuitka.net/)
-[![Style](https://img.shields.io/badge/Style-Black-000000)](https://github.com/psf/black)
-![Sloc](https://img.shields.io/badge/Sloc-208-informational)
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.4-informational)](https://nuitka.net/)
+[![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
+[![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
+![Sloc](https://img.shields.io/badge/Sloc-209-informational)
 
-You'll need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
+You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
 
 ```console
 python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--mingw]

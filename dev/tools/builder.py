@@ -73,7 +73,7 @@ class Builder:
             if (build := self.dist.installer_exe(python_env)) not in builts:
                 not_builts.append(build)
         if not_builts:
-            print(Title("Not built:"))
+            print(Title("Not built"))
             for build in not_builts:
                 print(Warn(f". {build}"))
         # has some exe been created ?
