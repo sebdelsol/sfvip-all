@@ -83,20 +83,18 @@ class Users:
             self._save()
 
 
-INSTAL_IN_PATH_ARG = {"install": True, "uninstall": False}
-
-
+# TODO LOC
 def install_in_path() -> None:
     if len(sys.argv) == 2:
-        exe_dir = str(Path(sys.argv[0]).parent.resolve())
-        install = INSTAL_IN_PATH_ARG.get(sys.argv[1])
+        install = {"install": True, "uninstall": False}.get(sys.argv[1])
         if install is not None:
+            exe_dir = str(Path(sys.argv[0]).parent.resolve())
             remove_from_sys_path(exe_dir)
             if install:
-                logging.info("add itself to path")
+                logging.info("Add itself to path")
                 add_to_sys_path(exe_dir)
             else:
-                logging.info("remove itself from path")
+                logging.info("Remove itself from path")
             broadcast_sys_path_change()
             sys.exit(0)
 

@@ -7,13 +7,12 @@ from urllib.parse import quote
 
 import requests
 
-from src.sfvip.app_info import get_app_update_url, get_github_raw
-from src.sfvip.app_updater import AppLastestUpdate, AppUpdate
-from src.sfvip.utils.exe import compute_md5
+# TODO remove
+from app_update import AppLastestUpdate, AppUpdate, AppUpdateLocation, compute_md5
 
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import Dist, repr_size
-from .utils.env import EnvArgs, PythonEnv, PythonEnvs, get_bitness_str
+from .utils.env import EnvArgs, PythonEnv, PythonEnvs
 from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub
 
 
@@ -45,14 +44,14 @@ class Published(NamedTuple):
     url: str
     md5: str
     version: str
-    is_64: bool
+    bitness: str
     valid: Valid
     size: str
 
     @classmethod
-    def from_update(cls, update: AppUpdate, exe: Path, is_64: bool) -> Self:
+    def from_update(cls, update: AppUpdate, exe: Path, python_env: PythonEnv) -> Self:
         return Published(
-            is_64=is_64,
+            bitness=python_env.bitness,
             url=update.url,
             md5=update.md5,
             version=update.version,
@@ -68,31 +67,31 @@ class Publisher:
     def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
         self.build = build
         self.dist = Dist(build)
-        self.github_raw = get_github_raw(github)
-        self.update_url = get_app_update_url(build, github)
-        # self.args = Args().parse_args()
+        self.update_location = AppUpdateLocation(build, github)
         self.all_python_envs = PythonEnvs(environments).all
         self.environments = environments
 
-    def _update_json(self, is_64: bool) -> Path:
-        return Path(self.build.dir) / self.build.update.format(bitness=get_bitness_str(is_64))
+    def update_file(self, python_env: PythonEnv) -> Path:
+        return Path(self.update_location.file.format(bitness=python_env.bitness))
+
+    def update_url(self, python_env: PythonEnv) -> str:
+        return self.update_location.url.format(bitness=python_env.bitness)
 
     def publish(self, python_env: PythonEnv) -> None:
-        if self.build.update:
-            installer_exe = self.dist.installer_exe(python_env)
-            installer_exe_str = str(installer_exe.as_posix())
-            if installer_exe.exists():
-                update_json = self._update_json(python_env.is_64)
-                with update_json.open(mode="w", encoding=Publisher.encoding) as f:
-                    update = AppUpdate(
-                        url=f"{self.github_raw}/{quote(installer_exe_str)}",
-                        md5=compute_md5(installer_exe),
-                        version=self.build.version,
-                    )
-                    json.dump(update._asdict(), f, indent=2)
-                print(Title("Publish update"), Ok(installer_exe_str), Low(update.md5))
-            else:
-                print(Warn("Publish update failed"), Ok(installer_exe_str))
+        installer_exe = self.dist.installer_exe(python_env)
+        installer_exe_str = str(installer_exe.as_posix())
+        if installer_exe.exists():
+            update_json = self.update_file(python_env)
+            with update_json.open(mode="w", encoding=Publisher.encoding) as f:
+                update = AppUpdate(
+                    url=f"{self.update_location.github}/{quote(installer_exe_str)}",
+                    md5=compute_md5(installer_exe),
+                    version=self.build.version,
+                )
+                json.dump(update._asdict(), f, indent=2)
+            print(Title("Publish update"), Ok(installer_exe_str), Low(update.md5))
+        else:
+            print(Warn("Publish update failed"), Ok(installer_exe_str))
 
     def publish_all(self) -> bool:
         args = Args().parse_args()
@@ -104,26 +103,24 @@ class Publisher:
         return not args.info
 
     def get_local_versions(self) -> Iterator[Published]:
-        if self.build.update:
-            for python_env in self.all_python_envs:
-                update_json = self._update_json(python_env.is_64)
-                if update_json.exists():
-                    with update_json.open(mode="r", encoding=Publisher.encoding) as f:
-                        if update := AppUpdate.from_json(json.load(f)):
-                            exe = self.dist.installer_exe(python_env, version=update.version)
-                            yield Published.from_update(update, exe, python_env.is_64)
+        for python_env in self.all_python_envs:
+            update_json = self.update_file(python_env)
+            if update_json.exists():
+                with update_json.open(mode="r", encoding=Publisher.encoding) as f:
+                    if update := AppUpdate.from_json(json.load(f)):
+                        exe = self.dist.installer_exe(python_env, version=update.version)
+                        yield Published.from_update(update, exe, python_env)
 
     def get_online_versions(self) -> Iterator[Published]:
-        if self.build.update:
-            for python_env in self.all_python_envs:
-                latest_update = AppLastestUpdate(self.update_url.format(bitness=python_env.bitness_str))
-                if update := latest_update.get(timeout=Publisher.timeout):
-                    with requests.get(update.url, timeout=Publisher.timeout) as response:
-                        with tempfile.TemporaryDirectory() as temp_dir:
-                            exe = Path(temp_dir) / "exe"
-                            with exe.open("wb") as f:
-                                f.write(response.content)
-                            yield Published.from_update(update, exe, python_env.is_64)
+        for python_env in self.all_python_envs:
+            latest_update = AppLastestUpdate(self.update_url(python_env))
+            if update := latest_update.get(timeout=Publisher.timeout):
+                with requests.get(update.url, timeout=Publisher.timeout) as response:
+                    with tempfile.TemporaryDirectory() as temp_dir:
+                        exe = Path(temp_dir) / "exe"
+                        with exe.open("wb") as f:
+                            f.write(response.content)
+                        yield Published.from_update(update, exe, python_env)
 
     def _show_versions(self, publisheds: Iterator[Published], old: Sequence[Published] = ()) -> list[Published]:
         all_publisheds = []
@@ -132,12 +129,11 @@ class Publisher:
             print(
                 Ok(f". {self.build.name}"),
                 version_color(f"v{published.version}"),
-                Ok(get_bitness_str(published.is_64)),
+                Ok(published.bitness),
                 Low(f"- {published.md5} - {published.size}"),
                 Ok(f" {published.valid.value}"),
                 (Ok(" Already published") if published in old else Title(" New")) if old else "",
             )
-
             all_publisheds.append(published)
         if not all_publisheds:
             print(Warn(". None"))

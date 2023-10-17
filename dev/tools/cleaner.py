@@ -2,7 +2,6 @@ from pathlib import Path
 
 from .publisher import Publisher
 from .utils.color import Ok, Title, Warn
-from .utils.env import get_bitness_str
 from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub, CfgTemplate
 
 UNAVAILABLE = """This version is not longer available.
@@ -26,8 +25,7 @@ def clean_old_build(build: CfgBuild, environments: CfgEnvironments, github: CfgG
             if "temp" in file.parts:
                 continue
             if build.version in file.parts or any(
-                published.version in file.parts and get_bitness_str(published.is_64) in file.parts
-                for published in publisheds
+                published.version in file.parts and published.bitness in file.parts for published in publisheds
             ):
                 print(Title(". Keep"), Ok(str(file.as_posix())))
                 kept = True

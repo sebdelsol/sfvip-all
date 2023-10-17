@@ -78,7 +78,7 @@ def _get_app_version(app_info: AppInfo) -> _Style:
 
 
 def _get_app_warn(app_info: AppInfo) -> _Style:
-    if app_info.app_64bit != app_info.os_64bit:
+    if app_info.bitness != app_info.os_bitness:
         warn = LOC.ShouldUseVersion % app_info.os_bitness
         return _InfoStyle.app_warn(warn).red
     warn = LOC.SearchWholeCatalog

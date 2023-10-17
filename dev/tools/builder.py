@@ -9,7 +9,7 @@ from .upgrader import Upgrader
 from .utils.color import Ok, Title, Warn
 from .utils.dist import Dist
 from .utils.env import EnvArgs, PythonEnv, PythonEnvs
-from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub, CfgLOC
+from .utils.protocols import CfgBuild, CfgEnvironments, CfgLOC
 
 
 # comments are turned into argparse help
@@ -36,17 +36,19 @@ class Args(EnvArgs):
 
 
 class Builder:
-    def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub, loc: CfgLOC) -> None:
+    def __init__(
+        self, build: CfgBuild, environments: CfgEnvironments, loc: CfgLOC, publisher: Optional[Publisher] = None
+    ) -> None:
         self.build = build
-        self.args = Args().parse_args()
         self.dist = Dist(build)
+        self.publisher = publisher
+        self.args = Args().parse_args()
         self.nuitka = Nuitka(build, self.args.mingw, self.args.build)
         self.nsis = NSIS(build, loc, self.args.installer)
-        self.publisher = Publisher(build, environments, github)
         self.python_envs = PythonEnvs(environments, self.args)
 
     def build_in(self, python_env: PythonEnv) -> Optional[Path]:
-        name = f"{self.build.name} v{self.build.version} {python_env.bitness_str}"
+        name = f"{self.build.name} v{self.build.version} {python_env.bitness}"
         print(python_env)
         print(Title("Building"), Ok(name))
         if python_env.check():
@@ -54,7 +56,7 @@ class Builder:
                 Upgrader(python_env).check(eager=True)
             if self.nuitka.run(python_env):
                 if built := self.nsis.run(python_env):
-                    if self.args.publish:
+                    if self.publisher and self.args.publish:
                         self.publisher.publish(python_env)
                 return built
         print(Warn("Build failed"), Ok(name))
@@ -68,7 +70,7 @@ class Builder:
             for python_env in self.python_envs.asked:
                 if built := self.build_in(python_env):
                     builts.append(built)
-                    print()
+                print()
 
         not_builts = []
         for python_env in self.python_envs.all:

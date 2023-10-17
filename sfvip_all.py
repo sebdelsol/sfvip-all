@@ -1,3 +1,5 @@
+# nuitka-project: --include-module=mitmproxy_windows
+# nuitka-project: --enable-plugin=tk-inter
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")

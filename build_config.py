@@ -21,10 +21,7 @@ class Build:
     dir = "build"
     enable_console = False
     logs_dir = "../logs"
-    nuitka_plugins = ("tk-inter",)
-    nuitka_plugin_dirs = ("mitmproxy_windows",)
     files = Splash, Logo, Translations
-    update = "update_{bitness}.json"
     install_finish_page = True
     install_cmd = ()
     uninstall_cmd = ()

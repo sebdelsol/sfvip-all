@@ -22,7 +22,7 @@ class Dist:
         self.build = build
 
     def build_dir(self, python_env: PythonEnv) -> Path:
-        return Path(self.build.dir) / "temp" / python_env.bitness_str
+        return Path(self.build.dir) / "temp" / python_env.bitness
 
     @property
     def dist_dir_name(self) -> str:
@@ -38,6 +38,6 @@ class Dist:
         return (
             Path(self.build.dir)
             / (version or self.build.version)
-            / python_env.bitness_str
+            / python_env.bitness
             / f"Install {self.build.name}.exe"
         )

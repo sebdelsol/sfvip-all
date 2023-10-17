@@ -38,7 +38,9 @@ class _LOC(Texts):
     def all_languages(self) -> Sequence[str]:
         return tuple(code_to_languages.values())
 
-    def set_tranlastions(self, translations: Path) -> None:
+    def set_tranlastions(self, translations: Path | str) -> None:
+        if isinstance(translations, str):
+            translations = Path(translations)
         self._translations = translations
 
     def set_language(self, language: Optional[str]) -> None:

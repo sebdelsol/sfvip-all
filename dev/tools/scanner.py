@@ -53,7 +53,7 @@ class VirusScan:
     def update(cls) -> None:
         print(Title("Update"), Ok("virus signatures"), end=" ")
         process = cls.run(*cls.update_args)
-        print(Low("-"), Warn("Failed") if process.returncode else Ok("Done"))
+        print(Low("-"), Warn("Failed") if process.returncode else Ok("Ok"))
 
     @classmethod
     def scan(cls, file: Path) -> bool:

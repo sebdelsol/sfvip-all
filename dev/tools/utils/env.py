@@ -11,7 +11,7 @@ from .color import Low, Ok, Title, Warn
 from .protocols import CfgEnvironments
 
 
-def get_bitness_str(is_64: bool) -> str:
+def get_bitness(is_64: bool) -> str:
     return "x64" if is_64 else "x86"
 
 
@@ -55,8 +55,8 @@ class PythonEnv:
         return None
 
     @cached_property
-    def bitness_str(self) -> str:
-        return get_bitness_str(self.is_64)
+    def bitness(self) -> str:
+        return get_bitness(self.is_64)
 
     @cached_property
     def is_64(self) -> bool:
@@ -83,7 +83,7 @@ class PythonEnv:
             return False
         if self.is_64 != self._want_64:
             print(Warn("Wrong Python bitness !"))
-            print(Warn("It should be"), Ok(get_bitness_str(self._want_64)))
+            print(Warn("It should be"), Ok(get_bitness(self._want_64)))
             return False
         return True
 
@@ -91,7 +91,7 @@ class PythonEnv:
         return "".join(
             (
                 Title("In "),
-                Ok(self.bitness_str),
+                Ok(self.bitness),
                 Title(" Python "),
                 Ok(self.python_version),
                 Title(" environment "),

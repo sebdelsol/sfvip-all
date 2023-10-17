@@ -3,9 +3,9 @@ import os
 import threading
 from functools import total_ordering
 from pathlib import Path
-from typing import Any, Callable, NamedTuple, Optional, Self
+from typing import Callable, Optional, Self
 
-import requests
+from app_update import AppLastestUpdate, AppUpdate
 
 from .app_info import AppConfig, AppInfo
 from .localization import LOC
@@ -13,7 +13,6 @@ from .ui import UI
 from .ui.window import AskWindow, ProgressWindow
 from .utils.clean_files import CleanFilesIn
 from .utils.downloader import download_to, exceptions
-from .utils.exe import compute_md5
 from .utils.guardian import ThreadGuardian
 from .utils.scheduler import Scheduler
 
@@ -44,41 +43,6 @@ class _Version:
         return self._to_len(n) > other._to_len(n)
 
 
-class AppUpdate(NamedTuple):
-    url: str
-    md5: str
-    version: str
-
-    @classmethod
-    def from_json(cls, json: Optional[Any]) -> Optional[Self]:
-        try:
-            if json:
-                update = cls(**json)
-                if all(isinstance(field, str) for field in update._fields):
-                    return update
-        except TypeError:
-            pass
-        return None
-
-    def is_valid_exe(self, exe: Path) -> bool:
-        return exe.exists() and compute_md5(exe) == self.md5
-
-
-class AppLastestUpdate:
-    def __init__(self, url: str) -> None:
-        self._url = url
-
-    def get(self, timeout: int) -> Optional[AppUpdate]:
-        try:
-            with requests.get(self._url, timeout=timeout) as response:
-                response.raise_for_status()
-                if update := AppUpdate.from_json(response.json()):
-                    return update
-        except requests.RequestException:
-            pass
-        return None
-
-
 AltLastRegisterT = Callable[[Callable[[], None]], None]
 
 
@@ -89,7 +53,7 @@ class AppUpdater:
         self._timeout = app_info.config.App.requests_timeout
         self._app_info = app_info
         self._at_last_register = at_last_register
-        self._latest_update = AppLastestUpdate(app_info.update_url.format(bitness=app_info.bitness))
+        self._latest_update = AppLastestUpdate(app_info.update_url)
         self._clean()
 
     def is_new(self, update: AppUpdate) -> bool:

@@ -25,7 +25,7 @@ def _version_of(python_envs: PythonEnvs, name: str, get_version: Callable[[Pytho
     if len(versions_set) > 1:
         print(Warn(f"{name} versions differ"))
         for python_env, version in versions.items():
-            print(".", Ok(python_env.bitness_str), Title(f"{name} is"), Warn(version))
+            print(".", Ok(python_env.bitness), Title(f"{name} is"), Warn(version))
         return None
     return versions_set.pop()
 

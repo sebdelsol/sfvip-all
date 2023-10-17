@@ -4,7 +4,13 @@ import sys
 from pathlib import Path
 from typing import NamedTuple, Protocol, Self, Sequence
 
+from app_update import AppUpdateLocation, Github
 from sfvip_all_config import AppDefaultConfig
+
+
+class AppConfig(AppDefaultConfig):
+    def __init__(self, app_roaming: Path) -> None:
+        super().__init__(app_roaming / "Config All.json")
 
 
 class Files(Protocol):
@@ -12,12 +18,8 @@ class Files(Protocol):
     path: str
 
 
-class BuildUpdate(Protocol):
+class Build(Protocol):
     dir: str
-    update: str
-
-
-class Build(BuildUpdate, Protocol):
     name: str
     version: str
     logs_dir: str
@@ -27,22 +29,12 @@ class Build(BuildUpdate, Protocol):
         ...
 
 
-class Github(Protocol):
-    owner: str
-    repo: str
+def get_bitness(is_64: bool) -> str:
+    return "x64" if is_64 else "x86"
 
 
-class AppConfig(AppDefaultConfig):
-    def __init__(self, app_roaming: Path) -> None:
-        super().__init__(app_roaming / "Config All.json")
-
-
-def get_github_raw(github: Github) -> str:
-    return f"https://github.com/{github.owner}/{github.repo}/raw/master"
-
-
-def get_app_update_url(build: BuildUpdate, github: Github) -> str:
-    return f"{get_github_raw(github)}/{build.dir}/{build.update}"
+APP_64BIT = sys.maxsize == (2**63) - 1
+OS_64BIT: bool = platform.machine().endswith("64")
 
 
 class AppInfo(NamedTuple):
@@ -56,8 +48,9 @@ class AppInfo(NamedTuple):
     translations: Path
     logs_dir: Path
     current_dir: Path
-    app_64bit: bool = sys.maxsize == (2**63) - 1
-    os_64bit: bool = platform.machine().endswith("64")
+
+    bitness = get_bitness(APP_64BIT)
+    os_bitness = get_bitness(OS_64BIT)
 
     @classmethod
     def from_build(cls, build: Build, github: Github, app_dir: Path = Path()) -> Self:
@@ -67,7 +60,7 @@ class AppInfo(NamedTuple):
         return cls(
             name=build.name,
             version=build.version,
-            update_url=get_app_update_url(build, github),
+            update_url=AppUpdateLocation(build, github).url.format(bitness=cls.bitness),
             roaming=roaming,
             config=AppConfig(roaming),
             logo=files["Logo"],
@@ -76,11 +69,3 @@ class AppInfo(NamedTuple):
             logs_dir=current_dir / build.logs_dir,
             current_dir=current_dir,
         )
-
-    @property
-    def bitness(self) -> str:
-        return "x64" if self.app_64bit else "x86"
-
-    @property
-    def os_bitness(self) -> str:
-        return "x64" if self.os_64bit else "x86"

@@ -75,7 +75,7 @@ class NSISInstaller:
         exe.parent.mkdir(parents=True, exist_ok=True)
         code = template.format(
             is_64=int(python_env.is_64),
-            bitness=python_env.bitness_str,
+            bitness=python_env.bitness,
             installer=str(exe.resolve()),
             **self.template_args,
         )

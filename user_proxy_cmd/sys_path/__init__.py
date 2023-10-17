@@ -3,6 +3,8 @@ import os
 import winreg
 from ctypes import wintypes
 
+PATH_ENV_VAR = "PATH"
+
 HWND_BROADCAST = 0xFFFF
 WM_SETTINGCHANGE = 0x001A
 SMTO_ABORTIFHUNG = 0x0002
@@ -35,9 +37,6 @@ def sz_expand(value, value_type):
     if value_type == winreg.REG_EXPAND_SZ:
         return winreg.ExpandEnvironmentStrings(value)
     return value
-
-
-PATH_ENV_VAR = "PATH"
 
 
 def remove_from_sys_path(pathname):
@@ -74,7 +73,7 @@ def remove_from_sys_path(pathname):
 def add_to_sys_path(path: str) -> None:
     path = os.path.abspath(path)
     if not os.path.isdir(path):
-        raise RuntimeError(f"Directory {path} does not exist, " "cannot add it to the path")
+        raise RuntimeError(f"Directory {path} does not exist, " "can't add it to path")
 
     root, keyname = (winreg.HKEY_CURRENT_USER, r"Environment")
     key = winreg.OpenKey(root, keyname, 0, winreg.KEY_QUERY_VALUE | winreg.KEY_SET_VALUE)

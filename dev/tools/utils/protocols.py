@@ -18,7 +18,6 @@ class CfgBuild(Protocol):
     company: str
     version: str
     dir: str
-    update: str
     logs_dir: str
     enable_console: bool
     install_finish_page: bool
@@ -33,14 +32,6 @@ class CfgBuild(Protocol):
 
     @property
     def files(self) -> Sequence[CfgFile | CfgFileResize]:
-        ...
-
-    @property
-    def nuitka_plugins(self) -> Sequence[str]:
-        ...
-
-    @property
-    def nuitka_plugin_dirs(self) -> Sequence[str]:
         ...
 
 
@@ -102,3 +93,56 @@ class CfgLOC(Protocol):
 
     def set_language(self, language: Optional[str]) -> None:
         ...
+
+
+# class CfgAppUpdate(Protocol):
+#     def __call__(self, url: str, md5: str, version: str) -> Self:
+#         ...
+
+#     @property
+#     def url(self) -> str:
+#         ...
+
+#     @property
+#     def md5(self) -> str:
+#         ...
+
+#     @property
+#     def version(self) -> str:
+#         ...
+
+#     @classmethod
+#     def from_json(cls, json: Optional[Any]) -> Optional[Self]:
+#         ...
+
+
+# class _CfgAppUpdateLocation:
+#     def __call__(self, build: CfgBuild, github: CfgGithub) -> Self:
+#         ...
+
+#     @property
+#     def github(self) -> str:
+#         ...
+
+#     @property
+#     def file(self) -> str:
+#         ...
+
+#     @property
+#     def url(self) -> str:
+#         ...
+
+
+# class CfgAppLastestUpdate(Protocol):
+#     def __call__(self, url: str) -> Self:
+#         ...
+
+#     def get(self, timeout: int) -> Optional[CfgAppUpdate]:
+#         ...
+
+
+# class CfgApp:
+#     AppUpdateLocation: _CfgAppUpdateLocation
+#     AppUpdate: CfgAppUpdate
+#     AppLastestUpdate: CfgAppLastestUpdate
+#     compute_md5: Callable[[Path], str]

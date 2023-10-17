@@ -1,8 +1,9 @@
 import shutil
 
-from dev.tools.scanner import VirusScan
-from src.sfvip.utils.exe import is64_exe
+# TODO remove
+from app_update.exe import is64_exe
 
+from ..scanner import VirusScan
 from ..utils.color import Ok, Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.dist import Dist
@@ -18,15 +19,14 @@ class Nuitka:
         self.dist = Dist(build)
         if do_run:
             self.args = (
-                *(f"--enable-plugin={plugin}" for plugin in build.nuitka_plugins),
                 "--enable-console" if build.enable_console else "--disable-console",
-                f"--company-name={build.company}",
-                f"--file-version={build.version}",
-                f"--product-version={build.version}",
-                "--mingw64" if mingw else "--clang",
+                *IncludeFiles(build.files, build.ico).all,
                 f"--windows-icon-from-ico={build.ico}",
                 f"--output-filename={build.name}.exe",
-                *IncludeFiles(build.files, build.ico).all,
+                f"--product-version={build.version}",
+                "--mingw64" if mingw else "--clang",
+                f"--company-name={build.company}",
+                f"--file-version={build.version}",
                 "--assume-yes-for-downloads",
                 "--python-flag=-OO",
                 "--standalone",
@@ -59,10 +59,6 @@ class Nuitka:
                 "-m",
                 "nuitka",
                 f"--output-dir={self.dist.build_dir(python_env)}",
-                *(
-                    f"--include-plugin-directory={python_env.path_str}/Lib/site-packages/{plugin_dir}"
-                    for plugin_dir in self.build.nuitka_plugin_dirs
-                ),
                 *self.args,
             )
             if not nuitka.run(out=Title):

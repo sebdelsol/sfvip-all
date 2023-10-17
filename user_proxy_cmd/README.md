@@ -19,7 +19,7 @@ SfvipUserProxy --remove
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8.4-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-209-informational)
+![Sloc](https://img.shields.io/badge/Sloc-197-informational)
 
 You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
 
