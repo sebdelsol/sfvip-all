@@ -3,13 +3,13 @@ import inspect
 import subprocess
 import textwrap
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from urllib.parse import quote
 
 from .nsis import MakeNSIS
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import Dist
-from .utils.env import PythonEnv, PythonEnvs, get_bitness_str
+from .utils.env import PythonEnv, PythonEnvs
 from .utils.protocols import (
     CfgBuild,
     CfgEnvironments,
@@ -19,21 +19,23 @@ from .utils.protocols import (
 )
 
 
-def _get_version_of(python_envs: PythonEnvs, name: str, get_version: Callable[[PythonEnv], str]) -> str:
-    versions = {python_env.is_64: get_version(python_env) for python_env in python_envs.all}
-    if versions[True] != versions[False]:
-        print(Ok("x64"), Warn("and"), Ok("x86"), Warn(f"{name} versions differ !"))
-        for is_64 in (True, False):
-            print(" ", Ok(get_bitness_str(is_64)), Title(f"{name} is"), Ok(versions[is_64]))
-    return versions[True]
+def _version_of(python_envs: PythonEnvs, name: str, get_version: Callable[[PythonEnv], str]) -> Optional[str]:
+    versions = {python_env: get_version(python_env) for python_env in python_envs.all}
+    versions_set = set(versions.values())
+    if len(versions_set) > 1:
+        print(Warn(f"{name} versions differ"))
+        for python_env, version in versions.items():
+            print(".", Ok(python_env.bitness_str), Title(f"{name} is"), Warn(version))
+        return None
+    return versions_set.pop()
 
 
-def _get_python_version(python_envs: PythonEnvs) -> str:
-    return _get_version_of(python_envs, "Python", lambda python_env: python_env.python_version)
+def _python_version(python_envs: PythonEnvs) -> Optional[str]:
+    return _version_of(python_envs, "Python", lambda python_env: python_env.python_version)
 
 
-def _get_nuitka_version(python_envs: PythonEnvs) -> str:
-    return _get_version_of(python_envs, "Nuitka", lambda python_env: python_env.package_version("nuitka"))
+def _nuitka_version(python_envs: PythonEnvs) -> Optional[str]:
+    return _version_of(python_envs, "Nuitka", lambda python_env: python_env.package_version("nuitka"))
 
 
 def _get_sloc(path: Path) -> int:
@@ -71,35 +73,40 @@ class Templater:
 
     def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
         python_envs = PythonEnvs(environments)
-        python_version = _get_python_version(python_envs)
-        dist = Dist(build)
-        self.template_format = dict(
-            exe64_link=quote(str(dist.installer_exe(python_envs.x64).as_posix())),
-            exe32_link=quote(str(dist.installer_exe(python_envs.x86).as_posix())),
-            env_x64_decl=_get_attr_link(environments.X64, "path"),
-            env_x86_decl=_get_attr_link(environments.X86, "path"),
-            requirements_x64=_get_requirements(python_envs.x64),
-            requirements_x86=_get_requirements(python_envs.x86),
-            py_version_compact=python_version.replace(".", ""),
-            nuitka_version=_get_nuitka_version(python_envs),
-            github_path=f"{github.owner}/{github.repo}",
-            sloc=_get_sloc(Path(build.main).parent),
-            nsis_version=MakeNSIS().get_version(),
-            script_main=Path(build.main).stem,
-            env_x64=environments.X64.path,
-            env_x86=environments.X86.path,
-            py_version=python_version,
-            ico_link=quote(build.ico),
-            version=build.version,
-            name=build.name,
-        )
+        python_version = _python_version(python_envs)
+        nuitka_version = _nuitka_version(python_envs)
+        if python_version and nuitka_version:
+            dist = Dist(build)
+            self.template_format = dict(
+                exe64_link=quote(str(dist.installer_exe(python_envs.x64).as_posix())),
+                exe32_link=quote(str(dist.installer_exe(python_envs.x86).as_posix())),
+                env_x64_decl=_get_attr_link(environments.X64, "path"),
+                env_x86_decl=_get_attr_link(environments.X86, "path"),
+                requirements_x64=_get_requirements(python_envs.x64),
+                requirements_x86=_get_requirements(python_envs.x86),
+                py_version_compact=python_version.replace(".", ""),
+                github_path=f"{github.owner}/{github.repo}",
+                sloc=_get_sloc(Path(build.main).parent),
+                nsis_version=MakeNSIS().get_version(),
+                script_main=Path(build.main).stem,
+                env_x64=environments.X64.path,
+                env_x86=environments.X86.path,
+                nuitka_version=nuitka_version,
+                py_version=python_version,
+                ico_link=quote(build.ico),
+                version=build.version,
+                name=build.name,
+            )
+        else:
+            self.template_format = None
 
     def create(self, template: CfgTemplate) -> None:
-        src, dst = Path(template.src), Path(template.dst)
-        print(Title("Create"), Ok(dst.as_posix()), Low(f"from {src.as_posix()}"))
-        text = src.read_text(encoding=Templater.encoding).format(**self.template_format)
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_text(text, encoding=Templater.encoding)
+        if self.template_format:
+            src, dst = Path(template.src), Path(template.dst)
+            print(Title("Create"), Ok(dst.as_posix()), Low(f"from {src.as_posix()}"))
+            text = src.read_text(encoding=Templater.encoding).format(**self.template_format)
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_text(text, encoding=Templater.encoding)
 
     def create_all(self, templates: CfgTemplates) -> None:
         for template in templates.all:

@@ -20,7 +20,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8.4-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-4851-informational)
+![Sloc](https://img.shields.io/badge/Sloc-4890-informational)
 
 Check the [***build config***](build_config.py).  
 You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
@@ -73,6 +73,10 @@ python -m dev.upgrade [--x86 | --x64 | --both] [--noeager]
 ### Publish an update
 ```console
 python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
+```
+### Scan for virus
+```console
+python -m dev.scan [--x86 | --x64 | --both]
 ```
 
 ### Translations

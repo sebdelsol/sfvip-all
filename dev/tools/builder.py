@@ -4,6 +4,7 @@ from typing import Optional
 from .nsis import NSIS
 from .nuitka import Nuitka
 from .publisher import Publisher
+from .scanner import VirusScan
 from .upgrader import Upgrader
 from .utils.color import Ok, Title, Warn
 from .utils.dist import Dist
@@ -62,6 +63,7 @@ class Builder:
     def build_all(self) -> bool:
         builts = []
         if self.args.build or self.args.installer:
+            VirusScan.update()
             print()
             for python_env in self.python_envs.asked:
                 if built := self.build_in(python_env):

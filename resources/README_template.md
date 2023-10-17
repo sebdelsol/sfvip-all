@@ -74,6 +74,10 @@ python -m dev.upgrade [--x86 | --x64 | --both] [--noeager]
 ```console
 python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```
+### Scan for virus
+```console
+python -m dev.scan [--x86 | --x64 | --both]
+```
 
 ### Translations
 You need a [***DeepL API key***](https://www.deepl.com/en/docs-api/).

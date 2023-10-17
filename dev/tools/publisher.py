@@ -134,8 +134,8 @@ class Publisher:
                 version_color(f"v{published.version}"),
                 Ok(get_bitness_str(published.is_64)),
                 Low(f"- {published.md5} - {published.size}"),
-                Ok(f"+ {published.valid.value}"),
-                (Ok("+ Already published") if published in old else Title("+ New")) if old else "",
+                Ok(f" {published.valid.value}"),
+                (Ok(" Already published") if published in old else Title(" New")) if old else "",
             )
 
             all_publisheds.append(published)

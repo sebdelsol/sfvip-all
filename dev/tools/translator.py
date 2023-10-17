@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 from deep_translator import DeeplTranslator, GoogleTranslator
+from deep_translator.exceptions import ServerException
 from tap import Tap
 
 from api_keys import DEEPL_KEY
@@ -46,7 +47,10 @@ class Translator:
         # save where markers are
         is_markers = [marker in text for text in texts]
         bundle = Translator.separator.join(texts).replace(marker, marker_replacement)
-        translation: str = self.translator.translate(bundle)
+        try:
+            translation: str = self.translator.translate(bundle)
+        except ServerException:
+            return None
         if translation:
             translation = translation.replace(marker_replacement, marker)
             translated_texts = (text.strip() for text in translation.split(Translator.separator.strip()))
