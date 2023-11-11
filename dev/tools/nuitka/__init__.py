@@ -1,8 +1,5 @@
 import shutil
 
-# TODO remove
-from app_update.exe import is64_exe
-
 from ..scanner import VirusScan
 from ..utils.color import Ok, Title, Warn
 from ..utils.command import CommandMonitor
@@ -49,7 +46,7 @@ class Nuitka:
     def check_exe(self, python_env: PythonEnv) -> bool:
         dist = self.dist.dist_dir(python_env)
         exe = dist / f"{self.build.name}.exe"
-        return dist.is_dir() and is64_exe(exe) == python_env.is_64 and VirusScan.scan(dist)
+        return dist.is_dir() and exe.is_file() and VirusScan.scan(dist)
 
     def run(self, python_env: PythonEnv) -> bool:
         if self.do_run:

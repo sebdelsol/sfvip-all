@@ -1,13 +1,33 @@
 import logging
 import platform
+import struct
 from pathlib import Path
 from typing import NamedTuple, Optional
 
 from cpuinfo.cpuinfo import _get_cpu_info_from_cpuid
 
-from app_update.exe import is64_exe
-
 logger = logging.getLogger(__name__)
+
+_MACHINE_I386 = 332
+_MACHINE_AMD64 = 34404
+
+
+def is64_exe(exe: Path) -> Optional[bool]:
+    if exe.is_file():
+        with exe.open("rb") as f:
+            s = f.read(2)
+            if s == b"MZ":  # exe ?
+                f.seek(60)
+                s = f.read(4)
+                header_offset = struct.unpack("<L", s)[0]
+                f.seek(header_offset + 4)
+                s = f.read(2)
+                machine = struct.unpack("<H", s)[0]
+                if machine == _MACHINE_AMD64:
+                    return True
+                if machine == _MACHINE_I386:
+                    return False
+    return None
 
 
 class Cpu:

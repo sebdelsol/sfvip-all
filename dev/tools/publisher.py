@@ -8,7 +8,7 @@ from urllib.parse import quote
 import requests
 
 # TODO remove
-from app_update import AppLastestUpdate, AppUpdate, AppUpdateLocation, compute_md5
+from app_update import AppLastestUpdate, AppUpdate, AppUpdateLocation
 
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import Dist, repr_size
@@ -29,11 +29,11 @@ class Valid(Enum):
     ERROR = Warn("Can't open Exe")
 
     @classmethod
-    def check_exe(cls, exe: Path, md5: str) -> Self:
+    def check_exe(cls, exe: Path, update: AppUpdate) -> Self:
         if not exe.exists():
             return cls.NOTFOUND
         try:
-            if compute_md5(exe) != md5:
+            if not update.is_valid_exe(exe):
                 return cls.MD5
         except OSError:
             return cls.ERROR
@@ -55,7 +55,7 @@ class Published(NamedTuple):
             url=update.url,
             md5=update.md5,
             version=update.version,
-            valid=Valid.check_exe(exe, update.md5),
+            valid=Valid.check_exe(exe, update),
             size=repr_size(exe),
         )
 
@@ -83,9 +83,9 @@ class Publisher:
         if installer_exe.exists():
             update_json = self.update_file(python_env)
             with update_json.open(mode="w", encoding=Publisher.encoding) as f:
-                update = AppUpdate(
+                update = AppUpdate.from_exe(
                     url=f"{self.update_location.github}/{quote(installer_exe_str)}",
-                    md5=compute_md5(installer_exe),
+                    exe=installer_exe,
                     version=self.build.version,
                 )
                 json.dump(update._asdict(), f, indent=2)

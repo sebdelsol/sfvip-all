@@ -1,10 +1,9 @@
+import hashlib
 import logging
 from pathlib import Path
 from typing import Any, NamedTuple, Optional, Protocol, Self
 
 import requests
-
-from .exe import compute_md5
 
 
 class BuildDir(Protocol):
@@ -53,8 +52,20 @@ class AppUpdate(NamedTuple):
             pass
         return None
 
+    @classmethod
+    def from_exe(cls, url: str, exe: Path, version: str) -> Self:
+        return cls(url=url, md5=cls.compute_md5(exe), version=version)
+
     def is_valid_exe(self, exe: Path) -> bool:
-        return exe.exists() and compute_md5(exe) == self.md5
+        return exe.exists() and self.compute_md5(exe) == self.md5
+
+    @staticmethod
+    def compute_md5(exe: Path, chunk_size: int = 2**20):
+        hash_md5 = hashlib.md5()
+        with exe.open("rb") as f:
+            for chunk in iter(lambda: f.read(chunk_size), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
 
 
 class AppLastestUpdate:

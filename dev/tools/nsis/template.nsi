@@ -11,7 +11,7 @@ Name "[[name]] [[version]] [[bitness]]"
 OutFile "[[installer]]"
 RequestExecutionLevel user
 InstallDir "$LocalAppData\Programs\[[name]] [[bitness]]"
-SetCompressor bzip2 ; /SOLID lzma trigger AV...
+SetCompressor /SOLID lzma ; bzip2 if it triggers AV
 Unicode true
 ManifestDPIAware true
 ShowInstDetails hide

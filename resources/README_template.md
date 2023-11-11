@@ -58,7 +58,7 @@ python -m venv {env_x86}
 {env_x86}\scripts\activate
 python -m pip install {requirements_x86}
 ```
-You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
+You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of [***mitmproxy***](https://mitmproxy.org/):  
 ```console
 rustup target add i686-pc-windows-msvc
 ```

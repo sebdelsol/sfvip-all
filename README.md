@@ -17,10 +17,10 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.6-fbdf79)](https://www.python.org/downloads/release/python-3116/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.4-informational)](https://nuitka.net/)
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.5-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-4925-informational)
+![Sloc](https://img.shields.io/badge/Sloc-4886-informational)
 
 Check the [***build config***](build_config.py).  
 You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
@@ -58,7 +58,7 @@ python -m venv .sfvip86
 .sfvip86\scripts\activate
 python -m pip install -r requirements.txt -r requirements.dev.txt -c constraints.x86.txt
 ```
-You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
+You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of [***mitmproxy***](https://mitmproxy.org/):  
 ```console
 rustup target add i686-pc-windows-msvc
 ```
