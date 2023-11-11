@@ -9,7 +9,7 @@ So you can easily **search your entire catalog**. It also **updates [mpv player]
 
 [<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/{github_path}/raw/master/{exe32_link})
 
-Check the [***changelog***](build/changelog.md) and the ***notes***[^1].  
+Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
 [^1]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  

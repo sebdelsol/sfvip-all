@@ -5,11 +5,11 @@ So you can easily **search your entire catalog**. It also **updates [mpv player]
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-1.4.1-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.1/x64/Install%20Sfvip%20All.exe)
+[<img src="https://img.shields.io/badge/Version-1.4.2-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.2/x64/Install%20Sfvip%20All.exe)
 
-[<img src="https://img.shields.io/badge/Version-1.4.1-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.1/x86/Install%20Sfvip%20All.exe)
+[<img src="https://img.shields.io/badge/Version-1.4.2-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.2/x86/Install%20Sfvip%20All.exe)
 
-Check the [***changelog***](build/changelog.md) and the ***notes***[^1].  
+Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
 [^1]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
@@ -17,7 +17,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.6-fbdf79)](https://www.python.org/downloads/release/python-3116/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.5-informational)](https://nuitka.net/)
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.8.6-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://img.shields.io/badge/Sloc-4886-informational)

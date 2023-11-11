@@ -7,7 +7,6 @@ from urllib.parse import quote
 
 import requests
 
-# TODO remove
 from app_update import AppLastestUpdate, AppUpdate, AppUpdateLocation
 
 from .utils.color import Low, Ok, Title, Warn

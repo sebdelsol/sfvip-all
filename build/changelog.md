@@ -1,3 +1,7 @@
+## 1.4.2
+* Bump _Nuitka_ to 1.8.6.
+* Reduce installer size.
+
 ## 1.4.1
 * Better check for installing or uninstalling.
 * Less AV false positives.
