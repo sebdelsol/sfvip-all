@@ -1,6 +1,6 @@
 # <img src="resources/Sfvip%20All.png" width="40" align="center"> Sfvip All
 ***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** with a local proxy that inserts an _All_ category into _Live_, _Series_ and _Vod_.  
-So you can easily **search your entire catalog**. It also **updates [mpv player](https://mpv.io/)** so you can enjoy its last features.
+So you can easily **search your entire catalog**. It also **updates [mpv player](https://mpv.io/)** dll so you can enjoy its lastest features.
 
 <img src="resources/all.png">
 
@@ -20,7 +20,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8.6-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-4886-informational)
+![Sloc](https://img.shields.io/badge/Sloc-4885-informational)
 
 Check the [***build config***](build_config.py).  
 You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.

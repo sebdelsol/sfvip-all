@@ -83,7 +83,6 @@ class Users:
             self._save()
 
 
-# TODO LOC
 def install_in_path() -> None:
     if len(sys.argv) == 2:
         install = {"install": True, "uninstall": False}.get(sys.argv[1])

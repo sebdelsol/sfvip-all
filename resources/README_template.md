@@ -1,6 +1,6 @@
 # <img src="{ico_link}" width="40" align="center"> {name}
 ***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** with a local proxy that inserts an _All_ category into _Live_, _Series_ and _Vod_.  
-So you can easily **search your entire catalog**. It also **updates [mpv player](https://mpv.io/)** so you can enjoy its last features.
+So you can easily **search your entire catalog**. It also **updates [mpv player](https://mpv.io/)** dll so you can enjoy its lastest features.
 
 <img src="resources/all.png">
 
