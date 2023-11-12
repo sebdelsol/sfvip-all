@@ -43,7 +43,7 @@ class NSIS:
         if self.do_run:
             print(Title("Installer by NSIS"), Ok(self.make_nsis.get_version()))
             install = self.installer.create(python_env)
-            nsis = CommandMonitor(self.make_nsis.path, *NSIS.nsis_args, str(install.script.resolve()))
+            nsis = CommandMonitor(self.make_nsis.path, *NSIS.nsis_args, str(install.installer.resolve()))
             if nsis.run(out=Title, err=Warn):
                 if VirusScan.scan(install.exe):
                     print(Title("Built"), Ok(str(install.exe.as_posix())), Low(repr_size(install.exe)))

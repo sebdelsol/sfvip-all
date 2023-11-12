@@ -1,5 +1,8 @@
 from pathlib import Path
-from typing import NamedTuple, Sequence
+from types import SimpleNamespace
+from typing import Iterator, NamedTuple, Sequence
+
+import jinja2
 
 from ..utils.dist import Dist, to_ico
 from ..utils.env import PythonEnv
@@ -14,19 +17,13 @@ def get_cmd(name: str, cmd: Sequence[str]) -> dict[str, str | int]:
     }
 
 
-def get_languages(loc: CfgLOC) -> str:
-    lang_macro = '!insertmacro MUI_LANGUAGE "%s"'
-    lang_macros = (lang_macro % lang.capitalize() for lang in loc.all_languages)
-    return "\n".join(("languages", *lang_macros))  # 1st line is a comment
+def get_already_running(loc: CfgLOC, name: str) -> tuple[SimpleNamespace, ...]:
+    def already_running() -> Iterator[SimpleNamespace]:
+        for lang in loc.all_languages:
+            loc.set_language(lang)
+            yield SimpleNamespace(lang=lang.upper(), text=loc.AlreadyRunning % name)
 
-
-def get_already_running(loc: CfgLOC, name: str) -> str:
-    lang_string = 'LangString already_running ${LANG_%s} "%s"'
-    lang_strings = []
-    for lang in loc.all_languages:
-        loc.set_language(lang)
-        lang_strings.append(lang_string % (lang.upper(), loc.AlreadyRunning % name))
-    return "\n".join(("already running", *lang_strings))  # 1st line is a comment
+    return tuple(already_running())
 
 
 def get_version(version: str, length: int) -> str:
@@ -37,51 +34,50 @@ def get_version(version: str, length: int) -> str:
 
 
 class NSISInstall(NamedTuple):
-    script: Path
+    installer: Path
     exe: Path
 
 
 class NSISInstaller:
-    template = Path(__file__).parent / "template.nsi"
-    template_args_markers = ("[[", "{"), ("]]", "}")
-    nsis_markers = ("{", "<<<"), ("}", ">>>")
-    script = "installer.nsi"
+    template_path = Path(__file__).parent / "template.nsi"
+    installer = "installer.nsi"
     version_length = 4
     encoding = "utf-8"
 
     def __init__(self, build: CfgBuild, loc: CfgLOC) -> None:
         self.dist = Dist(build)
-        self.template_args = dict(
-            finish_page=int(build.install_finish_page),
-            **get_cmd("install", build.install_cmd),
-            **get_cmd("uninstall", build.uninstall_cmd),
-            has_logs=int(bool(build.logs_dir)),
-            logs_dir=str(Path(build.logs_dir)),
-            name=build.name,
-            version=get_version(build.version, NSISInstaller.version_length),
-            company=build.company,
-            ico=str(Path(to_ico(build.ico))),
-            languages=get_languages(loc),
-            already_running=get_already_running(loc, build.name),
-            dist=self.dist.dist_dir_name,
-        )
+        with NSISInstaller.template_path.open("r", encoding=NSISInstaller.encoding) as f:
+            env = jinja2.Environment(trim_blocks=True, lstrip_blocks=True)
+            self.template = env.from_string(
+                f.read(),
+                globals=dict(
+                    name=build.name,
+                    company=build.company,
+                    dist=self.dist.dist_dir_name,
+                    ico=str(Path(to_ico(build.ico))),
+                    has_logs=int(bool(build.logs_dir)),
+                    logs_dir=str(Path(build.logs_dir)),
+                    finish_page=int(build.install_finish_page),
+                    already_running=get_already_running(loc, build.name),
+                    all_langs=[lang.capitalize() for lang in loc.all_languages],
+                    version=get_version(build.version, NSISInstaller.version_length),
+                    **get_cmd("install", build.install_cmd),
+                    **get_cmd("uninstall", build.uninstall_cmd),
+                ),
+            )
 
     def create(self, python_env: PythonEnv) -> NSISInstall:
-        with NSISInstaller.template.open("r", encoding=NSISInstaller.encoding) as f:
-            template = f.read()
-        for old, new in *NSISInstaller.nsis_markers, *NSISInstaller.template_args_markers:
-            template = template.replace(old, new)
         exe = self.dist.installer_exe(python_env)
         exe.parent.mkdir(parents=True, exist_ok=True)
-        code = template.format(
-            is_64=int(python_env.is_64),
-            bitness=python_env.bitness,
-            installer=str(exe.resolve()),
-            **self.template_args,
-        )
-        for old, new in NSISInstaller.nsis_markers:
-            code = code.replace(new, old)
-        script = self.dist.build_dir(python_env) / NSISInstaller.script
-        with script.open("w", encoding=NSISInstaller.encoding) as f:
-            f.write(code)
-        return NSISInstall(script=script, exe=exe)
+        installer = self.dist.build_dir(python_env) / NSISInstaller.installer
+        with installer.open("w", encoding=NSISInstaller.encoding) as f:
+            f.write(
+                self.template.render(
+                    dict(
+                        is_64=int(python_env.is_64),
+                        bitness=python_env.bitness,
+                        installer=str(exe.resolve()),
+                    )
+                )
+            )
+        return NSISInstall(installer=installer, exe=exe)
