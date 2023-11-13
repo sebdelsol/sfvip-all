@@ -1,5 +1,5 @@
-## 1.4.3
-* Installer use _Sfvip Player_ language when updating.
+## 1.4.4
+* Installer use _Sfvip Player_ language when updating (fix 1.4.3).
 
 ## 1.4.2
 * Bump _Nuitka_ to 1.8.6.

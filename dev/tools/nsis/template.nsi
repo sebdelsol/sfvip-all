@@ -36,16 +36,16 @@ ShowUninstDetails hide
 LangString already_running ${LANG_{{lang.upper}}} "{{lang.already_running}}"
 {% endfor %}
 
-; Cmd argument LANG= to force the language (case insensitive)
+; Cmd argument /LANG= to force the language (case insensitive)
 !include "FileFunc.nsh" ; GetParameters and GetOptions
 !include "StrFunc.nsh" ; StrCase
 ${Using:StrFunc} StrCase
 
 Function .onInit
     ${GetParameters} $0
-    ${GetOptions} $0 "LANG=" $0
-    ${StrCase} $0 $0 "U"
-    ${Switch} $0
+    ${GetOptions} $0 "/LANG=" $1
+    ${StrCase} $2 $1 "U"
+    ${Switch} $2
         {% for lang in all_languages %}
         ${Case} "{{lang.upper}}"
             StrCpy $LANGUAGE ${LANG_{{lang.upper}}}
