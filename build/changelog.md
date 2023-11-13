@@ -1,3 +1,6 @@
+## 1.4.3
+* Installer use _Sfvip Player_ language when updating.
+
 ## 1.4.2
 * Bump _Nuitka_ to 1.8.6.
 * Reduce installer size.

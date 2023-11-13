@@ -77,9 +77,9 @@ class AppUpdater:
     def _install(self, update_exe: Path) -> None:
         # replace current process with the update exe
         def launch() -> None:
-            update_exe_str = f"'{str(update_exe.resolve())}'"
-            logger.info("launch %s", update_exe_str)
-            os.execl(update_exe, update_exe_str)
+            update_exe_args = f"'{str(update_exe.resolve())}'", f"LANG={LOC.language}"
+            logger.info("launch %s %s", *update_exe_args)
+            os.execl(update_exe, *update_exe_args)
 
         # register to be launched after all the cleanup
         self._at_last_register(launch)

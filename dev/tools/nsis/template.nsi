@@ -4,14 +4,12 @@ VIAddVersionKey "FileVersion" "{{version}}"
 VIAddVersionKey "ProductName" "{{name}}"
 VIAddVersionKey "CompanyName" "{{company}}"
 
-; modern UI
-!include "MUI2.nsh"
+!include "MUI2.nsh" ; modern UI
 Name "{{name}} {{version}} {{bitness}}"
 OutFile "{{installer}}"
 RequestExecutionLevel user
 InstallDir "$LocalAppData\Programs\{{name}} {{bitness}}"
-; bzip2 if it triggers AV
-SetCompressor /SOLID lzma
+SetCompressor /SOLID lzma ; bzip2 if it triggers AV
 Unicode true
 ManifestDPIAware true
 ShowInstDetails hide
@@ -28,14 +26,35 @@ ShowUninstDetails hide
 {% endif %}
 !insertmacro MUI_UNPAGE_INSTFILES 
 
-{% for lang in all_langs %}
-!insertmacro MUI_LANGUAGE "{{lang}}"
+; include all languages
+{% for lang in all_languages %}
+!insertmacro MUI_LANGUAGE "{{lang.name}}"
 {% endfor %}
 
-{% for translation in already_running %}
-LangString already_running ${LANG_{{translation.lang}}} "{{translation.text}}"
+; already_running translations
+{% for lang in all_languages %}
+LangString already_running ${LANG_{{lang.upper}}} "{{lang.already_running}}"
 {% endfor %}
 
+; Cmd argument LANG= to force the language (case insensitive)
+!include "FileFunc.nsh" ; GetParameters and GetOptions
+!include "StrFunc.nsh" ; StrCase
+${Using:StrFunc} StrCase
+
+Function .onInit
+    ${GetParameters} $0
+    ${GetOptions} $0 "LANG=" $0
+    ${StrCase} $0 $0 "U"
+    ${Switch} $0
+        {% for lang in all_languages %}
+        ${Case} "{{lang.upper}}"
+            StrCpy $LANGUAGE ${LANG_{{lang.upper}}}
+            ${Break}
+        {% endfor %}
+    ${EndSwitch}
+FunctionEnd
+
+; Abort if running
 {% if is_64 %}
 !define System "sysnative"
 {% else %}
@@ -55,6 +74,7 @@ LangString already_running ${LANG_{{translation.lang}}} "{{translation.text}}"
     notRunning:
 !macroend
 
+; Install
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{name}} {{bitness}}"
 
 Section "Install"
@@ -83,6 +103,7 @@ Section "Install"
     {% endif %}
 SectionEnd
 
+; UnInstall
 Section "Uninstall"
     !insertmacro AbortIfAppRunning
     {% if has_uninstall_cmd %}
@@ -97,6 +118,7 @@ Section "Uninstall"
     Delete "$SMPROGRAMS\{{name}} {{bitness}}.lnk"
 SectionEnd
 
+; Run the installed App
 {% if finish_page %}
 Function RunApp
     ; exe working directory

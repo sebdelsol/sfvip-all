@@ -38,6 +38,10 @@ class _LOC(Texts):
     def all_languages(self) -> Sequence[str]:
         return tuple(code_to_languages.values())
 
+    @property
+    def language(self) -> str:
+        return self._language
+
     def set_tranlastions(self, translations: Path | str) -> None:
         if isinstance(translations, str):
             translations = Path(translations)

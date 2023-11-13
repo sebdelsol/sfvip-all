@@ -1,5 +1,4 @@
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Iterator, NamedTuple, Sequence
 
 import jinja2
@@ -17,13 +16,14 @@ def get_cmd(name: str, cmd: Sequence[str]) -> dict[str, str | int]:
     }
 
 
-def get_already_running(loc: CfgLOC, name: str) -> tuple[SimpleNamespace, ...]:
-    def already_running() -> Iterator[SimpleNamespace]:
-        for lang in loc.all_languages:
-            loc.set_language(lang)
-            yield SimpleNamespace(lang=lang.upper(), text=loc.AlreadyRunning % name)
-
-    return tuple(already_running())
+def get_all_languages(loc: CfgLOC, app_name: str) -> Iterator[dict[str, str]]:
+    for lang in loc.all_languages:
+        loc.set_language(lang)
+        yield dict(
+            upper=lang.upper(),
+            name=lang.capitalize(),
+            already_running=loc.AlreadyRunning % app_name,
+        )
 
 
 def get_version(version: str, length: int) -> str:
@@ -58,8 +58,7 @@ class NSISInstaller:
                     has_logs=int(bool(build.logs_dir)),
                     logs_dir=str(Path(build.logs_dir)),
                     finish_page=int(build.install_finish_page),
-                    already_running=get_already_running(loc, build.name),
-                    all_langs=[lang.capitalize() for lang in loc.all_languages],
+                    all_languages=tuple(get_all_languages(loc, build.name)),
                     version=get_version(build.version, NSISInstaller.version_length),
                     **get_cmd("install", build.install_cmd),
                     **get_cmd("uninstall", build.uninstall_cmd),
