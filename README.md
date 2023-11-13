@@ -5,9 +5,9 @@ So you can easily **search your entire catalog**. It also **updates [mpv player]
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-1.4.4-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.4/x64/Install%20Sfvip%20All.exe)
+[<img src="https://img.shields.io/badge/Version-1.4.5-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.5/x64/Install%20Sfvip%20All.exe)
 
-[<img src="https://img.shields.io/badge/Version-1.4.4-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.4/x86/Install%20Sfvip%20All.exe)
+[<img src="https://img.shields.io/badge/Version-1.4.5-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.5/x86/Install%20Sfvip%20All.exe)
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.

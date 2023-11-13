@@ -17,7 +17,7 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.4.4"
+    version = "1.4.5"
     dir = "build"
     enable_console = False
     logs_dir = "../logs"

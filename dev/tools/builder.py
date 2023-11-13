@@ -48,7 +48,7 @@ class Builder:
         self.python_envs = PythonEnvs(environments, self.args)
 
     def build_in(self, python_env: PythonEnv) -> Optional[Path]:
-        name = f"{self.build.name} v{self.build.version} {python_env.bitness}"
+        name = f"{self.build.name} {self.build.version} {python_env.bitness}"
         print(python_env)
         print(Title("Building"), Ok(name))
         if python_env.check():
