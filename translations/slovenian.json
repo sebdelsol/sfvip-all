@@ -1,9 +1,9 @@
 {
   "User": "Uporabnik",
   "UserProxy": "Uporabniški proxy",
-  "NoProxy": "Manjka proxy",
+  "NoProxy": "Proxy manjka",
   "Proxy": "%s Proxy",
-  "RestartFixProxy": "Ponovno zaženite, da popravite proxy",
+  "RestartFixProxy": "Ponovni zagon, da popravite proxy",
   "ShouldUseVersion": "Uporabiti morate različico %s",
   "SearchWholeCatalog": "Poiščite celoten katalog",
   "Download": "Prenos",
@@ -13,6 +13,7 @@
   "Restart": "Ponovni zagon",
   "Cancel": "Prekliči",
   "Search": "Iskanje",
+  "Retry": "Ponovni poskus",
   "CheckUpdate": "Preverite posodobitve",
   "UnknownVersion": "Neznana različica",
   "PleaseWait": "Počakajte",
@@ -25,5 +26,5 @@
   "AllSeries": "Vse serije",
   "AllMovies": "Vsi filmi",
   "AllChannels": "Vsi kanali",
-  "AlreadyRunning": "%s deluje. Prosimo, da ga najprej zaprete"
+  "AlreadyRunning": "%s deluje. Če želite nadaljevati, ga zaprite."
 }

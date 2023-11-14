@@ -5,7 +5,7 @@ from functools import total_ordering
 from pathlib import Path
 from typing import Callable, Optional, Self
 
-from app_update import AppLastestUpdate, AppUpdate
+from update import AppUpdate
 
 from .app_info import AppConfig, AppInfo
 from .localization import LOC
@@ -53,7 +53,7 @@ class AppUpdater:
         self._timeout = app_info.config.App.requests_timeout
         self._app_info = app_info
         self._at_last_register = at_last_register
-        self._latest_update = AppLastestUpdate(app_info.update_url)
+        self._latest_update = app_info.app_latest_update
         self._clean()
 
     def is_new(self, update: AppUpdate) -> bool:
@@ -61,7 +61,7 @@ class AppUpdater:
 
     def get_update(self) -> Optional[AppUpdate]:
         logger.info("check lastest %s version", self._app_info.name)
-        if update := self._latest_update.get(self._timeout):
+        if update := self._latest_update.online_load(self._app_info.bitness, self._timeout):
             logger.info("found update %s %s %s", self._app_info.name, update.version, self._app_info.bitness)
             return update
         logger.warning("check latest %s failed", self._app_info.name)

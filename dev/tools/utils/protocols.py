@@ -88,6 +88,10 @@ class CfgLOC(Protocol):
         ...
 
     @property
+    def Retry(self) -> str:  # pylint: disable=invalid-name
+        ...
+
+    @property
     def all_languages(self) -> Sequence[str]:
         ...
 

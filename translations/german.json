@@ -3,8 +3,8 @@
   "UserProxy": "Benutzer-Proxy",
   "NoProxy": "Proxy fehlt",
   "Proxy": "%s Proxy",
-  "RestartFixProxy": "Neustart, um die Proxies zu reparieren",
-  "ShouldUseVersion": "Sie sollten die %s-Version verwenden",
+  "RestartFixProxy": "Neustart, um die Proxys zu reparieren",
+  "ShouldUseVersion": "Sie sollten die Version %s verwenden",
   "SearchWholeCatalog": "Durchsuchen Sie Ihren gesamten Katalog",
   "Download": "Herunterladen",
   "Install": "Installieren",
@@ -13,6 +13,7 @@
   "Restart": "Neustart",
   "Cancel": "Abbrechen",
   "Search": "Suchen",
+  "Retry": "Wiederholen",
   "CheckUpdate": "Aktualisierungen prüfen",
   "UnknownVersion": "Unbekannte Version",
   "PleaseWait": "Bitte warten",
@@ -20,10 +21,10 @@
   "RestartInstall": "Möchten Sie neu starten, um %s zu installieren?",
   "SearchOrDownload": "Möchten Sie es suchen oder herunterladen?",
   "NoSocketPort": "Kein Socket-Port verfügbar!",
-  "CantStartProxies": "Kann lokale Proxies nicht starten!",
+  "CantStartProxies": "Lokale Proxys können nicht gestartet werden!",
   "NotFound": "%s nicht gefunden",
   "AllSeries": "Alle Serien",
   "AllMovies": "Alle Filme",
   "AllChannels": "Alle Kanäle",
-  "AlreadyRunning": "%s läuft. Bitte schließen Sie es zuerst"
+  "AlreadyRunning": "%s wird ausgeführt. Bitte schließen Sie es, um fortzufahren."
 }

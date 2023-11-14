@@ -4,4 +4,5 @@ from src.sfvip.localization.texts import Texts
 
 from .tools.translator import translate
 
-translate(Texts, LOC.all_languages, Translations)
+if __name__ == "__main__":
+    translate(Texts, LOC.all_languages, Translations)

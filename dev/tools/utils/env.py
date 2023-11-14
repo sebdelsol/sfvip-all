@@ -2,7 +2,7 @@ import subprocess
 import sys
 from functools import cached_property
 from pathlib import Path
-from typing import Iterator, Optional, Sequence
+from typing import Iterator, Literal, Optional, Sequence
 
 import pkg_resources
 from tap import Tap
@@ -11,7 +11,7 @@ from .color import Low, Ok, Title, Warn
 from .protocols import CfgEnvironments
 
 
-def get_bitness(is_64: bool) -> str:
+def get_bitness(is_64: bool) -> Literal["x64", "x86"]:
     return "x64" if is_64 else "x86"
 
 
@@ -55,7 +55,7 @@ class PythonEnv:
         return None
 
     @cached_property
-    def bitness(self) -> str:
+    def bitness(self) -> Literal["x64", "x86"]:
         return get_bitness(self.is_64)
 
     @cached_property

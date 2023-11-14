@@ -20,6 +20,7 @@ def get_all_languages(loc: CfgLOC, app_name: str) -> Iterator[dict[str, str]]:
     for lang in loc.all_languages:
         loc.set_language(lang)
         yield dict(
+            retry=loc.Retry,
             upper=lang.upper(),
             name=lang.capitalize(),
             already_running=loc.AlreadyRunning % app_name,

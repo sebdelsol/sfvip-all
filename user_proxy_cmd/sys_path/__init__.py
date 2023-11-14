@@ -21,7 +21,7 @@ SendMessageTimeout.argtypes = [
 ]
 
 
-def broadcast_sys_path_change():
+def broadcast_sys_path_change() -> None:
     SendMessageTimeout(
         HWND_BROADCAST,
         WM_SETTINGCHANGE,
@@ -33,13 +33,13 @@ def broadcast_sys_path_change():
     )
 
 
-def sz_expand(value, value_type):
+def sz_expand(value: str, value_type: int) -> str:
     if value_type == winreg.REG_EXPAND_SZ:
         return winreg.ExpandEnvironmentStrings(value)
     return value
 
 
-def remove_from_sys_path(pathname):
+def remove_from_sys_path(pathname: str) -> None:
     pathname = os.path.normcase(os.path.normpath(pathname))
     envkeys = [(winreg.HKEY_CURRENT_USER, r"Environment")]
     for root, keyname in envkeys:

@@ -11,7 +11,9 @@ https://github.com/{github_path}/tree/master/{readme_dir}#download
 """
 
 
-def clean_old_build(build: CfgBuild, environments: CfgEnvironments, github: CfgGithub, readme: CfgTemplate):
+def clean_old_build(
+    build: CfgBuild, environments: CfgEnvironments, github: CfgGithub, readme: CfgTemplate
+) -> None:
     suffixes = ".zip", ".exe"
     print(Title("Clean Old"), Ok("builts"))
     unavailable = UNAVAILABLE.format(

@@ -13,6 +13,7 @@
   "Restart": "Redémarrer",
   "Cancel": "Annuler",
   "Search": "Rechercher",
+  "Retry": "Réessayer",
   "CheckUpdate": "Vérifier les mises à jour",
   "UnknownVersion": "Version inconnue",
   "PleaseWait": "Veuillez patienter",
@@ -25,5 +26,5 @@
   "AllSeries": "Toutes les séries",
   "AllMovies": "Tous les films",
   "AllChannels": "Toutes les chaînes",
-  "AlreadyRunning": "%s est en cours d'exécution. Veuillez d'abord le fermer"
+  "AlreadyRunning": "%s est en cours d'exécution. Veuillez le fermer pour continuer."
 }

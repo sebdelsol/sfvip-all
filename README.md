@@ -5,9 +5,9 @@ So you can easily **search your entire catalog**. It also **updates [mpv player]
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-1.4.5-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.5/x64/Install%20Sfvip%20All.exe)
+[<img src="https://img.shields.io/badge/Version-1.4.6-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.6/x64/Install%20Sfvip%20All.exe)
 
-[<img src="https://img.shields.io/badge/Version-1.4.5-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.5/x86/Install%20Sfvip%20All.exe)
+[<img src="https://img.shields.io/badge/Version-1.4.6-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.6/x86/Install%20Sfvip%20All.exe)
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
@@ -20,7 +20,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8.6-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-4884-informational)
+![Sloc](https://img.shields.io/badge/Sloc-4883-informational)
 
 Check the [***build config***](build_config.py).  
 You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.

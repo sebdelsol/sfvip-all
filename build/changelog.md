@@ -1,6 +1,8 @@
+## 1.4.6
+* Fix localization when a running _Sfvip All_ prevents the (un)installation.
+
 ## 1.4.5
 * Installer use _Sfvip Player_ language when updating.
-* Installer already running message complete translation.
 * (fix 1.4.3 & 1.4.4).
 
 ## 1.4.2

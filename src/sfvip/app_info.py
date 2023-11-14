@@ -2,10 +2,10 @@ import os
 import platform
 import sys
 from pathlib import Path
-from typing import NamedTuple, Protocol, Self, Sequence
+from typing import Literal, NamedTuple, Protocol, Self, Sequence
 
-from app_update import AppUpdateLocation, Github
 from sfvip_all_config import AppDefaultConfig
+from update import AppLatestUpdate, Github
 
 
 class AppConfig(AppDefaultConfig):
@@ -29,7 +29,7 @@ class Build(Protocol):
         ...
 
 
-def get_bitness(is_64: bool) -> str:
+def get_bitness(is_64: bool) -> Literal["x64", "x86"]:
     return "x64" if is_64 else "x86"
 
 
@@ -40,7 +40,6 @@ OS_64BIT: bool = platform.machine().endswith("64")
 class AppInfo(NamedTuple):
     name: str
     version: str
-    update_url: str
     roaming: Path
     config: AppConfig
     logo: Path
@@ -48,9 +47,9 @@ class AppInfo(NamedTuple):
     translations: Path
     logs_dir: Path
     current_dir: Path
-
-    bitness = get_bitness(APP_64BIT)
-    os_bitness = get_bitness(OS_64BIT)
+    app_latest_update: AppLatestUpdate
+    bitness: Literal["x64", "x86"] = get_bitness(APP_64BIT)
+    os_bitness: Literal["x64", "x86"] = get_bitness(OS_64BIT)
 
     @classmethod
     def from_build(cls, build: Build, github: Github, app_dir: Path = Path()) -> Self:
@@ -60,7 +59,6 @@ class AppInfo(NamedTuple):
         return cls(
             name=build.name,
             version=build.version,
-            update_url=AppUpdateLocation(build, github).url.format(bitness=cls.bitness),
             roaming=roaming,
             config=AppConfig(roaming),
             logo=files["Logo"],
@@ -68,4 +66,5 @@ class AppInfo(NamedTuple):
             translations=files["Translations"],
             logs_dir=current_dir / build.logs_dir,
             current_dir=current_dir,
+            app_latest_update=AppLatestUpdate(build, github),
         )

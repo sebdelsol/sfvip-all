@@ -13,6 +13,7 @@
   "Restart": "Restart",
   "Cancel": "Cancel",
   "Search": "Search",
+  "Retry": "Retry",
   "CheckUpdate": "Check updates",
   "UnknownVersion": "Unknown version",
   "PleaseWait": "Please wait",
@@ -25,5 +26,5 @@
   "AllSeries": "All Series",
   "AllMovies": "All Movies",
   "AllChannels": "All Channels",
-  "AlreadyRunning": "%s is running. Please close it first"
+  "AlreadyRunning": "%s is running. Please close it to continue."
 }

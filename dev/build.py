@@ -16,7 +16,7 @@ def do_build(
     templates: CfgTemplates,
     readme: CfgTemplate,
     publisher: Optional[Publisher] = None,
-):
+) -> None:
     LOC.set_tranlastions(Translations.path)
     if Builder(build, environments, LOC, publisher).build_all():
         Templater(build, environments, Github).create_all(templates)

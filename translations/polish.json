@@ -13,6 +13,7 @@
   "Restart": "Uruchom ponownie",
   "Cancel": "Anuluj",
   "Search": "Wyszukaj",
+  "Retry": "Ponów próbę",
   "CheckUpdate": "Sprawdź aktualizacje",
   "UnknownVersion": "Nieznana wersja",
   "PleaseWait": "Proszę czekać",
@@ -20,10 +21,10 @@
   "RestartInstall": "Czy chcesz ponownie uruchomić, aby zainstalować %s?",
   "SearchOrDownload": "Czy chcesz go wyszukać lub pobrać?",
   "NoSocketPort": "Brak dostępnego portu gniazda!",
-  "CantStartProxies": "Nie można uruchomić lokalnych serwerów proxy!",
+  "CantStartProxies": "Nie można uruchomić lokalnych proxy!",
   "NotFound": "%s nie znaleziono",
   "AllSeries": "Wszystkie seriale",
   "AllMovies": "Wszystkie filmy",
   "AllChannels": "Wszystkie kanały",
-  "AlreadyRunning": "%s jest uruchomiony. Zamknij go najpierw"
+  "AlreadyRunning": "%s jest uruchomiony. Zamknij go, aby kontynuować."
 }
