@@ -1,11 +1,11 @@
 import logging
 import os
 import threading
-from functools import total_ordering
 from pathlib import Path
 from typing import Callable, Optional, Self
 
-from update import AppUpdate
+from shared.update import AppUpdate
+from shared.version import Version
 
 from .app_info import AppConfig, AppInfo
 from .localization import LOC
@@ -17,30 +17,6 @@ from .utils.guardian import ThreadGuardian
 from .utils.scheduler import Scheduler
 
 logger = logging.getLogger(__name__)
-
-
-@total_ordering
-class _Version:
-    def __init__(self, version_str: Optional[str]) -> None:
-        self._version = version_str or "0"
-        try:
-            self._tuple = tuple(map(int, (self._version.split("."))))
-        except (TypeError, ValueError):
-            self._tuple = (0,)
-
-    def _to_len(self, n) -> tuple[int, ...]:
-        return self._tuple + (0,) * (n - len(self._tuple))
-
-    def __repr__(self) -> str:
-        return self._version
-
-    def __eq__(self, other: Self) -> bool:
-        n = max(len(self._tuple), len(other._tuple))
-        return self._to_len(n) == other._to_len(n)
-
-    def __gt__(self, other: Self) -> bool:
-        n = max(len(self._tuple), len(other._tuple))
-        return self._to_len(n) > other._to_len(n)
 
 
 AltLastRegisterT = Callable[[Callable[[], None]], None]
@@ -57,7 +33,7 @@ class AppUpdater:
         self._clean()
 
     def is_new(self, update: AppUpdate) -> bool:
-        return _Version(update.version) > _Version(self._app_info.version)
+        return Version(update.version) > Version(self._app_info.version)
 
     def get_update(self) -> Optional[AppUpdate]:
         logger.info("check lastest %s version", self._app_info.name)

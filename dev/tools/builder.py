@@ -44,7 +44,7 @@ class Builder:
         self.publisher = publisher
         self.args = Args().parse_args()
         self.nuitka = Nuitka(build, self.args.mingw, self.args.build)
-        self.nsis = NSIS(build, loc, self.args.installer)
+        self.nsis = NSIS(build, loc, self.args.installer, self.args.upgrade)
         self.python_envs = PythonEnvs(environments, self.args)
 
     def build_in(self, python_env: PythonEnv) -> Optional[Path]:

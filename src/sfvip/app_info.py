@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Literal, NamedTuple, Protocol, Self, Sequence
 
 from sfvip_all_config import AppDefaultConfig
-from update import AppLatestUpdate, Github
+from shared.update import AppLatestUpdate, Github
 
 
 class AppConfig(AppDefaultConfig):

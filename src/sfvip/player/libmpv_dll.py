@@ -3,15 +3,12 @@ import filecmp
 import logging
 import shutil
 import tempfile
-import time
 from datetime import datetime
-from io import BytesIO
 from itertools import count
 from pathlib import Path
-from typing import NamedTuple, Optional, Protocol, Self
+from typing import NamedTuple, Optional, Self
 
-import feedparser
-import requests
+from shared.feed import FeedEntries, FeedEntry
 
 from ...config_loader import ConfigLoader
 from ..localization import LOC
@@ -22,24 +19,13 @@ from .cpu import Cpu
 logger = logging.getLogger(__name__)
 
 
-class _FeedEntries(Protocol):
-    class _Entry(Protocol):
-        title: str
-        link: str
-        updated_parsed: time.struct_time
-
-    entries: list[_Entry]
-    status: int
-    bozo: bool
-
-
 class Libmpv(NamedTuple):
     cpu_spec: Cpu.Spec
     timestamp: int
     url: str
 
     @classmethod
-    def from_entry(cls, cpu_spec: Cpu.Spec, entry: _FeedEntries._Entry) -> Self:
+    def from_entry(cls, cpu_spec: Cpu.Spec, entry: FeedEntry) -> Self:
         return cls(cpu_spec, calendar.timegm(entry.updated_parsed), entry.link)
 
     def get_version(self) -> Optional[str]:
@@ -92,18 +78,12 @@ class _LibmpvLatest:
         return None
 
     def get(self, cpu_spec: Cpu.Spec) -> Optional[Libmpv]:
-        try:
-            with requests.get(_LibmpvLatest._feed, timeout=self._timeout) as response:
-                response.raise_for_status()
-                feed: _FeedEntries = feedparser.parse(BytesIO(response.content))
-                if not feed.bozo and feed.entries:
-                    cpu_spec_str = _LibmpvLatest._cpu_spec_to_str[cpu_spec]
-                    name = _LibmpvLatest._name.format(cpu_spec_str=cpu_spec_str)
-                    libmpvs = (Libmpv.from_entry(cpu_spec, entry) for entry in feed.entries if name in entry.title)
-                    if libmpv := next(libmpvs, None):
-                        return libmpv
-        except requests.RequestException:
-            pass
+        if feed_entries := FeedEntries.get_from_url(_LibmpvLatest._feed, self._timeout):
+            cpu_spec_str = _LibmpvLatest._cpu_spec_to_str[cpu_spec]
+            name = _LibmpvLatest._name.format(cpu_spec_str=cpu_spec_str)
+            libmpvs = (Libmpv.from_entry(cpu_spec, entry) for entry in feed_entries if name in entry.title)
+            if libmpv := next(libmpvs, None):
+                return libmpv
         return None
 
 

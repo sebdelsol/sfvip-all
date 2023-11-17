@@ -3,6 +3,8 @@ from typing import Iterator, NamedTuple, Sequence
 
 import jinja2
 
+from shared.version import Version
+
 from ..utils.dist import Dist, to_ico
 from ..utils.env import PythonEnv
 from ..utils.protocols import CfgBuild, CfgLOC
@@ -25,13 +27,6 @@ def get_all_languages(loc: CfgLOC, app_name: str) -> Iterator[dict[str, str]]:
             name=lang.capitalize(),
             already_running=loc.AlreadyRunning % app_name,
         )
-
-
-def get_version(version: str, length: int) -> str:
-    versions = version.split(".")
-    if len(versions) < length:
-        versions.extend((["0"] * (length - len(versions))))
-    return ".".join(versions[:length])
 
 
 class NSISInstall(NamedTuple):
@@ -60,7 +55,7 @@ class NSISInstaller:
                     logs_dir=str(Path(build.logs_dir)),
                     finish_page=int(build.install_finish_page),
                     all_languages=tuple(get_all_languages(loc, build.name)),
-                    version=get_version(build.version, NSISInstaller.version_length),
+                    version=str(Version(build.version).force_len(NSISInstaller.version_length)),
                     **get_cmd("install", build.install_cmd),
                     **get_cmd("uninstall", build.uninstall_cmd),
                 ),

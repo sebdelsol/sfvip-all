@@ -34,15 +34,15 @@ def _python_version(python_envs: PythonEnvs) -> Optional[str]:
     return _version_of(python_envs, "Python", lambda python_env: python_env.python_version)
 
 
-def _nuitka_version(python_envs: PythonEnvs) -> Optional[str]:
-    return _version_of(python_envs, "Nuitka", lambda python_env: python_env.package_version("nuitka"))
+def _package_version(python_envs: PythonEnvs, name: str) -> Optional[str]:
+    return _version_of(python_envs, name.capitalize(), lambda python_env: python_env.package_version(name))
 
 
 def _get_sloc(path: Path) -> int:
     get_py_files = f"git ls-files -- '{path}/*.py'"
     count_non_blank_lines = "%{ ((Get-Content -Path $_) -notmatch '^\\s*$').Length }"
     sloc = subprocess.run(
-        ("powershell", f"({get_py_files} | {count_non_blank_lines} | measure -Sum).Sum"),
+        ("PowerShell", f"({get_py_files} | {count_non_blank_lines} | measure -Sum).Sum"),
         text=True,
         check=False,
         capture_output=True,
@@ -74,7 +74,8 @@ class Templater:
     def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
         python_envs = PythonEnvs(environments)
         python_version = _python_version(python_envs)
-        nuitka_version = _nuitka_version(python_envs)
+        nuitka_version = _package_version(python_envs, "nuitka")
+        mitmproxy_version = _package_version(python_envs, "mitmproxy")
         if python_version and nuitka_version:
             dist = Dist(build)
             self.template_format = dict(
@@ -91,6 +92,7 @@ class Templater:
                 script_main=Path(build.main).stem,
                 env_x64=environments.X64.path,
                 env_x86=environments.X86.path,
+                mitmproxy_version=mitmproxy_version,
                 nuitka_version=nuitka_version,
                 py_version=python_version,
                 ico_link=quote(build.ico),

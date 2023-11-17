@@ -1,5 +1,5 @@
 # packages to run the app for both environments
-mitmproxy>=10.1.0
+mitmproxy>=10.1.5
 watchdog>=3.0.0
 # for downloading the player and libmpv
 feedparser>=6.0.10

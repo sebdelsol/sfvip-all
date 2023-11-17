@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 import requests
 
-from update import AppLatestUpdate, AppUpdate
+from shared.update import AppLatestUpdate, AppUpdate
 
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import Dist, repr_size

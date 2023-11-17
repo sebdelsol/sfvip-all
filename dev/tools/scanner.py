@@ -51,14 +51,14 @@ class VirusScan:
 
     @classmethod
     def update(cls) -> None:
-        print(Title("Update"), Ok("virus signatures"), end=" ")
+        print(Title("Update"), Ok("virus signatures"), end=" ", flush=True)
         process = cls.run(*cls.update_args)
         print(Low("-"), Warn("Failed") if process.returncode else Ok("Ok"))
 
     @classmethod
     def scan(cls, file: Path) -> bool:
         if file.exists():
-            print(Title("Scan virus"), Ok(str(file.as_posix())), end=" ")
+            print(Title("Scan virus"), Ok(str(file.as_posix())), end=" ", flush=True)
             process = cls.run(*cls.scan_args, "-File", file.resolve())
             scan = Scan.from_process(process)
             print(Low("-"), scan)

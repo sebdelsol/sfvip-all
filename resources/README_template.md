@@ -19,19 +19,28 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational)](https://nsis.sourceforge.io/Download)
+[![mitmproxy](https://img.shields.io/badge/Mitmproxy-{mitmproxy_version}-informational)](https://mitmproxy.org/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
 
-Check the [***build config***](build_config.py).  
-You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
+[***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
+Check the [***build config***](build_config.py).
 ### Create an x64 environment
 With [***Python {py_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) or above.  
-Set ***{env_x64_decl}*** appropriately if you use a different environement.  
 ```console
 python -m venv {env_x64}
 {env_x64}\scripts\activate
 python -m pip install {requirements_x64}
 ```
+Set ***{env_x64_decl}*** appropriately if you use a different environement.  
+### Create an x86 environment
+With [***Python {py_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) or above.  
+```console
+python -m venv {env_x86}
+{env_x86}\scripts\activate
+python -m pip install {requirements_x86}
+```
+Set ***{env_x86_decl}*** appropriately if you use a different environement.  
 ### Run locally
 ```console
 python -m {script_main}
@@ -50,19 +59,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 <img src="resources/VS.png">
 
-### Build an **x86** version
-With [***Python {py_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) or above.  
-Set ***{env_x86_decl}*** appropriately if you use a different environement.  
-```console
-python -m venv {env_x86}
-{env_x86}\scripts\activate
-python -m pip install {requirements_x86}
-```
-You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of [***mitmproxy***](https://mitmproxy.org/):  
-```console
-rustup target add i686-pc-windows-msvc
-```
-### Build a specific version
+### Build specific versions
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish] [--mingw]
 ```

@@ -19,19 +19,28 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.6-fbdf79)](https://www.python.org/downloads/release/python-3116/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.8.6-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
+[![mitmproxy](https://img.shields.io/badge/Mitmproxy-10.1.5-informational)](https://mitmproxy.org/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-4883-informational)
+![Sloc](https://img.shields.io/badge/Sloc-4990-informational)
 
-Check the [***build config***](build_config.py).  
-You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
+[***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
+Check the [***build config***](build_config.py).
 ### Create an x64 environment
 With [***Python 3.11.6 x64***](https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe) or above.  
-Set ***[`Environments.X64.path`](/build_config.py#L34)*** appropriately if you use a different environement.  
 ```console
 python -m venv .sfvip64
 .sfvip64\scripts\activate
 python -m pip install -r requirements.txt -r requirements.dev.txt
 ```
+Set ***[`Environments.X64.path`](/build_config.py#L34)*** appropriately if you use a different environement.  
+### Create an x86 environment
+With [***Python 3.11.6 x86***](https://www.python.org/ftp/python/3.11.6/python-3.11.6.exe) or above.  
+```console
+python -m venv .sfvip86
+.sfvip86\scripts\activate
+python -m pip install -r requirements.txt -r requirements.dev.txt -c constraints.x86.txt
+```
+Set ***[`Environments.X86.path`](/build_config.py#L38)*** appropriately if you use a different environement.  
 ### Run locally
 ```console
 python -m sfvip_all
@@ -50,19 +59,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 
 <img src="resources/VS.png">
 
-### Build an **x86** version
-With [***Python 3.11.6 x86***](https://www.python.org/ftp/python/3.11.6/python-3.11.6.exe) or above.  
-Set ***[`Environments.X86.path`](/build_config.py#L38)*** appropriately if you use a different environement.  
-```console
-python -m venv .sfvip86
-.sfvip86\scripts\activate
-python -m pip install -r requirements.txt -r requirements.dev.txt -c constraints.x86.txt
-```
-You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of [***mitmproxy***](https://mitmproxy.org/):  
-```console
-rustup target add i686-pc-windows-msvc
-```
-### Build a specific version
+### Build specific versions
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish] [--mingw]
 ```
