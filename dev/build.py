@@ -1,7 +1,7 @@
 from typing import Optional
 
 from build_config import Github, Translations
-from src.sfvip.localization import LOC
+from translations.loc import LOC
 
 from .tools.builder import Builder
 from .tools.cleaner import clean_old_build

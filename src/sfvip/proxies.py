@@ -2,10 +2,11 @@ import socket
 from typing import Optional, Self
 from urllib.parse import urlparse, urlsplit, urlunsplit
 
+from translations.loc import LOC
+
 from ..mitm import MitmLocalProxy, Mode, validate_upstream
 from ..mitm.addon import AllCategoryName, SfVipAddOn
 from ..winapi import mutex
-from .localization import LOC
 
 
 class LocalproxyError(Exception):

@@ -7,7 +7,8 @@ from pathlib import Path
 from tkinter import ttk
 from typing import Any, Callable, Iterator, Optional, TypeVar
 
-from ..localization import LOC
+from translations.loc import LOC
+
 from .style import _Style
 from .thread import ThreadUI
 from .widgets import _Border, _Button, _get_border

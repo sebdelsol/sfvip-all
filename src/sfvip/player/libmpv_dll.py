@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import NamedTuple, Optional, Self
 
 from shared.feed import FeedEntries, FeedEntry
+from translations.loc import LOC
 
 from ...config_loader import ConfigLoader
-from ..localization import LOC
 from ..ui.window import AskWindow, ProgressWindow
 from ..utils.downloader import download_and_unpack, exceptions
 from .cpu import Cpu

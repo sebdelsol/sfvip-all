@@ -2,8 +2,9 @@ import threading
 from pathlib import Path
 from typing import Callable, Self
 
+from translations.loc import LOC
+
 from ..app_info import AppConfig
-from ..localization import LOC
 from ..ui import UI
 from ..utils.guardian import ThreadGuardian
 from ..utils.scheduler import Scheduler

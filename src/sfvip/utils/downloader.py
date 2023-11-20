@@ -9,7 +9,8 @@ import py7zr.callbacks
 import py7zr.exceptions
 import requests
 
-from ..localization import LOC
+from translations.loc import LOC
+
 from ..ui.window import ProgressWindow
 
 logger = logging.getLogger(__name__)

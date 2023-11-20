@@ -6,9 +6,9 @@ from typing import Callable, Optional, Self
 
 from shared.update import AppUpdate
 from shared.version import Version
+from translations.loc import LOC
 
 from .app_info import AppConfig, AppInfo
-from .localization import LOC
 from .ui import UI
 from .ui.window import AskWindow, ProgressWindow
 from .utils.clean_files import CleanFilesIn

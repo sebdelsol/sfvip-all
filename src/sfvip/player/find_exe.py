@@ -4,8 +4,9 @@ import winreg
 from pathlib import Path
 from typing import Any, Callable, Iterator, NamedTuple, Optional
 
+from translations.loc import LOC
+
 from ..app_info import AppInfo
-from ..localization import LOC
 from ..ui import UI
 from .downloader import download_player
 from .exception import PlayerNotFoundError

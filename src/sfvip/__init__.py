@@ -1,9 +1,10 @@
 import logging
 
+from translations.loc import LOC
+
 from .accounts import AccountsProxies
 from .app_info import AppInfo
 from .app_updater import AltLastRegisterT, AppAutoUpdater, AppUpdater
-from .localization import LOC
 from .player import Player, PlayerLanguageLoader
 from .player.exception import PlayerNotFoundError
 from .proxies import LocalProxies, LocalproxyError

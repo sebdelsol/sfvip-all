@@ -1,8 +1,9 @@
 import tkinter as tk
 from typing import Any, Callable, NamedTuple, Optional, Sequence
 
+from translations.loc import LOC
+
 from ..app_info import AppInfo
-from ..localization import LOC
 from .fx import _Fade
 from .sticky import _Offset, _StickyWindow
 from .style import _Style
