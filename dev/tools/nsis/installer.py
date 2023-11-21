@@ -55,7 +55,7 @@ class NSISInstaller:
                     logs_dir=str(Path(build.logs_dir)),
                     finish_page=int(build.install_finish_page),
                     all_languages=tuple(get_all_languages(loc, build.name)),
-                    version=str(Version(build.version).force_len(NSISInstaller.version_length)),
+                    version=str(Version(build.version, NSISInstaller.version_length)),
                     **get_cmd("install", build.install_cmd),
                     **get_cmd("uninstall", build.uninstall_cmd),
                 ),
