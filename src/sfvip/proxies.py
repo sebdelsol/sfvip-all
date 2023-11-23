@@ -13,16 +13,15 @@ class LocalproxyError(Exception):
     pass
 
 
-def _find_port(excluded_ports: set[int]) -> int:
-    while True:
+def _find_port(excluded_ports: set[int], retry: int) -> int:
+    for _ in range(retry):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            try:
-                sock.bind(("localhost", 0))
-                _, port = sock.getsockname()
-                if port not in excluded_ports:
-                    return port
-            except socket.error as e:
-                raise LocalproxyError(LOC.NoSocketPort) from e
+            sock.bind(("localhost", 0))
+            port = sock.getsockname()[1]
+            if port not in excluded_ports:
+                excluded_ports.add(port)
+                return port
+    raise LocalproxyError(LOC.NoSocketPort)
 
 
 def _ports_from(urls: set[str]) -> set[int]:
@@ -48,6 +47,8 @@ class LocalProxies:
     """start a local proxy for each upstream proxies (no upstream proxy count as one)"""
 
     _localhost = "http://127.0.0.1:{port}"
+    _find_ports_retry = 10
+    _mitmproxy_start_timeout = 5
 
     def __init__(self, inject_in_live: bool, upstreams: set[str]) -> None:
         self._all_name = AllCategoryName(
@@ -72,16 +73,15 @@ class LocalProxies:
                 for upstream in self._upstreams:
                     upstream_fixed = _fix_upstream(upstream)
                     if upstream_fixed is not None:
-                        port = _find_port(excluded_ports)
-                        excluded_ports.add(port)
+                        port = _find_port(excluded_ports, LocalProxies._find_ports_retry)
                         modes.add(Mode(port=port, upstream=upstream_fixed))
                         self._by_upstreams[upstream] = LocalProxies._localhost.format(port=port)
                 if modes:
                     addon = SfVipAddOn(self._all_name)
                     self._mitm_proxy = MitmLocalProxy(addon, modes)
                     self._mitm_proxy.start()
-                    # wait for proxies running so we're sure ports are bound
-                    if not addon.wait_running(timeout=5):
+                    # wait for proxies running so we're sure all ports are bound
+                    if not addon.wait_running(LocalProxies._mitmproxy_start_timeout):
                         raise LocalproxyError(LOC.CantStartProxies)
             return self
 

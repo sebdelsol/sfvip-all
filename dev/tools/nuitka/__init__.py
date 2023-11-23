@@ -31,7 +31,7 @@ class Nuitka:
                 build.main,
             )
             if build.logs_dir:
-                logs = f"--force-stderr-spec=%PROGRAM%/../{build.logs_dir}/{build.name} - %TIME%.log"
+                logs = f"--force-stderr-spec=%PROGRAM%/../{build.logs_dir}/{build.name} - %PID%.log"
                 self.args = logs, *self.args
         else:
             self.args = ()
