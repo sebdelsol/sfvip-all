@@ -1,3 +1,7 @@
+## 1.4.7
+* Bump _Nuitka_ to 1.9.2 for faster startup time.
+* Fix potential log files collisions & garbled filenames.
+
 ## 1.4.6
 * Fix localization when a running _Sfvip All_ prevents the (un)installation.
 

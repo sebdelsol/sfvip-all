@@ -1,3 +1,4 @@
+import logging
 import socket
 from typing import Optional, Self
 from urllib.parse import urlparse, urlsplit, urlunsplit
@@ -7,6 +8,8 @@ from translations.loc import LOC
 from ..mitm import MitmLocalProxy, Mode, validate_upstream
 from ..mitm.addon import AllCategoryName, SfVipAddOn
 from ..winapi import mutex
+
+logger = logging.getLogger(__name__)
 
 
 class LocalproxyError(Exception):
@@ -21,6 +24,7 @@ def _find_port(excluded_ports: set[int], retry: int) -> int:
             if port not in excluded_ports:
                 excluded_ports.add(port)
                 return port
+            logging.warning("port %s already in use", port)
     raise LocalproxyError(LOC.NoSocketPort)
 
 

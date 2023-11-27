@@ -3,7 +3,7 @@ import inspect
 import subprocess
 import textwrap
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 from urllib.parse import quote
 
 from .nsis import MakeNSIS
@@ -19,23 +19,18 @@ from .utils.protocols import (
 )
 
 
-def _version_of(python_envs: PythonEnvs, name: str, get_version: Callable[[PythonEnv], str]) -> Optional[str]:
-    versions = {python_env: get_version(python_env) for python_env in python_envs.all}
-    versions_set = set(versions.values())
-    if len(versions_set) > 1:
+def _version_of(python_envs: PythonEnvs, name: str) -> Optional[str]:
+    env_versions = {
+        python_env: python_env.python_version if name == "Python" else python_env.package_version(name.lower())
+        for python_env in python_envs.all
+    }
+    versions = set(env_versions.values())
+    if len(versions) > 1:
         print(Title(name), Warn("versions differ"))
-        for python_env, version in versions.items():
+        for python_env, version in env_versions.items():
             print(".", Ok(python_env.bitness), Title(f"{name} is"), Warn(version))
         return None
-    return versions_set.pop()
-
-
-def _python_version(python_envs: PythonEnvs) -> Optional[str]:
-    return _version_of(python_envs, "Python", lambda python_env: python_env.python_version)
-
-
-def _package_version(python_envs: PythonEnvs, name: str) -> Optional[str]:
-    return _version_of(python_envs, name.capitalize(), lambda python_env: python_env.package_version(name))
+    return versions.pop()
 
 
 def _get_sloc(path: Path) -> int:
@@ -73,10 +68,10 @@ class Templater:
 
     def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
         python_envs = PythonEnvs(environments)
-        python_version = _python_version(python_envs)
-        nuitka_version = _package_version(python_envs, "nuitka")
-        mitmproxy_version = _package_version(python_envs, "mitmproxy")
-        if python_version and nuitka_version:
+        python_version = _version_of(python_envs, "Python")
+        nuitka_version = _version_of(python_envs, "Nuitka")
+        mitmproxy_version = _version_of(python_envs, "Mitmproxy")
+        if python_version and nuitka_version and mitmproxy_version:
             dist = Dist(build)
             self.template_format = dict(
                 exe64_link=quote(str(dist.installer_exe(python_envs.x64).as_posix())),
@@ -103,12 +98,14 @@ class Templater:
             self.template_format = None
 
     def create(self, template: CfgTemplate) -> None:
+        src, dst = Path(template.src), Path(template.dst)
         if self.template_format:
-            src, dst = Path(template.src), Path(template.dst)
             print(Title("Create"), Ok(dst.as_posix()), Low(f"from {src.as_posix()}"))
             text = src.read_text(encoding=Templater.encoding).format(**self.template_format)
             dst.parent.mkdir(parents=True, exist_ok=True)
             dst.write_text(text, encoding=Templater.encoding)
+        else:
+            print(Warn("Not created:"), Ok(dst.as_posix()), Low(f"from {src.as_posix()}"))
 
     def create_all(self, templates: CfgTemplates) -> None:
         for template in templates.all:

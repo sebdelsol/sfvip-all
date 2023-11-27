@@ -31,7 +31,7 @@ class Nuitka:
                 build.main,
             )
             if build.logs_dir:
-                logs = f"--force-stderr-spec=%PROGRAM%/../{build.logs_dir}/{build.name} - %PID%.log"
+                logs = f"--force-stderr-spec=%PROGRAM%/../{build.logs_dir}/{build.name} - %TIME% - %PID%.log"
                 self.args = logs, *self.args
         else:
             self.args = ()
@@ -64,7 +64,7 @@ class Nuitka:
         else:
             print(Warn("Skip Build by Nuitka"))
 
+        self.clean_logs(python_env)
         if self.check_exe(python_env):
-            self.clean_logs(python_env)
             return True
         return False

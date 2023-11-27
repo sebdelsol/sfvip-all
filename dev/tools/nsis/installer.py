@@ -1,3 +1,4 @@
+from enum import StrEnum
 from pathlib import Path
 from typing import Iterator, NamedTuple, Sequence
 
@@ -8,6 +9,8 @@ from shared.version import Version
 from ..utils.dist import Dist, to_ico
 from ..utils.env import PythonEnv
 from ..utils.protocols import CfgBuild, CfgLOC
+
+NSISCompression = StrEnum("NSISCompression", ["zlib", "bzip2", "lzma"])
 
 
 def get_cmd(name: str, cmd: Sequence[str]) -> dict[str, str | int]:
@@ -36,6 +39,7 @@ class NSISInstall(NamedTuple):
 
 class NSISInstaller:
     template_path = Path(__file__).parent / "template.nsi"
+    compression = NSISCompression.lzma
     installer = "installer.nsi"
     version_length = 4
     encoding = "utf-8"
@@ -54,6 +58,7 @@ class NSISInstaller:
                     has_logs=int(bool(build.logs_dir)),
                     logs_dir=str(Path(build.logs_dir)),
                     finish_page=int(build.install_finish_page),
+                    compression=str(NSISInstaller.compression),
                     all_languages=tuple(get_all_languages(loc, build.name)),
                     version=str(Version(build.version, NSISInstaller.version_length)),
                     **get_cmd("install", build.install_cmd),

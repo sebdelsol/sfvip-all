@@ -9,7 +9,7 @@ Name "{{name}} {{version}} {{bitness}}"
 OutFile "{{installer}}"
 RequestExecutionLevel user
 InstallDir "$LocalAppData\Programs\{{name}} {{bitness}}"
-SetCompressor /SOLID lzma ; bzip2 if it triggers AV
+SetCompressor /SOLID {{compression}}
 Unicode true
 ManifestDPIAware true
 ShowInstDetails hide
