@@ -5,18 +5,18 @@ So you can easily **search your entire catalog**. It also **updates [mpv player]
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x64-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/{github_path}/raw/master/{exe64_link})
+[<img src="https://img.shields.io/badge/{name} {version} x64-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/{exe_x86_clean}?style=flat-square" height="30">](https://github.com/{github_path}/raw/master/{exe_x64_link})<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • {exe_x64_engine} • {exe_x64_signature}-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
 
-[<img src="https://img.shields.io/badge/Version-{version}-informational"><img src="https://img.shields.io/badge/x86-informational?logo=windows&logoColor=white"><img src="https://img.shields.io/badge/installer-informational">](https://github.com/{github_path}/raw/master/{exe32_link})
+[<img src="https://img.shields.io/badge/{name} {version} x86-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/{exe_x86_clean}?style=flat-square" height="30">](https://github.com/{github_path}/raw/master/{exe_x86_link})<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • {exe_x86_engine} • {exe_x86_signature}-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
 [^1]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
-_On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._
+_On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
 
 # Build
-[![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
+[![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational)](https://nsis.sourceforge.io/Download)
 [![mitmproxy](https://img.shields.io/badge/Mitmproxy-{mitmproxy_version}-informational)](https://mitmproxy.org/)

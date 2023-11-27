@@ -7,6 +7,7 @@ from typing import Any, Optional
 from urllib.parse import quote
 
 from .nsis import MakeNSIS
+from .scanner.file import ScanFile
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import Dist
 from .utils.env import PythonEnv, PythonEnvs
@@ -63,6 +64,17 @@ def _get_requirements(python_env: PythonEnv) -> str:
     return " ".join((*requirements, *constraints))
 
 
+def _get_exe_args(dist: Dist, python_env: PythonEnv) -> dict[str, str]:
+    exe = dist.installer_exe(python_env)
+    scan_file = ScanFile(exe)
+    return {
+        f"exe_{python_env.bitness}_link": quote(str(exe.as_posix())),
+        f"exe_{python_env.bitness}_engine": scan_file.engine,
+        f"exe_{python_env.bitness}_signature": scan_file.signature,
+        f"exe_{python_env.bitness}_clean": "Clean-brightgreen" if scan_file.clean else "Failed-red",
+    }
+
+
 class Templater:
     encoding = "utf-8"
 
@@ -74,8 +86,8 @@ class Templater:
         if python_version and nuitka_version and mitmproxy_version:
             dist = Dist(build)
             self.template_format = dict(
-                exe64_link=quote(str(dist.installer_exe(python_envs.x64).as_posix())),
-                exe32_link=quote(str(dist.installer_exe(python_envs.x86).as_posix())),
+                **_get_exe_args(dist, python_envs.x64),
+                **_get_exe_args(dist, python_envs.x86),
                 env_x64_decl=_get_attr_link(environments.X64, "path"),
                 env_x86_decl=_get_attr_link(environments.X86, "path"),
                 requirements_x64=_get_requirements(python_envs.x64),

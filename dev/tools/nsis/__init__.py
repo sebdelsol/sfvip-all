@@ -6,7 +6,7 @@ from typing import Optional
 
 from shared.version import Version
 
-from ..scanner import VirusScan
+from ..scanner import VirusScanner
 from ..utils.color import Low, Ok, Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.dist import repr_size
@@ -60,7 +60,7 @@ class NSIS:
             install = self.installer.create(python_env)
             nsis = CommandMonitor(self.make_nsis.path, *NSIS.nsis_args, str(install.installer.resolve()))
             if nsis.run(out=Title, err=Warn):
-                if VirusScan.scan(install.exe):
+                if VirusScanner().scan(install.exe):
                     print(Title("Built"), Ok(str(install.exe.as_posix())), Low(repr_size(install.exe)))
                     return install.exe
                 install.exe.unlink(missing_ok=True)

@@ -104,7 +104,7 @@ class ConfigLoader:
     note: all fields starting with _ are removed
     """
 
-    __slots__ = "_inner", "_file", "_path", "_name", "_file_lock", "_base_proxy"
+    __slots__ = "_inner", "_file", "_path", "_name", "_file_lock", "_base_proxy", "_check_newer"
     _default: Optional[type] = None
     _module_file: Optional[str] = None
 
@@ -114,10 +114,11 @@ class ConfigLoader:
             cls._default = cls
             cls._module_file = sys.modules[cls.__module__].__file__
 
-    def __init__(self, file: Path) -> None:
+    def __init__(self, file: Path, check_newer: bool = True) -> None:
         ConfigLoader._not_in_inner = set(dict(ConfigLoader.__dict__).keys())
         ConfigLoader._not_in_inner.update(set(dict(_ProxyNamespace.__dict__).keys()))
         self._file = file
+        self._check_newer = check_newer and "__compiled__" not in globals()  # not nuitka
         self._path: list[str] = []
         self._name = self.__class__.__name__
         self._file_lock = mutex.SystemWideMutex(f"file lock for {file}")
@@ -196,10 +197,7 @@ class ConfigLoader:
         return self
 
     def _im_newer(self) -> bool:
-        # launched by nuitka ?
-        if "__compiled__" in globals():
-            return False
-        return bool(self._module_file and getmtime(self._module_file) > getmtime(self._file))
+        return self._check_newer and bool(self._module_file and getmtime(self._module_file) > getmtime(self._file))
 
     def _as_dict(self, proxy: _ProxyNamespace) -> dict[str, Any]:
         """recursively get a dict from _ProxyNamespace with fields validation & default values"""

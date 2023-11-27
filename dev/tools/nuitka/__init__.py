@@ -1,6 +1,6 @@
 import shutil
 
-from ..scanner import VirusScan
+from ..scanner import VirusScanner
 from ..utils.color import Ok, Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.dist import Dist
@@ -47,7 +47,7 @@ class Nuitka:
     def check_exe(self, python_env: PythonEnv) -> bool:
         dist = self.dist.dist_dir(python_env)
         exe = dist / f"{self.build.name}.exe"
-        return dist.is_dir() and exe.is_file() and VirusScan.scan(dist)
+        return dist.is_dir() and exe.is_file() and VirusScanner().scan(dist)
 
     def run(self, python_env: PythonEnv) -> bool:
         if self.do_run:
