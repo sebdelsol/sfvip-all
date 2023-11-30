@@ -1,3 +1,4 @@
+import configparser
 import subprocess
 import sys
 from functools import cached_property
@@ -8,6 +9,7 @@ import pkg_resources
 from tap import Tap
 
 from .color import Low, Ok, Title, Warn
+from .command import CommandMonitor
 from .protocols import CfgEnvironments
 
 
@@ -27,32 +29,16 @@ class PythonEnv:
         self._env_path = Path(environment.path)
 
     @cached_property
+    def home(self) -> Path:
+        # https://docs.python.org/3/library/venv.html#creating-virtual-environments
+        pyvenv = self._env_path / "pyvenv.cfg"
+        config = configparser.ConfigParser()
+        config.read_string(f"[env]\n{pyvenv.read_text()}")
+        return Path(config.get("env", "home"))
+
+    @cached_property
     def exe(self) -> Path:
         return self._env_path / "scripts" / "python.exe"
-
-    @property
-    def path_str(self) -> str:
-        return str(self._env_path.resolve())
-
-    @property
-    def site_packages(self) -> str:
-        return str((self._env_path / "lib" / "site-packages").resolve())
-
-    @property
-    def requirements(self) -> Sequence[str]:
-        return self._requirements
-
-    @property
-    def constraints(self) -> Sequence[str]:
-        return self._constraints
-
-    def run_python(self, *args: str) -> Optional[str]:
-        if self.exe.exists():
-            try:
-                return subprocess.run([self.exe, *args], check=True, capture_output=True, text=True).stdout
-            except subprocess.CalledProcessError:
-                return None
-        return None
 
     @cached_property
     def bitness(self) -> Literal["x64", "x86"]:
@@ -70,6 +56,37 @@ class PythonEnv:
         if version := self.run_python("--version"):
             return version.split()[1]
         return PythonEnv.undefined_version
+
+    def clear_cached_properties(self) -> None:
+        del self.home
+        del self.exe
+        del self.bitness
+        del self.is_64
+        del self.python_version
+
+    @property
+    def path_str(self) -> str:
+        return str(self._env_path.resolve())
+
+    @property
+    def site_packages(self) -> str:
+        return str((self._env_path / "lib" / "site-packages").resolve())
+
+    @property
+    def requirements(self) -> Sequence[str]:
+        return self._requirements
+
+    @property
+    def constraints(self) -> Sequence[str]:
+        return self._constraints
+
+    def run_python(self, *args: str, exe: Optional[Path] = None) -> Optional[str]:
+        if self.exe.exists():
+            try:
+                return subprocess.run([exe or self.exe, *args], check=True, capture_output=True, text=True).stdout
+            except subprocess.CalledProcessError:
+                return None
+        return None
 
     def package_version(self, package_name: str) -> str:
         script = f"import importlib.metadata; print(importlib.metadata.version('{package_name}'))"
@@ -100,6 +117,25 @@ class PythonEnv:
                 Ok(str(self._env_path.name)),
             )
         )
+
+    def upgrade_python(self) -> bool:
+        # need to rename the python in use
+        old_exe = self.exe.with_suffix(".exe.old")
+        try:
+            old_exe.unlink(missing_ok=True)
+        except PermissionError:
+            older = old_exe.with_suffix(".older")
+            older.unlink(missing_ok=True)
+            old_exe.rename(older)
+        self.exe.rename(old_exe)
+        # upgrade from home python
+        py = CommandMonitor(self.home / "python.exe", "-m", "venv", "--upgrade", self.path_str)
+        if py.run(out=Title, err=Warn):
+            self.clear_cached_properties()
+            return True
+        # undo
+        old_exe.rename(self.exe)
+        return False
 
 
 # comments are turned into argparse help

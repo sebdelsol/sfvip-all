@@ -9,7 +9,7 @@ import requests
 from shared.feed import FeedEntries, FeedEntry
 from shared.version import Version
 
-from ..utils.color import Low, Ok, Title, Warn
+from ..utils.color import Ok, Title, Warn
 
 
 class NSISSetup(NamedTuple):
@@ -71,18 +71,17 @@ class NSISUpgrader:
         return False
 
     def upgrade(self) -> bool:
-        print(Title("Update"), Ok("NSIS"), Low("-"), end=" ", flush=True)
+        print(Title("Check"), Ok("NSIS"), end=" ", flush=True)
         if setup := self.get_latest():
-            print(Ok(str(setup.version)), end=" ", flush=True)
             if setup.version > self.current_version:
-                print(Ok("is new, Get"), end=" ", flush=True)
+                print(Ok(f"New {setup.version}"), Title("Get"), end=" ", flush=True)
                 with tempfile.TemporaryDirectory() as temp_dir:
                     if setup_exe := setup.get(temp_dir, NSISUpgrader.timeout):
-                        print(Ok("& Install"), end=" ", flush=True)
+                        print(Title("& Install"), end=" ", flush=True)
                         print(Ok("OK") if self.execute(setup_exe) else Warn("Failed"))
                         return True
             else:
-                print(Ok("is up-to-date"))
+                print(Ok("up-to-date"))
         else:
             print(Warn("Failed"))
         return False

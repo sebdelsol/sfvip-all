@@ -8,6 +8,7 @@ from .utils.color import Low, Ok, Title, Warn
 from .utils.columns import Columns, Justify
 from .utils.command import CommandMonitor
 from .utils.env import PythonEnv, RequiredBy
+from .utils.pyupdate import PythonInstaller, PythonVersion
 
 
 class _Pckg(NamedTuple):
@@ -25,20 +26,43 @@ class _PckgsColumns(Columns[_Pckg]):
     ...
 
 
-def _flushed_input(text: str) -> str:
+def flushed_input(*text: str) -> str:
     while msvcrt.kbhit():
         msvcrt.getch()
-    return input(text)
+    print(*text, end="", sep="")
+    return input(Title()).lower()
+
+
+def upgrade_python(python_env: PythonEnv) -> None:
+    print(Title("Check"), Ok("Python"), end=" ", flush=True)
+    if new_minor := PythonVersion(python_env.python_version).new_minor():
+        print(Ok(f"New {new_minor}"))
+        match flushed_input(Title("> Install : y"), Ok("es ? ")):
+            case "y":
+                print(Title("Get"), Ok(f"Python {new_minor}"), end=" ", flush=True)
+                installer = PythonInstaller(python_env, new_minor)
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    if installer.download(temp_dir):
+                        print(Title("& Install"), end=" ", flush=True)
+                        if installer.install():
+                            print(Ok("OK"))
+                            return
+                print(Warn("Failed"))
+            case _:
+                print(Warn("Skip"), Ok(f"Python {new_minor} install"))
+    else:
+        print(Ok("up-to-date"))
 
 
 class Upgrader:
     _prompt = Title("> Choose: e"), Ok("xit, "), Title("a"), Ok("ll or "), Title("# "), Ok("? ")
     _pip_install = "-m", "pip", "install", "--upgrade", "--require-virtualenv"
-    _pip_freeze = "-m", "pip", "freeze", "--quiet", "--exclude-editable"
+    _pip_freeze = "-m", "pip", "freeze", "--quiet"
 
     def __init__(self, python_env: PythonEnv) -> None:
         self._python_env = python_env
         self._required_by = RequiredBy(python_env)
+        upgrade_python(python_env)
 
     def _install(self, *options: str) -> bool:
         pip = CommandMonitor(self._python_env.exe, *Upgrader._pip_install, *options)
@@ -100,8 +124,7 @@ class Upgrader:
             else:
                 print(Title("Requirements"), Ok("up-to-date"))
                 break
-            print(*Upgrader._prompt, end="", sep="")
-            match _flushed_input(Title()).lower():
+            match flushed_input(*Upgrader._prompt).lower():
                 case "e":
                     print(Title("Exit"))
                     break
