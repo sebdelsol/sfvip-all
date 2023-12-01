@@ -37,19 +37,18 @@ def upgrade_python(python_env: PythonEnv) -> None:
     print(Title("Check"), Ok("Python"), end=" ", flush=True)
     if new_minor := PythonVersion(python_env.python_version).new_minor():
         print(Ok(f"New {new_minor}"))
-        match flushed_input(Title("> Install : y"), Ok("es ? ")):
-            case "y":
-                print(Title("Get"), Ok(f"Python {new_minor}"), end=" ", flush=True)
-                installer = PythonInstaller(python_env, new_minor)
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    if installer.download(temp_dir):
-                        print(Title("& Install"), end=" ", flush=True)
-                        if installer.install():
-                            print(Ok("OK"))
-                            return
-                print(Warn("Failed"))
-            case _:
-                print(Warn("Skip"), Ok(f"Python {new_minor} install"))
+        if flushed_input(Title("> Install : y"), Ok("es ? ")) == "y":
+            print(Title("Get"), Ok(f"Python {new_minor}"), end=" ", flush=True)
+            installer = PythonInstaller(python_env, new_minor)
+            with tempfile.TemporaryDirectory() as temp_dir:
+                if installer.download(temp_dir):
+                    print(Title("& Install"), end=" ", flush=True)
+                    if installer.install():
+                        print(Ok("OK"))
+                        return
+            print(Warn("Failed"))
+        else:
+            print(Warn("Skip"), Ok(f"Python {new_minor} install"))
     else:
         print(Ok("up-to-date"))
 

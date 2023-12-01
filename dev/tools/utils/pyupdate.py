@@ -7,7 +7,7 @@ import requests
 from shared.feed import FeedEntries
 from shared.version import Version
 
-from ..utils.env import PythonEnv
+from .env import PythonEnv
 
 
 class PythonVersion(Version):
