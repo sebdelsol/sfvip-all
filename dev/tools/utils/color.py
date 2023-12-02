@@ -1,8 +1,22 @@
 from typing import Protocol
 
-from colorama import Fore, Style, just_fix_windows_console
+try:
+    from colorama import Fore, Style, just_fix_windows_console
 
-just_fix_windows_console()
+    just_fix_windows_console()
+
+except ImportError:
+
+    class _Style:
+        YELLOW = "\x1b[33m"
+        RED = "\x1b[31m"
+        GREEN = "\x1b[32m"
+        CYAN = "\x1b[36m"
+        BRIGHT = "\x1b[1m"
+        RESET_ALL = "\x1b[0m"
+
+    Fore = _Style
+    Style = _Style
 
 
 class ToStyle(Protocol):  # to handle hint for the callable default parameter

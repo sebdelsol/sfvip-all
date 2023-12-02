@@ -4,14 +4,15 @@ import subprocess
 import sys
 from functools import cached_property
 from pathlib import Path
-from typing import Iterator, Literal, Optional, Sequence
+from typing import Literal, Optional, Sequence
 
 import pkg_resources
-from tap import Tap
 
-from .color import Low, Ok, Title, Warn
-from .command import CommandMonitor
-from .protocols import CfgEnvironments
+from shared.version import Version
+
+from ..utils.color import Low, Ok, Title, Warn
+from ..utils.command import CommandMonitor
+from ..utils.protocols import CfgEnvironments
 
 
 def get_bitness(is_64: bool) -> Literal["x64", "x86"]:
@@ -25,9 +26,11 @@ class PythonEnv:
         # use current Python bitness if not specified
         self._want_64 = sys.maxsize == (2**63) - 1 if want_64 is None else want_64
         environment = environments.X64 if self._want_64 else environments.X86
+        self._want_python = Version(environments.python, 2)
         self._requirements = environments.requirements
         self._constraints = environment.constraints
         self._env_path = Path(environment.path)
+        self.clean_partially_uninstalled()
 
     @cached_property
     def home(self) -> Path:
@@ -103,6 +106,10 @@ class PythonEnv:
             print(Warn("Wrong Python bitness !"))
             print(Warn("It should be"), Ok(get_bitness(self._want_64)))
             return False
+        if Version(self.python_version, 2) != self._want_python:
+            print(Warn("Wrong Python major version !"))
+            print(Warn("It should be"), Ok(str(self._want_python)))
+            return False
         return True
 
     def __repr__(self) -> str:
@@ -119,8 +126,7 @@ class PythonEnv:
             )
         )
 
-    def upgrade_python(self) -> bool:
-        # need to rename the python in use
+    def clean_old_exe(self) -> Path:
         old_exe = self.exe.with_suffix(".exe.old")
         try:
             old_exe.unlink(missing_ok=True)
@@ -128,6 +134,11 @@ class PythonEnv:
             older = old_exe.with_suffix(".older")
             older.unlink(missing_ok=True)
             old_exe.rename(older)
+        return old_exe
+
+    def upgrade_python(self) -> bool:
+        # need to rename the python in use
+        old_exe = self.clean_old_exe()
         self.exe.rename(old_exe)
         # upgrade from home python
         py = CommandMonitor(self.home / "python.exe", "-m", "venv", "--upgrade", self.path_str)
@@ -143,37 +154,6 @@ class PythonEnv:
         for folder in site_packages.glob("~*"):
             if folder.is_dir():
                 shutil.rmtree(folder, ignore_errors=True)
-
-
-# comments are turned into argparse help
-class EnvArgs(Tap):
-    both: bool = False  # x64 and x86 versions
-    x86: bool = False  # x86 version
-    x64: bool = False  # x64 version
-
-    def process_args(self) -> None:
-        if self.both:
-            self.x64, self.x86 = True, True
-
-    def get_python_envs(self, environments: CfgEnvironments) -> list[PythonEnv]:
-        return [PythonEnv(environments, bitness) for bitness in self.get_bitness()]
-
-    def get_bitness(self) -> Iterator[bool | None]:
-        if self.x64 or self.x86:
-            if self.x64:
-                yield True
-            if self.x86:
-                yield False
-        else:
-            yield None
-
-
-class PythonEnvs:
-    def __init__(self, environments: CfgEnvironments, args: Optional[EnvArgs] = None) -> None:
-        self.asked = args.get_python_envs(environments) if args else []
-        self.all = [PythonEnv(environments, bitness) for bitness in (True, False)]
-        self.x64 = PythonEnv(environments, True)
-        self.x86 = PythonEnv(environments, False)
 
 
 class RequiredBy:

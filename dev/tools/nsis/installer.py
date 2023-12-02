@@ -6,8 +6,8 @@ import jinja2
 
 from shared.version import Version
 
+from ..env import PythonEnv
 from ..utils.dist import Dist, to_ico
-from ..utils.env import PythonEnv
 from ..utils.protocols import CfgBuild, CfgLOC
 
 NSISCompression = StrEnum("NSISCompression", ["zlib", "bzip2", "lzma"])

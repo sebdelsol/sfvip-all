@@ -1,8 +1,8 @@
 from build_config import Environments
 
+from .tools.env.envs import EnvArgs
 from .tools.nsis import MakeNSIS
 from .tools.upgrader import Upgrader
-from .tools.utils.env import EnvArgs
 
 
 # comments are turned into argparse help
@@ -18,4 +18,4 @@ if __name__ == "__main__":
         print()
         print(python_env)
         if python_env.check():
-            Upgrader(python_env).check(eager=not args.noeager, clean=args.clean)
+            Upgrader(python_env).upgrade(eager=not args.noeager, clean=args.clean)

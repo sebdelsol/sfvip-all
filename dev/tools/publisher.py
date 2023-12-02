@@ -9,9 +9,9 @@ import requests
 
 from shared.update import AppLatestUpdate, AppUpdate
 
+from .env.envs import EnvArgs, PythonEnv, PythonEnvs
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import Dist, repr_size
-from .utils.env import EnvArgs, PythonEnv, PythonEnvs
 from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub
 
 

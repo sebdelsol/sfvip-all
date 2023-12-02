@@ -60,6 +60,8 @@ class _CfgEnvironment(Protocol):
 
 
 class CfgEnvironments(Protocol):
+    python: str
+
     @property
     def requirements(self) -> Sequence[str]:
         ...

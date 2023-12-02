@@ -1,10 +1,10 @@
 import shutil
 
+from ..env import PythonEnv
 from ..scanner import VirusScanner
 from ..utils.color import Ok, Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.dist import Dist
-from ..utils.env import PythonEnv
 from ..utils.protocols import CfgBuild
 from .files import IncludeFiles
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
+from .env.envs import EnvArgs, PythonEnv, PythonEnvs
 from .nsis import NSIS
 from .nuitka import Nuitka
 from .publisher import Publisher
@@ -8,7 +9,6 @@ from .scanner import VirusScanner
 from .upgrader import Upgrader
 from .utils.color import Ok, Title, Warn
 from .utils.dist import Dist
-from .utils.env import EnvArgs, PythonEnv, PythonEnvs
 from .utils.protocols import CfgBuild, CfgEnvironments, CfgLOC
 
 
@@ -53,7 +53,7 @@ class Builder:
         print(Title("Building"), Ok(name))
         if python_env.check():
             if self.args.upgrade:
-                Upgrader(python_env).check(eager=True)
+                Upgrader(python_env).upgrade(eager=True)
             if self.nuitka.run(python_env):
                 if built := self.nsis.run(python_env):
                     if self.publisher and self.args.publish:

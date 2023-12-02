@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from .env import PythonEnv
+from ..env import PythonEnv
 from .protocols import CfgBuild
 
 

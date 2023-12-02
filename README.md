@@ -21,49 +21,44 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![mitmproxy](https://img.shields.io/badge/Mitmproxy-10.1.5-informational)](https://mitmproxy.org/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-5163-000000)
+![Sloc](https://img.shields.io/badge/Sloc-5233-000000)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
-### Create an x64 environment
-With [***Python 3.11.6 x64***](https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe) or above.  
+### Create the environments
+You need [***Python 3.11 x64***](https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe) and [***Python 3.11 x86***](https://www.python.org/ftp/python/3.11.6/python-3.11.6.exe) installed:
 ```console
-python -m venv .sfvip64
+py -3.11-64 -m dev.create_env
+py -3.11-32 -m dev.create_env
+```
+### Activate the _x64_ environment
+```console
 .sfvip64\scripts\activate
-python -m pip install -r requirements.txt -r requirements.dev.txt
 ```
-Set ***[`Environments.X64.path`](/build_config.py#L34)*** appropriately if you use a different environement.  
-### Create an x86 environment
-With [***Python 3.11.6 x86***](https://www.python.org/ftp/python/3.11.6/python-3.11.6.exe) or above.  
-```console
-python -m venv .sfvip86
-.sfvip86\scripts\activate
-python -m pip install -r requirements.txt -r requirements.dev.txt -c constraints.x86.txt
-```
-Set ***[`Environments.X86.path`](/build_config.py#L38)*** appropriately if you use a different environement.  
 ### Run locally
 ```console
 python -m sfvip_all
 ```
-### Build with ***Mingw64***
-_The easiest option._
+### Build with **Mingw**
+It's the _easiest option:_
 ```console
 python -m dev.build --mingw
 ```
-### Build with ***Clang***
-_The recommended option._
+### Build with **Clang**
+It's the _recommended option:_
 ```console
 python -m dev.build
 ```
-You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig):
+You need to have [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig) installed before building:
 
 <img src="resources/VS.png">
 
-### Build specific versions
+### Build a specific version
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish] [--mingw]
 ```
 ### Upgrade dependencies
+It checks for _Nsis_, _Python_ minor update and all _packages dependencies_:
 ```console
 python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean]
 ```
@@ -72,12 +67,18 @@ python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean]
 python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```
 ### Scan for virus
+It updates _Microsoft Defender_ engine and signatures before scanning:
 ```console
 python -m dev.scan [--x86 | --x64 | --both]
 ```
 
 ### Translations
-You need a [***DeepL API key***](https://www.deepl.com/en/docs-api/).
+Get a [***DeepL API key***](https://www.deepl.com/en/docs-api/) and set `DEEPL_KEY` in `api_keys.py`:
+```python3
+# api_keys.py
+DEEPL_KEY=your_deepl_api_key
+```
+Translate the [**UI**](translations/loc/texts.py):
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```

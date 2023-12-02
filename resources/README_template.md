@@ -25,45 +25,40 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
-### Create an x64 environment
-With [***Python {py_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) or above.  
+### Create the environments
+You need [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) and [***Python {py_major_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) installed:
 ```console
-python -m venv {env_x64}
+py -{py_major_version}-64 -m dev.create_env
+py -{py_major_version}-32 -m dev.create_env
+```
+### Activate the _x64_ environment
+```console
 {env_x64}\scripts\activate
-python -m pip install {requirements_x64}
 ```
-Set ***{env_x64_decl}*** appropriately if you use a different environement.  
-### Create an x86 environment
-With [***Python {py_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) or above.  
-```console
-python -m venv {env_x86}
-{env_x86}\scripts\activate
-python -m pip install {requirements_x86}
-```
-Set ***{env_x86_decl}*** appropriately if you use a different environement.  
 ### Run locally
 ```console
 python -m {script_main}
 ```
-### Build with ***Mingw64***
-_The easiest option._
+### Build with **Mingw**
+It's the _easiest option:_
 ```console
 python -m dev.build --mingw
 ```
-### Build with ***Clang***
-_The recommended option._
+### Build with **Clang**
+It's the _recommended option:_
 ```console
 python -m dev.build
 ```
-You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig):
+You need to have [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig) installed before building:
 
 <img src="resources/VS.png">
 
-### Build specific versions
+### Build a specific version
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish] [--mingw]
 ```
 ### Upgrade dependencies
+It checks for _Nsis_, _Python_ minor update and all _packages dependencies_:
 ```console
 python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean]
 ```
@@ -72,12 +67,18 @@ python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean]
 python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```
 ### Scan for virus
+It updates _Microsoft Defender_ engine and signatures before scanning:
 ```console
 python -m dev.scan [--x86 | --x64 | --both]
 ```
 
 ### Translations
-You need a [***DeepL API key***](https://www.deepl.com/en/docs-api/).
+Get a [***DeepL API key***](https://www.deepl.com/en/docs-api/) and set `DEEPL_KEY` in `api_keys.py`:
+```python3
+# api_keys.py
+DEEPL_KEY=your_deepl_api_key
+```
+Translate the [**UI**](translations/loc/texts.py):
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```

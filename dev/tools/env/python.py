@@ -1,4 +1,5 @@
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Optional, Self
 
@@ -7,7 +8,9 @@ import requests
 from shared.feed import FeedEntries
 from shared.version import Version
 
-from .env import PythonEnv
+from ..utils.color import Ok, Title, Warn
+from ..utils.command import flushed_input
+from . import PythonEnv
 
 
 class PythonVersion(Version):
@@ -60,3 +63,23 @@ class PythonInstaller:
         except subprocess.CalledProcessError:
             pass
         return False
+
+
+def upgrade_python(python_env: PythonEnv) -> None:
+    print(Title("Check"), Ok("Python"), end=" ", flush=True)
+    if new_minor := PythonVersion(python_env.python_version).new_minor():
+        print(Ok(f"New {new_minor}"))
+        if flushed_input(Title("> Install : y"), Ok("es ? ")) == "y":
+            print(Title("Get"), Ok(f"Python {new_minor}"), end=" ", flush=True)
+            installer = PythonInstaller(python_env, new_minor)
+            with tempfile.TemporaryDirectory() as temp_dir:
+                if installer.download(temp_dir):
+                    print(Title("& Install"), end=" ", flush=True)
+                    if installer.install():
+                        print(Ok("OK"))
+                        return
+            print(Warn("Failed"))
+        else:
+            print(Warn("Skip"), Ok(f"Python {new_minor} install"))
+    else:
+        print(Ok("up-to-date"))

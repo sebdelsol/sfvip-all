@@ -1,16 +1,14 @@
-import ast
-import inspect
 import subprocess
-import textwrap
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 from urllib.parse import quote
 
+from .env.envs import PythonEnv, PythonEnvs
+from .env.python import PythonVersion
 from .nsis import MakeNSIS
 from .scanner.file import ScanFile
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import Dist
-from .utils.env import PythonEnv, PythonEnvs
 from .utils.protocols import (
     CfgBuild,
     CfgEnvironments,
@@ -49,21 +47,6 @@ def _get_sloc(path: Path) -> int:
         return 0
 
 
-def _get_attr_link(obj: Any, attr: str) -> str:
-    lines, start = inspect.getsourcelines(obj)
-    for node in ast.walk(ast.parse(textwrap.dedent("".join(lines)))):
-        if isinstance(node, ast.Assign) and isinstance(target := node.targets[0], ast.Name) and target.id == attr:
-            path = inspect.getfile(obj).replace(str(Path().resolve()), "").replace("\\", "/")
-            return f"[`{obj.__qualname__}.{attr}`]({path}#L{node.lineno + start - 1})"
-    return ""
-
-
-def _get_requirements(python_env: PythonEnv) -> str:
-    requirements = (f"-r {requirements}" for requirements in python_env.requirements)
-    constraints = (f"-c {constraints}" for constraints in python_env.constraints)
-    return " ".join((*requirements, *constraints))
-
-
 def _get_exe_args(dist: Dist, python_env: PythonEnv) -> dict[str, str]:
     exe = dist.installer_exe(python_env)
     scan_file = ScanFile(exe)
@@ -88,10 +71,7 @@ class Templater:
             self.template_format = dict(
                 **_get_exe_args(dist, python_envs.x64),
                 **_get_exe_args(dist, python_envs.x86),
-                env_x64_decl=_get_attr_link(environments.X64, "path"),
-                env_x86_decl=_get_attr_link(environments.X86, "path"),
-                requirements_x64=_get_requirements(python_envs.x64),
-                requirements_x86=_get_requirements(python_envs.x86),
+                py_major_version=str(PythonVersion(python_version).major),
                 py_version_compact=python_version.replace(".", ""),
                 github_path=f"{github.owner}/{github.repo}",
                 sloc=_get_sloc(Path(build.main).parent),

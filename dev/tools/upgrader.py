@@ -1,15 +1,14 @@
 import json
-import msvcrt
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, NamedTuple, Optional
 
+from .env import PythonEnv, RequiredBy
+from .env.python import upgrade_python
 from .utils.color import Low, Ok, Title, Warn
 from .utils.columns import Columns, Justify
-from .utils.command import CommandMonitor
-from .utils.env import PythonEnv, RequiredBy
-from .utils.pyupdate import PythonInstaller, PythonVersion
+from .utils.command import CommandMonitor, flushed_input
 
 
 class _Pckg(NamedTuple):
@@ -27,33 +26,6 @@ class _PckgsColumns(Columns[_Pckg]):
     ...
 
 
-def flushed_input(*text: str) -> str:
-    while msvcrt.kbhit():
-        msvcrt.getch()
-    print(*text, end="", sep="")
-    return input(Title()).lower()
-
-
-def upgrade_python(python_env: PythonEnv) -> None:
-    print(Title("Check"), Ok("Python"), end=" ", flush=True)
-    if new_minor := PythonVersion(python_env.python_version).new_minor():
-        print(Ok(f"New {new_minor}"))
-        if flushed_input(Title("> Install : y"), Ok("es ? ")) == "y":
-            print(Title("Get"), Ok(f"Python {new_minor}"), end=" ", flush=True)
-            installer = PythonInstaller(python_env, new_minor)
-            with tempfile.TemporaryDirectory() as temp_dir:
-                if installer.download(temp_dir):
-                    print(Title("& Install"), end=" ", flush=True)
-                    if installer.install():
-                        print(Ok("OK"))
-                        return
-            print(Warn("Failed"))
-        else:
-            print(Warn("Skip"), Ok(f"Python {new_minor} install"))
-    else:
-        print(Ok("up-to-date"))
-
-
 class Upgrader:
     _prompt = Title("> Choose: e"), Ok("xit, "), Title("a"), Ok("ll or "), Title("# "), Ok("? ")
     _pip_install = "-m", "pip", "install", "--upgrade", "--require-virtualenv"
@@ -63,7 +35,6 @@ class Upgrader:
     def __init__(self, python_env: PythonEnv) -> None:
         self._python_env = python_env
         self._required_by = RequiredBy(python_env)
-        self._python_env.clean_partially_uninstalled()
         upgrade_python(python_env)
 
     def _install(self, *options: str) -> bool:
@@ -117,7 +88,7 @@ class Upgrader:
                     return True
         return False
 
-    def check(self, eager: bool, clean: bool = False) -> None:
+    def upgrade(self, eager: bool, clean: bool = False) -> None:
         if not self._python_env.requirements:
             print(Warn("No requirements to check"))
             return

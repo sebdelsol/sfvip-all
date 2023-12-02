@@ -29,6 +29,7 @@ class Build:
 
 class Environments:
     requirements = "requirements.txt", "requirements.dev.txt"
+    python = "3.11"
 
     class X64:
         path = ".sfvip64"

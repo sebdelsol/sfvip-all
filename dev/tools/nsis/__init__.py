@@ -6,11 +6,11 @@ from typing import Optional
 
 from shared.version import Version
 
+from ..env import PythonEnv
 from ..scanner import VirusScanner
 from ..utils.color import Low, Ok, Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.dist import repr_size
-from ..utils.env import PythonEnv
 from ..utils.protocols import CfgBuild, CfgLOC
 from .installer import NSISInstaller
 from .upgrader import NSISUpgrader

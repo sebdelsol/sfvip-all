@@ -1,3 +1,4 @@
+import msvcrt
 import os
 import queue
 import textwrap
@@ -6,7 +7,7 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import IO, Iterator, NamedTuple, Optional
 
-from .color import Low, ToStyle, Warn
+from .color import Low, Title, ToStyle, Warn
 
 
 class _Line(NamedTuple):
@@ -29,10 +30,17 @@ def clear_lines(n: int) -> None:
         _line_clear()
 
 
+def flushed_input(*text: str, to_style: ToStyle = Title) -> str:
+    while msvcrt.kbhit():
+        msvcrt.getch()
+    print(*text, end="", sep="")
+    return input(to_style()).lower()
+
+
 class CommandMonitor:
     """monitor command stdout and stderr in realtime"""
 
-    def __init__(self, exe_path: Path, *args: str) -> None:
+    def __init__(self, exe_path: Path | str, *args: str) -> None:
         self._args = exe_path, *args
         self._width = os.get_terminal_size()[0]
         self._queue: queue.Queue[Optional[_Line]] = queue.Queue()
