@@ -1,4 +1,5 @@
 import configparser
+import shutil
 import subprocess
 import sys
 from functools import cached_property
@@ -136,6 +137,12 @@ class PythonEnv:
         # undo
         old_exe.rename(self.exe)
         return False
+
+    def clean_partially_uninstalled(self) -> None:
+        site_packages = self._env_path / "Lib" / "site-packages"
+        for folder in site_packages.glob("~*"):
+            if folder.is_dir():
+                shutil.rmtree(folder, ignore_errors=True)
 
 
 # comments are turned into argparse help

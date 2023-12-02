@@ -1,6 +1,7 @@
 import json
 import msvcrt
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, NamedTuple, Optional
 
@@ -57,15 +58,36 @@ class Upgrader:
     _prompt = Title("> Choose: e"), Ok("xit, "), Title("a"), Ok("ll or "), Title("# "), Ok("? ")
     _pip_install = "-m", "pip", "install", "--upgrade", "--require-virtualenv"
     _pip_freeze = "-m", "pip", "freeze", "--quiet"
+    _pip_uninstall = "-m", "pip", "uninstall"
 
     def __init__(self, python_env: PythonEnv) -> None:
         self._python_env = python_env
         self._required_by = RequiredBy(python_env)
+        self._python_env.clean_partially_uninstalled()
         upgrade_python(python_env)
 
     def _install(self, *options: str) -> bool:
         pip = CommandMonitor(self._python_env.exe, *Upgrader._pip_install, *options)
         return pip.run(out=Title, err=Warn)
+
+    def _uninstall(self, *options: str, keep_error: bool = True) -> bool:
+        pip = CommandMonitor(self._python_env.exe, *Upgrader._pip_uninstall, *options)
+        return pip.run(out=Title, err=Warn, keep_error=keep_error)
+
+    @contextmanager
+    def _freeze(self, *options: str) -> Iterator[Path | None]:
+        if freeze := self._python_env.run_python(*Upgrader._pip_freeze, *options):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                env = Path(temp_dir) / "env.txt"
+                env.write_text(freeze)
+                yield env
+        else:
+            yield
+
+    def _clean_all_packages(self) -> None:
+        with self._freeze() as installed:
+            if installed:
+                self._uninstall("-y", "-r", str(installed), keep_error=False)
 
     def _install_all_packages(self, eager: bool, dry_run: bool) -> Iterator[_Pckg]:
         """install all requirements, return what's been installed"""
@@ -89,18 +111,19 @@ class Upgrader:
 
     def _install_package(self, pckg: _Pckg) -> bool:
         """install one pckg constrained by all other pckgs' versions in the environment"""
-        if freeze := self._python_env.run_python(*Upgrader._pip_freeze, "--exclude", pckg.name):
-            with tempfile.TemporaryDirectory() as temp_dir:
-                constraints = Path(temp_dir) / "current-env.txt"
-                constraints.write_text(freeze)
+        with self._freeze("--exclude", pckg.name) as constraints:
+            if constraints:
                 if self._install(pckg.url or f"{pckg.name}=={pckg.version}", "-r", str(constraints)):
                     return True
         return False
 
-    def check(self, eager: bool) -> None:
+    def check(self, eager: bool, clean: bool = False) -> None:
         if not self._python_env.requirements:
             print(Warn("No requirements to check"))
             return
+        if clean:
+            print(Title("Clean"), Ok("all packages"))
+            self._clean_all_packages()
         print(
             *(Title("Check"), Ok("packages")),
             Low(f"{'eagerly' if eager else 'only needed'} for"),
@@ -123,7 +146,8 @@ class Upgrader:
             else:
                 print(Title("Requirements"), Ok("up-to-date"))
                 break
-            match flushed_input(*Upgrader._prompt).lower():
+            key = "a" if clean else flushed_input(*Upgrader._prompt)
+            match key:
                 case "e":
                     print(Title("Exit"))
                     break

@@ -18,7 +18,7 @@ _Remove it:_
 [![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational)](https://nsis.sourceforge.io/Download)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
+![Sloc](https://img.shields.io/badge/Sloc-{sloc}-000000)
 
 You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
 

@@ -21,7 +21,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational)](https://nsis.sourceforge.io/Download)
 [![mitmproxy](https://img.shields.io/badge/Mitmproxy-{mitmproxy_version}-informational)](https://mitmproxy.org/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-{sloc}-informational)
+![Sloc](https://img.shields.io/badge/Sloc-{sloc}-000000)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
@@ -65,7 +65,7 @@ python -m dev.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --read
 ```
 ### Upgrade dependencies
 ```console
-python -m dev.upgrade [--x86 | --x64 | --both] [--noeager]
+python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean]
 ```
 ### Publish an update
 ```console

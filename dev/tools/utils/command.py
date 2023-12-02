@@ -57,7 +57,7 @@ class CommandMonitor:
             for line in iter(self._queue.get, None):
                 yield line
 
-    def run(self, out: Optional[ToStyle] = None, err: Optional[ToStyle] = None) -> bool:
+    def run(self, out: Optional[ToStyle] = None, err: Optional[ToStyle] = None, keep_error: bool = True) -> bool:
         with Popen(
             self._args,
             stdout=PIPE if out else None,
@@ -65,20 +65,21 @@ class CommandMonitor:
             bufsize=0,
             text=True,
         ) as process:
-            ok = True
+            error = False
             n_lines = 0
             out = out or Low
             err = err or Warn
             for line in self._lines(process):
-                if line.is_error:
+                error |= line.is_error
+                if line.is_error and keep_error:
                     print(err(line.text.replace("\n", "")))
                     n_lines = 0
-                    ok = False
                 else:
                     clear_lines(n_lines)
                     lines = textwrap.wrap(line.text, width=self._width)
+                    to_style = err if line.is_error else out
                     n_lines = len(lines)
                     for text in lines:
-                        print(out(text))
+                        print(to_style(text))
             clear_lines(n_lines)
-        return ok and not process.returncode
+        return not (error or process.returncode)

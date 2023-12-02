@@ -15,10 +15,10 @@ SfvipUserProxy --remove
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.6-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3116/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.9.2-informational)](https://nuitka.net/)
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.9.3-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-196-informational)
+![Sloc](https://img.shields.io/badge/Sloc-196-000000)
 
 You need [***NSIS***](https://nsis.sourceforge.io/Download) to create the installer.
 

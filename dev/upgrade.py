@@ -8,6 +8,7 @@ from .tools.utils.env import EnvArgs
 # comments are turned into argparse help
 class Args(EnvArgs):
     noeager: bool = False  # upgrade only needed packages
+    clean: bool = False  # clean all packages
 
 
 if __name__ == "__main__":
@@ -17,4 +18,4 @@ if __name__ == "__main__":
         print()
         print(python_env)
         if python_env.check():
-            Upgrader(python_env).check(eager=not args.noeager)
+            Upgrader(python_env).check(eager=not args.noeager, clean=args.clean)
