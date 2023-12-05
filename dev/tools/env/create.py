@@ -6,7 +6,7 @@ from shared.version import Version
 from ..utils.color import Low, Ok, Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.protocols import CfgEnvironments
-from . import PythonEnv
+from . import PythonEnv, get_bitness
 
 
 def run_exe(exe: Path | str, *args: str) -> bool:
@@ -22,9 +22,9 @@ def running_bitness() -> bool:
 
 
 class CreatePythonEnv(PythonEnv):
-    _install = "-m", "pip", "install"
     _venv = "-m", "venv"
-    _upgrade_pip = "--upgrade", "pip"
+    _install = "-m", "pip", "install"
+    _upgrade_pip = *_install, "--upgrade", "pip"
 
     def __init__(self, environments: CfgEnvironments) -> None:
         super().__init__(environments, running_bitness())
@@ -36,17 +36,19 @@ class CreatePythonEnv(PythonEnv):
 
     def check(self) -> bool:
         if self._env_path.name in Path(sys.executable).parts or running_version(2) != self._want_python:
-            print(Warn("You should use:"))
-            print(Ok(f"py -{self._want_python}-{'64' if self.bitness else '32'} -m dev.create"))
+            print(Warn("You should use:"), end=" ")
+            print(Ok(f"py -{self._want_python}-{'64' if self.bitness else '32'} -m dev.create_env"))
             return False
         return True
 
     def create(self) -> bool:
+        print(Title("Create"), Ok(f"{self._env_path} environment"), end=" ")
+        print(Low("based on"), Ok(f"Python {running_version(3)}"), Ok(get_bitness(self._want_64)))
         return run_exe(sys.executable, *CreatePythonEnv._venv, self.path_str)
 
     def upgrade_pip(self) -> bool:
         print(Title("Upgrade"), Ok("pip"))
-        return run_exe(self.exe, *CreatePythonEnv._install, *CreatePythonEnv._upgrade_pip)
+        return run_exe(self.exe, *CreatePythonEnv._upgrade_pip)
 
     def install_requirements(self) -> bool:
         print(Title("Install"), Ok(", ".join((*self.requirements, *self.constraints))))
@@ -54,17 +56,7 @@ class CreatePythonEnv(PythonEnv):
         constraints = sum((("-c", constraints) for constraints in self.constraints), ())
         return run_exe(self.exe, *CreatePythonEnv._install, *requirements, *constraints)
 
-    def __repr__(self) -> str:
-        return "".join(
-            (
-                Ok(f"{self._env_path} environment"),
-                Low(" based on "),
-                Ok(f"Python {running_version(3)}"),
-            )
-        )
-
     def create_and_install(self) -> None:
-        print(Title("Create"), str(self))
         if self.check():
             self.handle_in_use()
             self.create()

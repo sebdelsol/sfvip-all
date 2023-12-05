@@ -26,7 +26,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
 ### Create the environments
-You need [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) and [***Python {py_major_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) installed:
+You need ***Python {py_major_version}*** [***x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) and [***x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) installed to create the environments:
 ```console
 py -{py_major_version}-64 -m dev.create_env
 py -{py_major_version}-32 -m dev.create_env

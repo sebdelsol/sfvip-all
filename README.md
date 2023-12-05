@@ -5,9 +5,9 @@ So you can easily **search your entire catalog**. It also **updates [mpv player]
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Sfvip All 1.4.7 x64-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/Clean-brightgreen?style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.7/x64/Install%20Sfvip%20All.exe)<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • 1.1.23100.2009 • 1.401.1505.0-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
+[<img src="https://img.shields.io/badge/Sfvip All 1.4.7 x64-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/Clean-brightgreen?style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.7/x64/Install%20Sfvip%20All.exe)<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • 1.1.23100.2009 • 1.401.1671.0-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
 
-[<img src="https://img.shields.io/badge/Sfvip All 1.4.7 x86-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/Clean-brightgreen?style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.7/x86/Install%20Sfvip%20All.exe)<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • 1.1.23100.2009 • 1.401.1505.0-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
+[<img src="https://img.shields.io/badge/Sfvip All 1.4.7 x86-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/Clean-brightgreen?style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.7/x86/Install%20Sfvip%20All.exe)<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • 1.1.23100.2009 • 1.401.1671.0-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
@@ -16,17 +16,17 @@ Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an us
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
 
 # Build
-[![Python](https://img.shields.io/badge/Python-3.11.6-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3116/)
+[![Python](https://img.shields.io/badge/Python-3.11.7-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3117/)
 [![Nuitka](https://img.shields.io/badge/Nuitka-1.9.3-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![mitmproxy](https://img.shields.io/badge/Mitmproxy-10.1.5-informational)](https://mitmproxy.org/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-5233-000000)
+![Sloc](https://img.shields.io/badge/Sloc-5227-000000)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
 ### Create the environments
-You need [***Python 3.11 x64***](https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe) and [***Python 3.11 x86***](https://www.python.org/ftp/python/3.11.6/python-3.11.6.exe) installed:
+You need ***Python 3.11*** [***x64***](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) and [***x86***](https://www.python.org/ftp/python/3.11.7/python-3.11.7.exe) installed to create the environments:
 ```console
 py -3.11-64 -m dev.create_env
 py -3.11-32 -m dev.create_env

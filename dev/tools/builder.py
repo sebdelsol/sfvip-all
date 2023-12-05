@@ -71,14 +71,14 @@ class Builder:
                 if built := self.build_in(python_env):
                     builts.append(built)
                 print()
-
-        not_builts = []
-        for python_env in self.python_envs.all:
-            if (build := self.dist.installer_exe(python_env)) not in builts:
-                not_builts.append(build)
-        if not_builts:
-            print(Title("Not built"))
-            for build in not_builts:
-                print(Warn(f". {build}"))
+            # show what's not built
+            not_builts = []
+            for python_env in self.python_envs.all:
+                if (build := self.dist.installer_exe(python_env)) not in builts:
+                    not_builts.append(build)
+            if not_builts:
+                print(Title("Not built"))
+                for build in not_builts:
+                    print(Warn(f". {build}"))
         # has some exe been created ?
         return bool(builts and self.args.installer)
