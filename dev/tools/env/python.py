@@ -30,7 +30,10 @@ class PythonVersion(Version):
 
 
 class PythonInstaller:
-    url = "https://www.python.org/ftp/python/{version}/python-{version}{bitness}.exe"
+    urls = (
+        "https://www.python.org/ftp/python/{version}/python-{version}{bitness}.exe",
+        "https://github.com/adang1345/PythonWindows/raw/master/{version}/python-{version}{bitness}-full.exe",
+    )
     bitness = {True: "-amd64", False: ""}
     timeout = 10
 
@@ -40,17 +43,18 @@ class PythonInstaller:
         self.exe = None
 
     def download(self, temp_dir: str) -> bool:
-        try:
-            bitness = PythonInstaller.bitness[self.python_env.is_64]
-            url = PythonInstaller.url.format(version=str(self.version), bitness=bitness)
-            with requests.get(url, timeout=PythonInstaller.timeout) as response:
-                response.raise_for_status()
-                self.exe = Path(temp_dir) / "python.exe"
-                with self.exe.open("wb") as f:
-                    f.write(response.content)
-                return True
-        except requests.RequestException:
-            pass
+        bitness = PythonInstaller.bitness[self.python_env.is_64]
+        for url in PythonInstaller.urls:
+            url = url.format(version=str(self.version), bitness=bitness)
+            try:
+                with requests.get(url, timeout=PythonInstaller.timeout) as response:
+                    response.raise_for_status()
+                    self.exe = Path(temp_dir) / "python.exe"
+                    with self.exe.open("wb") as f:
+                        f.write(response.content)
+                    return True
+            except requests.RequestException:
+                pass
         return False
 
     def install(self) -> bool:
