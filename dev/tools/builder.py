@@ -2,11 +2,11 @@ from pathlib import Path
 from typing import Optional
 
 from .env.envs import EnvArgs, PythonEnv, PythonEnvs
+from .env.upgrader import Upgrader
 from .nsis import NSIS
 from .nuitka import Nuitka
 from .publisher import Publisher
 from .scanner import VirusScanner
-from .upgrader import Upgrader
 from .utils.color import Ok, Title, Warn
 from .utils.dist import Dist
 from .utils.protocols import CfgBuild, CfgEnvironments, CfgLOC

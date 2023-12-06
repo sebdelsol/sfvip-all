@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from types import ModuleType
 
 from shared.version import Version
 
@@ -34,10 +35,11 @@ class CreatePythonEnv(PythonEnv):
             old_exe = self.clean_old_exe()
             self.exe.rename(old_exe)
 
-    def check(self) -> bool:
+    def right_python(self, calling_module: ModuleType) -> bool:
         if self._env_path.name in Path(sys.executable).parts or running_version(2) != self._want_python:
             print(Warn("You should use:"), end=" ")
-            print(Ok(f"py -{self._want_python}-{'64' if self.bitness else '32'} -m dev.create_env"))
+            module_name = calling_module.__spec__.name if calling_module.__spec__ else ""
+            print(Ok(f"py -{self._want_python}-{'64' if self.bitness else '32'} -m {module_name}"))
             return False
         return True
 
@@ -56,8 +58,8 @@ class CreatePythonEnv(PythonEnv):
         constraints = sum((("-c", constraints) for constraints in self.constraints), ())
         return run_exe(self.exe, *CreatePythonEnv._install, *requirements, *constraints)
 
-    def create_and_install(self) -> None:
-        if self.check():
+    def create_and_install(self, calling_module: ModuleType) -> None:
+        if self.right_python(calling_module):
             self.handle_in_use()
             self.create()
             self.upgrade_pip()

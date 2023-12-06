@@ -1,8 +1,8 @@
 from build_config import Environments
 
 from .tools.env.envs import EnvArgs
+from .tools.env.upgrader import Upgrader
 from .tools.nsis import MakeNSIS
-from .tools.upgrader import Upgrader
 
 
 # comments are turned into argparse help
@@ -12,8 +12,8 @@ class Args(EnvArgs):
 
 
 if __name__ == "__main__":
-    args = Args().parse_args()
     MakeNSIS().upgrade()
+    args = Args().parse_args()
     for python_env in args.get_python_envs(Environments):
         print()
         print(python_env)

@@ -43,4 +43,7 @@
     "python.envFile": "${workspaceFolder}/.sfvip64/", 
     "python.terminal.activateEnvironment": true,
     "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.enablePytestExtra": false,
+    "python.createEnvironment.trigger": "off",
 }

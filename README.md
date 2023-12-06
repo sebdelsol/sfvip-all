@@ -21,15 +21,15 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 [![mitmproxy](https://img.shields.io/badge/Mitmproxy-10.1.5-informational)](https://mitmproxy.org/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-5231-000000)
+![Sloc](https://img.shields.io/badge/Sloc-5235-000000)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
 ### Create the environments
 You need ***Python 3.11*** [***x64***](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) and [***x86***](https://www.python.org/ftp/python/3.11.7/python-3.11.7.exe) installed to create the environments:
 ```console
-py -3.11-64 -m dev.create_env
-py -3.11-32 -m dev.create_env
+py -3.11-64 -m dev.create
+py -3.11-32 -m dev.create
 ```
 ### Activate the _x64_ environment
 ```console

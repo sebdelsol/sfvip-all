@@ -4,11 +4,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, NamedTuple, Optional
 
-from .env import PythonEnv, RequiredBy
-from .env.python import upgrade_python
-from .utils.color import Low, Ok, Title, Warn
-from .utils.columns import Columns, Justify
-from .utils.command import CommandMonitor, flushed_input
+from ..utils.color import Low, Ok, Title, Warn
+from ..utils.columns import Columns, Justify
+from ..utils.command import CommandMonitor, flushed_input
+from . import PythonEnv, RequiredBy
+from .python import upgrade_python
 
 
 class _Pckg(NamedTuple):
