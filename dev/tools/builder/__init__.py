@@ -1,15 +1,16 @@
 from pathlib import Path
 from typing import Optional
 
-from .env.envs import EnvArgs, PythonEnv, PythonEnvs
-from .env.upgrader import Upgrader
-from .nsis import NSIS
+from ..env.envs import EnvArgs, PythonEnv, PythonEnvs
+from ..env.upgrader import Upgrader
+from ..nsis import NSIS
+from ..publisher import Publisher
+from ..scanner import VirusScanner
+from ..utils.color import Ok, Title, Warn
+from ..utils.dist import Dist
+from ..utils.protocols import CfgBuild, CfgEnvironments, CfgLOC
 from .nuitka import Nuitka
-from .publisher import Publisher
-from .scanner import VirusScanner
-from .utils.color import Ok, Title, Warn
-from .utils.dist import Dist
-from .utils.protocols import CfgBuild, CfgEnvironments, CfgLOC
+from .pyinstaller import Pyinstaller
 
 
 # comments are turned into argparse help
@@ -20,6 +21,7 @@ class Args(EnvArgs):
     mingw: bool = False  # build with mingw64
     upgrade: bool = False  # upgrade the environment
     publish: bool = False  # publish it
+    pyinstaller: bool = False  # use pyinstaller instead
 
     def process_args(self) -> None:
         super().process_args()
@@ -43,7 +45,11 @@ class Builder:
         self.dist = Dist(build)
         self.publisher = publisher
         self.args = Args().parse_args()
-        self.nuitka = Nuitka(build, self.args.mingw, self.args.build)
+        self.builder = (
+            Pyinstaller(build, self.args.build)
+            if self.args.pyinstaller
+            else Nuitka(build, self.args.mingw, self.args.build)
+        )
         self.nsis = NSIS(build, loc, self.args.installer, self.args.upgrade)
         self.python_envs = PythonEnvs(environments, self.args)
 
@@ -54,7 +60,7 @@ class Builder:
         if python_env.check():
             if self.args.upgrade:
                 Upgrader(python_env).upgrade(eager=True)
-            if self.nuitka.run(python_env):
+            if self.builder.run(python_env):
                 if built := self.nsis.run(python_env):
                     if self.publisher and self.args.publish:
                         self.publisher.publish(python_env)

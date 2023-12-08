@@ -17,8 +17,9 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
-[![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-informational)](https://nuitka.net/)
 [![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational)](https://nsis.sourceforge.io/Download)
+[![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-informational)](https://nuitka.net/)
+[![PyInstaller](https://img.shields.io/badge/PyInstaller-{pyinstaller_version}-informational)](https://pyinstaller.org/en/stable/)
 [![mitmproxy](https://img.shields.io/badge/Mitmproxy-{mitmproxy_version}-informational)](https://mitmproxy.org/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-000000)
@@ -39,15 +40,20 @@ py -{py_major_version}-32 -m dev.create
 ```console
 python -m {script_main}
 ```
-### Build with **Mingw**
-It's the _easiest option:_
-```console
-python -m dev.build --mingw
-```
-### Build with **Clang**
-It's the _recommended option:_
+### Build with **PyInstaller**
+It's the _fastest option but with more AV false positives:_
 ```console
 python -m dev.build
+```
+### Build with **Nuitka & Mingw**
+It's the _easiest option:_
+```console
+python -m dev.build --nuitka --mingw
+```
+### Build with **Nuitka & Clang**
+It's the _recommended option:_
+```console
+python -m dev.build --nuitka
 ```
 You need to have [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig) installed before building:
 
@@ -55,7 +61,7 @@ You need to have [**Visual Studio Community Edition**](https://www.visualstudio.
 
 ### Build a specific version
 ```console
-python -m dev.build [--x86 | --x64 | --both] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish] [--mingw]
+python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]
 ```
 ### Upgrade dependencies
 It checks for _Nsis_, _Python_ minor update and all _packages dependencies_:

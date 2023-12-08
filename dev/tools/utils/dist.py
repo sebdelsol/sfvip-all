@@ -31,9 +31,6 @@ class Dist:
     def dist_dir(self, python_env: PythonEnv) -> Path:
         return self.build_dir(python_env) / self.dist_dir_name
 
-    def build_exe(self, python_env: PythonEnv) -> Path:
-        return self.build_dir(python_env) / f"{self.build.name}.exe"
-
     def installer_exe(self, python_env: PythonEnv, version: Optional[str] = None) -> Path:
         return (
             Path(self.build.dir)

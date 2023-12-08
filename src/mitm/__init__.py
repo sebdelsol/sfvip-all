@@ -1,10 +1,4 @@
-# pylint: disable=wrong-import-position
 # use a separate named package to reduce what's imported by multiproccessing
-if "__compiled__" in globals():
-    # remove warning when launched by nuitka
-    import warnings  # fmt: skip
-    warnings.simplefilter("ignore")  # fmt: skip
-
 import asyncio
 import logging
 import multiprocessing

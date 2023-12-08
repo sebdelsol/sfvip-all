@@ -6,6 +6,7 @@ from pathlib import Path
 from types import FunctionType, MappingProxyType, MethodType, SimpleNamespace
 from typing import IO, Any, Iterator, Optional, Self, cast, get_type_hints
 
+from .. import is_built
 from ..winapi import mutex
 
 logger = logging.getLogger(__name__)
@@ -118,7 +119,7 @@ class ConfigLoader:
         ConfigLoader._not_in_inner = set(dict(ConfigLoader.__dict__).keys())
         ConfigLoader._not_in_inner.update(set(dict(_ProxyNamespace.__dict__).keys()))
         self._file = file
-        self._check_newer = check_newer and "__compiled__" not in globals()  # not nuitka
+        self._check_newer = check_newer and not is_built()
         self._path: list[str] = []
         self._name = self.__class__.__name__
         self._file_lock = mutex.SystemWideMutex(f"file lock for {file}")

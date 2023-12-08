@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Iterator, Sequence
@@ -9,7 +10,7 @@ from ..utils.dist import to_ico
 from ..utils.protocols import CfgFile, CfgFileResize
 
 
-class IncludeFiles:
+class IncludeFiles(ABC):
     def __init__(self, files: Sequence[CfgFile | CfgFileResize], ico: str) -> None:
         ico_file = SimpleNamespace(src=ico, path=to_ico(ico), resize=None)
         self.files = ico_file, *files
@@ -31,8 +32,9 @@ class IncludeFiles:
     def all(self) -> Iterator[str]:
         self._create_all()
         for file in self.files:
-            path = Path(file.path)
-            if path.is_dir():
-                yield f"--include-data-dir={file.path}={file.path}"
-            elif path.is_file():
-                yield f"--include-data-file={file.path}={file.path}"
+            for arg in self.get_arg(Path(file.path)):
+                yield arg
+
+    @abstractmethod
+    def get_arg(self, path: Path) -> Iterator[str]:
+        ...
