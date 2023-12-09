@@ -120,7 +120,7 @@ class LibmpvDll:
                 dlls = (file for file in temp_dir.glob(LibmpvDll.pattern))
                 if dll := next(dlls, None):
                     self._libdir.mkdir(parents=True, exist_ok=True)
-                    shutil.copy(dll, self._libdir)
+                    shutil.copy(dll, self._libdir / dll.name.replace("lib", ""))
                     logger.info("libmpv dll found")
                     self._version.update_from(libmpv)
                     return True

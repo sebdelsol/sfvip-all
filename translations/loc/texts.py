@@ -32,6 +32,7 @@ class Texts(NamedTuple):
     AllMovies: str = "All Movies"
     AllChannels: str = "All Channels"
     AlreadyRunning: str = "%s is running. Please close it to continue."
+    PlayerTooOld: str = "%s is too old. Version ≥ %s is needed."
 
     @staticmethod
     def as_dict() -> dict[str, str]:

@@ -22,7 +22,7 @@ class IncludeFiles(ABC):
                 if isinstance(file, CfgFileResize):
                     print(Low(f" from {file.src}"), end="")
                     if file.resize:
-                        print(Low(f" - resized to {file.resize}"), end="")
+                        print(Low(" - resized"), end="")
                         Image.open(file.src).resize(file.resize).save(file.path)
                     else:
                         Image.open(file.src).save(file.path)
@@ -32,9 +32,9 @@ class IncludeFiles(ABC):
     def all(self) -> Iterator[str]:
         self._create_all()
         for file in self.files:
-            for arg in self.get_arg(Path(file.path)):
-                yield arg
+            for file in self.get_file(Path(file.path)):
+                yield file
 
     @abstractmethod
-    def get_arg(self, path: Path) -> Iterator[str]:
+    def get_file(self, path: Path) -> Iterator[str]:
         ...

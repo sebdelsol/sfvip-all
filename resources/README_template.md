@@ -10,6 +10,7 @@ So you can easily **search your entire catalog**. It also **updates [mpv player]
 [<img src="https://img.shields.io/badge/{name} {version} x86-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/{exe_x86_clean}?style=flat-square" height="30">](https://github.com/{github_path}/raw/master/{exe_x86_link})<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • {exe_x86_engine} • {exe_x86_signature}-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
+[***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
 Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
 [^1]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
@@ -40,20 +41,20 @@ py -{py_major_version}-32 -m dev.create
 ```console
 python -m {script_main}
 ```
-### Build with **PyInstaller**
+### Build with ***PyInstaller***
 It's the _fastest option but with more AV false positives:_
 ```console
-python -m dev.build
+python -m dev.build --pyinstaller
 ```
-### Build with **Nuitka & Mingw**
+### Build with ***Nuitka & Mingw***
 It's the _easiest option:_
 ```console
-python -m dev.build --nuitka --mingw
+python -m dev.build --mingw
 ```
-### Build with **Nuitka & Clang**
+### Build with ***Nuitka & Clang***
 It's the _recommended option:_
 ```console
-python -m dev.build --nuitka
+python -m dev.build
 ```
 You need to have [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig) installed before building:
 

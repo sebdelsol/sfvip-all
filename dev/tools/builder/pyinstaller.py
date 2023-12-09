@@ -6,19 +6,19 @@ import pyinstaller_versionfile
 from ..utils.color import Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.protocols import CfgBuild
-from .builder import DistBuilder
+from .distribution import Distribution
 from .files import IncludeFiles
 
 
 class IncludeFilesPyInstaller(IncludeFiles):
-    def get_arg(self, path: Path) -> Iterator[str]:
+    def get_file(self, path: Path) -> Iterator[str]:
         if path.is_dir():
             yield f"--add-data={path.resolve()}:{path}"
         elif path.is_file():
             yield f"--add-data={path.resolve()}:{path.parent}"
 
 
-class Pyinstaller(DistBuilder):
+class Pyinstaller(Distribution):
     name = "PyInstaller"
 
     def __init__(self, build: CfgBuild, do_run: bool) -> None:
@@ -43,11 +43,12 @@ class Pyinstaller(DistBuilder):
                 product_name=self.build.name,
             )
 
-    def _run(self, python_exe: Path, build_dir: Path) -> Optional[Path]:
+    def create(self, python_exe: Path, build_dir: Path) -> Optional[Path]:
         versionfile = build_dir / "versionfile.txt"
         pyinstaller_versionfile.create_versionfile(output_file=versionfile, **self.version)
         ok = CommandMonitor(
             python_exe,
+            "-O",  # optimization
             "-m",
             "PyInstaller",
             f"--version-file={versionfile.resolve()}",

@@ -1,4 +1,5 @@
 import shutil
+import time
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import ClassVar, Optional
@@ -10,8 +11,9 @@ from ..utils.dist import Dist
 from ..utils.protocols import CfgBuild
 
 
-class DistBuilder(ABC):
+class Distribution(ABC):
     name: ClassVar[str]
+    _retry_antivirus_lock = 5
 
     def __init__(self, build: CfgBuild, do_run: bool) -> None:
         self.build = build
@@ -36,12 +38,19 @@ class DistBuilder(ABC):
             print(Title(f"Build by {self.name}"), Ok(python_env.package_version(self.name)))
             build_dir = self.dist.build_dir(python_env) / self.name.lower()
             build_dir.mkdir(exist_ok=True)
-            if (built_dist := self._run(python_env.exe, build_dir)) is None:
+            built_dist = self.create(python_env.exe, build_dir)
+            if built_dist is None:
                 return False
             dist_dir = self.dist.dist_dir(python_env)
             if dist_dir.is_dir():
                 shutil.rmtree(dist_dir)
-            built_dist.rename(dist_dir)
+            # AV might lock the file
+            for _ in range(Distribution._retry_antivirus_lock):
+                try:
+                    built_dist.rename(dist_dir)
+                    break
+                except PermissionError:
+                    time.sleep(1)
         else:
             print(Warn(f"Skip Build by {self.name}"))
 
@@ -51,5 +60,5 @@ class DistBuilder(ABC):
         return False
 
     @abstractmethod
-    def _run(self, python_exe: Path, build_dir: Path) -> Optional[Path]:
+    def create(self, python_exe: Path, build_dir: Path) -> Optional[Path]:
         ...

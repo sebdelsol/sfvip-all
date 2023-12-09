@@ -35,7 +35,10 @@ class PlayerLanguageLoader(PlayerConfig):
     @property
     def language(self) -> Optional[str]:
         if config := self.load():
-            return config[PlayerLanguageLoader.language_key]
+            try:
+                return config[PlayerLanguageLoader.language_key]
+            except KeyError:
+                pass
         return None
 
 
@@ -48,7 +51,10 @@ class _PlayerRectLoader(PlayerConfig):
     @property
     def rect(self) -> sticky.Rect:
         if config := self.load():
-            return sticky.Rect(*(config[key] for key in _PlayerRectLoader._keys))
+            try:
+                return sticky.Rect(*(config[key] for key in _PlayerRectLoader._keys))
+            except KeyError:
+                return sticky.Rect(0, 0, 0, 0, True)
         return sticky.Rect()
 
     @rect.setter
@@ -111,13 +117,17 @@ class Player:
     """run the player"""
 
     def __init__(self, app_info: AppInfo, ui: UI) -> None:
-        self.exe = PlayerExe(app_info, ui).exe
-        self._libmpv_updater = PlayerLibmpvAutoUpdater(self.exe, app_info.config, ui, self.relaunch)
+        self._player_exe = PlayerExe(app_info, ui)
+        self._libmpv_updater = PlayerLibmpvAutoUpdater(self._player_exe.exe, app_info.config, ui, self.relaunch)
         self._window_watcher = _PlayerWindowWatcher()
         self._rect_loader: Optional[_PlayerRectLoader] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._process_lock = threading.Lock()
         self._launcher = _Launcher()
+
+    @property
+    def has_all_channels(self) -> bool:
+        return self._player_exe.has_all_channels
 
     def want_to_launch(self) -> bool:
         if self._launcher.want_to_launch():
@@ -134,7 +144,7 @@ class Player:
 
     @contextmanager
     def run(self) -> Iterator[None]:
-        assert self.exe is not None
+        assert self._player_exe.exe is not None
         assert self._rect_loader is not None
 
         set_rect_lock = None
@@ -147,7 +157,7 @@ class Player:
 
         with self._libmpv_updater:
             with _PlayerConfigDirSetting().watch(self.relaunch):
-                with subprocess.Popen([self.exe]) as self._process:
+                with subprocess.Popen([self._player_exe.exe]) as self._process:
                     logger.info("player started")
                     self._window_watcher.start(self._process.pid)
                     if set_rect_lock:

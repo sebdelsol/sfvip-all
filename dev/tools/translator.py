@@ -25,7 +25,7 @@ deepl_supported_langs = DeeplTranslator(**deepl_kwargs).get_supported_languages(
 
 class Translator:
     marker_replace = "%s", "000"
-    separator = "; "  # DO NOT use it in the texts (best separator found)
+    separator = "\n"  # DO NOT use it in the texts (best separator found)
 
     def __init__(self, source: str, target: str) -> None:
         """prefer DeepL if it supports those languages"""
@@ -53,7 +53,7 @@ class Translator:
             return None
         if translation:
             translation = translation.replace(marker_replacement, marker)
-            translated_texts = (text.strip() for text in translation.split(Translator.separator.strip()))
+            translated_texts = (text.strip() for text in translation.split(Translator.separator))
             translated_texts = list(filter(None, translated_texts))
             if len(translated_texts) == len(texts):
                 # check markers are where they should be

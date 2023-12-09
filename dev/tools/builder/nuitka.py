@@ -4,19 +4,19 @@ from typing import Iterator, Optional
 from ..utils.color import Title
 from ..utils.command import CommandMonitor
 from ..utils.protocols import CfgBuild
-from .builder import DistBuilder
+from .distribution import Distribution
 from .files import IncludeFiles
 
 
 class IncludeFilesNuitka(IncludeFiles):
-    def get_arg(self, path: Path) -> Iterator[str]:
+    def get_file(self, path: Path) -> Iterator[str]:
         if path.is_dir():
             yield f"--include-data-dir={path}={path}"
         elif path.is_file():
             yield f"--include-data-file={path}={path}"
 
 
-class Nuitka(DistBuilder):
+class Nuitka(Distribution):
     name = "Nuitka"
 
     def __init__(self, build: CfgBuild, mingw: bool, do_run: bool) -> None:
@@ -41,7 +41,7 @@ class Nuitka(DistBuilder):
                 logs = f"--force-stderr-spec=%PROGRAM%/../{build.logs_dir}/{build.name} - %TIME% - %PID%.log"
                 self.args = logs, *self.args
 
-    def _run(self, python_exe: Path, build_dir: Path) -> Optional[Path]:
+    def create(self, python_exe: Path, build_dir: Path) -> Optional[Path]:
         ok = CommandMonitor(
             python_exe,
             "-m",

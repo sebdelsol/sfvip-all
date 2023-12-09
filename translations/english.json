@@ -26,5 +26,6 @@
   "AllSeries": "All Series",
   "AllMovies": "All Movies",
   "AllChannels": "All Channels",
-  "AlreadyRunning": "%s is running. Please close it to continue."
+  "AlreadyRunning": "%s is running. Please close it to continue.",
+  "PlayerTooOld": "%s is too old. Version ≥ %s is needed."
 }
