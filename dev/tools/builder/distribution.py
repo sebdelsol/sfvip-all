@@ -50,7 +50,9 @@ class Distribution(ABC):
                     built_dist.rename(dist_dir)
                     break
                 except PermissionError:
-                    time.sleep(1)
+                    time.sleep(2)
+            else:
+                print(Warn(f"AV locked {dist_dir}"))
         else:
             print(Warn(f"Skip Build by {self.name}"))
 

@@ -2,7 +2,7 @@
 * Work with _Sfvip Player_ >= 1.2.5.7.
 * Check _Sfvip Player_ version. 
 * Bump _Python_ to 3.11.7.
-* Bump _Nuitka_ to 1.9.3.
+* Bump _Nuitka_ to 1.9.4.
 
 ## 1.4.7
 * Bump _Nuitka_ to 1.9.2 for faster startup time.

@@ -5,13 +5,15 @@ So you can easily **search your entire catalog**. It also **updates [mpv player]
 <img src="resources/all.png">
 
 # Download
-[<img src="https://img.shields.io/badge/Sfvip All 1.4.8 x64-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/Clean-brightgreen?style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.8/x64/Install%20Sfvip%20All.exe)<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • 1.1.23110.2 • 1.403.202.0-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
+[<img src="https://img.shields.io/badge/Sfvip All 1.4.8 x64-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/Clean-brightgreen?style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.8/x64/Install%20Sfvip%20All.exe)<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • 1.1.23110.2 • 1.403.268.0-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
 
-[<img src="https://img.shields.io/badge/Sfvip All 1.4.8 x86-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/Clean-brightgreen?style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.8/x86/Install%20Sfvip%20All.exe)<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • 1.1.23110.2 • 1.403.202.0-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
+[<img src="https://img.shields.io/badge/Sfvip All 1.4.8 x86-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://img.shields.io/badge/Clean-brightgreen?style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.8/x86/Install%20Sfvip%20All.exe)<img src="https://custom-icon-badges.demolab.com/badge/Scanned by Microsoft Defender • 1.1.23110.2 • 1.403.268.0-white.svg?logo=shield-check&logoColor=black&style=flat-square" height="15">
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
-Get [***SfvipUserProxy***](user_proxy_cmd) _command line_ to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
+
+If you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database,  
+please use [***SfvipUserProxy***](user_proxy_cmd) _command line_.
 
 [^1]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
@@ -19,11 +21,11 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.7-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3117/)
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.9.3-informational)](https://nuitka.net/)
-[![PyInstaller](https://img.shields.io/badge/PyInstaller-6.2.0-informational)](https://pyinstaller.org/en/stable/)
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.9.4-informational)](https://nuitka.net/)
+[![PyInstaller](https://img.shields.io/badge/PyInstaller-6.3.0-informational)](https://pyinstaller.org/en/stable/)
 [![mitmproxy](https://img.shields.io/badge/Mitmproxy-10.1.5-informational)](https://mitmproxy.org/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://img.shields.io/badge/Sloc-5469-000000)
+![Sloc](https://img.shields.io/badge/Sloc-5471-000000)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
