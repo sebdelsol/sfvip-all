@@ -20,12 +20,14 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
-[![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational)](https://nsis.sourceforge.io/Download)
-[![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-informational)](https://nuitka.net/)
-[![PyInstaller](https://img.shields.io/badge/PyInstaller-{pyinstaller_version}-informational)](https://pyinstaller.org/en/stable/)
-[![mitmproxy](https://img.shields.io/badge/Mitmproxy-{mitmproxy_version}-informational)](https://mitmproxy.org/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://img.shields.io/badge/Sloc-{sloc}-000000)
+<sup><sub>build with</sub></sup>
+[![Nuitka](https://img.shields.io/badge/Nuitka-{nuitka_version}-informational)](https://nuitka.net/)
+<sup><sub>or</sub></sup>
+[![PyInstaller](https://img.shields.io/badge/PyInstaller-{pyinstaller_version}-informational)](https://pyinstaller.org/en/stable/)
+<sup><sub>& installer</sub></sup>
+[![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational)](https://nsis.sourceforge.io/Download)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).

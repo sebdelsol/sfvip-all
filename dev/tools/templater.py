@@ -66,8 +66,7 @@ class Templater:
         python_version = _version_of(python_envs, "Python")
         nuitka_version = _version_of(python_envs, "Nuitka")
         pyinstaller_version = _version_of(python_envs, "PyInstaller")
-        mitmproxy_version = _version_of(python_envs, "Mitmproxy")
-        if python_version and nuitka_version and mitmproxy_version and pyinstaller_version:
+        if python_version and nuitka_version and pyinstaller_version:
             dist = Dist(build)
             self.template_format = dict(
                 **_get_exe_args(dist, python_envs.x64),
@@ -81,7 +80,6 @@ class Templater:
                 env_x64=environments.X64.path,
                 env_x86=environments.X86.path,
                 pyinstaller_version=pyinstaller_version,
-                mitmproxy_version=mitmproxy_version,
                 nuitka_version=nuitka_version,
                 py_version=python_version,
                 ico_link=quote(build.ico),

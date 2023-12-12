@@ -15,11 +15,14 @@ SfvipUserProxy --remove
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.7-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3117/)
-[![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
-[![Nuitka](https://img.shields.io/badge/Nuitka-1.9.3-informational)](https://nuitka.net/)
-[![PyInstaller](https://img.shields.io/badge/PyInstaller-6.2.0-informational)](https://pyinstaller.org/en/stable/)
 [![Style](https://img.shields.io/badge/Style-Black-000000)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://img.shields.io/badge/Sloc-196-000000)
+<sup><sub>build with</sub></sup>
+[![Nuitka](https://img.shields.io/badge/Nuitka-1.9.4-informational)](https://nuitka.net/)
+<sup><sub>or</sub></sup>
+[![PyInstaller](https://img.shields.io/badge/PyInstaller-6.3.0-informational)](https://pyinstaller.org/en/stable/)
+<sup><sub>& installer</sub></sup>
+[![Nsis](https://img.shields.io/badge/Nsis-3.09-informational)](https://nsis.sourceforge.io/Download)
 
 ```console
 python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme]

@@ -17,6 +17,7 @@ class _SplashWindow(_StickyWindow):
         self.attributes("-transparentcolor", _SplashWindow._bg)
         win.set_click_through(self.winfo_id())
         self._fade = _Fade(self)
+        self.update()  # force size computation
 
     def show(self, rect: Rect) -> None:
         if rect.valid():
