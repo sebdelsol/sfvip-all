@@ -54,7 +54,7 @@ def _get_exe_args(dist: Dist, python_env: PythonEnv) -> dict[str, str]:
         f"exe_{python_env.bitness}_link": quote(str(exe.as_posix())),
         f"exe_{python_env.bitness}_engine": scan_file.engine,
         f"exe_{python_env.bitness}_signature": scan_file.signature,
-        f"exe_{python_env.bitness}_clean": "Clean-brightgreen" if scan_file.clean else "Failed-red",
+        f"exe_{python_env.bitness}_clean": "clean-brightgreen" if scan_file.clean else "failed-red",
     }
 
 

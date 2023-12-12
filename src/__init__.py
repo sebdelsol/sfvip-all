@@ -22,10 +22,6 @@ at_very_last = AtVeryLast()
 # pylint: disable=wrong-import-position
 import logging
 import sys
-import time
-from pathlib import Path
-
-from build_config import Build
 
 
 def is_py_installer() -> bool:
@@ -41,11 +37,18 @@ def is_built() -> bool:
 
 
 def set_logging() -> None:
-    time_ms = round(time.time() * 1000)
     if is_py_installer():
+        # pylint: disable=import-outside-toplevel
+        import time
+        from pathlib import Path
+
+        from build_config import Build
+
+        time_ms = round(time.time() * 1000)
         logfile = Path(Build.logs_dir) / f"{Build.name} - {time_ms}.log"
     else:
         logfile = None  # it's handled in dev.builder.nuitka
+
     logging.basicConfig(filename=logfile, level=logging.INFO, format="%(asctime)s - %(message)s")
     if is_py_installer():
         logging.info("build by PyInstaller")

@@ -7,17 +7,19 @@ set_logging()
 
 if __name__ == "__main__":
     # reduce what's imported in the proxies process
-    # pylint: disable=ungrouped-imports
     import logging
-    import multiprocessing
     import sys
     from pathlib import Path
 
+    # pylint: disable=ungrouped-imports
     from build_config import Build, Github
-    from src import at_very_last
+    from src import at_very_last, is_py_installer
     from src.sfvip import AppInfo, run_app
 
-    multiprocessing.freeze_support()
+    if is_py_installer():
+        import multiprocessing
+
+        multiprocessing.freeze_support()
 
     # for debug purpose only
     if len(sys.argv) > 1 and sys.argv[1] == "fakev0":
