@@ -104,7 +104,7 @@ class LibmpvDll:
         return libmpv.timestamp > (self._version.timestamp or 0)
 
     def get_latest_libmpv(self) -> Optional[Libmpv]:
-        logger.info("get lastest libmpv")
+        logger.info("get latest libmpv")
         if cpu_spec := self._version.update_cpu_spec(self._player_exe):
             if libmpv := self._libmpv_latest.get(cpu_spec):
                 logger.info("found update libmpv %s", libmpv.get_version())

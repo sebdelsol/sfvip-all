@@ -1,6 +1,6 @@
 # <img src="resources/Sfvip%20All.png" width="40" align="center"> Sfvip All
-***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** and inserts an _All_ category into _Live_, _Series_ and _Vod_ so you can easily **search your entire catalog**.  
-It also ***updates [Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy theirs lastest features.
+***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to insert an _All_ category into _Live_, _Series_ and _Vod_ so you can easily **search your entire catalog**.  
+It also ***updates [Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy theirs latest features.
 
 <img src="resources/all.png">
 

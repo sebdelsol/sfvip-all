@@ -36,7 +36,7 @@ class AppUpdater:
         return Version(update.version) > Version(self._app_info.version)
 
     def get_update(self) -> Optional[AppUpdate]:
-        logger.info("check lastest %s version", self._app_info.name)
+        logger.info("check latest %s version", self._app_info.name)
         if update := self._latest_update.online_load(self._app_info.bitness, self._timeout):
             logger.info("found update %s %s %s", self._app_info.name, update.version, self._app_info.bitness)
             return update

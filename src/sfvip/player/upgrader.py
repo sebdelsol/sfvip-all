@@ -49,7 +49,7 @@ class PlayerUpdater:
         return f"{self._current.version} {self._current.bitness}"
 
     def get_latest_version(self) -> Optional[Version]:
-        logger.info("check lastest Sfvip Player version")
+        logger.info("check latest Sfvip Player version")
         if version := PlayerLatestUpdate().get_version(self._timeout):
             logger.info("found update Sfvip Player %s", version)
             return version

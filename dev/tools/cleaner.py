@@ -5,7 +5,7 @@ from .utils.color import Ok, Title, Warn
 from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub, CfgTemplate
 
 UNAVAILABLE = """This version is not longer available.
-Please get the lastest version HERE:
+Please get the latest version HERE:
 
 https://github.com/{github_path}/tree/master/{readme_dir}#download
 """
