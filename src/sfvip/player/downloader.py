@@ -4,6 +4,8 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
+from translations.loc import LOC
+
 from ..app_info import AppInfo
 from ..ui.window import ProgressWindow
 from ..utils.downloader import download_and_unpack, exceptions
@@ -39,7 +41,7 @@ def download_player(player_name: str, app_info: AppInfo, timeout: int) -> Option
     # in parent dir so it will be kept when uninstalling
     player_dir = app_info.current_dir.parent / f"{player_name.capitalize()} {_PlayerUpdater.bitness}"
     player_exe = player_dir / f"{player_name}.exe"
-    progress = ProgressWindow(f"Download {player_dir.name}")
+    progress = ProgressWindow(f"{LOC.Download} {player_dir.name}")
     if progress.run_in_thread(download, *exceptions):
         return str(player_exe)
     shutil.rmtree(player_dir, ignore_errors=True)
@@ -51,7 +53,7 @@ def upgrade_player(player_exe: Path, timeout: int) -> Optional[str]:
         return _PlayerUpdater(player_exe).download(timeout, progress)
 
     player_dir = player_exe.parent
-    progress = ProgressWindow(f"Download {player_dir.name}")
+    progress = ProgressWindow(f"{LOC.Download} {player_dir.name}")
     if progress.run_in_thread(download, *exceptions):
         return str(player_exe)
     shutil.rmtree(player_dir, ignore_errors=True)

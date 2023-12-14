@@ -24,15 +24,16 @@ logger = logging.getLogger(__name__)
 class PlayerLatestUpdate:
     _url = "https://raw.githubusercontent.com/K4L4Uz/SFVIP-Player/main/Update.json"
     _re_version = r"^v([\d\.]+)"
-    _key = "tag_name"
+    _key_version = "tag_name"
 
     @staticmethod
     def get_version(timeout: int) -> Optional[Version]:
         try:
             with requests.get(PlayerLatestUpdate._url, timeout=timeout) as response:
                 response.raise_for_status()
-                tag = response.json()[PlayerLatestUpdate._key]
-                return Version(re.findall(PlayerLatestUpdate._re_version, tag)[0])
+                name = response.json()[PlayerLatestUpdate._key_version]
+                version = re.findall(PlayerLatestUpdate._re_version, name)[0]
+                return Version(version)
         except (requests.RequestException, KeyError, IndexError):
             return None
 
@@ -59,14 +60,16 @@ class PlayerUpdater:
 
     def install(self) -> None:
         if self._can_install():
+            # TODO use bitness of the player
             upgrade_player(Path(self._player_exe.exe), self._timeout)
             self._current = self._player_exe.update_found()
 
     def _can_install(self) -> bool:
         while True:
             try:
-                time.sleep(0.5)
+                time.sleep(0.5)  # needed for the player to actually stop
                 with Path(self._current.exe).open("ab"):
+                    # could write the player exe == it's not running
                     return True
             except PermissionError:
                 if not self._ask_retry():
