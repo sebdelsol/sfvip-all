@@ -107,6 +107,19 @@ def _get_libmpv_button_text(action: Optional[str] = None, version: Optional[str]
     return _InfoStyle.app(f"{action or ''} {version or ''}").no_truncate.white
 
 
+def _get_player_button_text(action: Optional[str] = None, version: Optional[str] = None) -> _Style:
+    return _InfoStyle.app(f"{action or ''} v{version or ''}").no_truncate.white
+
+
+def _get_player_version(version: Optional[str] = None) -> _Style:
+    version = version if version else LOC.UnknownVersion
+    return _InfoStyle.app(f"Sfvip Player v{version}").grey
+
+
+def _get_player_auto_update() -> _Style:
+    return _InfoStyle.app(LOC.CheckUpdate).grey
+
+
 def _are_infos_valid(infos: Sequence[Info]) -> bool:
     return all(info.is_valid for info in infos)
 
@@ -191,6 +204,7 @@ class _ProxiesWindow(_StickyWindow):
 
 
 class _InfosWindow(_ProxiesWindow):
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, app_info: AppInfo) -> None:
         super().__init__(app_info)
         pad = _InfoTheme.pad
@@ -204,10 +218,14 @@ class _InfosWindow(_ProxiesWindow):
         app_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_app_version(app_info).to_tk)
         self._app_update = _CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_app_auto_update().to_tk)
         separator2 = tk.Frame(frame, bg=_InfoTheme.separator)
+        self._player_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_player_version().to_tk)
+        self._player_update = _CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_player_auto_update().to_tk)
+        self._player_button = _Button(frame, **_InfoTheme.button)  # type: ignore
+        separator3 = tk.Frame(frame, bg=_InfoTheme.separator)
         self._libmpv_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_libmpv_version().to_tk)
         self._libmpv_update = _CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_libmpv_auto_update().to_tk)
         self._libmpv_button = _Button(frame, **_InfoTheme.button)  # type: ignore
-        separator3 = tk.Frame(frame, bg=_InfoTheme.separator)
+        separator4 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
         row = 0
         header_frame.grid(row=row, columnspan=3, padx=pad, sticky=tk.NSEW)
@@ -222,14 +240,21 @@ class _InfosWindow(_ProxiesWindow):
         row += 1
         separator2.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
+        self._player_version.grid(row=row, column=0, padx=pad, sticky=tk.W)
+        self._player_update.grid(row=row, column=1, padx=pad, sticky=tk.EW)
+        self._player_button.grid(row=row, column=2, padx=button_pad, pady=button_pad, sticky=tk.EW)
+        self._player_button.grid_remove()
+        row += 1
+        separator3.grid(row=row, columnspan=3, sticky=tk.EW)
+        row += 1
         self._libmpv_version.grid(row=row, column=0, padx=pad, sticky=tk.W)
         self._libmpv_update.grid(row=row, column=1, padx=pad, sticky=tk.EW)
         self._libmpv_button.grid(row=row, column=2, padx=button_pad, pady=button_pad, sticky=tk.EW)
         self._libmpv_button.grid_remove()
         row += 1
-        separator3.grid(row=row, columnspan=3, sticky=tk.EW)
+        separator4.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
-        super()._layout(row=6)
+        super()._layout(row=row)
         frame.columnconfigure(2, weight=1)
 
     def set_app_update(
@@ -259,3 +284,19 @@ class _InfosWindow(_ProxiesWindow):
 
     def set_libmpv_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
         self._libmpv_update.set_callback(is_checked, callback)
+
+    def set_player_version(self, version: Optional[str]) -> None:
+        self._player_version.config(**_get_player_version(version).to_tk)
+        self.geometry("")  # resize the window
+
+    def set_player_update(
+        self,
+        action_name: Optional[str],
+        action: Optional[Callable[[], None]],
+        version: Optional[str],
+    ) -> None:
+        self._player_button.config(**_get_player_button_text(action_name, version).to_tk)
+        self._set_button_action(self._player_button, action)
+
+    def set_player_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._player_update.set_callback(is_checked, callback)

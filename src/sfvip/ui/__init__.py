@@ -71,6 +71,24 @@ class UI(tk.Tk):
     def set_libmpv_version(self, version: Optional[str]) -> None:
         self._infos.set_libmpv_version(version)
 
+    def set_player_version(self, version: Optional[str]) -> None:
+        self._infos.set_player_version(version)
+
+    def set_player_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._infos.set_player_auto_update(is_checked, callback)
+
+    def set_player_updating(self) -> None:
+        self._logo.set_pulse(ok=True, reason=_PulseReason.UPDATE_PLAYER)
+
+    def set_player_update(
+        self,
+        action_name: Optional[str] = None,
+        action: Optional[Callable[[], None]] = None,
+        version: Optional[str] = None,
+    ) -> None:
+        self._infos.set_player_update(action_name, action, version)
+        self._logo.set_pulse(ok=action is None, reason=_PulseReason.UPDATE_PLAYER)
+
     def showinfo(self, message: str, force_create: bool = False) -> None:
         def _showinfo() -> bool:
             message_win.wait_window()

@@ -115,7 +115,7 @@ class _TitleBarWindow(_Window):
         title_bar.columnconfigure(1, weight=1)
         self._grip_widgets(logo, title_txt)
         if isinstance(self.master, tk.Tk):
-            self.master.eval(f"tk::PlaceWindow {str(self)} center")
+            self.master.after(0, self.master.eval, f"tk::PlaceWindow {str(self)} center")
 
     def _grip_widgets(self, *widgets: tk.Widget) -> None:
         def click_window(event: tk.Event) -> None:

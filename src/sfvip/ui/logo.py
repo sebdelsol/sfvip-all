@@ -13,6 +13,7 @@ class _PulseReason(Enum):
     RESTART_FOR_PROXIES = auto()
     UPDATE_APP = auto()
     UPDATE_LIBMPV = auto()
+    UPDATE_PLAYER = auto()
     UNKNOWN = auto()
 
 

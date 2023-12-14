@@ -9,6 +9,9 @@ class AppDefaultConfig(ConfigLoader):
 
     class Player:
         exe: str | None = None
+        auto_update: bool = True
+        retry_minutes: int = 10
+        requests_timeout: int = 5
 
         class Libmpv:
             auto_update: bool = True

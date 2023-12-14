@@ -77,6 +77,9 @@ class PlayerExe:
     def has_all_channels(self) -> bool:
         return self._found.version > Version(PlayerExe._version_without_all_channels)
 
+    def update_found(self) -> FoundExe:
+        return FoundExe.from_exe(self._found.exe)
+
     @staticmethod
     def _check(exe: str) -> Optional[FoundExe]:
         if (path := Path(exe)).is_file() and path.match(PlayerExe._pattern):
@@ -122,7 +125,7 @@ class PlayerExe:
                 exe = self._ui.find_file(PlayerExe._name, PlayerExe._pattern)
             else:
                 logger.info("try to download the player")
-                exe = download_player(PlayerExe._name, self._app_info, self._app_config.App.requests_timeout)
+                exe = download_player(PlayerExe._name, self._app_info, self._app_config.Player.requests_timeout)
             if exe:
                 yield exe
                 break

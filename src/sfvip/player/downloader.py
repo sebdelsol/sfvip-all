@@ -44,3 +44,15 @@ def download_player(player_name: str, app_info: AppInfo, timeout: int) -> Option
         return str(player_exe)
     shutil.rmtree(player_dir, ignore_errors=True)
     logger.warning("player download failed")
+
+
+def upgrade_player(player_exe: Path, timeout: int) -> Optional[str]:
+    def download() -> bool:
+        return _PlayerUpdater(player_exe).download(timeout, progress)
+
+    player_dir = player_exe.parent
+    progress = ProgressWindow(f"Download {player_dir.name}")
+    if progress.run_in_thread(download, *exceptions):
+        return str(player_exe)
+    shutil.rmtree(player_dir, ignore_errors=True)
+    logger.warning("player download failed")

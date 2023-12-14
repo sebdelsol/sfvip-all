@@ -12,6 +12,7 @@ from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .find_exe import PlayerExe
 from .libmpv_updater import PlayerLibmpvAutoUpdater
+from .upgrader import PlayerAutoUpdater
 
 logger = logging.getLogger(__name__)
 
@@ -95,15 +96,22 @@ class _Launcher:
     def __init__(self) -> None:
         self._launch = True
         self._rect: Optional[sticky.Rect] = None
+        self._before_launch: Optional[Callable[[], None]] = None
 
     def want_to_launch(self) -> bool:
-        launch = self._launch
+        if launch := self._launch:
+            if self._before_launch is not None:
+                self._before_launch()
         # won't launch next time except if explitcitly set
         self._launch = False
+        self._before_launch = None
         return launch
 
-    def set_relaunch(self, rect: Optional[sticky.Rect]) -> None:
+    def set_relaunch(
+        self, rect: Optional[sticky.Rect], before_launch: Optional[Callable[[], None]] = None
+    ) -> None:
         self._launch = True
+        self._before_launch = before_launch
         self._rect = rect
 
     @property
@@ -116,9 +124,11 @@ class _Launcher:
 class Player:
     """run the player"""
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, app_info: AppInfo, ui: UI) -> None:
         self._player_exe = PlayerExe(app_info, ui)
         self._libmpv_updater = PlayerLibmpvAutoUpdater(self._player_exe.exe, app_info.config, ui, self.relaunch)
+        self._player_updater = PlayerAutoUpdater(self._player_exe, app_info.config, ui, self.relaunch)
         self._window_watcher = _PlayerWindowWatcher()
         self._rect_loader: Optional[_PlayerRectLoader] = None
         self._process: Optional[subprocess.Popen[bytes]] = None
@@ -155,20 +165,21 @@ class Player:
             set_rect_lock.acquire()
             self._rect_loader.rect = self._launcher.rect
 
-        with self._libmpv_updater:
-            with _PlayerConfigDirSetting().watch(self.relaunch):
-                with subprocess.Popen([self._player_exe.exe]) as self._process:
-                    logger.info("player started")
-                    self._window_watcher.start(self._process.pid)
-                    if set_rect_lock:
-                        # give time to the player to read its config
-                        time.sleep(0.5)
-                        set_rect_lock.release()
-                    yield
-                with self._process_lock:
-                    self._process = None
-                logger.info("player stopped")
-                self._window_watcher.stop()
+        with self._player_updater:
+            with self._libmpv_updater:
+                with _PlayerConfigDirSetting().watch(self.relaunch):
+                    with subprocess.Popen([self._player_exe.exe]) as self._process:
+                        logger.info("player started")
+                        self._window_watcher.start(self._process.pid)
+                        if set_rect_lock:
+                            # give time to the player to read its config
+                            time.sleep(0.5)
+                            set_rect_lock.release()
+                        yield
+                    with self._process_lock:
+                        self._process = None
+                    logger.info("player stopped")
+                    self._window_watcher.stop()
 
     def stop(self) -> bool:
         with self._process_lock:
@@ -178,9 +189,9 @@ class Player:
                     return True
         return False
 
-    def relaunch(self, sleep_duration_s: float = 1) -> None:
+    def relaunch(self, sleep_duration_s: float = 1, before_launch: Optional[Callable[[], None]] = None) -> None:
         # give time to the player to stop if it's been initiated by the user
         time.sleep(sleep_duration_s)
         if self.stop():
-            self._launcher.set_relaunch(self._window_watcher.rect)
+            self._launcher.set_relaunch(self._window_watcher.rect, before_launch)
             logger.info("restart the player")
