@@ -96,22 +96,20 @@ class _Launcher:
     def __init__(self) -> None:
         self._launch = True
         self._rect: Optional[sticky.Rect] = None
-        self._before_launch: Optional[Callable[[], None]] = None
+        self._can_relaunch: Optional[threading.Event] = None
 
     def want_to_launch(self) -> bool:
         if launch := self._launch:
-            if self._before_launch is not None:
-                self._before_launch()
+            if self._can_relaunch is not None:
+                self._can_relaunch.wait()
         # won't launch next time except if explitcitly set
         self._launch = False
-        self._before_launch = None
+        self._can_relaunch = None
         return launch
 
-    def set_relaunch(
-        self, rect: Optional[sticky.Rect], before_launch: Optional[Callable[[], None]] = None
-    ) -> None:
+    def set_relaunch(self, rect: Optional[sticky.Rect], can_relaunch: Optional[threading.Event] = None) -> None:
         self._launch = True
-        self._before_launch = before_launch
+        self._can_relaunch = can_relaunch
         self._rect = rect
 
     @property
@@ -189,9 +187,9 @@ class Player:
                     return True
         return False
 
-    def relaunch(self, sleep_duration_s: float = 1, before_launch: Optional[Callable[[], None]] = None) -> None:
+    def relaunch(self, sleep_duration_s: float = 1, can_relaunch: Optional[threading.Event] = None) -> None:
         # give time to the player to stop if it's been initiated by the user
         time.sleep(sleep_duration_s)
         if self.stop():
-            self._launcher.set_relaunch(self._window_watcher.rect, before_launch)
+            self._launcher.set_relaunch(self._window_watcher.rect, can_relaunch)
             logger.info("restart the player")

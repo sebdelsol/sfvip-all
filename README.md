@@ -6,10 +6,10 @@ It also ***updates [Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://githu
 
 # Download
 [<img src="https://img.shields.io/badge/Sfvip All 1.4.9 x64-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.9/x64/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.479.0_</sup></sub>
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.485.0_</sup></sub>
 
 [<img src="https://img.shields.io/badge/Sfvip All 1.4.9 x86-informational?logo=docusign&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.9/x86/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.479.0_</sup></sub>
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.485.0_</sup></sub>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
@@ -26,7 +26,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-6.3.0-informational.svg?logo=tools)](https://pyinstaller.org/en/stable/)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/or%20Nuitka-1.9.4-informational.svg?logo=tools)](https://nuitka.net/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-5657-000000.svg?logo=file-code)
+![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-5660-000000.svg?logo=file-code)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).

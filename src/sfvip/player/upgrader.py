@@ -1,8 +1,9 @@
 import logging
 import re
 import threading
+import time
 from pathlib import Path
-from typing import Callable, Optional, Protocol, Self
+from typing import Optional, Protocol, Self
 
 import requests
 
@@ -64,6 +65,7 @@ class PlayerUpdater:
     def _can_install(self) -> bool:
         while True:
             try:
+                time.sleep(0.5)
                 with Path(self._current.exe).open("ab"):
                     return True
             except PermissionError:
@@ -91,7 +93,7 @@ _updating = ThreadGuardian()
 
 
 class SetRelaunchT(Protocol):
-    def __call__(self, sleep_duration_s: float = ..., before_launch: Optional[Callable[[], None]] = ...) -> None:
+    def __call__(self, sleep_duration_s: float = ..., can_relaunch: Optional[threading.Event] = ...) -> None:
         ...
 
 
@@ -133,7 +135,10 @@ class PlayerAutoUpdater:
                     assert version
                     self._ui.set_player_updating()
                     if self._player_updater.ask_install(version):
-                        self._relaunch_player(0, self._player_updater.install)
+                        can_relaunch = threading.Event()
+                        self._relaunch_player(0, can_relaunch)
+                        self._player_updater.install()
+                        can_relaunch.set()
                     else:
                         self._ui.set_player_update(LOC.Install, install, str(version))
 
