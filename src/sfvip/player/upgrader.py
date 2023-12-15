@@ -1,12 +1,12 @@
 import logging
 import re
 import threading
-import time
 from pathlib import Path
 from typing import Optional, Protocol, Self
 
 import requests
 
+from shared import get_bitness_str
 from shared.version import Version
 from translations.loc import LOC
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class PlayerLatestUpdate:
     _url = "https://raw.githubusercontent.com/K4L4Uz/SFVIP-Player/main/Update.json"
-    _re_version = r"^v([\d\.]+)"
+    _re_version = re.compile(r"^v([\d\.]+)")
     _key_version = "tag_name"
 
     @staticmethod
@@ -32,7 +32,7 @@ class PlayerLatestUpdate:
             with requests.get(PlayerLatestUpdate._url, timeout=timeout) as response:
                 response.raise_for_status()
                 name = response.json()[PlayerLatestUpdate._key_version]
-                version = re.findall(PlayerLatestUpdate._re_version, name)[0]
+                version = PlayerLatestUpdate._re_version.findall(name)[0]
                 return Version(version)
         except (requests.RequestException, KeyError, IndexError):
             return None
@@ -48,7 +48,7 @@ class PlayerUpdater:
         return version > self._current.version
 
     def get_current_version_str(self) -> str:
-        return f"{self._current.version} {'x64' if self._current.bitness else 'x86'}"
+        return f"{self._current.version} {get_bitness_str(self._current.bitness)}"
 
     def get_latest_version(self) -> Optional[Version]:
         logger.info("check latest Sfvip Player version")
@@ -59,20 +59,20 @@ class PlayerUpdater:
         return None
 
     def install(self) -> None:
-        if self._can_install():
-            while True:
-                if upgrade_player(self._current.exe, self._current.bitness, self._timeout):
-                    self._current = self._player_exe.update_found()
-                    break
-                if not self._ask("Sfvip Player", LOC.UpgradeFailed, LOC.Retry):
-                    break
+        while True:
+            if not self._can_install():
+                break
+            if upgrade_player(self._current.exe, self._current.bitness, self._timeout):
+                self._current = self._player_exe.update_found()
+                break
+            if not self._ask("Sfvip Player", LOC.UpgradeFailed, LOC.Retry):
+                break
 
     def _can_install(self) -> bool:
         while True:
             try:
-                time.sleep(0.5)  # needed for the player to actually stop
+                # could write the player exe == it's not running
                 with Path(self._current.exe).open("ab"):
-                    # could write the player exe == it's not running
                     return True
             except PermissionError:
                 if not self._ask("Sfvip Player", LOC.AlreadyRunning, LOC.Retry):

@@ -66,7 +66,8 @@ class Templater:
         python_version = _version_of(python_envs, "Python")
         nuitka_version = _version_of(python_envs, "Nuitka")
         pyinstaller_version = _version_of(python_envs, "PyInstaller")
-        if python_version and nuitka_version and pyinstaller_version:
+        mitmproxy_version = _version_of(python_envs, "mitmproxy")
+        if python_version and nuitka_version and pyinstaller_version and mitmproxy_version:
             dist = Dist(build)
             self.template_format = dict(
                 **_get_exe_args(dist, python_envs.x64),
@@ -74,12 +75,13 @@ class Templater:
                 py_major_version=str(PythonVersion(python_version).major),
                 py_version_compact=python_version.replace(".", ""),
                 github_path=f"{github.owner}/{github.repo}",
+                pyinstaller_version=pyinstaller_version,
                 sloc=_get_sloc(Path(build.main).parent),
                 nsis_version=MakeNSIS().get_version(),
+                mitmproxy_version=mitmproxy_version,
                 script_main=Path(build.main).stem,
                 env_x64=environments.X64.path,
                 env_x86=environments.X86.path,
-                pyinstaller_version=pyinstaller_version,
                 nuitka_version=nuitka_version,
                 py_version=python_version,
                 ico_link=quote(build.ico),

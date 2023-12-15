@@ -176,6 +176,7 @@ class Player:
                     with self._process_lock:
                         self._process = None
                     logger.info("player stopped")
+                    # at the end since tk might lock because relaunch could be called in the same thread
                     self._window_watcher.stop()
 
     def stop(self) -> bool:
@@ -192,3 +193,6 @@ class Player:
         if self.stop():
             self._launcher.set_relaunch(self._window_watcher.rect, can_relaunch)
             logger.info("restart the player")
+            # wait for the player to stop
+            while self._process:
+                time.sleep(0)
