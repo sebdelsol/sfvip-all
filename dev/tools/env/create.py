@@ -7,7 +7,7 @@ from shared.version import Version
 from ..utils.color import Low, Ok, Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.protocols import CfgEnvironments
-from . import PythonEnv, get_bitness
+from . import PythonEnv, get_bitness_str
 
 
 def run_exe(exe: Path | str, *args: str) -> bool:
@@ -45,7 +45,7 @@ class CreatePythonEnv(PythonEnv):
 
     def create(self) -> bool:
         print(Title("Create"), Ok(f"{self._env_path} environment"), end=" ")
-        print(Low("based on"), Ok(f"Python {running_version(3)}"), Ok(get_bitness(self._want_64)))
+        print(Low("based on"), Ok(f"Python {running_version(3)}"), Ok(get_bitness_str(self._want_64)))
         return run_exe(sys.executable, *CreatePythonEnv._venv, self.path_str)
 
     def upgrade_pip(self) -> bool:

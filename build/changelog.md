@@ -1,6 +1,6 @@
-## 1.4.10 (upcoming)
-* Fix Localization when downloading.
-* Fix Player bitness when upgrading.
+## 1.4.10
+* Fix _Sfvip Player_ upgrading (bitness and error handling).
+* Fix UI localization when downloading.
 * Bump _Nuitka_ to 1.9.5.
 
 ## 1.4.9

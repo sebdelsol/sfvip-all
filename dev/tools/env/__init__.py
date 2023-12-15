@@ -8,15 +8,12 @@ from typing import Literal, Optional, Sequence
 
 import pkg_resources
 
+from shared import get_bitness_str
 from shared.version import Version
 
 from ..utils.color import Low, Ok, Title, Warn
 from ..utils.command import CommandMonitor
 from ..utils.protocols import CfgEnvironments
-
-
-def get_bitness(is_64: bool) -> Literal["x64", "x86"]:
-    return "x64" if is_64 else "x86"
 
 
 class PythonEnv:
@@ -46,7 +43,7 @@ class PythonEnv:
 
     @cached_property
     def bitness(self) -> Literal["x64", "x86"]:
-        return get_bitness(self.is_64)
+        return get_bitness_str(self.is_64)
 
     @cached_property
     def is_64(self) -> bool:
@@ -104,7 +101,7 @@ class PythonEnv:
             return False
         if self.is_64 != self._want_64:
             print(Warn("Wrong Python bitness !"))
-            print(Warn("It should be"), Ok(get_bitness(self._want_64)))
+            print(Warn("It should be"), Ok(get_bitness_str(self._want_64)))
             return False
         if Version(self.python_version, 2) != self._want_python:
             print(Warn("Wrong Python major version !"))

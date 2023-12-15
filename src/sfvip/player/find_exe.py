@@ -4,13 +4,14 @@ import winreg
 from pathlib import Path
 from typing import Any, Callable, Iterator, NamedTuple, Optional, Self
 
+from shared import get_bitness_str
 from shared.version import Version
 from translations.loc import LOC
 
 from ...winapi.version import get_version_string
 from ..app_info import AppInfo
 from ..ui import UI
-from .cpu import is64_exe
+from .cpu import Cpu, is64_exe
 from .downloader import download_player
 from .exception import PlayerNotFoundError
 from .registry import Registry
@@ -42,15 +43,15 @@ _registry_searches = (
 
 
 class FoundExe(NamedTuple):
-    exe: str
+    exe: Path
     version: Version
-    bitness: str
+    bitness: bool
 
     @classmethod
-    def from_exe(cls, exe: str) -> Self:
-        version = Version(get_version_string(exe, "FileVersion"))
-        bitness = "x64" if is64_exe(Path(exe)) else "x86"
-        return cls(exe, version, bitness)
+    def from_exe(cls, exe: Path) -> Self:
+        version = Version(get_version_string(str(exe.resolve()), "FileVersion"))
+        bitness = is64_exe(exe)
+        return cls(exe, version, Cpu.is64 if bitness is None else bitness)
 
 
 class PlayerExe:
@@ -66,11 +67,16 @@ class PlayerExe:
         self._app_info = app_info
         self._app_config = app_info.config
         self._found = self._find()
-        app_info.config.Player.exe = self._found.exe
-        logger.info("player is '%s' %s %s", self._found.exe, self._found.version, self._found.bitness)
+        app_info.config.Player.exe = str(self._found.exe.resolve())
+        logger.info(
+            "player is '%s' %s %s",
+            self._found.exe,
+            self._found.version,
+            get_bitness_str(self._found.bitness),
+        )
 
     @property
-    def exe(self) -> str:
+    def exe(self) -> Path:
         return self._found.exe
 
     @property
@@ -82,8 +88,9 @@ class PlayerExe:
 
     @staticmethod
     def _check(exe: str) -> Optional[FoundExe]:
-        if (path := Path(exe)).is_file() and path.match(PlayerExe._pattern):
-            found = FoundExe.from_exe(exe)
+        path = Path(exe)
+        if path.is_file() and path.match(PlayerExe._pattern):
+            found = FoundExe.from_exe(path)
             if found.version >= Version(PlayerExe._min_version):
                 return found
         return None

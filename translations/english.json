@@ -19,7 +19,7 @@
   "PleaseWait": "Please wait",
   "CheckLastestLibmpv": "Check latest libmpv update",
   "RestartInstall": "Do you want to restart to install %s ?",
-  "SearchOrDownload": "Do you want to Search or download it ?",
+  "SearchOrDownload": "Do you want to search or download it ?",
   "NoSocketPort": "No socket port available !",
   "CantStartProxies": "Can't start local proxies !",
   "NotFound": "%s not found",
@@ -27,5 +27,6 @@
   "AllMovies": "All Movies",
   "AllChannels": "All Channels",
   "AlreadyRunning": "%s is running. Please close it to continue.",
-  "PlayerTooOld": "%s is too old. Version ≥ %s is needed."
+  "PlayerTooOld": "%s is too old. Version %s or above is needed.",
+  "UpgradeFailed": "%s upgrade failed. Do you want to retry ?"
 }

@@ -19,7 +19,7 @@
   "PleaseWait": "Prosimo, počakajte",
   "CheckLastestLibmpv": "Preverite najnovejšo posodobitev libmpv",
   "RestartInstall": "Ali želite znova zagnati namestitev %s ?",
-  "SearchOrDownload": "Želite iskati ali prenesti ?",
+  "SearchOrDownload": "Ali želite poiskati ali prenesti ?",
   "NoSocketPort": "Vtičnica ni na voljo !",
   "CantStartProxies": "Ni mogoče zagnati lokalnih posrednikov !",
   "NotFound": "%s ni mogoče najti",
@@ -27,5 +27,6 @@
   "AllMovies": "Vsi filmi",
   "AllChannels": "Vsi kanali",
   "AlreadyRunning": "%s je zagnan. Če želite nadaljevati, ga zaprite.",
-  "PlayerTooOld": "%s je prestar. Potrebna je različica ≥ %s."
+  "PlayerTooOld": "%s je prestar. Potrebna je različica %s ali novejša.",
+  "UpgradeFailed": "Nadgradnja različice %s ni uspela. Ali želite ponoviti poskus ?"
 }

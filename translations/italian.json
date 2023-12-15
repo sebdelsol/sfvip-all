@@ -22,10 +22,11 @@
   "SearchOrDownload": "Vuoi cercarlo o scaricarlo?",
   "NoSocketPort": "Nessuna porta socket disponibile!",
   "CantStartProxies": "Impossibile avviare i proxy locali!",
-  "NotFound": "%s non è stato trovato",
+  "NotFound": "%s non trovato",
   "AllSeries": "Tutte le serie",
   "AllMovies": "Tutti i film",
   "AllChannels": "Tutti i canali",
   "AlreadyRunning": "%s è in esecuzione. Chiudere per continuare.",
-  "PlayerTooOld": "%s è troppo vecchio. È necessaria la versione ≥ %s."
+  "PlayerTooOld": "%s è troppo vecchio. È necessaria la versione %s o superiore.",
+  "UpgradeFailed": "L'aggiornamento %s non è riuscito. Si desidera riprovare?"
 }

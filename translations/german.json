@@ -27,5 +27,6 @@
   "AllMovies": "Alle Filme",
   "AllChannels": "Alle Kanäle",
   "AlreadyRunning": "%s wird ausgeführt. Bitte schließen Sie es, um fortzufahren.",
-  "PlayerTooOld": "%s ist zu alt. Es wird eine Version ≥ %s benötigt."
+  "PlayerTooOld": "%s ist zu alt. Es wird Version %s oder höher benötigt.",
+  "UpgradeFailed": "%s Upgrade fehlgeschlagen. Möchten Sie es erneut versuchen?"
 }

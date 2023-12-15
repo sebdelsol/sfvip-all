@@ -16,9 +16,9 @@ _updating = ThreadGuardian()
 
 class PlayerLibmpvAutoUpdater:
     def __init__(
-        self, player_path: str, app_config: AppConfig, ui: UI, relaunch_player: Callable[[int], None]
+        self, player_path: Path, app_config: AppConfig, ui: UI, relaunch_player: Callable[[int], None]
     ) -> None:
-        self._libmpv_dll = LibmpvDll(Path(player_path), app_config.Player.Libmpv.requests_timeout)
+        self._libmpv_dll = LibmpvDll(player_path, app_config.Player.Libmpv.requests_timeout)
         self._relaunch_player = relaunch_player
         self._installed_version = None
         self._scheduler = Scheduler()

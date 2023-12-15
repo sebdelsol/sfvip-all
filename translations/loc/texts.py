@@ -24,7 +24,7 @@ class Texts(NamedTuple):
     PleaseWait: str = "Please wait"
     CheckLastestLibmpv: str = "Check latest libmpv update"
     RestartInstall: str = "Do you want to restart to install %s ?"
-    SearchOrDownload: str = "Do you want to Search or download it ?"
+    SearchOrDownload: str = "Do you want to search or download it ?"
     NoSocketPort: str = "No socket port available !"
     CantStartProxies: str = "Can't start local proxies !"
     NotFound: str = "%s not found"
@@ -32,7 +32,8 @@ class Texts(NamedTuple):
     AllMovies: str = "All Movies"
     AllChannels: str = "All Channels"
     AlreadyRunning: str = "%s is running. Please close it to continue."
-    PlayerTooOld: str = "%s is too old. Version ≥ %s is needed."
+    PlayerTooOld: str = "%s is too old. Version %s or above is needed."
+    UpgradeFailed: str = "%s upgrade failed. Do you want to retry ?"
 
     @staticmethod
     def as_dict() -> dict[str, str]:

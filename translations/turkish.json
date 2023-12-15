@@ -18,8 +18,8 @@
   "UnknownVersion": "Bilinmeyen versiyon",
   "PleaseWait": "Lütfen bekleyin",
   "CheckLastestLibmpv": "En son libmpv güncellemesini kontrol edin",
-  "RestartInstall": "%s'i yüklemek için yeniden başlatmak istiyor musunuz?",
-  "SearchOrDownload": "Arama yapmak veya indirmek istiyor musunuz?",
+  "RestartInstall": "%s'i yüklemek için yeniden başlatmak mı istiyorsunuz?",
+  "SearchOrDownload": "Aramak veya indirmek istiyor musunuz?",
   "NoSocketPort": "Kullanılabilir soket portu yok !",
   "CantStartProxies": "Yerel proxy'ler başlatılamıyor !",
   "NotFound": "%s bulunamadı",
@@ -27,5 +27,6 @@
   "AllMovies": "Tüm Filmler",
   "AllChannels": "Tüm Kanallar",
   "AlreadyRunning": "%s çalışıyor. Devam etmek için lütfen kapatın.",
-  "PlayerTooOld": "%s çok eski. Sürüm ≥ %s gereklidir."
+  "PlayerTooOld": "%s çok eski. Sürüm %s veya üzeri gereklidir.",
+  "UpgradeFailed": "%s yükseltmesi başarısız oldu. Yeniden denemek ister misiniz?"
 }

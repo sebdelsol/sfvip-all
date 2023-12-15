@@ -48,7 +48,7 @@ class PlayerUpdater:
         return version > self._current.version
 
     def get_current_version_str(self) -> str:
-        return f"{self._current.version} {self._current.bitness}"
+        return f"{self._current.version} {'x64' if self._current.bitness else 'x86'}"
 
     def get_latest_version(self) -> Optional[Version]:
         logger.info("check latest Sfvip Player version")
@@ -60,9 +60,12 @@ class PlayerUpdater:
 
     def install(self) -> None:
         if self._can_install():
-            # TODO use bitness of the player
-            upgrade_player(Path(self._player_exe.exe), self._timeout)
-            self._current = self._player_exe.update_found()
+            while True:
+                if upgrade_player(self._current.exe, self._current.bitness, self._timeout):
+                    self._current = self._player_exe.update_found()
+                    break
+                if not self._ask("Sfvip Player", LOC.UpgradeFailed, LOC.Retry):
+                    break
 
     def _can_install(self) -> bool:
         while True:
@@ -72,7 +75,7 @@ class PlayerUpdater:
                     # could write the player exe == it's not running
                     return True
             except PermissionError:
-                if not self._ask_retry():
+                if not self._ask("Sfvip Player", LOC.AlreadyRunning, LOC.Retry):
                     return False
 
     @staticmethod
@@ -83,9 +86,6 @@ class PlayerUpdater:
 
         ask_win = AskWindow(f"{LOC.Install} {name}", message % name, ok, LOC.Cancel)
         return bool(ask_win.run_in_thread(_ask))
-
-    def _ask_retry(self) -> bool:
-        return self._ask("Sfvip Player", LOC.AlreadyRunning, LOC.Retry)
 
     def ask_install(self, version: Version) -> bool:
         return self._ask(f"Sfvip Player {version}", LOC.RestartInstall, LOC.Install)

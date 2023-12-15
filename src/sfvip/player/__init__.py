@@ -152,7 +152,6 @@ class Player:
 
     @contextmanager
     def run(self) -> Iterator[None]:
-        assert self._player_exe.exe is not None
         assert self._rect_loader is not None
 
         set_rect_lock = None
