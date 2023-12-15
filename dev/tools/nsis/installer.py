@@ -10,7 +10,11 @@ from ..env import PythonEnv
 from ..utils.dist import Dist, to_ico
 from ..utils.protocols import CfgBuild, CfgLOC
 
-NSISCompression = StrEnum("NSISCompression", ["zlib", "bzip2", "lzma"])
+
+class NSISCompression(StrEnum):
+    ZLIB = "zlib"
+    BZIP2 = "bzip2"
+    LZMA = "lzma"
 
 
 def get_cmd(name: str, cmd: Sequence[str]) -> dict[str, str | int]:
@@ -39,7 +43,7 @@ class NSISInstall(NamedTuple):
 
 class NSISInstaller:
     template_path = Path(__file__).parent / "template.nsi"
-    compression = NSISCompression.lzma
+    compression = NSISCompression.LZMA
     installer = "installer.nsi"
     version_length = 4
     encoding = "utf-8"

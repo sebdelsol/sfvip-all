@@ -23,7 +23,7 @@ class PythonVersion(Version):
 
     def new_minor(self) -> Optional[Self]:
         for entry in FeedEntries.get_from_url(PythonVersion.feed, PythonVersion.timeout):
-            version = PythonVersion(entry.title[1:])
+            version = self.__class__(entry.title[1:])
             if version.major == self.major and version > self:
                 return version
         return None

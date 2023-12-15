@@ -27,7 +27,7 @@ class _Style(str):
         return self.copy(text)
 
     def copy(self, text: Optional[str] = None) -> Self:
-        a_copy = _Style(str(self) if text is None else text)
+        a_copy = self.__class__(str(self) if text is None else text)
         # pylint: disable=protected-access
         a_copy._fg = self._fg
         a_copy._font = self._font

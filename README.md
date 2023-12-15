@@ -27,7 +27,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 <sup><sub>or</sub></sup>
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-1.9.5-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-5680-000000.svg?logo=file-code&logoColor=a0a0a0)
+![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-5683-000000.svg?logo=file-code&logoColor=a0a0a0)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).

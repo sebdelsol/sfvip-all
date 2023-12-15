@@ -26,9 +26,9 @@ class Rect(NamedTuple):
 
     def position(self, offset: _Offset, w: int, h: int) -> Self:
         if offset.centered:
-            return Rect(self.x + (self.w - w) * 0.5, self.y + (self.h - h) * 0.5, w, h)
+            return self.__class__(self.x + (self.w - w) * 0.5, self.y + (self.h - h) * 0.5, w, h)
         x, y = offset.maximized if self.is_maximized else offset.regular
-        return Rect(self.x + x, self.y + y, w, h)
+        return self.__class__(self.x + x, self.y + y, w, h)
 
     def to_geometry(self) -> str:
         return f"{self.w}x{self.h}+{self.x:.0f}+{self.y:.0f}"

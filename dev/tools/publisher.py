@@ -1,6 +1,6 @@
 import json
 import tempfile
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Iterator, Literal, NamedTuple, Optional, Self, Sequence
 from urllib.parse import quote
@@ -41,14 +41,14 @@ class AppLatestUpdateLocal(AppLatestUpdate):
             json.dump(update._asdict(), f, indent=2)
 
 
-class Valid(Enum):
+class Valid(StrEnum):
     OK = Ok("Valid")
     NOTFOUND = Warn("Exe not found")
     MD5 = Warn("Wrong md5 Exe")
     ERROR = Warn("Can't open Exe")
 
     @classmethod
-    def check_exe(cls, exe: Path, update: AppUpdate) -> Self:
+    def check_exe(cls, exe: Path, update: AppUpdate) -> str:
         if not exe.exists():
             return cls.NOTFOUND
         try:
@@ -64,12 +64,12 @@ class Published(NamedTuple):
     md5: str
     version: str
     bitness: str
-    valid: Valid
+    valid: str
     size: str
 
     @classmethod
     def from_update(cls, update: AppUpdate, exe: Path, python_env: PythonEnv) -> Self:
-        return Published(
+        return cls(
             bitness=python_env.bitness,
             url=update.url,
             md5=update.md5,
@@ -132,7 +132,7 @@ class Publisher:
                 version_color(f"v{published.version}"),
                 Ok(published.bitness),
                 Low(f"- {published.md5} - {published.size}"),
-                Ok(f" {published.valid.value}"),
+                Ok(f" {published.valid}"),
                 (Ok(" Already published") if published in old else Title(" New")) if old else "",
             )
             all_publisheds.append(published)

@@ -28,7 +28,7 @@ class DefenderScan(NamedTuple):
     @classmethod
     def from_process(cls, process: subprocess.CompletedProcess) -> Self:
         threats = tuple(cls.get_threats(process.stdout))
-        return DefenderScan(
+        return cls(
             threats=threats,
             is_clean=not (process.returncode or threats),
             has_failed=bool(process.returncode),

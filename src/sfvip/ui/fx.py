@@ -17,7 +17,7 @@ class _Color(NamedTuple):
 
     def blend_with(self, color: Self, t: float) -> Self:
         assert 0.0 <= t <= 1.0
-        return _Color(
+        return self.__class__(
             round(self.r * (1 - t) + color.r * t),
             round(self.g * (1 - t) + color.g * t),
             round(self.b * (1 - t) + color.b * t),
