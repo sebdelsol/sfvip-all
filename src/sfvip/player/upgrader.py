@@ -42,7 +42,7 @@ class PlayerUpdater:
     def __init__(self, player_exe: PlayerExe, app_config: AppConfig) -> None:
         self._timeout = app_config.Player.requests_timeout
         self._player_exe = player_exe
-        self._current = player_exe.update_found()
+        self._current = player_exe.found
 
     def is_new(self, version: Version) -> bool:
         return version > self._current.version
@@ -63,7 +63,7 @@ class PlayerUpdater:
             if not self._can_install():
                 break
             if upgrade_player(self._current.exe, self._current.bitness, self._timeout):
-                self._current = self._player_exe.update_found()
+                self._current = self._player_exe.found.update()
                 break
             if not self._ask("Sfvip Player", LOC.UpgradeFailed, LOC.Retry):
                 break

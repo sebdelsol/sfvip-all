@@ -1,20 +1,19 @@
 # <img src="resources/Sfvip%20All.png" width="40" align="center"> Sfvip All
 ***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to insert an _All_ category so you can easily **search your entire catalog**.  
-It also ***updates [Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy theirs latest features.
+It also ***updates [Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features.
 
 <img src="resources/all.png">
 
 # Download
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.10 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.10/x64/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.540.0_</sup></sub>
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.611.0_</sup></sub>
 
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.10 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.10/x86/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.540.0_</sup></sub>
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.611.0_</sup></sub>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
-
-If you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database, please use [***SfvipUserProxy***](user_proxy_cmd) _command line_.
+Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
 [^1]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
@@ -22,13 +21,13 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.7-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3117/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.1.6-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
+[![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
+![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-5694-000000.svg?logo=file-code&logoColor=a0a0a0)
+
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-1.9.5-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>or</sub></sup>
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-6.3.0-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
-
-[![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-5689-000000.svg?logo=file-code&logoColor=a0a0a0)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).

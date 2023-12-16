@@ -53,6 +53,9 @@ class FoundExe(NamedTuple):
         bitness = is64_exe(exe)
         return cls(exe, version, Cpu.is64 if bitness is None else bitness)
 
+    def update(self) -> Self:
+        return self.__class__.from_exe(self.exe)
+
 
 class PlayerExe:
     """find the player exe"""
@@ -83,26 +86,29 @@ class PlayerExe:
     def has_all_channels(self) -> bool:
         return self._found.version > Version(PlayerExe._version_without_all_channels)
 
-    def update_found(self) -> FoundExe:
-        return FoundExe.from_exe(self._found.exe)
+    @property
+    def found(self) -> FoundExe:
+        return self._found
 
     @staticmethod
-    def _check(exe: str) -> Optional[FoundExe]:
-        path = Path(exe)
-        if path.is_file() and path.match(PlayerExe._pattern):
-            found = FoundExe.from_exe(path)
-            if found.version >= Version(PlayerExe._min_version):
-                return found
-        return None
+    def _find_from(*finders: Callable[[], Iterator[str]]) -> FoundExe | bool:
+        found = None
+        for find in finders:
+            for exe in find():
+                exe = Path(exe)
+                if exe.is_file() and exe.match(PlayerExe._pattern):
+                    found = FoundExe.from_exe(exe)
+                    if found.version >= Version(PlayerExe._min_version):
+                        return found
+        return bool(found)
 
     def _find(self) -> FoundExe:
-        for find_exe in self._from_config, self._from_registry:
-            for exe in find_exe():
-                if found := self._check(exe):
-                    return found
-        self._ui.showinfo(LOC.PlayerTooOld % (PlayerExe._name.title(), PlayerExe._min_version))
-        for exe in self._from_file_or_download():
-            if found := self._check(exe):
+        if found := self._find_from(self._from_config, self._from_registry):
+            if isinstance(found, FoundExe):
+                return found
+            self._ui.showinfo(LOC.PlayerTooOld % (PlayerExe._name.title(), PlayerExe._min_version))
+        if found := self._find_from(self._from_file_or_download):
+            if isinstance(found, FoundExe):
                 return found
         raise PlayerNotFoundError(LOC.NotFound % PlayerExe._name.title())
 

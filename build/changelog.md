@@ -1,3 +1,6 @@
+## 1.4.10 (upcomming)
+* Fix missing _Sfvip Player_ UI.
+
 ## 1.4.10
 * Fix _Sfvip Player_ upgrading (bitness and error handling).
 * Fix UI localization when downloading.

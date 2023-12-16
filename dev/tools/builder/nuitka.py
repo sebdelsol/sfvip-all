@@ -33,7 +33,7 @@ class Nuitka(Distribution):
                 f"--file-version={build.version}",
                 "--assume-yes-for-downloads",
                 "--python-flag=-OO",
-                "--deployment",  # disable Nuitka safeguards
+                "--deployment",  # disable Nuitka safeguards, comment if some issues
                 "--standalone",
                 build.main,
             )
