@@ -6,10 +6,10 @@ It also ***updates [Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://githu
 
 # Download
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.10 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.10/x64/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.611.0_</sup></sub>
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.640.0_</sup></sub>
 
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.10 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.10/x86/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.611.0_</sup></sub>
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.640.0_</sup></sub>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  

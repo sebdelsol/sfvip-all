@@ -50,7 +50,7 @@ def download_player(player_name: str, app_info: AppInfo, timeout: int) -> Option
     logger.warning("player download failed")
 
 
-def upgrade_player(player_exe: Path, player_bitness: bool, timeout: int) -> bool:
+def update_player(player_exe: Path, player_bitness: bool, timeout: int) -> bool:
     def download() -> bool:
         return _PlayerUpdater(exe, player_bitness).download(timeout, progress)
 

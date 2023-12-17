@@ -12,7 +12,7 @@ from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
 from .find_exe import PlayerExe
 from .libmpv_updater import PlayerLibmpvAutoUpdater
-from .upgrader import PlayerAutoUpdater
+from .updater import PlayerAutoUpdater
 
 logger = logging.getLogger(__name__)
 

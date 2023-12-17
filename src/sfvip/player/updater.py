@@ -15,7 +15,7 @@ from ..ui import UI
 from ..ui.window import AskWindow
 from ..utils.guardian import ThreadGuardian
 from ..utils.scheduler import Scheduler
-from .downloader import upgrade_player
+from .downloader import update_player
 from .find_exe import PlayerExe
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class PlayerUpdater:
         while True:
             if not self._can_install():
                 break
-            if upgrade_player(self._current.exe, self._current.bitness, self._timeout):
+            if update_player(self._current.exe, self._current.bitness, self._timeout):
                 self._current = self._player_exe.found.update()
                 break
             if not self._ask("Sfvip Player", LOC.UpgradeFailed, LOC.Retry):
