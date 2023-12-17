@@ -88,7 +88,7 @@ class Upgrader:
                     return True
         return False
 
-    def upgrade(self, eager: bool, clean: bool = False) -> None:
+    def upgrade(self, eager: bool, clean: bool = False, force: bool = False) -> None:
         if not self._python_env.requirements:
             print(Warn("No requirements to check"))
             return
@@ -117,7 +117,7 @@ class Upgrader:
             else:
                 print(Title("Requirements"), Ok("up-to-date"))
                 break
-            key = "a" if clean else flushed_input(*Upgrader._prompt)
+            key = "a" if (clean or force) else flushed_input(*Upgrader._prompt)
             match key:
                 case "e":
                     print(Title("Exit"))

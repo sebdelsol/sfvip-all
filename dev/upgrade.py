@@ -9,6 +9,7 @@ from .tools.nsis import MakeNSIS
 class Args(EnvArgs):
     noeager: bool = False  # upgrade only needed packages
     clean: bool = False  # clean all packages
+    force: bool = False  # skip prompt and force installation
 
 
 if __name__ == "__main__":
@@ -18,4 +19,4 @@ if __name__ == "__main__":
         print()
         print(python_env)
         if python_env.check():
-            Upgrader(python_env).upgrade(eager=not args.noeager, clean=args.clean)
+            Upgrader(python_env).upgrade(eager=not args.noeager, clean=args.clean, force=args.force)

@@ -71,7 +71,7 @@ python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuil
 ### Upgrade dependencies
 It checks for _Nsis_, _Python_ minor update and all _packages dependencies_:
 ```console
-python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean]
+python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean] [--force]
 ```
 ### Publish an update
 ```console

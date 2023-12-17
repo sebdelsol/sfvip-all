@@ -1,4 +1,4 @@
-## 1.4.10 (upcomming)
+## 1.4.11 (upcomming)
 * Fix missing _Sfvip Player_ UI.
 
 ## 1.4.10
