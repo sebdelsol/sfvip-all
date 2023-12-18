@@ -37,13 +37,16 @@ def _minimum_addons() -> Sequence[Any]:
 
 class _AddOn(Protocol):
     def request(self, flow: http.HTTPFlow) -> None:
-        pass
+        ...
 
     def response(self, flow: http.HTTPFlow) -> None:
-        pass
+        ...
 
     def responseheaders(self, flow: http.HTTPFlow) -> None:
-        pass
+        ...
+
+    def init_epg(self) -> None:
+        ...
 
 
 class Mode(NamedTuple):
@@ -81,6 +84,7 @@ class MitmLocalProxy(multiprocessing.Process):
         loop = asyncio.get_event_loop()
         master = Master(opts, event_loop=loop)
         master.addons.add(self._addon, *_minimum_addons())
+        self._addon.init_epg()
 
         def _wait_for_stop() -> None:
             self._stop.wait()

@@ -1,3 +1,6 @@
+## 1.4.12 (upcoming)
+* External EPG option.
+
 ## 1.4.11
 * Fix episodes list that _Sfvip Player_ doesn't correctly handle.
 * Fix missing _Sfvip Player_ UI.

@@ -9,6 +9,8 @@ from typing import Any, NamedTuple, Optional
 from mitmproxy import http
 from mitmproxy.coretypes.multidict import MultiDictView
 
+from .epg import EPG
+
 logger = logging.getLogger(__name__)
 
 
@@ -104,6 +106,12 @@ class SfVipAddOn:
         self._category_panel = {panel.get_category: panel for panel in panels}
         self._categories_panel = {panel.get_categories: panel for panel in panels}
         self._running = multiprocessing.Event()
+        self.epg = None
+
+    def init_epg(self):
+        # TODO
+        # self.epg = EPG("https://epgshare01.online/epgshare01/epg_ripper_FR1.xml.gz")
+        pass
 
     def running(self) -> None:
         self._running.set()
@@ -138,6 +146,7 @@ class SfVipAddOn:
         return None
 
     def response(self, flow: http.HTTPFlow) -> None:
+        # pylint: disable=too-many-nested-blocks
         if flow.response and not flow.response.stream:
             if _is_api_request(flow.request):
                 action = _get_query_key(flow.request, "action")
@@ -149,6 +158,17 @@ class SfVipAddOn:
                     info = _response_json(flow.response)
                     if fixed_info := fix_info_serie(info):
                         flow.response.text = json.dumps(fixed_info)
+                elif self.epg:
+                    if action == "get_live_streams":
+                        category_id = _get_query_key(flow.request, "category_id")
+                        if not category_id:  # TODO case of all pannel !!
+                            self.epg.set_channel_ids(_response_json(flow.response))
+                    if action == "get_short_epg":
+                        stream_id = _get_query_key(flow.request, "stream_id")
+                        limit = _get_query_key(flow.request, "limit")
+                        if stream_id and limit:
+                            if epg_listings := tuple(self.epg.get(stream_id, int(limit))):
+                                flow.response.text = json.dumps({"epg_listings": epg_listings})
 
     @staticmethod
     def responseheaders(flow: http.HTTPFlow) -> None:
