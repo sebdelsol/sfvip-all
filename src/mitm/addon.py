@@ -80,6 +80,17 @@ def _log(verb: str, panel: Panel, action: str) -> None:
     logger.info(txt, verb, panel.all_category_name, panel.all_category_id, action)
 
 
+def fix_info_serie(info: Any) -> Optional[dict[str, Any]]:
+    if isinstance(info, dict):
+        if episodes := info.get("episodes"):
+            # fix episode list : Xtream code api recommend a dictionary
+            if isinstance(episodes, list):
+                info["episodes"] = {str(season[0]["season"]): season for season in episodes}
+                logger.info("fix serie info")
+                return info
+    return None
+
+
 class SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
@@ -111,24 +122,33 @@ class SfVipAddOn:
                     _del_query_key(flow.request, "category_id")
                     _log("serve", panel, action)
 
+    def inject_all(self, categories: Any, action: str) -> Optional[list[Any]]:
+        if isinstance(categories, list):
+            # response with the all category injected @ the beginning
+            panel = self._categories_panel[action]
+            panel.all_category_id = _unused_category_id(categories)
+            all_category = dict(
+                category_id=panel.all_category_id,
+                category_name=panel.all_category_name,
+                parent_id=0,
+            )
+            categories.insert(0, all_category)
+            _log("inject", panel, action)
+            return categories
+        return None
+
     def response(self, flow: http.HTTPFlow) -> None:
         if flow.response and not flow.response.stream:
             if _is_api_request(flow.request):
                 action = _get_query_key(flow.request, "action")
                 if action in self._categories_panel:
                     categories = _response_json(flow.response)
-                    if isinstance(categories, list):
-                        # response with the all category injected @ the beginning
-                        panel = self._categories_panel[action]
-                        panel.all_category_id = _unused_category_id(categories)
-                        all_category = dict(
-                            category_id=panel.all_category_id,
-                            category_name=panel.all_category_name,
-                            parent_id=0,
-                        )
-                        categories.insert(0, all_category)
-                        flow.response.text = json.dumps(categories)
-                        _log("inject", panel, action)
+                    if all_injected := self.inject_all(categories, action):
+                        flow.response.text = json.dumps(all_injected)
+                elif action == "get_series_info":
+                    info = _response_json(flow.response)
+                    if fixed_info := fix_info_serie(info):
+                        flow.response.text = json.dumps(fixed_info)
 
     @staticmethod
     def responseheaders(flow: http.HTTPFlow) -> None:

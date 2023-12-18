@@ -1,4 +1,5 @@
-## 1.4.11 (upcomming)
+## 1.4.11
+* Fix episodes list that _Sfvip Player_ doesn't correctly handle.
 * Fix missing _Sfvip Player_ UI.
 
 ## 1.4.10
