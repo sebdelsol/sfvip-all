@@ -54,12 +54,13 @@ class LocalProxies:
     _find_ports_retry = 10
     _mitmproxy_start_timeout = 5
 
-    def __init__(self, inject_in_live: bool, upstreams: set[str]) -> None:
+    def __init__(self, inject_in_live: bool, upstreams: set[str], epg_url: Optional[str]) -> None:
         self._all_name = AllCategoryName(
             live=LOC.AllChannels if inject_in_live else None,
             series=LOC.AllSeries,
             vod=LOC.AllMovies,
         )
+        self._epg_url = epg_url
         self._upstreams = upstreams
         self._by_upstreams: dict[str, str] = {}
         self._mitm_proxy: Optional[MitmLocalProxy] = None
@@ -81,7 +82,7 @@ class LocalProxies:
                         modes.add(Mode(port=port, upstream=upstream_fixed))
                         self._by_upstreams[upstream] = LocalProxies._localhost.format(port=port)
                 if modes:
-                    addon = SfVipAddOn(self._all_name)
+                    addon = SfVipAddOn(self._all_name, self._epg_url)
                     self._mitm_proxy = MitmLocalProxy(addon, modes)
                     self._mitm_proxy.start()
                     # wait for proxies running so we're sure all ports are bound

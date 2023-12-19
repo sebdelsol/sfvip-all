@@ -18,5 +18,8 @@ class AppDefaultConfig(ConfigLoader):
             retry_minutes: int = 10
             requests_timeout: int = 3
 
+    class EPG:
+        url: str | None = None
+
     class AllCategory:
         inject_in_live: bool = False

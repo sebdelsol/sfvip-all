@@ -6,7 +6,7 @@ import time
 import unicodedata
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Iterator, NamedTuple, Optional, Self
+from typing import Any, Iterator, NamedTuple, Optional, Self
 
 import requests
 
@@ -53,8 +53,40 @@ class Programme(NamedTuple):
 
 
 def _normalize(name: str) -> str:
-    name = name.lower().replace(".", "").replace("+", "plus")
-    return unicodedata.normalize("NFKD", name)
+    name = name.lower()
+    for char in ".", "-", "/", "(", ")":
+        name = name.replace(char, "")
+    name = name.replace("+", "plus")
+    # remove accents
+    nfkd_form = unicodedata.normalize("NFKD", name)
+    return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+
+def _get_int(text: Optional[str]) -> Optional[int]:
+    try:
+        if text:
+            return int(text)
+    except ValueError:
+        pass
+    return None
+
+
+class ServerChannels:
+    def __init__(self, channels: Any) -> None:
+        self.channels: dict[str, str] = {}
+        self.set(channels)
+
+    def set(self, channels: Any) -> None:
+        if isinstance(channels, list):
+            for channel in channels:
+                if isinstance(channel, dict):
+                    stream_id = channel.get("stream_id")
+                    channel_id = channel.get("epg_channel_id")
+                    if isinstance(stream_id, (str, int)) and isinstance(channel_id, str):
+                        self.channels[str(stream_id)] = channel_id
+
+    def get(self, stream_id: str) -> Optional[str]:
+        return self.channels.get(stream_id)
 
 
 class EPG:
@@ -63,8 +95,8 @@ class EPG:
     def __init__(self, url: str) -> None:
         self.url = url
         self.tree = None
-        self.to_channel_ids = {}
-        self.normalized_channels = {}
+        self.channels: dict[str, str] = {}
+        self.servers: dict[str, ServerChannels] = {}
         self.channels_lock = threading.Lock()
         threading.Thread(target=self._populate_channels).start()
 
@@ -78,55 +110,52 @@ class EPG:
             return None
 
     def _populate_channels(self) -> None:
+        logger.info("load epg channels from '%s'", self.url)
         if tree := self._get_tree():
-            normalized_channels = {
+            channels = {
                 _normalize(channel_id): channel_id
                 for element in tree.findall("./channel")
                 if (channel_id := element.get("id"))
             }
             with self.channels_lock:
                 self.tree = tree
-                self.normalized_channels = normalized_channels
+                self.channels = channels
+            logger.info("epg channels updated from '%s'", self.url)
 
-    def _find_channel_id(self, channel: dict) -> Optional[str]:
-        if channel_id := channel.get("epg_channel_id"):
-            if isinstance(channel_id, str):
-                channel_id = _normalize(channel_id)
-                if channel_id in self.normalized_channels:
-                    return self.normalized_channels[channel_id]
-        return None
-
-    def _get_from_channel_id(self, channel_id: str) -> Iterator[Programme]:
+    def get_programmes(self, channel_id: str) -> Iterator[Programme]:
+        channel_id = _normalize(channel_id)
         with self.channels_lock:
             tree = self.tree
-        if tree:
+            channel = self.channels.get(channel_id)
+        if tree and channel:
             now = time.time()
-            for element in tree.findall(f'./programme[@channel="{channel_id}"]'):
+            for element in tree.findall(f'./programme[@channel="{channel}"]'):
                 if programme := Programme.from_element(element, now):
                     yield programme
 
-    def set_channel_ids(self, json) -> None:
-        # TODO store in self.all_channels & deffer self.to_channel_ids creation in populate_channels
-        if isinstance(json, list):
-            for channel in json:
-                if isinstance(channel, dict):
-                    stream_id = channel.get("stream_id")
-                    channel_id = self._find_channel_id(channel)
-                    if stream_id and channel_id:
-                        self.to_channel_ids[str(stream_id)] = channel_id
+    def set_server_channels(self, server: Optional[str], channels: Any) -> None:
+        if server:
+            logger.info("set channels for %s", server)
+            self.servers[server] = ServerChannels(channels)
 
-    def get(self, stream_id: str, limit: int) -> Iterator[dict[str, str]]:
-        # TODO check to_channel_ids is valid
-        if channel_id := self.to_channel_ids.get(stream_id):
-            logger.info("get epg for %s", channel_id)
-            for i, programme in enumerate(self._get_from_channel_id(channel_id)):
-                if i >= limit:
-                    break
-                yield programme._asdict()
+    def get(self, server: Optional[str], stream_id: str, limit: Optional[str]) -> Iterator[dict[str, str]]:
+        if server and (server_channels := self.servers.get(server)):
+            if channel_id := server_channels.get(stream_id):
+                count = 0
+                _limit = _get_int(limit)
+                for count, programme in enumerate(self.get_programmes(channel_id)):
+                    if _limit and count >= _limit:
+                        break
+                    yield programme._asdict()
+                if count > 0:
+                    logger.info("get epg for %s", channel_id)
 
 
 if __name__ == "__main__":
-    _epg = EPG("https://epgshare01.online/epgshare01/epg_ripper_FR1.xml.gz")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+    epg = EPG("https://epgshare01.online/epgshare01/epg_ripper_FR1.xml.gz")
     time.sleep(3)
-    for p in _epg._get_from_channel_id("TF1.fr"):
+    for i, p in enumerate(epg.get_programmes("TF1.fr")):
+        if i >= 2:
+            break
         print(p)

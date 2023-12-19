@@ -96,7 +96,7 @@ def fix_info_serie(info: Any) -> Optional[dict[str, Any]]:
 class SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
-    def __init__(self, all_name: AllCategoryName) -> None:
+    def __init__(self, all_name: AllCategoryName, epg_url: Optional[str]) -> None:
         panels = [
             get_panel(PanelType.VOD, all_name.vod),
             get_panel(PanelType.SERIES, all_name.series, streams=False),
@@ -107,11 +107,11 @@ class SfVipAddOn:
         self._categories_panel = {panel.get_categories: panel for panel in panels}
         self._running = multiprocessing.Event()
         self.epg = None
+        self.epg_url = epg_url
 
     def init_epg(self):
-        # TODO
-        # self.epg = EPG("https://epgshare01.online/epgshare01/epg_ripper_FR1.xml.gz")
-        pass
+        if self.epg_url:
+            self.epg = EPG(self.epg_url)
 
     def running(self) -> None:
         self._running.set()
@@ -161,13 +161,14 @@ class SfVipAddOn:
                 elif self.epg:
                     if action == "get_live_streams":
                         category_id = _get_query_key(flow.request, "category_id")
-                        if not category_id:  # TODO case of all pannel !!
-                            self.epg.set_channel_ids(_response_json(flow.response))
+                        if not category_id:
+                            server = flow.request.host_header
+                            self.epg.set_server_channels(server, _response_json(flow.response))
                     if action == "get_short_epg":
-                        stream_id = _get_query_key(flow.request, "stream_id")
-                        limit = _get_query_key(flow.request, "limit")
-                        if stream_id and limit:
-                            if epg_listings := tuple(self.epg.get(stream_id, int(limit))):
+                        if stream_id := _get_query_key(flow.request, "stream_id"):
+                            server = flow.request.host_header
+                            limit = _get_query_key(flow.request, "limit")
+                            if epg_listings := tuple(self.epg.get(server, stream_id, limit)):
                                 flow.response.text = json.dumps({"epg_listings": epg_listings})
 
     @staticmethod
