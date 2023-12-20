@@ -125,18 +125,29 @@ def _are_infos_valid(infos: Sequence[Info]) -> bool:
     return all(info.is_valid for info in infos)
 
 
-def _get_epg() -> _Style:
+def _epg() -> _Style:
     return _InfoStyle.app(LOC.EpgUrl).grey
 
 
-def _get_epg_status(epg_status: EPGstatus) -> _Style:
-    to_style = {
+def _epg_url() -> _Style:
+    return _InfoStyle.app("").smaller(2).grey
+
+
+def _epg_status_styles() -> dict[EPGstatus | None, _Style]:
+    return {
         EPGstatus.LOADING: _InfoStyle.app(LOC.Loading).white,
         EPGstatus.READY: _InfoStyle.app(LOC.ready).lime_green,
         EPGstatus.FAILED: _InfoStyle.app(LOC.Failed).red,
         EPGstatus.NOEPG: _InfoStyle.app(LOC.NoEpg).grey,
     }
-    return to_style.get(epg_status, _InfoStyle.app("").grey)
+
+
+def _epg_width() -> int:
+    return max(len(style.to_tk["text"]) for style in _epg_status_styles().values())
+
+
+def _epg_status(epg_status: Optional[EPGstatus] = None) -> _Style:
+    return _epg_status_styles().get(epg_status, _InfoStyle.app("").grey)
 
 
 class _ProxiesWindow(_StickyWindow):
@@ -242,9 +253,9 @@ class _InfosWindow(_ProxiesWindow):
         self._libmpv_button = _Button(frame, **_InfoTheme.button)  # type: ignore
         separator4 = tk.Frame(frame, bg=_InfoTheme.separator)
         epg_frame = tk.Frame(frame, bg=_InfoTheme.bg_rows)
-        epg_label = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_get_epg().to_tk)
-        self._epg_url = tk.Entry(epg_frame, bg=_InfoTheme.bg_headers, **_get_epg().to_tk)
-        self._epg_status = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_get_epg().to_tk)
+        epg_label = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_epg().to_tk)
+        self._epg_url = tk.Entry(epg_frame, bg=_InfoTheme.bg_headers, **_epg_url().to_tk, insertbackground="white")
+        self._epg_status = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_epg_status().to_tk, width=_epg_width())
         separator5 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
         row = 0
@@ -276,7 +287,7 @@ class _InfosWindow(_ProxiesWindow):
         row += 1
         epg_frame.grid(row=row, columnspan=3, sticky=tk.NSEW)
         epg_label.pack(padx=pad, side=tk.LEFT)
-        self._epg_url.pack(padx=pad, pady=pad, side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self._epg_url.pack(pady=pad, side=tk.LEFT, fill=tk.BOTH, expand=True)
         self._epg_status.pack(padx=pad, side=tk.LEFT)
         row += 1
         separator5.grid(row=row, columnspan=3, sticky=tk.EW)
@@ -292,7 +303,7 @@ class _InfosWindow(_ProxiesWindow):
         self._epg_url.bind("<FocusOut>", lambda _: callback(self._epg_url.get()))
 
     def set_epg_status(self, epg_status: EPGstatus) -> None:
-        self._epg_status.config(**_get_epg_status(epg_status).to_tk)
+        self._epg_status.config(**_epg_status(epg_status).to_tk)
 
     def set_app_update(
         self,
