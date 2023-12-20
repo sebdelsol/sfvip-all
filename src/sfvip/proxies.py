@@ -8,6 +8,9 @@ from translations.loc import LOC
 from ..mitm import MitmLocalProxy, Mode, validate_upstream
 from ..mitm.addon import AllCategoryName, SfVipAddOn
 from ..winapi import mutex
+from .app_info import AppConfig
+from .epg import EpgUpdater
+from .ui import UI
 
 logger = logging.getLogger(__name__)
 
@@ -54,21 +57,26 @@ class LocalProxies:
     _find_ports_retry = 10
     _mitmproxy_start_timeout = 5
 
-    def __init__(self, inject_in_live: bool, upstreams: set[str], epg_url: Optional[str]) -> None:
+    def __init__(self, app_config: AppConfig, inject_in_live: bool, upstreams: set[str], ui: UI) -> None:
+        self._epg_updater = EpgUpdater(app_config, self.epg_update, ui)
         self._all_name = AllCategoryName(
             live=LOC.AllChannels if inject_in_live else None,
             series=LOC.AllSeries,
             vod=LOC.AllMovies,
         )
-        self._epg_url = epg_url
         self._upstreams = upstreams
         self._by_upstreams: dict[str, str] = {}
+        self._addon: Optional[SfVipAddOn] = None
         self._mitm_proxy: Optional[MitmLocalProxy] = None
         self._bind_free_ports = mutex.SystemWideMutex("bind free ports for local proxies")
 
     @property
     def by_upstreams(self) -> dict[str, str]:
         return self._by_upstreams
+
+    def epg_update(self, url: str) -> None:
+        if self._addon:
+            self._addon.epg_update(url)
 
     def __enter__(self) -> Self:
         with self._bind_free_ports:
@@ -82,14 +90,16 @@ class LocalProxies:
                         modes.add(Mode(port=port, upstream=upstream_fixed))
                         self._by_upstreams[upstream] = LocalProxies._localhost.format(port=port)
                 if modes:
-                    addon = SfVipAddOn(self._all_name, self._epg_url)
+                    self._addon = addon = SfVipAddOn(self._all_name, self._epg_updater.update_status)
                     self._mitm_proxy = MitmLocalProxy(addon, modes)
                     self._mitm_proxy.start()
                     # wait for proxies running so we're sure all ports are bound
                     if not addon.wait_running(LocalProxies._mitmproxy_start_timeout):
                         raise LocalproxyError(LOC.CantStartProxies)
+                    self._epg_updater.start()
             return self
 
     def __exit__(self, *_) -> None:
         if self._mitm_proxy:
             self._mitm_proxy.stop()
+        self._epg_updater.stop()

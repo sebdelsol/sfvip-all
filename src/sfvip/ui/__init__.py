@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 from typing import Callable, Optional, Sequence
 
+from ...mitm.epg import EPGstatus
 from .infos import AppInfo, Info, _InfosWindow
 from .logo import _LogoWindow, _PulseReason
 from .splash import _SplashWindow
@@ -37,6 +38,12 @@ class UI(tk.Tk):
     def set_infos(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[int], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)
         self._logo.set_pulse(ok=ok, reason=_PulseReason.RESTART_FOR_PROXIES)
+
+    def set_epg_url_update(self, epg_url: Optional[str], callback: Callable[[str], None]) -> None:
+        self._infos.set_epg_url_update(epg_url, callback)
+
+    def set_epg_status(self, epg_status: EPGstatus) -> None:
+        self._infos.set_epg_status(epg_status)
 
     def set_app_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
         self._infos.set_app_auto_update(is_checked, callback)

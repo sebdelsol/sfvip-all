@@ -3,9 +3,9 @@ import asyncio
 import logging
 import multiprocessing
 import threading
-from typing import Any, NamedTuple, Protocol, Sequence
+from typing import Any, NamedTuple, Sequence
 
-from mitmproxy import http, options
+from mitmproxy import options
 from mitmproxy.addons import (
     core,
     disable_h2c,
@@ -16,6 +16,8 @@ from mitmproxy.addons import (
 )
 from mitmproxy.master import Master
 from mitmproxy.net import server_spec
+
+from .addon import SfVipAddOn
 
 logger = logging.getLogger(__name__)
 # do not pollute the log
@@ -33,20 +35,6 @@ def _minimum_addons() -> Sequence[Any]:
         next_layer.NextLayer(),
         tlsconfig.TlsConfig(),
     )
-
-
-class _AddOn(Protocol):
-    def request(self, flow: http.HTTPFlow) -> None:
-        ...
-
-    def response(self, flow: http.HTTPFlow) -> None:
-        ...
-
-    def responseheaders(self, flow: http.HTTPFlow) -> None:
-        ...
-
-    def init_epg(self) -> None:
-        ...
 
 
 class Mode(NamedTuple):
@@ -69,7 +57,7 @@ def validate_upstream(url: str) -> bool:
 class MitmLocalProxy(multiprocessing.Process):
     """run mitmdump in a process"""
 
-    def __init__(self, addon: _AddOn, modes: set[Mode]) -> None:
+    def __init__(self, addon: SfVipAddOn, modes: set[Mode]) -> None:
         self._stop = multiprocessing.Event()
         self._addon = addon
         self._modes = modes
@@ -84,7 +72,6 @@ class MitmLocalProxy(multiprocessing.Process):
         loop = asyncio.get_event_loop()
         master = Master(opts, event_loop=loop)
         master.addons.add(self._addon, *_minimum_addons())
-        self._addon.init_epg()
 
         def _wait_for_stop() -> None:
             self._stop.wait()

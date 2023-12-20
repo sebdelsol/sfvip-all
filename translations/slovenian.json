@@ -28,5 +28,10 @@
   "AllChannels": "Vsi kanali",
   "AlreadyRunning": "%s je zagnan. Če želite nadaljevati, ga zaprite.",
   "PlayerTooOld": "%s je prestar. Potrebna je različica %s ali novejša.",
-  "UpgradeFailed": "Nadgradnja različice %s ni uspela. Ali želite ponoviti poskus ?"
+  "UpgradeFailed": "Nadgradnja različice %s ni uspela. Ali želite ponoviti poskus ?",
+  "Loading": "Nalaganje",
+  "ready": "Pripravljen",
+  "Failed": "Neuspešno",
+  "NoEpg": "Ni EPG",
+  "EpgUrl": "Vnesite url naslov EPG"
 }

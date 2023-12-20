@@ -34,6 +34,11 @@ class Texts(NamedTuple):
     AlreadyRunning: str = "%s is running. Please close it to continue."
     PlayerTooOld: str = "%s is too old. Version %s or above is needed."
     UpgradeFailed: str = "%s upgrade failed. Do you want to retry ?"
+    Loading: str = "Loading"
+    ready: str = "Ready"
+    Failed: str = "Failed"
+    NoEpg: str = "No EPG"
+    EpgUrl: str = "Enter EPG url"
 
     @staticmethod
     def as_dict() -> dict[str, str]:

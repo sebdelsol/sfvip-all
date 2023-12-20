@@ -9,7 +9,7 @@ from typing import Any, NamedTuple, Optional
 from mitmproxy import http
 from mitmproxy.coretypes.multidict import MultiDictView
 
-from .epg import EPG
+from .epg import EPG, UpdateStatusT
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +96,7 @@ def fix_info_serie(info: Any) -> Optional[dict[str, Any]]:
 class SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
-    def __init__(self, all_name: AllCategoryName, epg_url: Optional[str]) -> None:
+    def __init__(self, all_name: AllCategoryName, update_status: UpdateStatusT) -> None:
         panels = [
             get_panel(PanelType.VOD, all_name.vod),
             get_panel(PanelType.SERIES, all_name.series, streams=False),
@@ -106,15 +106,17 @@ class SfVipAddOn:
         self._category_panel = {panel.get_category: panel for panel in panels}
         self._categories_panel = {panel.get_categories: panel for panel in panels}
         self._running = multiprocessing.Event()
-        self.epg = None
-        self.epg_url = epg_url
+        self.epg = EPG(update_status)
 
-    def init_epg(self):
-        if self.epg_url:
-            self.epg = EPG(self.epg_url)
+    def epg_update(self, url: str):
+        self.epg.ask_update(url)
+
+    def done(self):
+        self.epg.stop()
 
     def running(self) -> None:
         self._running.set()
+        self.epg.start()
 
     def wait_running(self, timeout: Optional[float] = None) -> bool:
         return self._running.wait(timeout)
@@ -158,18 +160,17 @@ class SfVipAddOn:
                     info = _response_json(flow.response)
                     if fixed_info := fix_info_serie(info):
                         flow.response.text = json.dumps(fixed_info)
-                elif self.epg:
-                    if action == "get_live_streams":
-                        category_id = _get_query_key(flow.request, "category_id")
-                        if not category_id:
-                            server = flow.request.host_header
-                            self.epg.set_server_channels(server, _response_json(flow.response))
-                    if action == "get_short_epg":
-                        if stream_id := _get_query_key(flow.request, "stream_id"):
-                            server = flow.request.host_header
-                            limit = _get_query_key(flow.request, "limit")
-                            if epg_listings := tuple(self.epg.get(server, stream_id, limit)):
-                                flow.response.text = json.dumps({"epg_listings": epg_listings})
+                elif action == "get_live_streams":
+                    category_id = _get_query_key(flow.request, "category_id")
+                    if not category_id:
+                        server = flow.request.host_header
+                        self.epg.set_server_channels(server, _response_json(flow.response))
+                elif action == "get_short_epg":
+                    if stream_id := _get_query_key(flow.request, "stream_id"):
+                        server = flow.request.host_header
+                        limit = _get_query_key(flow.request, "limit")
+                        if epg_listings := tuple(self.epg.get(server, stream_id, limit)):
+                            flow.response.text = json.dumps({"epg_listings": epg_listings})
 
     @staticmethod
     def responseheaders(flow: http.HTTPFlow) -> None:

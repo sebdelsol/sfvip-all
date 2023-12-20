@@ -28,5 +28,10 @@
   "AllChannels": "Wszystkie kanały",
   "AlreadyRunning": "%s jest uruchomiony. Zamknij go, aby kontynuować.",
   "PlayerTooOld": "Wersja %s jest za stara. Wymagana jest wersja %s lub nowsza.",
-  "UpgradeFailed": "Aktualizacja %s nie powiodła się. Czy chcesz ponowić próbę?"
+  "UpgradeFailed": "Aktualizacja %s nie powiodła się. Czy chcesz ponowić próbę?",
+  "Loading": "Ładowanie",
+  "ready": "Gotowe",
+  "Failed": "Nie powiodło się",
+  "NoEpg": "Brak EPG",
+  "EpgUrl": "Wprowadź adres URL EPG"
 }

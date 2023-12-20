@@ -1,14 +1,17 @@
 import base64
 import gzip
 import logging
-import threading
+import multiprocessing
 import time
 import unicodedata
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Any, Iterator, NamedTuple, Optional, Self
+from enum import Enum, auto
+from typing import Any, Callable, Iterator, NamedTuple, Optional, Self
 
 import requests
+
+from shared.job_runner import JobRunner
 
 logger = logging.getLogger(__name__)
 
@@ -89,44 +92,94 @@ class ServerChannels:
         return self.channels.get(stream_id)
 
 
-class EPG:
-    _timeout = 10
+class EPGstatus(Enum):
+    LOADING = auto()
+    READY = auto()
+    FAILED = auto()
+    NOEPG = auto()
 
-    def __init__(self, url: str) -> None:
-        self.url = url
-        self.tree = None
-        self.channels: dict[str, str] = {}
-        self.servers: dict[str, ServerChannels] = {}
-        self.channels_lock = threading.Lock()
-        threading.Thread(target=self._populate_channels).start()
 
-    def _get_tree(self) -> Optional[ET.Element]:
+UpdateStatusT = Callable[[EPGstatus], None]
+
+
+class EPGupdate(NamedTuple):
+    _timeout = 5
+
+    url: str = ""
+    tree: Optional[ET.Element] = None
+    channels: dict[str, str] = {}
+
+    @staticmethod
+    def _get_tree(url: str) -> Optional[ET.Element]:
         try:
-            with requests.get(self.url, timeout=EPG._timeout) as response:
+            with requests.get(url, timeout=EPGupdate._timeout) as response:
                 response.raise_for_status()
-                xml = gzip.decompress(response.content) if self.url.endswith(".gz") else response.content
+                xml = gzip.decompress(response.content) if url.endswith(".gz") else response.content
                 return ET.fromstring(xml)
         except (requests.RequestException, gzip.BadGzipFile, ET.ParseError):
             return None
 
-    def _populate_channels(self) -> None:
-        logger.info("load epg channels from '%s'", self.url)
-        if tree := self._get_tree():
-            channels = {
-                _normalize(channel_id): channel_id
-                for element in tree.findall("./channel")
-                if (channel_id := element.get("id"))
-            }
-            with self.channels_lock:
-                self.tree = tree
-                self.channels = channels
-            logger.info("epg channels updated from '%s'", self.url)
+    @classmethod
+    def from_url(cls, url: str, update_status: UpdateStatusT) -> Self:
+        if url:
+            logger.info("update epg channels from '%s'", url)
+            update_status(EPGstatus.LOADING)
+            if tree := cls._get_tree(url):
+                channels = {
+                    _normalize(channel_id): channel_id
+                    for element in tree.findall("./channel")
+                    if (channel_id := element.get("id"))
+                }
+                logger.info("epg channels updated from '%s'", url)
+                update_status(EPGstatus.READY)
+                return cls(url, tree, channels)
+            update_status(EPGstatus.FAILED)
+        else:
+            update_status(EPGstatus.NOEPG)
+        return cls(url)
+
+
+class EPGupdater(JobRunner[str]):
+    _name = "epg updater"
+
+    def __init__(self, update_done: Callable[[EPGupdate], None], update_status: UpdateStatusT) -> None:
+        self._update_status = update_status
+        self._update_done = update_done
+        self._last_url = None
+        super().__init__(self._update)
+
+    def _update(self, url: str) -> None:
+        if self._last_url != url:
+            self._last_url = url
+            self._update_done(EPGupdate.from_url(url, self._update_status))
+
+
+class EPG:
+    def __init__(self, update_status: UpdateStatusT) -> None:
+        self.update: Optional[EPGupdate] = None
+        self.servers: dict[str, ServerChannels] = {}
+        self.update_lock = multiprocessing.Lock()
+        self.updater = EPGupdater(self._update_done, update_status)
+
+    def ask_update(self, url: str) -> None:
+        self.updater.add_job(url)
+
+    # All the following methods should be called int the same process !
+    def _update_done(self, update: EPGupdate) -> None:
+        with self.update_lock:
+            self.update = update
+
+    def start(self) -> None:
+        self.updater.start()
+
+    def stop(self) -> None:
+        self.updater.stop()
 
     def get_programmes(self, channel_id: str) -> Iterator[Programme]:
         channel_id = _normalize(channel_id)
-        with self.channels_lock:
-            tree = self.tree
-            channel = self.channels.get(channel_id)
+        with self.update_lock:
+            tree = self.update and self.update.tree
+            channel = self.update and self.update.channels.get(channel_id)
         if tree and channel:
             now = time.time()
             for element in tree.findall(f'./programme[@channel="{channel}"]'):
@@ -149,13 +202,3 @@ class EPG:
                     yield programme._asdict()
                 if count > 0:
                     logger.info("get epg for %s", channel_id)
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
-    epg = EPG("https://epgshare01.online/epgshare01/epg_ripper_FR1.xml.gz")
-    time.sleep(3)
-    for i, p in enumerate(epg.get_programmes("TF1.fr")):
-        if i >= 2:
-            break
-        print(p)

@@ -28,5 +28,10 @@
   "AllChannels": "Tüm Kanallar",
   "AlreadyRunning": "%s çalışıyor. Devam etmek için lütfen kapatın.",
   "PlayerTooOld": "%s çok eski. Sürüm %s veya üzeri gereklidir.",
-  "UpgradeFailed": "%s yükseltmesi başarısız oldu. Yeniden denemek ister misiniz?"
+  "UpgradeFailed": "%s yükseltmesi başarısız oldu. Yeniden denemek ister misiniz?",
+  "Loading": "Yükleniyor",
+  "ready": "Hazır",
+  "Failed": "Başarısız",
+  "NoEpg": "EPG yok",
+  "EpgUrl": "EPG URL'sini girin"
 }

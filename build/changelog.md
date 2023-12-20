@@ -1,4 +1,4 @@
-## 1.4.12 (upcoming)
+## 1.4.12 
 * External EPG option.
 
 ## 1.4.11
