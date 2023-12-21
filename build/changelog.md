@@ -1,4 +1,8 @@
-## 1.4.12 
+## 1.4.12.1 
+* Fix hook bug in x86 version.
+* External EPG match more channels.
+
+## 1.4.12
 * External EPG option.
 
 ## 1.4.11

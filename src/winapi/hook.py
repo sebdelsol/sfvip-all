@@ -1,5 +1,6 @@
 import ctypes
 import queue
+import sys
 import threading
 from ctypes.wintypes import BOOL, DWORD, HWND, LONG, LPARAM, LPDWORD, MSG
 from typing import Callable, NamedTuple, Optional
@@ -69,7 +70,9 @@ class EventLoop:
             self._tid = None
 
 
-_HWINEVENTHOOK = ctypes.c_int64
+APP_64 = sys.maxsize == (2**63) - 1
+_HWINEVENTHOOK = ctypes.c_int64 if APP_64 else ctypes.c_int32
+
 _WinEventProcType = ctypes.WINFUNCTYPE(None, _HWINEVENTHOOK, DWORD, HWND, LONG, LONG, DWORD, DWORD)
 _SetWinEventHook = _user32.SetWinEventHook
 _SetWinEventHook.restype = _HWINEVENTHOOK
@@ -98,7 +101,7 @@ class Hook:
     def __init__(self, window: WindowExe, event_callback: Callable[[HWND], None]) -> None:
         self._lock = threading.Lock()
         self._hwnd = window.hwnd
-        self._hooks: list[_HWINEVENTHOOK] = []
+        self._hooks: list[ctypes.c_int64 if APP_64 else ctypes.c_int32] = []
         self._events = _Events(window.hwnd, event_callback)
         _event_proc = _WinEventProcType(self._handle_event)  # keep a strong reference or crash
         self._hook_args = 0, _event_proc, window.pid, window.tid, _WINEVENT_OUTOFCONTEXT | _WINEVENT_SKIPOWNTHREAD

@@ -2,6 +2,7 @@ import base64
 import gzip
 import logging
 import multiprocessing
+import threading
 import time
 import unicodedata
 import xml.etree.ElementTree as ET
@@ -14,6 +15,25 @@ import requests
 from shared.job_runner import JobRunner
 
 logger = logging.getLogger(__name__)
+
+
+def _normalize(name: str) -> str:
+    name = name.lower()
+    for char in ".-/(){}[]: ":
+        name = name.replace(char, "")
+    name = name.replace("+", "plus")
+    # remove accents
+    nfkd_form = unicodedata.normalize("NFKD", name)
+    return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+
+def _get_int(text: Optional[str]) -> Optional[int]:
+    try:
+        if text:
+            return int(text)
+    except ValueError:
+        pass
+    return None
 
 
 class Programme(NamedTuple):
@@ -55,41 +75,33 @@ class Programme(NamedTuple):
         return datetime.fromtimestamp(timestamp).strftime(r"%Y-%m-%d %H:%M:%S")
 
 
-def _normalize(name: str) -> str:
-    name = name.lower()
-    for char in ".", "-", "/", "(", ")":
-        name = name.replace(char, "")
-    name = name.replace("+", "plus")
-    # remove accents
-    nfkd_form = unicodedata.normalize("NFKD", name)
-    return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
-
-
-def _get_int(text: Optional[str]) -> Optional[int]:
-    try:
-        if text:
-            return int(text)
-    except ValueError:
-        pass
-    return None
-
-
 class ServerChannels:
-    def __init__(self, channels: Any) -> None:
+    def __init__(self, server: str, channels: Any) -> None:
+        self.server = server
         self.channels: dict[str, str] = {}
-        self.set(channels)
-
-    def set(self, channels: Any) -> None:
+        self.channels_lock = threading.Lock()
         if isinstance(channels, list):
-            for channel in channels:
-                if isinstance(channel, dict):
-                    stream_id = channel.get("stream_id")
-                    channel_id = channel.get("epg_channel_id")
-                    if isinstance(stream_id, (str, int)) and isinstance(channel_id, str):
-                        self.channels[str(stream_id)] = channel_id
+            threading.Thread(target=self._set, args=(channels,)).start()
+
+    def _set(self, channels: list) -> None:
+        logger.info("set channels for %s", self.server)
+        channel_ids = {}
+        for channel in channels:
+            if isinstance(channel, dict):
+                stream_id = channel.get("stream_id")
+                if isinstance(stream_id, (str, int)):
+                    for key in "epg_channel_id", "name":
+                        channel_id = channel.get(key)
+                        if channel_id and isinstance(channel_id, str):
+                            channel_ids[str(stream_id)] = channel_id
+                            break
+        with self.channels_lock:
+            self.channels = channel_ids
+        logger.info("%d channels found for %s", len(channel_ids), self.server)
 
     def get(self, stream_id: str) -> Optional[str]:
-        return self.channels.get(stream_id)
+        with self.channels_lock:
+            return self.channels.get(stream_id)
 
 
 class EPGstatus(Enum):
@@ -188,8 +200,7 @@ class EPG:
 
     def set_server_channels(self, server: Optional[str], channels: Any) -> None:
         if server:
-            logger.info("set channels for %s", server)
-            self.servers[server] = ServerChannels(channels)
+            self.servers[server] = ServerChannels(server, channels)
 
     def get(self, server: Optional[str], stream_id: str, limit: Optional[str]) -> Iterator[dict[str, str]]:
         if server and (server_channels := self.servers.get(server)):
