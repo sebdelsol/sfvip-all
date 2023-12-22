@@ -3,7 +3,7 @@ from typing import Any, Callable, NamedTuple, Optional, Sequence
 
 from translations.loc import LOC
 
-from ...mitm.epg import EPGstatus
+from ...mitm.epg.update import EPGstatus
 from ..app_info import AppInfo
 from .fx import _Fade
 from .sticky import _Offset, _StickyWindow
@@ -138,7 +138,8 @@ def _epg_status_styles() -> dict[EPGstatus | None, _Style]:
         EPGstatus.LOADING: _InfoStyle.app(LOC.Loading).white,
         EPGstatus.READY: _InfoStyle.app(LOC.ready).lime_green,
         EPGstatus.FAILED: _InfoStyle.app(LOC.Failed).red,
-        EPGstatus.NOEPG: _InfoStyle.app(LOC.NoEpg).grey,
+        EPGstatus.NO_EPG: _InfoStyle.app(LOC.NoEpg).grey,
+        EPGstatus.INVALID_URL: _InfoStyle.app(LOC.InvalidUrl).red,
     }
 
 

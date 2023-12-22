@@ -36,13 +36,15 @@ class Jobs(Generic[T]):
 
 
 class JobRunner(Generic[T]):
-    """run jobs accross processes"""
+    """
+    run jobs accross processes
+    jobs are run in a FIFO sequence
+    all following methods should be called from the same process EXCEPT add_job
+    """
 
-    _name = ""
-
-    def __init__(self, job: Callable[[T], None]) -> None:
+    def __init__(self, job: Callable[[T], None], name: str) -> None:
         self._job = job
-        self._jobs = Jobs[T](self._name)
+        self._jobs = Jobs[T](name)
         self._jobs_runner = None
 
     def _run_jobs(self) -> None:

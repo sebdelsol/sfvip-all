@@ -33,5 +33,6 @@
   "ready": "Prêt",
   "Failed": "Échec",
   "NoEpg": "Pas d'EPG",
-  "EpgUrl": "Entrez l'url de l'EPG"
+  "EpgUrl": "Entrer l'url de l'EPG",
+  "InvalidUrl": "Url invalide"
 }

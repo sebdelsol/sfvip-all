@@ -9,13 +9,13 @@
         "--load-plugins=pylint.extensions.no_self_use",
         "--max-line-length=115"
     ],
-    "pylint.severity" : { 
-        "convention": "Warning", 
-        "error": "Error", 
-        "fatal": "Error", 
-        "refactor": "Warning", 
-        "warning": "Warning", 
-        "info": "Warning" 
+    "pylint.severity": {
+        "convention": "Warning",
+        "error": "Error",
+        "fatal": "Error",
+        "refactor": "Warning",
+        "warning": "Warning",
+        "info": "Warning"
     },
     // type checking (pylance)
     "python.analysis.typeCheckingMode": "basic",
@@ -26,21 +26,32 @@
     ],
     // isort 
     "isort.args": [
-        "--profile", "black"
+        "--profile",
+        "black"
     ],
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit"
         },
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.rulers": [
+            {
+                "column": 89,
+                "color": "#ffffff10"
+            },
+            {
+                "column": 115,
+                "color": "#ffffff10"
+            }
+        ],
     },
     // hide pycache
     "files.exclude": {
         "**/__pycache__": true
     },
     // env
-    "python.envFile": "${workspaceFolder}/.sfvip64/", 
+    "python.envFile": "${workspaceFolder}/.sfvip64/",
     "python.terminal.activateEnvironment": true,
     "python.terminal.activateEnvInCurrentTerminal": true,
     "python.analysis.autoFormatStrings": true,

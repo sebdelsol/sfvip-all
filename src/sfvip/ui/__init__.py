@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 from typing import Callable, Optional, Sequence
 
-from ...mitm.epg import EPGstatus
+from ...mitm.epg.update import EPGstatus
 from .infos import AppInfo, Info, _InfosWindow
 from .logo import _LogoWindow, _PulseReason
 from .splash import _SplashWindow

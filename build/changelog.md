@@ -1,3 +1,6 @@
+## 1.4.12.2
+* Validate External EPG url.
+
 ## 1.4.12.1 
 * Fix hook bug in x86 version.
 * External EPG match more channels.

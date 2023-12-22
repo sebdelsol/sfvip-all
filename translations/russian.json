@@ -33,5 +33,6 @@
   "ready": "Готовность",
   "Failed": "Не удалось",
   "NoEpg": "Нет EPG",
-  "EpgUrl": "Введите URL EPG"
+  "EpgUrl": "Введите URL EPG",
+  "InvalidUrl": "Недопустимый адрес"
 }

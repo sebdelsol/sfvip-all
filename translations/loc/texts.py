@@ -39,6 +39,7 @@ class Texts(NamedTuple):
     Failed: str = "Failed"
     NoEpg: str = "No EPG"
     EpgUrl: str = "Enter EPG url"
+    InvalidUrl: str = "Invalid url"
 
     @staticmethod
     def as_dict() -> dict[str, str]:
