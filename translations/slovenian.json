@@ -33,6 +33,6 @@
   "ready": "Pripravljen",
   "Failed": "Neuspešno",
   "NoEpg": "Ni EPG",
-  "EpgUrl": "Vnesite url naslov EPG",
+  "EpgUrl": "Zunanji EPG",
   "InvalidUrl": "Nepravilen url naslov"
 }

@@ -79,16 +79,14 @@ def _valid_url(url: str) -> bool:
 
 
 class EPGupdate(NamedTuple):
-    _timeout = 5
-
     url: str = ""
     channels: dict[str, str] = {}
     tree: Optional[ET.Element] = None
 
     @staticmethod
-    def _get_tree(url: str) -> Optional[ET.Element]:
+    def _get_tree(url: str, timeout: int) -> Optional[ET.Element]:
         try:
-            with requests.get(url, timeout=EPGupdate._timeout) as response:
+            with requests.get(url, timeout=timeout) as response:
                 response.raise_for_status()
                 xml = gzip.decompress(response.content) if url.endswith(".gz") else response.content
                 return ET.fromstring(xml)
@@ -96,12 +94,12 @@ class EPGupdate(NamedTuple):
             return None
 
     @classmethod
-    def from_url(cls, url: str, update_status: UpdateStatusT) -> Self:
+    def from_url(cls, url: str, update_status: UpdateStatusT, timeout: int) -> Self:
         if url:
             if _valid_url(url):
                 logger.info("load epg channels from '%s'", url)
                 update_status(EPGstatus.LOADING)
-                if tree := cls._get_tree(url):
+                if tree := cls._get_tree(url, timeout):
                     channels = {
                         _normalize(channel_id): channel_id
                         for element in tree.findall("./channel")
@@ -128,17 +126,18 @@ class EPGupdate(NamedTuple):
 
 
 class EPGupdater(JobRunner[str]):
-    def __init__(self, update_status: UpdateStatusT) -> None:
+    def __init__(self, update_status: UpdateStatusT, timeout: int) -> None:
         self._update_lock = multiprocessing.Lock()
         self._update: Optional[EPGupdate] = None
         self._update_status = update_status
+        self._timeout = timeout
         super().__init__(self._updating, "epg updater")
 
     def _updating(self, url: str) -> None:
         with self._update_lock:
             update = self._update
         if not update or update.url != url:
-            update = EPGupdate.from_url(url, self._update_status)
+            update = EPGupdate.from_url(url, self._update_status, self._timeout)
             with self._update_lock:
                 self._update = update
 

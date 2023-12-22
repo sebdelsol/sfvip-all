@@ -20,6 +20,7 @@ class AppDefaultConfig(ConfigLoader):
 
     class EPG:
         url: str | None = None
+        requests_timeout: int = 5
 
     class AllCategory:
         inject_in_live: bool = False

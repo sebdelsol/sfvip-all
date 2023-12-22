@@ -1,15 +1,17 @@
 # <img src="resources/Sfvip%20All.png" width="40" align="center"> Sfvip All
-***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to insert an _All_ category so you can easily **search your entire catalog**.  
-It also ***updates [Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features.
+***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
+* Insert an _All_ category so you can easily **search your entire catalog**.  
+* **Update [Mpv](https://mpv.io/)** and **[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)** so you can enjoy their latest features. 
+* Support an **external EPG**.
 
 <img src="resources/all.png">
 
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.2 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.2/x64/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.936.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.3 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.3/x64/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.941.0_</sup></sub>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.2 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.2/x86/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.936.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.3 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.3/x86/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.941.0_</sup></sub>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
@@ -22,7 +24,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.7-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3117/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.1.6-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-6052-000000.svg?logo=file-code&logoColor=a0a0a0)
+![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-6068-000000.svg?logo=file-code&logoColor=a0a0a0)
 
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-1.9.5-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)

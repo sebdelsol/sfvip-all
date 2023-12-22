@@ -17,13 +17,17 @@ def _get_int(text: Optional[str]) -> Optional[int]:
 
 
 class EPG:
-    def __init__(self, update_status: UpdateStatusT) -> None:
-        self.servers: dict[str, EPGserverChannels] = {}
-        self.updater = EPGupdater(update_status)
+    # all following methods should be called from the same process EXCEPT add_job & wait_running
 
-    # this is the only method that can be called from another process
+    def __init__(self, update_status: UpdateStatusT, timeout: int) -> None:
+        self.servers: dict[str, EPGserverChannels] = {}
+        self.updater = EPGupdater(update_status, timeout)
+
     def ask_update(self, url: str) -> None:
         self.updater.add_job(url)
+
+    def wait_running(self, timeout: int) -> bool:
+        return self.updater.wait_running(timeout)
 
     def start(self) -> None:
         self.updater.start()
@@ -36,7 +40,7 @@ class EPG:
             self.servers[server] = EPGserverChannels(server, channels)
 
     def get(self, server: Optional[str], stream_id: str, limit: Optional[str]) -> Iterator[dict[str, str]]:
-        if (update := self.updater.update) and server:
+        if server and (update := self.updater.update):
             if channel_id := self.servers.get(server, {}).get(stream_id):
                 count = 0
                 int_limit = _get_int(limit)

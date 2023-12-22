@@ -1,4 +1,4 @@
-from typing import Callable, Self
+from typing import Callable
 
 from shared.job_runner import JobRunner
 
@@ -9,7 +9,7 @@ from .ui import UI
 
 class EpgUpdater:
     def __init__(self, config: AppConfig, epg_update: Callable[[str], None], ui: UI) -> None:
-        self._status_job_runner = JobRunner[EPGstatus](self._on_epg_status_changed, "epg status listener")
+        self._status_job_runner = JobRunner[EPGstatus](ui.set_epg_status, "epg status listener")
         self._epg_update = epg_update
         self._config = config
         self._ui = ui
@@ -18,11 +18,10 @@ class EpgUpdater:
     def update_status(self) -> UpdateStatusT:
         return self._status_job_runner.add_job
 
-    def start(self) -> Self:
+    def start(self) -> None:
         self._status_job_runner.start()
         self._ui.set_epg_url_update(self._config.EPG.url, self._on_epg_url_changed)
         self._epg_update(self._config.EPG.url or "")
-        return self
 
     def stop(self) -> None:
         self._status_job_runner.stop()
@@ -30,6 +29,3 @@ class EpgUpdater:
     def _on_epg_url_changed(self, epg_url: str) -> None:
         self._config.EPG.url = epg_url if epg_url else None
         self._epg_update(epg_url)
-
-    def _on_epg_status_changed(self, epg_status: EPGstatus) -> None:
-        self._ui.set_epg_status(epg_status)

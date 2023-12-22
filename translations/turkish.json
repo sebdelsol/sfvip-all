@@ -33,6 +33,6 @@
   "ready": "Hazır",
   "Failed": "Başarısız",
   "NoEpg": "EPG yok",
-  "EpgUrl": "EPG URL'sini girin",
+  "EpgUrl": "Harici EPG",
   "InvalidUrl": "Geçersiz url"
 }

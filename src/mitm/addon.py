@@ -1,7 +1,6 @@
 # use separate named package to reduce what's imported by multiprocessing
 import json
 import logging
-import multiprocessing
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, NamedTuple, Optional
@@ -96,7 +95,7 @@ def fix_info_serie(info: Any) -> Optional[dict[str, Any]]:
 class SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
-    def __init__(self, all_name: AllCategoryName, update_status: UpdateStatusT) -> None:
+    def __init__(self, all_name: AllCategoryName, update_status: UpdateStatusT, timeout: int) -> None:
         panels = [
             get_panel(PanelType.VOD, all_name.vod),
             get_panel(PanelType.SERIES, all_name.series, streams=False),
@@ -105,21 +104,19 @@ class SfVipAddOn:
             panels.append(get_panel(PanelType.LIVE, all_name.live))
         self._category_panel = {panel.get_category: panel for panel in panels}
         self._categories_panel = {panel.get_categories: panel for panel in panels}
-        self._running = multiprocessing.Event()
-        self.epg = EPG(update_status)
+        self.epg = EPG(update_status, timeout)
 
     def epg_update(self, url: str):
         self.epg.ask_update(url)
 
-    def done(self):
-        self.epg.stop()
-
     def running(self) -> None:
-        self._running.set()
         self.epg.start()
 
-    def wait_running(self, timeout: Optional[float] = None) -> bool:
-        return self._running.wait(timeout)
+    def done(self) -> None:
+        self.epg.stop()
+
+    def wait_running(self, timeout: int) -> bool:
+        return self.epg.wait_running(timeout)
 
     def request(self, flow: http.HTTPFlow) -> None:
         if _is_api_request(flow.request):

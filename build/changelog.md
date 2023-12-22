@@ -1,3 +1,6 @@
+## 1.4.12.3
+* External EPG url works when there's no user.
+
 ## 1.4.12.2
 * Validate External EPG url.
 

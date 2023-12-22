@@ -8,7 +8,7 @@ T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
-class Jobs(Generic[T]):
+class _Jobs(Generic[T]):
     def __init__(self, name: str) -> None:
         self._objs: "multiprocessing.SimpleQueue[T | None]" = multiprocessing.SimpleQueue()
         self._running = multiprocessing.Event()
@@ -27,6 +27,9 @@ class Jobs(Generic[T]):
             yield obj
         logger.info("%s stopped", self._name)
 
+    def wait_running(self, timeout: int) -> bool:
+        return self._running.wait(timeout)
+
     def start(self) -> None:
         self._running.set()
 
@@ -39,12 +42,12 @@ class JobRunner(Generic[T]):
     """
     run jobs accross processes
     jobs are run in a FIFO sequence
-    all following methods should be called from the same process EXCEPT add_job
+    all following methods should be called from the same process EXCEPT add_job & wait_running
     """
 
     def __init__(self, job: Callable[[T], None], name: str) -> None:
         self._job = job
-        self._jobs = Jobs[T](name)
+        self._jobs = _Jobs[T](name)
         self._jobs_runner = None
 
     def _run_jobs(self) -> None:
@@ -54,6 +57,9 @@ class JobRunner(Generic[T]):
     @property
     def add_job(self) -> Callable[[T], None]:
         return self._jobs.add_job
+
+    def wait_running(self, timeout: int) -> bool:
+        return self._jobs.wait_running(timeout)
 
     def start(self) -> None:
         self._jobs_runner = threading.Thread(target=self._run_jobs)

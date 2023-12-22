@@ -38,7 +38,7 @@ class Texts(NamedTuple):
     ready: str = "Ready"
     Failed: str = "Failed"
     NoEpg: str = "No EPG"
-    EpgUrl: str = "Enter EPG url"
+    EpgUrl: str = "External EPG"
     InvalidUrl: str = "Invalid url"
 
     @staticmethod

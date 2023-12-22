@@ -33,6 +33,6 @@
   "ready": "Έτοιμο",
   "Failed": "Απέτυχε",
   "NoEpg": "Δεν υπάρχει EPG",
-  "EpgUrl": "Εισάγετε τη διεύθυνση EPG",
+  "EpgUrl": "Εξωτερικό EPG",
   "InvalidUrl": "Μη έγκυρο url"
 }

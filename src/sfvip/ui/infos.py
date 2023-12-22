@@ -255,7 +255,9 @@ class _InfosWindow(_ProxiesWindow):
         separator4 = tk.Frame(frame, bg=_InfoTheme.separator)
         epg_frame = tk.Frame(frame, bg=_InfoTheme.bg_rows)
         epg_label = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_epg().to_tk)
-        self._epg_url = tk.Entry(epg_frame, bg=_InfoTheme.bg_headers, **_epg_url().to_tk, insertbackground="white")
+        self._epg_url = tk.Entry(
+            epg_frame, bg=_InfoTheme.bg_headers, **_epg_url().to_tk, insertbackground="white", width=50
+        )
         self._epg_status = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_epg_status().to_tk, width=_epg_width())
         separator5 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout

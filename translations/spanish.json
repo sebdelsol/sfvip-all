@@ -33,6 +33,6 @@
   "ready": "Listo",
   "Failed": "Fallo",
   "NoEpg": "No EPG",
-  "EpgUrl": "Introduzca url EPG",
+  "EpgUrl": "EPG externa",
   "InvalidUrl": "Url no válida"
 }

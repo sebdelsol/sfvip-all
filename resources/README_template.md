@@ -1,6 +1,8 @@
 # <img src="{ico_link}" width="40" align="center"> {name}
-***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to insert an _All_ category so you can easily **search your entire catalog**.  
-It also ***updates [Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features.
+***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
+* Insert an _All_ category so you can easily **search your entire catalog**.  
+* **Update [Mpv](https://mpv.io/)** and **[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)** so you can enjoy their latest features. 
+* Support an **external EPG**.
 
 <img src="resources/all.png">
 

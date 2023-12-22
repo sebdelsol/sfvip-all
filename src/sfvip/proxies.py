@@ -50,6 +50,14 @@ def _fix_upstream(url: str) -> Optional[str]:
     return None
 
 
+def get_all_name(inject_in_live: bool) -> AllCategoryName:
+    return AllCategoryName(
+        live=LOC.AllChannels if inject_in_live else None,
+        series=LOC.AllSeries,
+        vod=LOC.AllMovies,
+    )
+
+
 class LocalProxies:
     """start a local proxy for each upstream proxies (no upstream proxy count as one)"""
 
@@ -59,14 +67,10 @@ class LocalProxies:
 
     def __init__(self, app_config: AppConfig, inject_in_live: bool, upstreams: set[str], ui: UI) -> None:
         self._epg_updater = EpgUpdater(app_config, self.epg_update, ui)
-        self._all_name = AllCategoryName(
-            live=LOC.AllChannels if inject_in_live else None,
-            series=LOC.AllSeries,
-            vod=LOC.AllMovies,
-        )
+        all_name = get_all_name(inject_in_live)
+        self._addon = SfVipAddOn(all_name, self._epg_updater.update_status, app_config.EPG.requests_timeout)
         self._upstreams = upstreams
         self._by_upstreams: dict[str, str] = {}
-        self._addon: Optional[SfVipAddOn] = None
         self._mitm_proxy: Optional[MitmLocalProxy] = None
         self._bind_free_ports = mutex.SystemWideMutex("bind free ports for local proxies")
 
@@ -75,13 +79,12 @@ class LocalProxies:
         return self._by_upstreams
 
     def epg_update(self, url: str) -> None:
-        if self._addon:
-            self._addon.epg_update(url)
+        self._addon.epg_update(url)
 
     def __enter__(self) -> Self:
         with self._bind_free_ports:
+            modes: set[Mode] = set()
             if self._upstreams:
-                modes: set[Mode] = set()
                 excluded_ports = _ports_from(self._upstreams)
                 for upstream in self._upstreams:
                     upstream_fixed = _fix_upstream(upstream)
@@ -89,17 +92,15 @@ class LocalProxies:
                         port = _find_port(excluded_ports, LocalProxies._find_ports_retry)
                         modes.add(Mode(port=port, upstream=upstream_fixed))
                         self._by_upstreams[upstream] = LocalProxies._localhost.format(port=port)
-                if modes:
-                    self._addon = addon = SfVipAddOn(self._all_name, self._epg_updater.update_status)
-                    self._mitm_proxy = MitmLocalProxy(addon, modes)
-                    self._mitm_proxy.start()
-                    # wait for proxies running so we're sure all ports are bound
-                    if not addon.wait_running(LocalProxies._mitmproxy_start_timeout):
-                        raise LocalproxyError(LOC.CantStartProxies)
-                    self._epg_updater.start()
+            self._mitm_proxy = MitmLocalProxy(self._addon, modes)
+            self._mitm_proxy.start()
+            # wait for proxies running so we're sure all ports are bound
+            if not self._mitm_proxy.wait_running(LocalProxies._mitmproxy_start_timeout):
+                raise LocalproxyError(LOC.CantStartProxies)
+            self._epg_updater.start()
             return self
 
     def __exit__(self, *_) -> None:
         if self._mitm_proxy:
+            self._epg_updater.stop()
             self._mitm_proxy.stop()
-        self._epg_updater.stop()
