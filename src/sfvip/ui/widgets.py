@@ -2,10 +2,10 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Any, Callable, Collection, NamedTuple, Optional, Sequence
 
-from .style import _Style
+from .style import Style
 
 
-def _set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
+def set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
     """flat, no arrow, bg=color of slider"""
     style = ttk.Style()
     style.theme_use("clam")
@@ -34,19 +34,19 @@ def _set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
     style.map("Vertical.TScrollbar", background=[("active", active_slider)])
 
 
-class _Border(NamedTuple):
+class Border(NamedTuple):
     bg: str
     size: float
     relief: str
 
 
-def _get_border(border: _Border, **kwargs: Any) -> dict[str, Any]:
+def get_border(border: Border, **kwargs: Any) -> dict[str, Any]:
     return dict(highlightbackground=border.bg, highlightthickness=border.size, highlightcolor=border.bg, **kwargs)
 
 
 # pylint: disable=too-many-ancestors
 class _AutoScrollbar(ttk.Scrollbar):
-    def set(self, first, last) -> None:
+    def set(self, first: float | str, last: float | str) -> None:
         if float(first) <= 0.0 and float(last) >= 1.0:
             self.grid_remove()
         else:
@@ -89,7 +89,7 @@ class _VscrollCanvas(tk.Canvas):
         self.yview_scroll(int(-1 * (event.delta / 12)), "units")
 
 
-class _Button(tk.Button):
+class Button(tk.Button):
     """
     button with a colored border
     with a mouseover color
@@ -101,12 +101,12 @@ class _Button(tk.Button):
         master: tk.BaseWidget,
         bg: str,
         mouseover: str,
-        border: Optional[_Border] = None,
+        border: Optional[Border] = None,
         attached_to: Optional[tk.Frame] = None,
         **kwargs: Any
     ) -> None:
         # create a frame for the border, note: do not pack
-        self._frame = tk.Frame(master, bg=bg, **(_get_border(border) if border else {}))
+        self._frame = tk.Frame(master, bg=bg, **(get_border(border) if border else {}))
         self._attached_to = attached_to if attached_to else self._frame
         active = dict(activebackground=bg, activeforeground=kwargs.get("fg", "white"))
         # create the button
@@ -116,7 +116,7 @@ class _Button(tk.Button):
         self.bind("<Enter>", lambda _: self.config(bg=mouseover), add="+")
         self.bind("<Leave>", lambda _: self.config(bg=bg), add="+")
 
-    def grid(self, **kwargs) -> None:
+    def grid(self, **kwargs: Any) -> None:
         self._frame.grid(**kwargs)
         if self._attached_to:
             self._attached_to.grid()
@@ -126,13 +126,13 @@ class _Button(tk.Button):
         if self._attached_to:
             self._attached_to.grid_remove()
 
-    def pack(self, **kwargs) -> None:
+    def pack(self, **kwargs: Any) -> None:
         self._frame.pack(**kwargs)
         if self._attached_to:
             self._attached_to.pack()
 
 
-class _ListView(tk.Frame):
+class ListView(tk.Frame):
     """
     List view with styled content and auto scroll
     Note: set_headers should be called before set_rows
@@ -164,7 +164,7 @@ class _ListView(tk.Frame):
         for widget in what.winfo_children():
             widget.destroy()
 
-    def set_headers(self, headers: Collection[_Style]) -> None:
+    def set_headers(self, headers: Collection[Style]) -> None:
         self._clear(self._frame_headers)
         pad = self._pad
         n_column = len(headers)
@@ -175,7 +175,7 @@ class _ListView(tk.Frame):
             self._widths[column] = max(label.winfo_reqwidth() + pad * 2, self._widths[column])
         self.set_column_widths()
 
-    def set_rows(self, rows: Sequence[Collection[_Style]]) -> None:
+    def set_rows(self, rows: Sequence[Collection[Style]]) -> None:
         self._clear(self._frame_rows)
         pad = self._pad
         n_column = len(self._widths)
@@ -199,7 +199,7 @@ class _ListView(tk.Frame):
             self._frame_rows.columnconfigure(column, minsize=width)
 
 
-class _CheckBox(tk.Checkbutton):
+class CheckBox(tk.Checkbutton):
     def __init__(self, master: tk.BaseWidget, bg: str, **kwargs: Any) -> None:
         self._checked = tk.BooleanVar()
         self._changed_callback = None

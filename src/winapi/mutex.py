@@ -8,17 +8,17 @@ _CreateMutex = _kernel32.CreateMutexW
 _CreateMutex.argtypes = [LPCVOID, BOOL, LPCWSTR]
 _CreateMutex.restype = HANDLE
 
-_WaitForSingleObject = _kernel32.WaitForSingleObject
-_WaitForSingleObject.argtypes = [HANDLE, DWORD]
-_WaitForSingleObject.restype = DWORD
+WaitForSingleObject = _kernel32.WaitForSingleObject
+WaitForSingleObject.argtypes = [HANDLE, DWORD]
+WaitForSingleObject.restype = DWORD
 
 _ReleaseMutex = _kernel32.ReleaseMutex
 _ReleaseMutex.argtypes = [HANDLE]
 _ReleaseMutex.restype = BOOL
 
-_CloseHandle = _kernel32.CloseHandle
-_CloseHandle.argtypes = [HANDLE]
-_CloseHandle.restype = BOOL
+CloseHandle = _kernel32.CloseHandle
+CloseHandle.argtypes = [HANDLE]
+CloseHandle.restype = BOOL
 
 _TIMEOUT_INFINITE = 0xFFFFFFFF
 
@@ -34,7 +34,7 @@ class SystemWideMutex:
 
     def acquire(self, timeout: Optional[float] = None) -> bool:
         timeout = _TIMEOUT_INFINITE if timeout is None else int(round(timeout * 1000))
-        ret = _WaitForSingleObject(self._handle, timeout)
+        ret = WaitForSingleObject(self._handle, timeout)
         if ret in (0, 0x80):
             return True
         if ret == 0x102:  # Timeout
@@ -48,7 +48,7 @@ class SystemWideMutex:
     def close(self) -> None:
         if self._handle is None:  # Already closed
             return
-        if not _CloseHandle(self._handle):
+        if not CloseHandle(self._handle):
             raise ctypes.WinError()
         self._handle = None
 

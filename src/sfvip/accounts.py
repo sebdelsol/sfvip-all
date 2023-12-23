@@ -76,12 +76,12 @@ class _Database:
         self._database = PlayerDatabase()
         self._accessed_by_me = self._atime
         self.accounts = _Accounts()
-        self.lock = self._database._lock
+        self.lock = self._database.lock
         self.watcher = self._database.get_watcher()
         if self._database.is_file():
-            logger.info("accounts file is '%s'", self._database)
+            logger.info("Accounts file is '%s'", self._database)
         else:
-            logger.warning("no accounts file")
+            logger.warning("No accounts file")
 
     @property
     def _atime(self) -> float:
@@ -138,7 +138,7 @@ class AccountsProxies:
                 account.Name = names.unique(account.Name)
                 if account.HttpProxy in proxies:
                     account.HttpProxy = proxies[account.HttpProxy]
-                    logger.info("%s user %s proxy to '%s'", msg, account.Name, account.HttpProxy)
+                    logger.info("%s user %s proxy to '%s'", msg.capitalize(), account.Name, account.HttpProxy)
             self._database.save()
 
     def _infos(self, proxies: dict[str, str]) -> Sequence[Info]:
@@ -167,7 +167,7 @@ class AccountsProxies:
             def on_modified(last_modified: float) -> None:
                 # to prevent recursion check it occured after any modification done by any instance
                 if last_modified > self._database.shared_self_modified_time:
-                    logger.info("accounts proxies file has been externaly modified")
+                    logger.info("Accounts proxies file has been externaly modified")
                     restore_proxies()
                     set_infos(player_relaunch)
 

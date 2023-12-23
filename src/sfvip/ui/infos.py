@@ -5,16 +5,16 @@ from translations.loc import LOC
 
 from ...mitm.epg.update import EPGstatus
 from ..app_info import AppInfo
-from .fx import _Fade
-from .sticky import _Offset, _StickyWindow
-from .style import _Style
+from .fx import Fade
+from .sticky import Offset, StickyWindow
+from .style import Style
 from .widgets import (
-    _Border,
-    _Button,
-    _CheckBox,
-    _get_border,
-    _ListView,
-    _set_vscrollbar_style,
+    Border,
+    Button,
+    CheckBox,
+    ListView,
+    get_border,
+    set_vscrollbar_style,
 )
 
 
@@ -34,14 +34,14 @@ class _InfoTheme:
     bg_headers = "#242424"
     bg_rows = "#2A2A2A"
     separator = "#303030"
-    border = _Border(bg="#808080", size=1, relief="")
-    button = dict(bg="#1F1E1D", mouseover="#3F3F41", border=_Border(bg="white", size=0.75, relief="groove"))
+    border = Border(bg="#808080", size=1, relief="")
+    button = dict(bg="#1F1E1D", mouseover="#3F3F41", border=Border(bg="white", size=0.75, relief="groove"))
     listview = dict(bg_headers=bg_headers, bg_rows=bg_rows, bg_separator=separator)
     listview_scrollbar = dict(bg=bg_rows, slider="white", active_slider="grey")
 
 
 class _InfoStyle:
-    stl = _Style().font("Calibri").font_size(12).max_width(30)
+    stl = Style().font("Calibri").font_size(12).max_width(30)
     arrow = stl("➜").color("#555555").bigger(5)
     upstream = stl.copy().color("#A0A0A0")
     proxy = stl.copy().white
@@ -51,7 +51,7 @@ class _InfoStyle:
     app = stl.copy().smaller(2)
 
 
-def _get_infos_headers(app_name: str) -> Sequence[_Style]:
+def _get_infos_headers(app_name: str) -> Sequence[Style]:
     return (
         _InfoStyle.name(LOC.User).bigger(2).bold,
         _InfoStyle.blank,
@@ -61,7 +61,7 @@ def _get_infos_headers(app_name: str) -> Sequence[_Style]:
     )
 
 
-def _get_row(info: Info) -> Sequence[_Style]:
+def _get_row(info: Info) -> Sequence[Style]:
     return (
         _InfoStyle.name(info.name) if info.name else _InfoStyle.name("-").grey,
         _InfoStyle.arrow if info.name else _InfoStyle.blank,
@@ -71,15 +71,15 @@ def _get_row(info: Info) -> Sequence[_Style]:
     )
 
 
-def _get_relaunch_button() -> _Style:
+def _get_relaunch_button() -> Style:
     return _InfoStyle.stl(LOC.RestartFixProxy).no_truncate.white
 
 
-def _get_app_version(app_info: AppInfo) -> _Style:
+def _get_app_version(app_info: AppInfo) -> Style:
     return _InfoStyle.app(f"{app_info.name} v{app_info.version} {app_info.bitness}").grey
 
 
-def _get_app_warn(app_info: AppInfo) -> _Style:
+def _get_app_warn(app_info: AppInfo) -> Style:
     if app_info.bitness != app_info.os_bitness:
         warn = LOC.ShouldUseVersion % app_info.os_bitness
         return _InfoStyle.app_warn(warn).red
@@ -87,37 +87,37 @@ def _get_app_warn(app_info: AppInfo) -> _Style:
     return _InfoStyle.app_warn(warn).lime_green
 
 
-def _get_app_button_text(action: Optional[str] = None, version: Optional[str] = None) -> _Style:
+def _get_app_button_text(action: Optional[str] = None, version: Optional[str] = None) -> Style:
     return _InfoStyle.app(f"{action or ''} v{version or ''}").no_truncate.white
 
 
-def _get_app_auto_update() -> _Style:
+def _get_app_auto_update() -> Style:
     return _InfoStyle.app(LOC.CheckUpdate).grey
 
 
-def _get_libmpv_version(version: Optional[str] = None) -> _Style:
+def _get_libmpv_version(version: Optional[str] = None) -> Style:
     version = version if version else LOC.UnknownVersion
     return _InfoStyle.app(f"Libmpv {version}").grey
 
 
-def _get_libmpv_auto_update() -> _Style:
+def _get_libmpv_auto_update() -> Style:
     return _InfoStyle.app(LOC.CheckUpdate).grey
 
 
-def _get_libmpv_button_text(action: Optional[str] = None, version: Optional[str] = None) -> _Style:
+def _get_libmpv_button_text(action: Optional[str] = None, version: Optional[str] = None) -> Style:
     return _InfoStyle.app(f"{action or ''} {version or ''}").no_truncate.white
 
 
-def _get_player_button_text(action: Optional[str] = None, version: Optional[str] = None) -> _Style:
+def _get_player_button_text(action: Optional[str] = None, version: Optional[str] = None) -> Style:
     return _InfoStyle.app(f"{action or ''} v{version or ''}").no_truncate.white
 
 
-def _get_player_version(version: Optional[str] = None) -> _Style:
+def _get_player_version(version: Optional[str] = None) -> Style:
     version = version if version else LOC.UnknownVersion
     return _InfoStyle.app(f"Sfvip Player v{version}").grey
 
 
-def _get_player_auto_update() -> _Style:
+def _get_player_auto_update() -> Style:
     return _InfoStyle.app(LOC.CheckUpdate).grey
 
 
@@ -125,15 +125,15 @@ def _are_infos_valid(infos: Sequence[Info]) -> bool:
     return all(info.is_valid for info in infos)
 
 
-def _epg() -> _Style:
+def _epg() -> Style:
     return _InfoStyle.app(LOC.EpgUrl).grey
 
 
-def _epg_url() -> _Style:
+def _epg_url() -> Style:
     return _InfoStyle.app("").smaller(2).grey
 
 
-def _epg_status_styles() -> dict[EPGstatus | None, _Style]:
+def _epg_status_styles() -> dict[EPGstatus | None, Style]:
     return {
         EPGstatus.LOADING: _InfoStyle.app(LOC.Loading).white,
         EPGstatus.READY: _InfoStyle.app(LOC.ready).lime_green,
@@ -147,34 +147,34 @@ def _epg_width() -> int:
     return max(len(style.to_tk["text"]) for style in _epg_status_styles().values())
 
 
-def _epg_status(epg_status: Optional[EPGstatus] = None) -> _Style:
+def _epg_status(epg_status: Optional[EPGstatus] = None) -> Style:
     return _epg_status_styles().get(epg_status, _InfoStyle.app("").grey)
 
 
-class _ProxiesWindow(_StickyWindow):
+class _ProxiesWindow(StickyWindow):
     """installed proxies infos"""
 
-    _offset = _Offset(regular=(-36, 36), maximized=(2, 35))
+    _offset = Offset(regular=(-36, 36), maximized=(2, 35))
     _max_height = 400
 
     def __init__(self, app_info: AppInfo) -> None:
-        border = _get_border(_InfoTheme.border)
-        super().__init__(_InfosWindow._offset, **border, bg=_InfoTheme.bg_rows)
+        border = get_border(_InfoTheme.border)
+        super().__init__(InfosWindow._offset, **border, bg=_InfoTheme.bg_rows)
         self.attributes("-alpha", 0.0)
-        self.maxsize(-1, _InfosWindow._max_height)
+        self.maxsize(-1, InfosWindow._max_height)
         # create a frame for hovering detection
         self._frame = tk.Frame(self, bg=_InfoTheme.bg_rows)
         self._frame.pack(expand=True, fill=tk.BOTH)
         self._bind_mouse_hover(self._frame)
-        self._fade = _Fade(self)
+        self._fade = Fade(self)
         # widgets
         self._header_frame = tk.Frame(self._frame, bg=_InfoTheme.bg_headers)
-        self._relaunch_button = _Button(
+        self._relaunch_button = Button(
             self._header_frame, **_InfoTheme.button, **_get_relaunch_button().to_tk, attached_to=self._header_frame
         )
-        self._listview = _ListView(self._frame, **_InfoTheme.listview, pad=_InfoTheme.pad)
+        self._listview = ListView(self._frame, **_InfoTheme.listview, pad=_InfoTheme.pad)
         self._listview.set_headers(_get_infos_headers(app_info.name))
-        _set_vscrollbar_style(**_InfoTheme.listview_scrollbar)
+        set_vscrollbar_style(**_InfoTheme.listview_scrollbar)
 
     def _layout(self, row: int) -> None:
         button_pad = _InfoTheme.button_pad
@@ -186,7 +186,7 @@ class _ProxiesWindow(_StickyWindow):
         self._listview.grid(row=row, columnspan=3, sticky=tk.NSEW)
         self._frame.rowconfigure(row, weight=1)
 
-    def _set_button_action(self, button: _Button, action: Optional[Callable[..., None]], *args: Any) -> None:
+    def _set_button_action(self, button: Button, action: Optional[Callable[..., None]], *args: Any) -> None:
         if action:
 
             def _action(_) -> None:
@@ -230,7 +230,7 @@ class _ProxiesWindow(_StickyWindow):
         self._fade.fade(fade_duration_ms=250, out=True, wait_ms=100)
 
 
-class _InfosWindow(_ProxiesWindow):
+class InfosWindow(_ProxiesWindow):
     # pylint: disable=too-many-instance-attributes, too-many-statements, too-many-locals
     def __init__(self, app_info: AppInfo) -> None:
         super().__init__(app_info)
@@ -241,17 +241,17 @@ class _InfosWindow(_ProxiesWindow):
         header_frame = tk.Frame(frame, bg=_InfoTheme.bg_headers)
         app_warn_label = tk.Label(header_frame, bg=_InfoTheme.bg_headers, **_get_app_warn(app_info).to_tk)
         separator = tk.Frame(frame, bg=_InfoTheme.separator)
-        self._app_button = _Button(frame, **_InfoTheme.button)  # type: ignore
+        self._app_button = Button(frame, **_InfoTheme.button)  # type: ignore
         app_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_app_version(app_info).to_tk)
-        self._app_update = _CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_app_auto_update().to_tk)
+        self._app_update = CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_app_auto_update().to_tk)
         separator2 = tk.Frame(frame, bg=_InfoTheme.separator)
         self._player_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_player_version().to_tk)
-        self._player_update = _CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_player_auto_update().to_tk)
-        self._player_button = _Button(frame, **_InfoTheme.button)  # type: ignore
+        self._player_update = CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_player_auto_update().to_tk)
+        self._player_button = Button(frame, **_InfoTheme.button)  # type: ignore
         separator3 = tk.Frame(frame, bg=_InfoTheme.separator)
         self._libmpv_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_libmpv_version().to_tk)
-        self._libmpv_update = _CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_libmpv_auto_update().to_tk)
-        self._libmpv_button = _Button(frame, **_InfoTheme.button)  # type: ignore
+        self._libmpv_update = CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_libmpv_auto_update().to_tk)
+        self._libmpv_button = Button(frame, **_InfoTheme.button)  # type: ignore
         separator4 = tk.Frame(frame, bg=_InfoTheme.separator)
         epg_frame = tk.Frame(frame, bg=_InfoTheme.bg_rows)
         epg_label = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_epg().to_tk)

@@ -2,7 +2,7 @@ import ctypes
 from ctypes.wintypes import BOOL, DWORD, HDC, LPARAM
 from typing import Any, NamedTuple
 
-from .rect import _WindowRect
+from .rect import WindowRect
 
 user32 = ctypes.windll.user32
 
@@ -14,20 +14,20 @@ class MonitorArea(NamedTuple):
     work_area: tuple[int, int, int, int]
 
 
-_MonitorEnumProc = ctypes.WINFUNCTYPE(BOOL, _HMONITOR, HDC, ctypes.POINTER(_WindowRect), LPARAM)
+_MonitorEnumProc = ctypes.WINFUNCTYPE(BOOL, _HMONITOR, HDC, ctypes.POINTER(WindowRect), LPARAM)
 
 
 class _MonitorInfo(ctypes.Structure):
     _fields_ = [
         ("_sizeof", DWORD),
-        ("area", _WindowRect),
-        ("work_area", _WindowRect),
+        ("area", WindowRect),
+        ("work_area", WindowRect),
         ("_flags", DWORD),
     ]
 
 
 def _get_monitor_area(handle_monitor: _HMONITOR) -> MonitorArea:
-    monitor_info = _MonitorInfo(ctypes.sizeof(_MonitorInfo), _WindowRect(), _WindowRect())
+    monitor_info = _MonitorInfo(ctypes.sizeof(_MonitorInfo), WindowRect(), WindowRect())
     user32.GetMonitorInfoW(handle_monitor, ctypes.byref(monitor_info))
     return MonitorArea(monitor_info.area.get_rect(), monitor_info.work_area.get_rect())
 

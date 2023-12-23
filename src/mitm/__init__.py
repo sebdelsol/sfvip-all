@@ -66,7 +66,7 @@ class MitmLocalProxy(multiprocessing.Process):
         super().__init__()
 
     def run(self) -> None:
-        logger.info("mitmproxy process started")
+        logger.info("Mitmproxy process started")
         threading.Thread(target=self._wait_for_stop).start()
         if self._modes:
             # launch one proxy per mode
@@ -89,7 +89,7 @@ class MitmLocalProxy(multiprocessing.Process):
                 self._master.shutdown()
             else:
                 self._addon.done()
-        logger.info("mitmproxy process exit")
+        logger.info("Mitmproxy process exit")
 
     def wait_running(self, timeout: int) -> bool:
         return self._addon.wait_running(timeout)

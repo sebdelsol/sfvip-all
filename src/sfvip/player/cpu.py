@@ -42,7 +42,7 @@ class Cpu:
     @staticmethod
     def spec(player_exe: Path) -> Optional[Spec]:
         # it takes ~2s to check v3 microarchitecture
-        logger.info("get cpu spec")
+        logger.info("Get cpu spec")
         if (is64 := is64_exe(player_exe)) is not None:
             if is64 and Cpu.is64 and (cpu_info := _get_cpu_info_from_cpuid()):
                 cpu_flags = set(cpu_info.get("flags", []))

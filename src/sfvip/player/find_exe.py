@@ -72,7 +72,7 @@ class PlayerExe:
         self._found = self._find()
         app_info.config.Player.exe = str(self._found.exe.resolve())
         logger.info(
-            "player is '%s' %s %s",
+            "Player is '%s' %s %s",
             self._found.exe,
             self._found.version,
             get_bitness_str(self._found.bitness),
@@ -118,7 +118,7 @@ class PlayerExe:
 
     @staticmethod
     def _from_registry() -> Iterator[str]:
-        logger.info("try to find the player in the registry")
+        logger.info("Try to find the player in the registry")
         for registry_search in _registry_searches:
             if found := registry_search.method(registry_search.hkey, registry_search.path, PlayerExe._name):
                 for exe in registry_search.handle_found(found):
@@ -134,10 +134,10 @@ class PlayerExe:
             if ok is None:
                 break
             if ok:
-                logger.info("ask the user to find the player")
+                logger.info("Ask the user to find the player")
                 exe = self._ui.find_file(PlayerExe._name, PlayerExe._pattern)
             else:
-                logger.info("try to download the player")
+                logger.info("Try to download the player")
                 exe = download_player(PlayerExe._name, self._app_info, self._app_config.Player.requests_timeout)
             if exe:
                 yield exe

@@ -3,11 +3,11 @@ from tkinter import filedialog
 from typing import Callable, Optional, Sequence
 
 from ...mitm.epg.update import EPGstatus
-from .infos import AppInfo, Info, _InfosWindow
-from .logo import _LogoWindow, _PulseReason
-from .splash import _SplashWindow
+from .infos import AppInfo, Info, InfosWindow
+from .logo import LogoWindow, PulseReason
+from .splash import SplashWindow
 from .thread import ThreadUI
-from .window import AskWindow, MessageWindow, _Window
+from .window import AskWindow, MessageWindow, Window
 
 
 class UI(tk.Tk):
@@ -15,20 +15,20 @@ class UI(tk.Tk):
 
     def __init__(self, app_info: AppInfo) -> None:
         super().__init__()
-        self.withdraw()  # we rely on some _StickyWindow instead
+        self.withdraw()  # we rely on some StickyWindow instead
         self._splash_img = tk.PhotoImage(file=app_info.splash)  # keep a reference for tk
         self.wm_iconphoto(True, self._splash_img)
-        self.splash = _SplashWindow(self._splash_img)
-        self._infos = _InfosWindow(app_info)
-        self._logo = _LogoWindow(app_info.logo, self._infos)
-        _Window.set_logo(app_info.logo)
+        self.splash = SplashWindow(self._splash_img)
+        self._infos = InfosWindow(app_info)
+        self._logo = LogoWindow(app_info.logo, self._infos)
+        Window.set_logo(app_info.logo)
         self._title = f"{app_info.name} v{app_info.version} {app_info.bitness}"
         self._has_quit = False
 
     def quit(self) -> None:
         if not self._has_quit:
             self._has_quit = True
-            _Window.quit_all()
+            Window.quit_all()
             ThreadUI.quit()
             super().quit()
 
@@ -37,7 +37,7 @@ class UI(tk.Tk):
 
     def set_infos(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[int], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)
-        self._logo.set_pulse(ok=ok, reason=_PulseReason.RESTART_FOR_PROXIES)
+        self._logo.set_pulse(ok=ok, reason=PulseReason.RESTART_FOR_PROXIES)
 
     def set_epg_url_update(self, epg_url: Optional[str], callback: Callable[[str], None]) -> None:
         self._infos.set_epg_url_update(epg_url, callback)
@@ -49,7 +49,7 @@ class UI(tk.Tk):
         self._infos.set_app_auto_update(is_checked, callback)
 
     def set_app_updating(self) -> None:
-        self._logo.set_pulse(ok=True, reason=_PulseReason.UPDATE_APP)
+        self._logo.set_pulse(ok=True, reason=PulseReason.UPDATE_APP)
 
     def set_app_update(
         self,
@@ -58,13 +58,13 @@ class UI(tk.Tk):
         version: Optional[str] = None,
     ) -> None:
         self._infos.set_app_update(action_name, action, version)
-        self._logo.set_pulse(ok=action is None, reason=_PulseReason.UPDATE_APP)
+        self._logo.set_pulse(ok=action is None, reason=PulseReason.UPDATE_APP)
 
     def set_libmpv_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
         self._infos.set_libmpv_auto_update(is_checked, callback)
 
     def set_libmpv_updating(self) -> None:
-        self._logo.set_pulse(ok=True, reason=_PulseReason.UPDATE_LIBMPV)
+        self._logo.set_pulse(ok=True, reason=PulseReason.UPDATE_LIBMPV)
 
     def set_libmpv_update(
         self,
@@ -73,7 +73,7 @@ class UI(tk.Tk):
         version: Optional[str] = None,
     ) -> None:
         self._infos.set_libmpv_update(action_name, action, version)
-        self._logo.set_pulse(ok=action is None, reason=_PulseReason.UPDATE_LIBMPV)
+        self._logo.set_pulse(ok=action is None, reason=PulseReason.UPDATE_LIBMPV)
 
     def set_libmpv_version(self, version: Optional[str]) -> None:
         self._infos.set_libmpv_version(version)
@@ -85,7 +85,7 @@ class UI(tk.Tk):
         self._infos.set_player_auto_update(is_checked, callback)
 
     def set_player_updating(self) -> None:
-        self._logo.set_pulse(ok=True, reason=_PulseReason.UPDATE_PLAYER)
+        self._logo.set_pulse(ok=True, reason=PulseReason.UPDATE_PLAYER)
 
     def set_player_update(
         self,
@@ -94,7 +94,7 @@ class UI(tk.Tk):
         version: Optional[str] = None,
     ) -> None:
         self._infos.set_player_update(action_name, action, version)
-        self._logo.set_pulse(ok=action is None, reason=_PulseReason.UPDATE_PLAYER)
+        self._logo.set_pulse(ok=action is None, reason=PulseReason.UPDATE_PLAYER)
 
     def showinfo(self, message: str, force_create: bool = False) -> None:
         def _showinfo() -> bool:

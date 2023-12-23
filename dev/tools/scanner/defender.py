@@ -26,7 +26,7 @@ class DefenderScan(NamedTuple):
                 yield line.split()[-1]
 
     @classmethod
-    def from_process(cls, process: subprocess.CompletedProcess) -> Self:
+    def from_process(cls, process: subprocess.CompletedProcess[str]) -> Self:
         threats = tuple(cls.get_threats(process.stdout))
         return cls(
             threats=threats,
@@ -52,7 +52,7 @@ class Defender:
     timeout = 20
 
     @classmethod
-    def _run(cls, *args: str | Path) -> subprocess.CompletedProcess:
+    def _run(cls, *args: str | Path) -> subprocess.CompletedProcess[str]:
         return subprocess.run((cls.exe, *args), timeout=cls.timeout, capture_output=True, check=False, text=True)
 
     @classmethod

@@ -28,7 +28,7 @@ class _PlayerUpdater:
             archive = Path(temp_dir) / "player update"
             if download_and_unpack(self._download_url, archive, self._player_exe.parent, timeout, progress):
                 if self._player_exe.exists():
-                    logger.info("player exe found")
+                    logger.info("Player exe found")
                     return True
         return False
 
@@ -47,7 +47,7 @@ def download_player(player_name: str, app_info: AppInfo, timeout: int) -> Option
     if progress.run_in_thread(download, *exceptions):
         return str(player_exe)
     shutil.rmtree(player_dir, ignore_errors=True)
-    logger.warning("player download failed")
+    logger.warning("Player download failed")
 
 
 def update_player(player_exe: Path, player_bitness: bool, timeout: int) -> bool:
@@ -63,5 +63,5 @@ def update_player(player_exe: Path, player_bitness: bool, timeout: int) -> bool:
                 return True
             except shutil.Error:
                 pass
-        logger.warning("player download failed")
+        logger.warning("Player download failed")
         return False

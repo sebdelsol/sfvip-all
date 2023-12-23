@@ -36,11 +36,11 @@ class AppUpdater:
         return Version(update.version) > Version(self._app_info.version)
 
     def get_update(self) -> Optional[AppUpdate]:
-        logger.info("check latest %s version", self._app_info.name)
+        logger.info("Check latest %s version", self._app_info.name)
         if update := self._latest_update.online_load(self._app_info.bitness, self._timeout):
-            logger.info("found update %s %s %s", self._app_info.name, update.version, self._app_info.bitness)
+            logger.info("Found update %s %s %s", self._app_info.name, update.version, self._app_info.bitness)
             return update
-        logger.warning("check latest %s failed", self._app_info.name)
+        logger.warning("Check latest %s failed", self._app_info.name)
         return None
 
     def _clean(self) -> None:
@@ -54,7 +54,7 @@ class AppUpdater:
         # replace current process with the update exe
         def launch() -> None:
             update_exe_args = update_exe.name, f"/LANG={LOC.language}"
-            logger.info("launch %s %s", *update_exe_args)
+            logger.info("Launch %s %s", *update_exe_args)
             os.execl(update_exe, *update_exe_args)
 
         # register to be launched after all the cleanup
@@ -83,7 +83,7 @@ class AppUpdater:
         def ask_and_install() -> bool:
             ask_win.wait_window()
             if ask_win.ok:
-                logger.info("install %s", update_exe.name)
+                logger.info("Install %s", update_exe.name)
                 self._install(update_exe)
             return bool(ask_win.ok)
 

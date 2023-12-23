@@ -124,7 +124,7 @@ class Publisher:
                         yield Published.from_update(update, exe, python_env)
 
     def _show_versions(self, publisheds: Iterator[Published], old: Sequence[Published] = ()) -> list[Published]:
-        all_publisheds = []
+        all_publisheds: list[Published] = []
         for published in publisheds:
             version_color = Ok if published.version == self.build.version else Warn
             print(

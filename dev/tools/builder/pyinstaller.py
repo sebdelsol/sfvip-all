@@ -42,6 +42,8 @@ class Pyinstaller(Distribution):
                 internal_name=self.build.name,
                 product_name=self.build.name,
             )
+        else:
+            self.args = ()
 
     def create(self, python_exe: Path, build_dir: Path) -> Optional[Path]:
         versionfile = build_dir / "versionfile.txt"

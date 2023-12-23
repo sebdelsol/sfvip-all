@@ -166,7 +166,7 @@ class Player:
             with self._libmpv_updater:
                 with _PlayerConfigDirSetting().watch(self.relaunch):
                     with subprocess.Popen([self._player_exe.exe]) as self._process:
-                        logger.info("player started")
+                        logger.info("Player started")
                         self._window_watcher.start(self._process.pid)
                         if set_rect_lock:
                             # give time to the player to read its config
@@ -175,7 +175,7 @@ class Player:
                         yield
                     with self._process_lock:
                         self._process = None
-                    logger.info("player stopped")
+                    logger.info("Player stopped")
                     # at the end since tk might lock because relaunch could be called in the same thread
                     self._window_watcher.stop()
 
@@ -192,7 +192,7 @@ class Player:
         time.sleep(sleep_duration_s)
         if self.stop():
             self._launcher.set_relaunch(self._window_watcher.rect, can_relaunch)
-            logger.info("restart the player")
+            logger.info("Restart the player")
             # wait for the player to stop
             while self._process:
                 time.sleep(0)

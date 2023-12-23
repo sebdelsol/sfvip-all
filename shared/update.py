@@ -1,6 +1,6 @@
 import hashlib
 from pathlib import Path
-from typing import Literal, NamedTuple, Optional, Protocol, Self
+from typing import Any, Literal, NamedTuple, Optional, Protocol, Self
 
 import requests
 
@@ -28,12 +28,11 @@ class AppUpdate(NamedTuple):
     version: str
 
     @classmethod
-    def from_dict(cls, dct: Optional[dict[str, str]]) -> Optional[Self]:
+    def from_dict(cls, dct: Optional[dict[str, Any]]) -> Optional[Self]:
         try:
             if dct:
-                update = cls(**dct)
-                if all(isinstance(field, str) for field in update._fields):
-                    return update
+                if all(isinstance(value, str) for value in dct.values()):
+                    return cls(**dct)
         except TypeError:
             pass
         return None

@@ -131,3 +131,5 @@ class Upgrader:
                     print(Title("Install"), Ok("package"), " ".join(columns.rows[i].split()))
                     if self._install_package(pckg):
                         to_install.remove(pckg)
+                case _:
+                    pass

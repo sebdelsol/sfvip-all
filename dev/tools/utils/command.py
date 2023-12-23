@@ -56,7 +56,7 @@ class CommandMonitor:
         threading.Thread(target=queue_lines).start()
         return done
 
-    def _lines(self, process: Popen) -> Iterator[_Line]:
+    def _lines(self, process: Popen[str]) -> Iterator[_Line]:
         def completed() -> bool:
             return all(done.is_set() for done in done_flags)
 

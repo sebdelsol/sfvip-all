@@ -56,18 +56,18 @@ class _LOC(Texts):
 
     def _apply_language(self) -> None:
         if self._translations is None:
-            logger.warning("no translations found")
+            logger.warning("No translations found")
             return
         translation_json = self._translations / f"{self._language}.json"
         try:
             with translation_json.open("r", encoding=_LOC._encoding) as f:
                 translation: dict[str, str] = json.load(f)
-            logger.info("%s translation loaded", self._language)
+            logger.info("%s translation loaded", self._language.capitalize())
             for key, value in translation.items():
                 if hasattr(_LOC, key):
                     setattr(_LOC, key, value)
         except (json.JSONDecodeError, FileNotFoundError):
-            logger.warning("can't load %s translation", self._language)
+            logger.warning("Can't load %s translation", self._language)
 
 
 LOC = _LOC()

@@ -21,7 +21,10 @@ at_very_last = AtVeryLast()
 
 # pylint: disable=wrong-import-position
 import logging
+import platform
 import sys
+
+from shared import get_bitness_str
 
 
 def is_py_installer() -> bool:
@@ -50,7 +53,8 @@ def set_logging() -> None:
         logfile = None  # it's handled in dev.builder.nuitka
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format="%(asctime)s - %(message)s")
+    logging.info("Run Python %s %s", platform.python_version(), get_bitness_str(platform.machine().endswith("64")))
     if is_py_installer():
-        logging.info("build by PyInstaller")
+        logging.info("Build by PyInstaller")
     elif is_nuitka():
-        logging.info("build by Nuitka")
+        logging.info("Build by Nuitka")

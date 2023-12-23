@@ -69,7 +69,7 @@ class Builder:
         return None
 
     def build_all(self) -> bool:
-        builts = []
+        builts: list[Path] = []
         if self.args.build or self.args.installer:
             VirusScanner().update()
             print()
@@ -78,7 +78,7 @@ class Builder:
                     builts.append(built)
                 print()
             # show what's not built
-            not_builts = []
+            not_builts: list[Path] = []
             for python_env in self.python_envs.all:
                 if (build := self.dist.installer_exe(python_env)) not in builts:
                     not_builts.append(build)

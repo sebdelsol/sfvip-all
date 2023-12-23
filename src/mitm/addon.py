@@ -78,7 +78,7 @@ def _unused_category_id(categories: list[dict]) -> str:
 
 def _log(verb: str, panel: Panel, action: str) -> None:
     txt = "%s category '%s' (id=%s) for '%s' request"
-    logger.info(txt, verb, panel.all_category_name, panel.all_category_id, action)
+    logger.info(txt.capitalize(), verb.capitalize(), panel.all_category_name, panel.all_category_id, action)
 
 
 def fix_info_serie(info: Any) -> Optional[dict[str, Any]]:
@@ -87,7 +87,7 @@ def fix_info_serie(info: Any) -> Optional[dict[str, Any]]:
             # fix episode list : Xtream code api recommend a dictionary
             if isinstance(episodes, list):
                 info["episodes"] = {str(season[0]["season"]): season for season in episodes}
-                logger.info("fix serie info")
+                logger.info("Fix serie info")
                 return info
     return None
 

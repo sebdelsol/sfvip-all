@@ -34,7 +34,7 @@ def get_window_from_pid(pid: int) -> Optional[WindowExe]:
     hwnds: list[WindowExe] = []
     process_id = DWORD()
 
-    def callback(hwnd: HWND, _) -> bool:
+    def callback(hwnd: HWND, _: LPARAM) -> bool:
         if is_visible(hwnd) and is_enabled(hwnd):
             tid = _GetWindowThreadProcessId(hwnd, ctypes.byref(process_id))
             if process_id.value == pid:
@@ -136,7 +136,7 @@ class _Events:
         self._event_callback = event_callback
         self._listenning = True
         self._event_count = 0
-        self._events = queue.LifoQueue()  # last event is the first handeld
+        self._events: "queue.LifoQueue[int|None]" = queue.LifoQueue()  # last event is the first handeld
         self._event_count_lock = threading.Lock()
         self._listen_thread = threading.Thread(target=self._listen_event)
 

@@ -104,12 +104,12 @@ class LibmpvDll:
         return libmpv.timestamp > (self._version.timestamp or 0)
 
     def get_latest_libmpv(self) -> Optional[Libmpv]:
-        logger.info("get latest libmpv")
+        logger.info("Get latest libmpv")
         if cpu_spec := self._version.update_cpu_spec(self._player_exe):
             if libmpv := self._libmpv_latest.get(cpu_spec):
-                logger.info("found update libmpv %s", libmpv.get_version())
+                logger.info("Found update libmpv %s", libmpv.get_version())
                 return libmpv
-        logger.warning("get latest libmpv failed")
+        logger.warning("Get latest libmpv failed")
         return None
 
     def _download(self, libmpv: Libmpv, progress: ProgressWindow) -> bool:
@@ -121,7 +121,7 @@ class LibmpvDll:
                 if dll := next(dlls, None):
                     self._libdir.mkdir(parents=True, exist_ok=True)
                     shutil.copy(dll, self._libdir / dll.name.replace("lib", ""))
-                    logger.info("libmpv dll found")
+                    logger.info("Libmpv dll found")
                     self._version.update_from(libmpv)
                     return True
             return False

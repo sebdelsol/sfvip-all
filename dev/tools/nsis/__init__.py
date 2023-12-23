@@ -56,7 +56,7 @@ class NSIS:
 
     def run(self, python_env: PythonEnv) -> Optional[Path]:
         if self.do_run and self.make_nsis.path:
-            print(Title("Installer by NSIS"), Ok(str(self.make_nsis.get_version())))
+            print(Title("Installer with NSIS"), Ok(str(self.make_nsis.get_version())))
             install = self.installer.create(python_env)
             nsis = CommandMonitor(self.make_nsis.path, *NSIS.nsis_args, str(install.installer.resolve()))
             if nsis.run(out=Title, err=Warn):
@@ -65,5 +65,5 @@ class NSIS:
                     return install.exe
                 install.exe.unlink(missing_ok=True)
         else:
-            print(Warn("Skip Installer by NSIS"))
+            print(Warn("Skip Installer with NSIS"))
         return None

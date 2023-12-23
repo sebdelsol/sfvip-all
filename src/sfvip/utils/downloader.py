@@ -36,7 +36,7 @@ def _unpack_7z(archive: Path, extract_dir: Path, set_percent: TPercentFunc) -> N
             self.extracted_size = 0
             self.failed = False
 
-        def report_end(self, _, wrote_bytes) -> None:
+        def report_end(self, processing_file_path: str, wrote_bytes: int | str) -> None:
             self.extracted_size += int(wrote_bytes)
             try:
                 set_percent(100 * self.extracted_size / uncompress_size)
@@ -52,7 +52,7 @@ def _unpack_7z(archive: Path, extract_dir: Path, set_percent: TPercentFunc) -> N
         def report_postprocess(self) -> None:
             pass
 
-        def report_warning(self, _) -> None:
+        def report_warning(self, message: str) -> None:
             pass
 
     with py7zr.SevenZipFile(archive) as zf:
@@ -96,13 +96,13 @@ def download_and_unpack(
     url: str, archive: Path, extract_dir: Path, timeout: int, progress: ProgressWindow
 ) -> bool:
     progress.msg(f"{LOC.Download} {archive.name}")
-    logger.info("download %s", archive.name)
+    logger.info("Download %s", archive.name)
     with progress.show_percent() as set_percent:
         if response := _download(url, archive, timeout, set_percent):
             if mimetype := response.headers.get("Content-Type"):
                 if unpack_func := _mimeTypes_to_unpack_method.get(mimetype):
                     progress.msg(f"{LOC.Extract} {archive.name}")
-                    logger.info("extract %s", archive.name)
+                    logger.info("Extract %s", archive.name)
                     unpack_func(archive, extract_dir, set_percent)
                     if not progress.destroyed:
                         return True
@@ -111,7 +111,7 @@ def download_and_unpack(
 
 def download_to(url: str, path: Path, timeout: int, progress: ProgressWindow) -> bool:
     progress.msg(f"{LOC.Download} {path.name}")
-    logger.info("download %s", path.name)
+    logger.info("Download %s", path.name)
     with progress.show_percent() as set_percent:
         if _download(url, path, timeout, set_percent):
             if not progress.destroyed:

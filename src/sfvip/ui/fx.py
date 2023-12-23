@@ -27,7 +27,7 @@ class _Color(NamedTuple):
         return f"#{self.r:02X}{self.g:02X}{self.b:02X}"
 
 
-class _Pulse:
+class Pulse:
     """pulse bg of a widget, between color1 & color2 @frequency"""
 
     class Args(NamedTuple):
@@ -57,7 +57,7 @@ class _Pulse:
             sin = math.sin(self._two_pi_frequency * time.perf_counter())
             color = self._color1.blend_with(self._color2, (sin + 1) * 0.5)  # keep in [0,1]
             self._widget["bg"] = color.to_str()
-            self._after = self._widget.after(_Pulse._pulse_dt_ms, self._pulse)
+            self._after = self._widget.after(Pulse._pulse_dt_ms, self._pulse)
 
     def start(self) -> None:
         self.stop()
@@ -68,7 +68,7 @@ class _Pulse:
             self._widget.after_cancel(self._after)
 
 
-class _Fade:
+class Fade:
     """fade in & out a toplevel window"""
 
     _fade_dt_ms: int = 25
@@ -78,7 +78,7 @@ class _Fade:
         self._after = None
 
     def fade(self, fade_duration_ms: int, out: bool, wait_ms: int = 0) -> None:
-        dalpha = _Fade._fade_dt_ms / fade_duration_ms if fade_duration_ms > 0 else 1.0
+        dalpha = Fade._fade_dt_ms / fade_duration_ms if fade_duration_ms > 0 else 1.0
         dalpha = (-1 if out else 1) * dalpha
         if self._after:
             self._win.after_cancel(self._after)
@@ -88,7 +88,7 @@ class _Fade:
             alpha = self._win.attributes("-alpha") + dalpha
             self._win.attributes("-alpha", max(0.0, min(alpha, 1.0)))
             if 0.0 < alpha < 1.0:
-                self._after = self._win.after(_Fade._fade_dt_ms, fade)
+                self._after = self._win.after(Fade._fade_dt_ms, fade)
             elif out:
                 self._win.withdraw()
 

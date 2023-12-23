@@ -9,19 +9,19 @@ from typing import Any, Callable, Iterator, Optional, TypeVar
 
 from translations.loc import LOC
 
-from .style import _Style
+from .style import Style
 from .thread import ThreadUI
-from .widgets import _Border, _Button, _get_border
+from .widgets import Border, Button, get_border
 
 logger = logging.getLogger(__name__)
 Treturn = TypeVar("Treturn")
 
 
 class _Theme:
-    text = _Style().font("Calibri").font_size(10).max_width(30).no_truncate.white
+    text = Style().font("Calibri").font_size(10).max_width(30).no_truncate.white
     wait = text.copy().bigger(6)
     bg = "#2A2A2A"
-    border = _Border(bg="#808080", size=1, relief="")
+    border = Border(bg="#808080", size=1, relief="")
     space = 30
     padx = 10
 
@@ -45,14 +45,14 @@ class _Title:
 
 class _Ask:
     bg = _Theme.bg
-    button = dict(bg="#1F1E1D", border=_Border(bg="#3F3F41", size=0.75, relief="groove"))
+    button = dict(bg="#1F1E1D", border=Border(bg="#3F3F41", size=0.75, relief="groove"))
     button_pad = 7
     text = _Theme.text.copy().bigger(5)
     space = 20
 
 
-class _Window(tk.Toplevel):
-    _instances: set["_Window"] = set()
+class Window(tk.Toplevel):
+    _instances: set["Window"] = set()
     _instances_lock = threading.RLock()
     _has_quit = False
     _image: tk.PhotoImage
@@ -69,22 +69,22 @@ class _Window(tk.Toplevel):
                 instance.destroy()
 
     def __init__(self, *args: Any, force_create: bool = False, **kwargs: Any) -> None:
-        with _Window._instances_lock:
-            if not _Window._has_quit or force_create:
+        with Window._instances_lock:
+            if not Window._has_quit or force_create:
                 super().__init__(*args, **kwargs)
-                _Window._instances.add(self)
+                Window._instances.add(self)
                 self._destroyed = False
 
     def destroy(self) -> None:
-        with _Window._instances_lock:
+        with Window._instances_lock:
             if not self._destroyed:
-                _Window._instances.discard(self)
+                Window._instances.discard(self)
                 self._destroyed = True
                 super().destroy()
 
     @property
     def destroyed(self) -> bool:
-        return self._destroyed or _Window._has_quit
+        return self._destroyed or Window._has_quit
 
     def run_in_thread(self, func: Callable[[], Optional[bool]], *exceptions: type[Exception]) -> Optional[bool]:
         try:
@@ -96,18 +96,18 @@ class _Window(tk.Toplevel):
         return False
 
 
-class _TitleBarWindow(_Window):
+class _TitleBarWindow(Window):
     def __init__(self, title: str, width: int, *args: Any, **kwargs: Any) -> None:
-        border = _get_border(_Theme.border)
+        border = get_border(_Theme.border)
         super().__init__(*args, **border, **kwargs)
         self.minsize(width, -1)
         self.overrideredirect(True)  # turns off title bar, geometry
         self.attributes("-topmost", True)
         self.resizable(False, False)
         title_bar = tk.Frame(self, bg=_Title.bg)
-        logo = tk.Label(title_bar, bg=_Title.bg, image=_Window._image)
+        logo = tk.Label(title_bar, bg=_Title.bg, image=Window._image)
         title_txt = tk.Label(title_bar, bg=_Title.bg, **_Title.title(title).to_tk)
-        close_button = _Button(title_bar, **_Title.button, **_Title.quit.to_tk, command=self.destroy)
+        close_button = Button(title_bar, **_Title.button, **_Title.quit.to_tk, command=self.destroy)
         title_bar.pack(expand=True, fill=tk.BOTH)
         logo.grid(row=0, column=0)
         title_txt.grid(row=0, column=1)
@@ -135,7 +135,7 @@ class MessageWindow(_TitleBarWindow):
     def __init__(self, title: str, message: str, width: int = 400, force_create: bool = False) -> None:
         super().__init__(title=title, width=width, bg=_Theme.bg, force_create=force_create)
         label = tk.Label(self, bg=_Ask.bg, **_Ask.text(message).to_tk)
-        ok_button = _Button(
+        ok_button = Button(
             self, **_Ask.button, width=10, mouseover="lime green", **_Ask.text("Ok").to_tk, command=self.destroy
         )
         label.pack(pady=_Ask.space, padx=_Theme.padx)
@@ -150,10 +150,10 @@ class AskWindow(_TitleBarWindow):
         frame = tk.Frame(self, bg=_Ask.bg)
         label = tk.Label(frame, bg=_Ask.bg, **_Ask.text(message).to_tk)
         width = max(len(ok), len(cancel), 10)
-        ok_button = _Button(
+        ok_button = Button(
             frame, **_Ask.button, width=width, mouseover="lime green", **_Ask.text(ok).to_tk, command=self._on_ok
         )
-        cancel_button = _Button(
+        cancel_button = Button(
             frame, **_Ask.button, width=width, mouseover="red", **_Ask.text(cancel).to_tk, command=self._on_cancel
         )
         frame.pack(expand=True, fill=tk.BOTH)

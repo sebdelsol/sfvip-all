@@ -11,14 +11,14 @@ from .file import ScanFile
 class VirusScanner(Defender):
     def update(self) -> None:
         print(Title("Update"), Ok("virus signatures"), end=" ", flush=True)
-        print(Low("-"), Ok("Ok") if self._update() else Warn("Failed"), end=" ")
-        print(Low("- Engine"), Ok(self.engine), Low("- Signature"), Ok(self.signature))
+        print(Low("•"), Ok("Ok") if self._update() else Warn("Failed"), end=" ")
+        print(Low("• Engine"), Ok(self.engine), Low("• Signature"), Ok(self.signature))
 
     def scan(self, file: Path) -> bool:
         if file.exists():
             print(Title("Scan virus"), Ok(str(file.as_posix())), end=" ", flush=True)
             scan = self._scan(file)
-            print(Low("-"), scan)
+            print(Low("•"), scan)
             ScanFile(file).set(self.engine, self.signature, scan.is_clean)
             return scan.is_clean
         return False

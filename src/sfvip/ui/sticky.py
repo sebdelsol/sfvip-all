@@ -5,7 +5,7 @@ from typing import Any, NamedTuple, Optional, Self
 from ...winapi import monitor
 
 
-class _Offset(NamedTuple):
+class Offset(NamedTuple):
     regular: tuple[int, int] = 0, 0
     maximized: tuple[int, int] = 0, 0
     centered: bool = False
@@ -24,7 +24,7 @@ class Rect(NamedTuple):
     def valid(self) -> bool:
         return all(attr != infinity for attr in (self.x, self.y, self.w, self.h))
 
-    def position(self, offset: _Offset, w: int, h: int) -> Self:
+    def position(self, offset: Offset, w: int, h: int) -> Self:
         if offset.centered:
             return self.__class__(self.x + (self.w - w) * 0.5, self.y + (self.h - h) * 0.5, w, h)
         x, y = offset.maximized if self.is_maximized else offset.regular
@@ -46,10 +46,10 @@ class WinState(NamedTuple):
     is_foreground: bool
 
 
-class _StickyWindow(tk.Toplevel):
+class StickyWindow(tk.Toplevel):
     """follow position, hide & show when needed"""
 
-    def __init__(self, offset: _Offset, **kwargs: Any) -> None:
+    def __init__(self, offset: Offset, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.withdraw()
         self.overrideredirect(True)
@@ -75,14 +75,14 @@ class _StickyWindow(tk.Toplevel):
 
 
 class StickyWindows:
-    """pure class, handle on_state_changed on all _StickyWindow"""
+    """pure class, handle on_state_changed on all StickyWindow"""
 
     _current_rect: Optional[Rect] = None
-    _instances: list[_StickyWindow] = []
+    _instances: list[StickyWindow] = []
     _lock = threading.Lock()
 
     @staticmethod
-    def register(instance: _StickyWindow) -> None:
+    def register(instance: StickyWindow) -> None:
         StickyWindows._instances.append(instance)
 
     @staticmethod
@@ -113,10 +113,10 @@ class StickyWindows:
                 StickyWindows.bring_to_front_all(state.is_topmost, state.is_foreground)
                 if state.rect != StickyWindows._current_rect:
                     StickyWindows._current_rect = state.rect
-                    StickyWindows.change_position_all(_Maximized.fix(state.rect))
+                    StickyWindows.change_position_all(Maximized.fix(state.rect))
 
 
-class _Maximized:
+class Maximized:
     """maximized window stay in its screen"""
 
     _monitor_rects = tuple(Rect(*area.work_area, True) for area in monitor.monitors_areas())
@@ -125,7 +125,7 @@ class _Maximized:
     def fix(rect: Rect) -> Rect:
         if rect.is_maximized:
             # fix possible wrong zoomed coords
-            for monitor_rect in _Maximized._monitor_rects:
+            for monitor_rect in Maximized._monitor_rects:
                 if rect.is_middle_inside(monitor_rect):
                     return monitor_rect
         return rect

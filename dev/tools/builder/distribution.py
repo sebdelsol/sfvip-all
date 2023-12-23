@@ -35,7 +35,7 @@ class Distribution(ABC):
 
     def run(self, python_env: PythonEnv) -> bool:
         if self.do_run:
-            print(Title(f"Build by {self.name}"), Ok(python_env.package_version(self.name)))
+            print(Title(f"Build with {self.name}"), Ok(python_env.package_version(self.name)))
             build_dir = self.dist.build_dir(python_env) / self.name.lower()
             build_dir.mkdir(exist_ok=True)
             built_dist = self.create(python_env.exe, build_dir)
@@ -54,7 +54,7 @@ class Distribution(ABC):
             else:
                 print(Warn(f"AV locked {dist_dir}"))
         else:
-            print(Warn(f"Skip Build by {self.name}"))
+            print(Warn("Skip Build with"), Warn(self.name))
 
         self.clean_logs(python_env)
         if self.check_exe(python_env):

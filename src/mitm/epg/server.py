@@ -1,6 +1,6 @@
 import logging
 import threading
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -13,9 +13,8 @@ class EPGserverChannels:
         if isinstance(channels, list):
             threading.Thread(target=self._set, args=(channels,)).start()
 
-    def _set(self, channels: list) -> None:
-        logger.info("set channels for %s", self.server)
-        channel_ids = {}
+    @staticmethod
+    def _stream_to_channels(channels: list[Any]) -> Iterator[tuple[str, str]]:
         for channel in channels:
             if isinstance(channel, dict):
                 stream_id = channel.get("stream_id")
@@ -23,11 +22,15 @@ class EPGserverChannels:
                     for key in "epg_channel_id", "name":
                         channel_id = channel.get(key)
                         if channel_id and isinstance(channel_id, str):
-                            channel_ids[str(stream_id)] = channel_id
+                            yield str(stream_id), channel_id
                             break
+
+    def _set(self, channels: list[Any]) -> None:
+        logger.info("Set channels for %s", self.server)
+        to_channels = dict(self._stream_to_channels(channels))
         with self.channels_lock:
-            self.channels = channel_ids
-        logger.info("%d channels found for %s", len(channel_ids), self.server)
+            self.channels = to_channels
+        logger.info("%d channels found for %s", len(to_channels), self.server)
 
     def get(self, stream_id: str) -> Optional[str]:
         with self.channels_lock:

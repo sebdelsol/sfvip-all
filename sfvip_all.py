@@ -25,10 +25,10 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "fakev0":
         Build.version = "0"
 
-    logging.info("main process started")
+    logging.info("Main process started")
     run_app(
         at_very_last.register,
         AppInfo.from_build(Build, Github, app_dir=Path(__file__).parent),
         keep_logs=6,
     )
-    logging.info("main process exit")
+    logging.info("Main process exit")

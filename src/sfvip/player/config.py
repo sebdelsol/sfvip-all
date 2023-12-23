@@ -17,17 +17,17 @@ logger = logging.getLogger(__name__)
 class _PlayerConfigDir:
     """cached player config dir, provide system wide locks and watchers for its files"""
 
-    _from_registry = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
-    _from_roaming = Path(os.environ["APPDATA"]) / "SFVIP-Player"
+    from_registry = winreg.HKEY_CURRENT_USER, r"SOFTWARE\SFVIP", "ConfigDir"
+    from_roaming = Path(os.environ["APPDATA"]) / "SFVIP-Player"
 
     @classmethod
     @cache
     def path(cls) -> Path:
-        path = Registry.value_by_name(*cls._from_registry)
+        path = Registry.value_by_name(*cls.from_registry)
         if path and (path := Path(path)).is_dir():
-            logger.info("player config dir is '%s'", path)
+            logger.info("Player config dir is '%s'", path)
             return path
-        path = _PlayerConfigDir._from_roaming
+        path = _PlayerConfigDir.from_roaming
         path.mkdir(parents=True, exist_ok=True)
         return path
 
@@ -58,10 +58,10 @@ class PlayerConfigDirSettingWatcher:
         try:
             PlayerConfigDirSettingWatcher._watcher
         except AttributeError:
-            path = _PlayerConfigDir._from_registry
+            path = _PlayerConfigDir.from_registry
             if not Registry.value_by_name(*path):
                 Registry.create_key(*path, str(_PlayerConfigDir.path()))
-            PlayerConfigDirSettingWatcher._watcher = RegistryWatcher(*_PlayerConfigDir._from_registry)
+            PlayerConfigDirSettingWatcher._watcher = RegistryWatcher(*_PlayerConfigDir.from_registry)
 
     @staticmethod
     def has_changed() -> None:
@@ -80,6 +80,10 @@ class PlayerConfigDirFile(type(Path())):
     def __init__(self) -> None:
         self._lock = _PlayerConfigDir.lock_for(self._filename)
         super().__init__()
+
+    @property
+    def lock(self) -> mutex.SystemWideMutex:
+        return self._lock
 
     def get_watcher(self) -> FileWatcher:
         return _PlayerConfigDir.watcher_for(self._filename)

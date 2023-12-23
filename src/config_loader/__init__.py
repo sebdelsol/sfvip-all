@@ -202,7 +202,7 @@ class ConfigLoader:
 
     def _as_dict(self, proxy: _ProxyNamespace) -> dict[str, Any]:
         """recursively get a dict from _ProxyNamespace with fields validation & default values"""
-        dct = {}
+        dct: dict[str, Any] = {}
         for key, value in _public_attributes(proxy.__dict__):
             if proxy.hasattr(key):
                 if isinstance(value, _ProxyNamespace):

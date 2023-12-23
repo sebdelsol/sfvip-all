@@ -53,7 +53,7 @@ def remove_from_sys_path(pathname: str) -> None:
             continue
         try:
             any_change = False
-            results = []
+            results: list[str] = []
             for v in reg_value[0].split(os.pathsep):
                 vexp = sz_expand(v, reg_value[1])
                 # Check if the expanded path matches the requested path in a normalized way

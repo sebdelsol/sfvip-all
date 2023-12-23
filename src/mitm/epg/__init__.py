@@ -41,12 +41,13 @@ class EPG:
 
     def get(self, server: Optional[str], stream_id: str, limit: Optional[str]) -> Iterator[dict[str, str]]:
         if server and (update := self.updater.update):
-            if channel_id := self.servers.get(server, {}).get(stream_id):
-                count = 0
-                int_limit = _get_int(limit)
-                for count, programme in enumerate(update.get_programmes(channel_id)):
-                    if int_limit and count >= int_limit:
-                        break
-                    yield programme
-                if count > 0:
-                    logger.info("get epg for %s", channel_id)
+            if server_channels := self.servers.get(server):
+                if channel_id := server_channels.get(stream_id):
+                    count = 0
+                    int_limit = _get_int(limit)
+                    for count, programme in enumerate(update.get_programmes(channel_id)):
+                        if int_limit and count >= int_limit:
+                            break
+                        yield programme
+                    if count > 0:
+                        logger.info("Get epg for %s", channel_id)

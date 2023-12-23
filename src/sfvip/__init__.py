@@ -16,7 +16,7 @@ exceptions = PlayerNotFoundError, LocalproxyError
 
 
 def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: int) -> None:
-    logger.info("run %s %s %s", app_info.name, app_info.version, app_info.bitness)
+    logger.info("Run %s %s %s", app_info.name, app_info.version, app_info.bitness)
     LOC.set_tranlastions(app_info.translations)
     LOC.set_language(PlayerLanguageLoader().language)
     app_config = app_info.config.update()
@@ -41,7 +41,7 @@ def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: in
         ui.run_in_thread(run, *exceptions)
     except exceptions as err:
         ui.showinfo(str(err), force_create=True)
-        logger.warning(str(err))
+        logger.warning(str(err).capitalize())
     finally:
         ui.quit()
         CleanFilesIn(app_info.logs_dir).keep(keep_logs, f"{app_info.name} - *.log")

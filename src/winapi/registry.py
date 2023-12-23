@@ -4,7 +4,7 @@ import threading
 from ctypes.wintypes import BOOL, DWORD, HANDLE, HKEY, LONG, LPCWSTR, LPVOID
 from typing import Iterator, Self
 
-from .mutex import _CloseHandle, _WaitForSingleObject
+from .mutex import CloseHandle, WaitForSingleObject
 
 _kernel32 = ctypes.windll.kernel32
 
@@ -30,10 +30,10 @@ class _Event:
         return self
 
     def __exit__(self, *_) -> None:
-        _CloseHandle(self.handle)
+        CloseHandle(self.handle)
 
     def wait(self, timeout_ms: int = 0) -> bool:
-        wait_result = _WaitForSingleObject(self.handle, timeout_ms)
+        wait_result = WaitForSingleObject(self.handle, timeout_ms)
         if wait_result == _WAIT_OBJECT_0:
             return True
         return False
