@@ -1,3 +1,8 @@
+## 1.4.12.4
+* Fix [issue](https://github.com/sebdelsol/sfvip-all/issues/2) when external EPG is too big.
+* External EPG UI is more responsive.
+* Show External EPG progress.
+
 ## 1.4.12.3
 * External EPG url works when there's no user.
 
@@ -6,7 +11,7 @@
 
 ## 1.4.12.1 
 * Fix hook bug in x86 version.
-* External EPG match more channels.
+* External EPG matches more channels.
 
 ## 1.4.12
 * External EPG option.
@@ -39,7 +44,7 @@
 * Fix localization when a running _Sfvip All_ prevents the (un)installation.
 
 ## 1.4.5
-* Installer use _Sfvip Player_ language when updating.
+* Installer uses _Sfvip Player_ language when updating.
 * (fix 1.4.3 & 1.4.4).
 
 ## 1.4.2

@@ -30,9 +30,10 @@
   "PlayerTooOld": "%s est trop ancien. La version %s ou supérieure est nécessaire.",
   "UpgradeFailed": "La mise à jour de %s a échoué. Voulez-vous réessayer ?",
   "Loading": "Chargement",
-  "ready": "Prêt",
+  "Processing": "Traitement",
+  "Ready": "Prêt",
   "Failed": "Échec",
   "NoEpg": "Pas d'EPG",
   "EpgUrl": "EPG externe",
-  "InvalidUrl": "Url invalide"
+  "InvalidUrl": "Url non valide"
 }

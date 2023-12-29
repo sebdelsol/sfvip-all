@@ -17,7 +17,7 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.4.12.3"
+    version = "1.4.12.4"
     dir = "build"
     enable_console = False
     logs_dir = "../logs"
@@ -40,6 +40,11 @@ class Environments:
         constraints = ("constraints.x86.txt",)
 
 
+class Github:
+    owner = "sebdelsol"
+    repo = "sfvip-all"
+
+
 class Readme:
     src = "resources/README_template.md"
     dst = "README.md"
@@ -48,11 +53,6 @@ class Readme:
 class Post:
     src = "resources/post_template.txt"
     dst = f"{Build.dir}/{Build.version}/post.txt"
-
-
-class Github:
-    owner = "sebdelsol"
-    repo = "sfvip-all"
 
 
 class Templates:

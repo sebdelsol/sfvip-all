@@ -3,7 +3,7 @@ from typing import Any, Callable, NamedTuple, Optional, Sequence
 
 from translations.loc import LOC
 
-from ...mitm.epg.update import EPGstatus
+from ...mitm.epg.update import EPGProgress, EPGstatus
 from ..app_info import AppInfo
 from .fx import Fade
 from .sticky import Offset, StickyWindow
@@ -133,10 +133,11 @@ def _epg_url() -> Style:
     return _InfoStyle.app("").smaller(2).grey
 
 
-def _epg_status_styles() -> dict[EPGstatus | None, Style]:
+def _epg_status_styles(progress: str) -> dict[EPGstatus | None, Style]:
     return {
-        EPGstatus.LOADING: _InfoStyle.app(LOC.Loading).white,
-        EPGstatus.READY: _InfoStyle.app(LOC.ready).lime_green,
+        EPGstatus.LOADING: _InfoStyle.app(f"{LOC.Loading}{progress}").grey,
+        EPGstatus.PROCESSING: _InfoStyle.app(f"{LOC.Processing}{progress}").grey,
+        EPGstatus.READY: _InfoStyle.app(LOC.Ready).lime_green,
         EPGstatus.FAILED: _InfoStyle.app(LOC.Failed).red,
         EPGstatus.NO_EPG: _InfoStyle.app(LOC.NoEpg).grey,
         EPGstatus.INVALID_URL: _InfoStyle.app(LOC.InvalidUrl).red,
@@ -144,11 +145,12 @@ def _epg_status_styles() -> dict[EPGstatus | None, Style]:
 
 
 def _epg_width() -> int:
-    return max(len(style.to_tk["text"]) for style in _epg_status_styles().values())
+    return max(len(style.to_tk["text"]) for style in _epg_status_styles(" 100%").values())
 
 
-def _epg_status(epg_status: Optional[EPGstatus] = None) -> Style:
-    return _epg_status_styles().get(epg_status, _InfoStyle.app("").grey)
+def _epg_status(epg_status: EPGProgress) -> Style:
+    progress = "" if epg_status.progress is None else f" {epg_status.progress:.0%}"
+    return _epg_status_styles(progress).get(epg_status.status, _InfoStyle.app("").grey)
 
 
 class _ProxiesWindow(StickyWindow):
@@ -256,9 +258,14 @@ class InfosWindow(_ProxiesWindow):
         epg_frame = tk.Frame(frame, bg=_InfoTheme.bg_rows)
         epg_label = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_epg().to_tk)
         self._epg_url = tk.Entry(
-            epg_frame, bg=_InfoTheme.bg_headers, **_epg_url().to_tk, insertbackground="white", width=50
+            epg_frame,
+            bg=_InfoTheme.bg_headers,
+            disabledbackground=_InfoTheme.bg_rows,
+            **_epg_url().to_tk,
+            insertbackground="white",
+            width=50,
         )
-        self._epg_status = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_epg_status().to_tk, width=_epg_width())
+        self._epg_status = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, width=_epg_width())
         separator5 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
         row = 0
@@ -305,7 +312,8 @@ class InfosWindow(_ProxiesWindow):
         self._epg_url.bind("<Return>", lambda _: callback(self._epg_url.get()))
         self._epg_url.bind("<FocusOut>", lambda _: callback(self._epg_url.get()))
 
-    def set_epg_status(self, epg_status: EPGstatus) -> None:
+    def set_epg_status(self, epg_status: EPGProgress) -> None:
+        self._epg_url.config(state=tk.DISABLED if epg_status.status is EPGstatus.LOADING else tk.NORMAL)
         self._epg_status.config(**_epg_status(epg_status).to_tk)
 
     def set_app_update(

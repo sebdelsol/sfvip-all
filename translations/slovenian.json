@@ -30,9 +30,10 @@
   "PlayerTooOld": "%s je prestar. Potrebna je različica %s ali novejša.",
   "UpgradeFailed": "Nadgradnja različice %s ni uspela. Ali želite ponoviti poskus ?",
   "Loading": "Nalaganje",
-  "ready": "Pripravljen",
+  "Processing": "Obdelava",
+  "Ready": "Pripravljeno",
   "Failed": "Neuspešno",
   "NoEpg": "Ni EPG",
   "EpgUrl": "Zunanji EPG",
-  "InvalidUrl": "Nepravilen url naslov"
+  "InvalidUrl": "Nepravilen url"
 }

@@ -1,13 +1,17 @@
+import ctypes
 import tkinter as tk
 from tkinter import filedialog
 from typing import Callable, Optional, Sequence
 
-from ...mitm.epg.update import EPGstatus
+from ...mitm.epg.update import EPGProgress
 from .infos import AppInfo, Info, InfosWindow
 from .logo import LogoWindow, PulseReason
 from .splash import SplashWindow
 from .thread import ThreadUI
 from .window import AskWindow, MessageWindow, Window
+
+# avoid blurry text
+ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 
 class UI(tk.Tk):
@@ -42,7 +46,7 @@ class UI(tk.Tk):
     def set_epg_url_update(self, epg_url: Optional[str], callback: Callable[[str], None]) -> None:
         self._infos.set_epg_url_update(epg_url, callback)
 
-    def set_epg_status(self, epg_status: EPGstatus) -> None:
+    def set_epg_status(self, epg_status: EPGProgress) -> None:
         self._infos.set_epg_status(epg_status)
 
     def set_app_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:

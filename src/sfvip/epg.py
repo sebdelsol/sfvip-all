@@ -2,14 +2,14 @@ from typing import Callable
 
 from shared.job_runner import JobRunner
 
-from ..mitm.epg.update import EPGstatus, UpdateStatusT
+from ..mitm.epg.update import EPGProgress, UpdateStatusT
 from .app_info import AppConfig
 from .ui import UI
 
 
 class EpgUpdater:
     def __init__(self, config: AppConfig, epg_update: Callable[[str], None], ui: UI) -> None:
-        self._status_job_runner = JobRunner[EPGstatus](ui.set_epg_status, "Epg status listener")
+        self._status_job_runner = JobRunner[EPGProgress](ui.set_epg_status, "Epg status listener")
         self._epg_update = epg_update
         self._config = config
         self._ui = ui
