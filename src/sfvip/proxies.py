@@ -8,7 +8,7 @@ from translations.loc import LOC
 from ..mitm import MitmLocalProxy, Mode, validate_upstream
 from ..mitm.addon import AllCategoryName, SfVipAddOn
 from ..winapi import mutex
-from .app_info import AppConfig
+from .app_info import AppInfo
 from .epg import EpgUpdater
 from .ui import UI
 
@@ -65,10 +65,15 @@ class LocalProxies:
     _find_ports_retry = 10
     _mitmproxy_start_timeout = 5
 
-    def __init__(self, app_config: AppConfig, inject_in_live: bool, upstreams: set[str], ui: UI) -> None:
-        self._epg_updater = EpgUpdater(app_config, self.epg_update, ui)
+    def __init__(self, app_info: AppInfo, inject_in_live: bool, upstreams: set[str], ui: UI) -> None:
+        self._epg_updater = EpgUpdater(app_info.config, self.epg_update, ui)
         all_name = get_all_name(inject_in_live)
-        self._addon = SfVipAddOn(all_name, self._epg_updater.update_status, app_config.EPG.requests_timeout)
+        self._addon = SfVipAddOn(
+            all_name,
+            app_info.roaming,
+            self._epg_updater.update_status,
+            app_info.config.EPG.requests_timeout,
+        )
         self._upstreams = upstreams
         self._by_upstreams: dict[str, str] = {}
         self._mitm_proxy: Optional[MitmLocalProxy] = None

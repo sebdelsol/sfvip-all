@@ -3,11 +3,13 @@ import json
 import logging
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import Any, NamedTuple, Optional
 
 from mitmproxy import http
 from mitmproxy.coretypes.multidict import MultiDictView
 
+from .cache import StalkerCache
 from .epg import EPG, UpdateStatusT
 
 logger = logging.getLogger(__name__)
@@ -41,10 +43,6 @@ def get_panel(panel_type: PanelType, all_category_name: str, streams: bool = Tru
     )
 
 
-def _is_api_request(request: http.Request) -> bool:
-    return "player_api.php?" in request.path
-
-
 def _query(request: http.Request) -> MultiDictView[str, str]:
     return getattr(request, "urlencoded_form" if request.method == "POST" else "query")
 
@@ -58,7 +56,7 @@ def _get_query_key(request: http.Request, key: str) -> Optional[str]:
 
 
 def _response_json(response: http.Response) -> Optional[Any]:
-    if response and response.text and response.headers.get("content-type") == "application/json":
+    if response and response.text and "application/json" in response.headers.get("content-type", ""):
         try:
             return json.loads(response.text)
         except json.JSONDecodeError:
@@ -95,7 +93,11 @@ def fix_info_serie(info: Any) -> Optional[dict[str, Any]]:
 class SfVipAddOn:
     """mitmproxy addon to inject the all category"""
 
-    def __init__(self, all_name: AllCategoryName, update_status: UpdateStatusT, timeout: int) -> None:
+    api_requests = "player_api.php?", "portal.php?"
+
+    def __init__(
+        self, all_name: AllCategoryName, roaming: Path, update_status: UpdateStatusT, timeout: int
+    ) -> None:
         panels = [
             get_panel(PanelType.VOD, all_name.vod),
             get_panel(PanelType.SERIES, all_name.series, streams=False),
@@ -104,6 +106,7 @@ class SfVipAddOn:
             panels.append(get_panel(PanelType.LIVE, all_name.live))
         self._category_panel = {panel.get_category: panel for panel in panels}
         self._categories_panel = {panel.get_categories: panel for panel in panels}
+        self.cache: StalkerCache | None = StalkerCache(roaming)
         self.epg = EPG(update_status, timeout)
 
     def epg_update(self, url: str):
@@ -118,16 +121,9 @@ class SfVipAddOn:
     def wait_running(self, timeout: int) -> bool:
         return self.epg.wait_running(timeout)
 
-    def request(self, flow: http.HTTPFlow) -> None:
-        if _is_api_request(flow.request):
-            action = _get_query_key(flow.request, "action")
-            if action in self._category_panel:
-                panel = self._category_panel[action]
-                category_id = _get_query_key(flow.request, "category_id")
-                if category_id == panel.all_category_id:
-                    # turn an all category query into a whole catalog query
-                    _del_query_key(flow.request, "category_id")
-                    _log("serve", panel, action)
+    @staticmethod
+    def is_api_request(request: http.Request) -> bool:
+        return any(api_request in request.path for api_request in SfVipAddOn.api_requests)
 
     def inject_all(self, categories: Any, action: str) -> Optional[list[Any]]:
         if isinstance(categories, list):
@@ -144,34 +140,49 @@ class SfVipAddOn:
             return categories
         return None
 
-    def response(self, flow: http.HTTPFlow) -> None:
-        # pylint: disable=too-many-nested-blocks
-        if flow.response and not flow.response.stream:
-            if _is_api_request(flow.request):
-                action = _get_query_key(flow.request, "action")
-                if action in self._categories_panel:
-                    categories = _response_json(flow.response)
-                    if all_injected := self.inject_all(categories, action):
-                        flow.response.text = json.dumps(all_injected)
-                elif action == "get_series_info":
-                    info = _response_json(flow.response)
-                    if fixed_info := fix_info_serie(info):
-                        flow.response.text = json.dumps(fixed_info)
-                elif action == "get_live_streams":
+    def request(self, flow: http.HTTPFlow) -> None:
+        if self.is_api_request(flow.request):
+            match action := _get_query_key(flow.request, "action"):
+                case "get_ordered_list":
+                    if self.cache and (response := self.cache.load_response(flow)):
+                        flow.response = response
+                case action if action in self._category_panel:
+                    panel = self._category_panel[action]
                     category_id = _get_query_key(flow.request, "category_id")
-                    if not category_id:
-                        server = flow.request.host_header
-                        self.epg.set_server_channels(server, _response_json(flow.response))
-                elif action == "get_short_epg":
-                    if stream_id := _get_query_key(flow.request, "stream_id"):
-                        server = flow.request.host_header
-                        limit = _get_query_key(flow.request, "limit")
-                        if epg_listings := tuple(self.epg.get(server, stream_id, limit)):
-                            flow.response.text = json.dumps({"epg_listings": epg_listings})
+                    if category_id == panel.all_category_id:
+                        # turn an all category query into a whole catalog query
+                        _del_query_key(flow.request, "category_id")
+                        _log("serve", panel, action)
 
-    @staticmethod
-    def responseheaders(flow: http.HTTPFlow) -> None:
+    def response(self, flow: http.HTTPFlow) -> None:
+        if flow.response and not flow.response.stream:
+            if self.is_api_request(flow.request):
+                match action := _get_query_key(flow.request, "action"):
+                    case "get_ordered_list":
+                        if self.cache:
+                            self.cache.save_response(flow)
+                    case "get_series_info":
+                        info = _response_json(flow.response)
+                        if fixed_info := fix_info_serie(info):
+                            flow.response.text = json.dumps(fixed_info)
+                    case "get_live_streams":
+                        category_id = _get_query_key(flow.request, "category_id")
+                        if not category_id:
+                            server = flow.request.host_header
+                            self.epg.set_server_channels(server, _response_json(flow.response))
+                    case "get_short_epg":
+                        if stream_id := _get_query_key(flow.request, "stream_id"):
+                            server = flow.request.host_header
+                            limit = _get_query_key(flow.request, "limit")
+                            if epg_listings := tuple(self.epg.get(server, stream_id, limit)):
+                                flow.response.text = json.dumps({"epg_listings": epg_listings})
+                    case action if action in self._categories_panel:
+                        categories = _response_json(flow.response)
+                        if all_injected := self.inject_all(categories, action):
+                            flow.response.text = json.dumps(all_injected)
+
+    def responseheaders(self, flow: http.HTTPFlow) -> None:
         """all reponses are streamed except the api requests"""
-        if not _is_api_request(flow.request):
+        if not self.is_api_request(flow.request):
             if flow.response:
                 flow.response.stream = True

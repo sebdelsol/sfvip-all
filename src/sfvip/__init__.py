@@ -31,7 +31,7 @@ def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: in
             while player.want_to_launch():
                 ui.splash.show(player.rect)
                 accounts_proxies = AccountsProxies(app_info.roaming, ui)
-                with LocalProxies(app_config, inject_in_live, accounts_proxies.upstreams, ui) as local_proxies:
+                with LocalProxies(app_info, inject_in_live, accounts_proxies.upstreams, ui) as local_proxies:
                     with accounts_proxies.set(local_proxies.by_upstreams) as restore_accounts_proxies:
                         with app_auto_updater:
                             with player.run():

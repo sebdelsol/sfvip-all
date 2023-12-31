@@ -1,3 +1,6 @@
+## 1.4.12.5 (upcoming)
+* Option to cache Stalker's all category (user with MAC).
+
 ## 1.4.12.4
 * Fix [issue](https://github.com/sebdelsol/sfvip-all/issues/2) when external EPG is too big.
 * External EPG UI is more responsive.
