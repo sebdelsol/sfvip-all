@@ -1,19 +1,13 @@
 import logging
 from typing import Any, Iterator, Optional
 
+from ..utils import get_int
 from .server import EPGserverChannels
 from .update import EPGupdater, UpdateStatusT
 
 logger = logging.getLogger(__name__)
 
-
-def _get_int(text: Optional[str]) -> Optional[int]:
-    try:
-        if text:
-            return int(text)
-    except ValueError:
-        pass
-    return None
+# TODO EPG for Stalker portal
 
 
 class EPG:
@@ -44,7 +38,7 @@ class EPG:
             if server_channels := self.servers.get(server):
                 if channel_id := server_channels.get(stream_id):
                     count = 0
-                    int_limit = _get_int(limit)
+                    int_limit = get_int(limit)
                     for count, programme in enumerate(update.get_programmes(channel_id)):
                         if int_limit and count >= int_limit:
                             break

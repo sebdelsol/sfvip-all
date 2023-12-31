@@ -70,6 +70,7 @@ class LocalProxies:
         all_name = get_all_name(inject_in_live)
         self._addon = SfVipAddOn(
             all_name,
+            app_info.config.AllCategory.cache_enabled,
             app_info.roaming,
             self._epg_updater.update_status,
             app_info.config.EPG.requests_timeout,
