@@ -6,7 +6,7 @@ from typing import Optional
 
 from mitmproxy import http
 
-from ..cache import StalkerCache
+from ..cache import AllUpdated, StalkerCache, UpdateCacheProgressT
 from ..epg import EPG, UpdateStatusT
 from ..utils import get_query_key, response_json
 from .all import AllCategoryName, AllPanels
@@ -51,12 +51,13 @@ class SfVipAddOn:
     def __init__(
         self,
         all_name: AllCategoryName,
-        cache_enabled: bool,
+        all_updated: AllUpdated,
         roaming: Path,
         update_status: UpdateStatusT,
+        update_progress: UpdateCacheProgressT,
         timeout: int,
     ) -> None:
-        self.cache = StalkerCache(roaming) if cache_enabled else None
+        self.cache = StalkerCache(roaming, update_progress, all_updated)
         self.epg = EPG(update_status, timeout)
         self.panels = AllPanels(all_name)
 
@@ -78,15 +79,16 @@ class SfVipAddOn:
             return get_query_key(request, "action")
         return None
 
-    def request(self, flow: http.HTTPFlow) -> None:
+    async def request(self, flow: http.HTTPFlow) -> None:
         if action := self.is_api_request(flow.request):
             match action:
-                case "get_ordered_list" if self.cache:
+                case "get_ordered_list":
                     self.cache.load_response(flow)
                 case _:
+                    self.cache.stop(flow)
                     self.panels.serve_all(flow, action)
 
-    def response(self, flow: http.HTTPFlow) -> None:
+    async def response(self, flow: http.HTTPFlow) -> None:
         if flow.response and not flow.response.stream:
             if action := self.is_api_request(flow.request):
                 match action:
@@ -96,12 +98,18 @@ class SfVipAddOn:
                         set_epg_server(flow, self.epg)
                     case "get_short_epg":
                         get_short_epg(flow, self.epg)
-                    case "get_ordered_list" if self.cache:
+                    case "get_ordered_list":
                         self.cache.save_response(flow)
+                    case "get_categories":
+                        self.cache.inject_all_cached_category(flow)
                     case _:
                         self.panels.inject_all(flow, action)
 
-    def responseheaders(self, flow: http.HTTPFlow) -> None:
+    async def error(self, flow: http.HTTPFlow):
+        if self.is_api_request(flow.request) == "get_ordered_list":
+            self.cache.stop(flow)
+
+    async def responseheaders(self, flow: http.HTTPFlow) -> None:
         """all reponses are streamed except the api requests"""
         if not self.is_api_request(flow.request):
             if flow.response:

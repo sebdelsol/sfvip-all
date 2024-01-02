@@ -35,5 +35,10 @@
   "Failed": "Nie powiodło się",
   "NoEpg": "Brak EPG",
   "EpgUrl": "Zewnętrzne EPG",
-  "InvalidUrl": "Nieprawidłowy adres url"
+  "InvalidUrl": "Nieprawidłowy adres url",
+  "UpdatedToday": "Zaktualizowano dzisiaj",
+  "Updated1DayAgo": "Zaktualizowano 1 dzień temu",
+  "UpdatedDaysAgo": "Zaktualizowano %s dni temu",
+  "UpdateAllSeries": "Aktualizacja wszystkich seriali",
+  "UpdateAllMovies": "Zaktualizuj wszystkie filmy"
 }

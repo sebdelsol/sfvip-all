@@ -4,6 +4,7 @@ import logging
 import multiprocessing
 import tempfile
 import time
+import traceback
 import unicodedata
 from enum import Enum, auto
 from pathlib import Path
@@ -15,6 +16,7 @@ import requests
 
 from shared.job_runner import JobRunner
 
+from ..utils import ProgressStep
 from .programme import EPGprogramme, InternalProgramme
 
 logger = logging.getLogger(__name__)
@@ -56,23 +58,6 @@ def _valid_url(url: str) -> bool:
         return False
 
 
-class _ProgressStep:
-    def __init__(self, step: float = 0.01, total: float = 0) -> None:
-        self._total = total
-        self._last = 0
-        self._step = step
-
-    def increment_total(self, increment: float):
-        self._total += increment
-
-    def progress(self, current: float) -> Optional[float]:
-        progress = current / (self._total or 1)
-        if progress - self._last >= self._step:
-            self._last = progress
-            return progress
-        return None
-
-
 class EPGupdate(NamedTuple):
     channels: dict[str, list[InternalProgramme]] = {}
 
@@ -84,7 +69,7 @@ class EPGupdate(NamedTuple):
                 with requests.get(url, stream=True, timeout=timeout) as response:
                     response.raise_for_status()
                     if total_size := int(response.headers.get("Content-Length", 0)):
-                        progress_step = _ProgressStep(total=total_size)
+                        progress_step = ProgressStep(total=total_size)
                         xml = Path(temp_dir) / "xml"
                         with xml.open(mode="wb") as f:
                             chunk_size = 1024 * 128
@@ -96,8 +81,11 @@ class EPGupdate(NamedTuple):
                                 f.write(chunk)
                             else:
                                 return cls._process(xml, url, update_status, stopping)
+                    else:
+                        logger.warning("Download epg from '%s' has a size of 0", url)
+        # TODO clean ?
         except (requests.RequestException, gzip.BadGzipFile, ET.ParseError):
-            pass
+            logger.error(traceback.format_exc())  # debug
         return None
 
     @classmethod
@@ -105,7 +93,7 @@ class EPGupdate(NamedTuple):
         update_status(EPGProgress(EPGstatus.PROCESSING))
         with gzip.GzipFile(xml) if url.endswith(".gz") else xml.open("rb") as f:
             channels: dict[str, list[InternalProgramme]] = {}
-            progress_step = _ProgressStep()
+            progress_step = ProgressStep()
             elem: ET.ElementBase
             title: str = ""
             desc: str = ""

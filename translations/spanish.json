@@ -35,5 +35,10 @@
   "Failed": "Fallo",
   "NoEpg": "Sin EPG",
   "EpgUrl": "EPG externa",
-  "InvalidUrl": "Url no válida"
+  "InvalidUrl": "URL no válida",
+  "UpdatedToday": "Actualizado hoy",
+  "Updated1DayAgo": "Actualizado hace 1 día",
+  "UpdatedDaysAgo": "Actualizado hace %s días",
+  "UpdateAllSeries": "Actualizar todas las series",
+  "UpdateAllMovies": "Actualizar todas las películas"
 }

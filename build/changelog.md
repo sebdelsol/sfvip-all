@@ -1,5 +1,8 @@
 ## 1.4.12.5 (upcoming)
-* Option to cache Stalker's all category (user with MAC).
+* MAC accounts' all categories are cached.
+* MAC accounts' all categories caches can be updated.
+* Show MAC accounts all categories progress when their cache is build.
+* Fix bug when trying to update _Libmpv_ with the player opened.
 
 ## 1.4.12.4
 * Fix [issue](https://github.com/sebdelsol/sfvip-all/issues/2) when external EPG is too big.

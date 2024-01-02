@@ -35,5 +35,10 @@
   "Failed": "Није успео",
   "NoEpg": "Нема ЕПГ",
   "EpgUrl": "Екстерни ЕПГ",
-  "InvalidUrl": "Неважећи УРЛ"
+  "InvalidUrl": "Неважећи УРЛ",
+  "UpdatedToday": "Ажурирано данас",
+  "Updated1DayAgo": "Ажурирано пре 1 дан",
+  "UpdatedDaysAgo": "Ажурирано пре %s дана",
+  "UpdateAllSeries": "Ажурирајте све серије",
+  "UpdateAllMovies": "Ажурирајте све филмове"
 }

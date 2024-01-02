@@ -35,5 +35,10 @@
   "Failed": "Başarısız",
   "NoEpg": "EPG yok",
   "EpgUrl": "Harici EPG",
-  "InvalidUrl": "Geçersiz url"
+  "InvalidUrl": "Geçersiz url",
+  "UpdatedToday": "Bugün güncellendi",
+  "Updated1DayAgo": "1 gün önce güncellendi",
+  "UpdatedDaysAgo": "%s gün önce güncellendi",
+  "UpdateAllSeries": "Tüm serileri güncelle",
+  "UpdateAllMovies": "Tüm filmleri güncelle"
 }

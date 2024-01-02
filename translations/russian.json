@@ -35,5 +35,10 @@
   "Failed": "Не удалось",
   "NoEpg": "Нет EPG",
   "EpgUrl": "Внешний EPG",
-  "InvalidUrl": "Неверный url"
+  "InvalidUrl": "Неверный url",
+  "UpdatedToday": "Обновлено сегодня",
+  "Updated1DayAgo": "Обновлено 1 день назад",
+  "UpdatedDaysAgo": "Обновлено %s дней назад",
+  "UpdateAllSeries": "Обновить все серии",
+  "UpdateAllMovies": "Обновить все фильмы"
 }

@@ -41,6 +41,11 @@ class Texts(NamedTuple):
     NoEpg: str = "No EPG"
     EpgUrl: str = "External EPG"
     InvalidUrl: str = "Invalid url"
+    UpdatedToday: str = "Updated today"
+    Updated1DayAgo: str = "Updated 1 day ago"
+    UpdatedDaysAgo: str = "Updated %s days ago"
+    UpdateAllSeries: str = "Update All series"
+    UpdateAllMovies: str = "Update All movies"
 
     @staticmethod
     def as_dict() -> dict[str, str]:

@@ -25,9 +25,9 @@ class Rect(NamedTuple):
         return all(attr != infinity for attr in (self.x, self.y, self.w, self.h))
 
     def position(self, offset: Offset, w: int, h: int) -> Self:
-        if offset.centered:
-            return self.__class__(self.x + (self.w - w) * 0.5, self.y + (self.h - h) * 0.5, w, h)
         x, y = offset.maximized if self.is_maximized else offset.regular
+        if offset.centered:
+            return self.__class__(self.x + x + (self.w - w) * 0.5, self.y + y + (self.h - h) * 0.5, w, h)
         return self.__class__(self.x + x, self.y + y, w, h)
 
     def to_geometry(self) -> str:
@@ -64,6 +64,7 @@ class StickyWindow(tk.Toplevel):
         self.geometry(rect.to_geometry())
 
     def bring_to_front(self, is_topmost: bool, is_foreground: bool) -> None:
+        # TODO !!!!!!!!!!!!!!!!!!!!????????????
         if self.state() != "normal":
             self.deiconify()
         if is_foreground:

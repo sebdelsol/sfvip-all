@@ -96,6 +96,7 @@ class LibmpvDll:
         self._libdir = player_exe.parent / "lib"
         self._libmpv_latest = _LibmpvLatest(timeout)
         self._version = LibmpvVersion(self._libdir / "libmpv.json").update()
+        _OldDlls(self._libdir).clean()
 
     def get_version(self) -> Optional[str]:
         return self._version.get_version()
@@ -156,23 +157,42 @@ class LibmpvDll:
 
 class _OldDlls:
     _pattern = LibmpvDll.pattern
+    _running_pattern = "*mpv*.old.running.*"
 
     def __init__(self, libdir: Path) -> None:
         self._libdir = libdir
         self._moved_dlls: list[tuple[Path, Path]] = []
 
+    def clean(self) -> None:
+        for running in self._libdir.glob(_OldDlls._running_pattern):
+            try:
+                running.unlink()
+            except PermissionError:
+                pass
+
     def move(self) -> None:
         old_dir = self._libdir / "old"
         old_dir.mkdir(parents=True, exist_ok=True)
-        for dll in (file for file in self._libdir.glob(_OldDlls._pattern)):
+        for dll in self._libdir.glob(_OldDlls._pattern):
             for i in count(start=1):
                 dst = old_dir / f"{dll.name}.{i}"
                 if not dst.exists() or filecmp.cmp(dll, dst):
-                    shutil.move(dll, dst)
-                    self._moved_dlls.append((dll, dst))
+                    try:
+                        shutil.move(dll, dst)
+                        self._moved_dlls.append((dll, dst))
+                    except PermissionError:
+                        shutil.copy(dll, dst)
+                        for j in count(start=1):
+                            running = dll.with_suffix(f".old.running.{j}")
+                            if not running.exists():
+                                dll.rename(running)
+                                break
                     break
 
     def restore(self) -> None:
         for dll, dst in self._moved_dlls:
-            shutil.move(dst, dll)
+            try:
+                shutil.move(dst, dll)
+            except PermissionError:
+                pass
         self._moved_dlls = []

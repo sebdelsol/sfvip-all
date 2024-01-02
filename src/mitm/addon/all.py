@@ -50,7 +50,7 @@ def _unused_category_id(categories: list[dict]) -> str:
 
 
 def _log(verb: str, panel: Panel, action: str) -> None:
-    txt = "%s category '%s' (id=%s) for '%s' request"
+    txt = "%s '%s' category (id=%s) for '%s' request"
     logger.info(txt.capitalize(), verb.capitalize(), panel.all_category_name, panel.all_category_id, action)
 
 

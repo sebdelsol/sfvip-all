@@ -17,7 +17,7 @@ class Build:
     main = "sfvip_all.py"
     company = "sebdelsol"
     name = "Sfvip All"
-    version = "1.4.12.4"
+    version = "1.4.12.5"
     dir = "build"
     enable_console = False
     logs_dir = "../logs"
@@ -37,7 +37,7 @@ class Environments:
 
     class X86:
         path = ".sfvip86"
-        constraints = ("constraints.x86.txt",)
+        constraints = ()
 
 
 class Github:

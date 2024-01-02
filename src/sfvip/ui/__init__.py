@@ -6,6 +6,7 @@ from typing import Callable, Optional, Sequence
 from ...mitm.epg.update import EPGProgress
 from .infos import AppInfo, Info, InfosWindow
 from .logo import LogoWindow, PulseReason
+from .progress import ProgressBar
 from .splash import SplashWindow
 from .thread import ThreadUI
 from .window import AskWindow, MessageWindow, Window
@@ -22,6 +23,7 @@ class UI(tk.Tk):
         self.withdraw()  # we rely on some StickyWindow instead
         self._splash_img = tk.PhotoImage(file=app_info.splash)  # keep a reference for tk
         self.wm_iconphoto(True, self._splash_img)
+        self.progress_bar = ProgressBar()
         self.splash = SplashWindow(self._splash_img)
         self._infos = InfosWindow(app_info)
         self._logo = LogoWindow(app_info.logo, self._infos)

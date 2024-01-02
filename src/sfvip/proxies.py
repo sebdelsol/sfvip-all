@@ -7,8 +7,10 @@ from translations.loc import LOC
 
 from ..mitm import MitmLocalProxy, Mode, validate_upstream
 from ..mitm.addon import AllCategoryName, SfVipAddOn
+from ..mitm.cache import AllUpdated
 from ..winapi import mutex
 from .app_info import AppInfo
+from .cache import CacheProgressListener
 from .epg import EpgUpdater
 from .ui import UI
 
@@ -58,6 +60,16 @@ def get_all_name(inject_in_live: bool) -> AllCategoryName:
     )
 
 
+def get_all_updated() -> AllUpdated:
+    return AllUpdated(
+        today=LOC.UpdatedToday,
+        one_day=LOC.Updated1DayAgo,
+        several_days=LOC.UpdatedDaysAgo,
+        all_names={"vod": LOC.AllMovies, "series": LOC.AllSeries},
+        all_updates={"vod": LOC.UpdateAllMovies, "series": LOC.UpdateAllSeries},
+    )
+
+
 class LocalProxies:
     """start a local proxy for each upstream proxies (no upstream proxy count as one)"""
 
@@ -67,12 +79,13 @@ class LocalProxies:
 
     def __init__(self, app_info: AppInfo, inject_in_live: bool, upstreams: set[str], ui: UI) -> None:
         self._epg_updater = EpgUpdater(app_info.config, self.epg_update, ui)
-        all_name = get_all_name(inject_in_live)
+        self._cache_progress = CacheProgressListener(ui)
         self._addon = SfVipAddOn(
-            all_name,
-            app_info.config.AllCategory.cache_enabled,
+            get_all_name(inject_in_live),
+            get_all_updated(),
             app_info.roaming,
             self._epg_updater.update_status,
+            self._cache_progress.update_progress,
             app_info.config.EPG.requests_timeout,
         )
         self._upstreams = upstreams
@@ -104,9 +117,11 @@ class LocalProxies:
             if not self._mitm_proxy.wait_running(LocalProxies._mitmproxy_start_timeout):
                 raise LocalproxyError(LOC.CantStartProxies)
             self._epg_updater.start()
+            self._cache_progress.start()
             return self
 
     def __exit__(self, *_) -> None:
         if self._mitm_proxy:
+            self._cache_progress.stop()
             self._epg_updater.stop()
             self._mitm_proxy.stop()

@@ -24,4 +24,3 @@ class AppDefaultConfig(ConfigLoader):
 
     class AllCategory:
         inject_in_live: bool = False
-        cache_enabled: bool = True

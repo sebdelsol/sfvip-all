@@ -4,16 +4,16 @@ import sys
 from os.path import getmtime
 from pathlib import Path
 from types import FunctionType, MappingProxyType, MethodType, SimpleNamespace
-from typing import IO, Any, Iterator, Optional, Self, cast, get_type_hints
+from typing import IO, Any, Iterator, Literal, Optional, Self, cast, get_type_hints
 
 from .. import is_built
 from ..winapi import mutex
 
 logger = logging.getLogger(__name__)
 
-"""
-### How to use ###
+""" How to use !
 # Create a subclass of ConfigLoader
+# It's better to add type hints and default value for all fields
 class DefaultConfig(ConfigLoader):
     a_bool: bool = True
 
@@ -24,16 +24,16 @@ class DefaultConfig(ConfigLoader):
         class NestedDeeper:
             where_am_I : str = "Uh ?"
 
-# Instantiate it to link this config to a json file
+# Instantiate this config to link it to a file
 config = DefaultConfig(Path("config.json"))
 
 # The json file is read or created with default values
-config.update()  # "config.json" file is created with default values if it doesn't exist
+config.update()  # "config.json" file is created with default values
 
-# IDE auto complete still works !
+# Your IDE auto complete works :)
 print(config.a_bool)  # True
 
-# Set an attribute: it'll be skipped if the wrong type
+# Set an attribute: it'll be skipped if it's the wrong type
 config.Nested.a_bool = "I want to be true"
 print(config.Nested.a_bool)  # still None
 
@@ -42,7 +42,7 @@ config.Nested.a_string = "Lorem Ipsum ..."
 config.load()
 print(config.Nested.a_string)  # "Lorem Ipsum ..."
 
-# Go deeper 
+# Go deeper
 print(config.Nested.NestedDeeper.where_am_I)  # "Uh ?"
 """
 
@@ -118,10 +118,10 @@ class ConfigLoader:
     def __init__(self, file: Path, check_newer: bool = True) -> None:
         ConfigLoader._not_in_inner = set(dict(ConfigLoader.__dict__).keys())
         ConfigLoader._not_in_inner.update(set(dict(_ProxyNamespace.__dict__).keys()))
-        self._file = file
         self._check_newer = check_newer and not is_built()
-        self._path: list[str] = []
         self._name = self.__class__.__name__
+        self._path: list[str] = []
+        self._file = file
         self._file_lock = mutex.SystemWideMutex(f"file lock for {file}")
         # turn all config nested classes into _ProxyNamespace instances
         self._base_proxy: _ProxyNamespace = _ProxyNamespace(self)
@@ -172,7 +172,7 @@ class ConfigLoader:
                         self.save()
         self.clear_path()
 
-    def _open(self, mode: str) -> IO[str]:
+    def _open(self, mode: Literal["r", "w"]) -> IO[str]:
         with self._file_lock:
             return self._file.open(mode, encoding="utf-8")
 

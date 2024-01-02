@@ -35,5 +35,10 @@
   "Failed": "Neuspešno",
   "NoEpg": "Ni EPG",
   "EpgUrl": "Zunanji EPG",
-  "InvalidUrl": "Nepravilen url"
+  "InvalidUrl": "Nepravilen url",
+  "UpdatedToday": "Posodobljeno danes",
+  "Updated1DayAgo": "Posodobljeno pred 1 dnem",
+  "UpdatedDaysAgo": "Posodobljeno pred %s dnevi",
+  "UpdateAllSeries": "Posodobitev vseh serij",
+  "UpdateAllMovies": "Posodobitev vseh filmov"
 }
