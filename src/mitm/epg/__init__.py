@@ -7,7 +7,7 @@ from .update import EPGupdater, UpdateStatusT
 
 logger = logging.getLogger(__name__)
 
-# TODO EPG for Stalker portal
+# TODO EPG for MAC portal
 
 
 class EPG:

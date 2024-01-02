@@ -1,4 +1,7 @@
-## 1.4.12.5 (upcoming)
+## 1.4.12.6
+* Fix external EPG that failed to download (because of missing headers content length).
+
+## 1.4.12.5
 * MAC accounts' all categories are cached.
 * MAC accounts' all categories caches can be updated.
 * Show MAC accounts all categories progress when their cache is build.

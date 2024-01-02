@@ -6,7 +6,7 @@ from typing import Optional
 
 from mitmproxy import http
 
-from ..cache import AllUpdated, StalkerCache, UpdateCacheProgressT
+from ..cache import AllUpdated, MACCache, UpdateCacheProgressT
 from ..epg import EPG, UpdateStatusT
 from ..utils import get_query_key, response_json
 from .all import AllCategoryName, AllPanels
@@ -57,7 +57,7 @@ class SfVipAddOn:
         update_progress: UpdateCacheProgressT,
         timeout: int,
     ) -> None:
-        self.cache = StalkerCache(roaming, update_progress, all_updated)
+        self.mac_cache = MACCache(roaming, update_progress, all_updated)
         self.epg = EPG(update_status, timeout)
         self.panels = AllPanels(all_name)
 
@@ -83,9 +83,9 @@ class SfVipAddOn:
         if action := self.is_api_request(flow.request):
             match action:
                 case "get_ordered_list":
-                    self.cache.load_response(flow)
+                    self.mac_cache.load_response(flow)
                 case _:
-                    self.cache.stop(flow)
+                    self.mac_cache.stop(flow)
                     self.panels.serve_all(flow, action)
 
     async def response(self, flow: http.HTTPFlow) -> None:
@@ -99,15 +99,15 @@ class SfVipAddOn:
                     case "get_short_epg":
                         get_short_epg(flow, self.epg)
                     case "get_ordered_list":
-                        self.cache.save_response(flow)
+                        self.mac_cache.save_response(flow)
                     case "get_categories":
-                        self.cache.inject_all_cached_category(flow)
+                        self.mac_cache.inject_all_cached_category(flow)
                     case _:
                         self.panels.inject_all(flow, action)
 
     async def error(self, flow: http.HTTPFlow):
         if self.is_api_request(flow.request) == "get_ordered_list":
-            self.cache.stop(flow)
+            self.mac_cache.stop(flow)
 
     async def responseheaders(self, flow: http.HTTPFlow) -> None:
         """all reponses are streamed except the api requests"""

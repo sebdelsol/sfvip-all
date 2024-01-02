@@ -68,24 +68,21 @@ class EPGupdate(NamedTuple):
             with tempfile.TemporaryDirectory() as temp_dir:
                 with requests.get(url, stream=True, timeout=timeout) as response:
                     response.raise_for_status()
-                    if total_size := int(response.headers.get("Content-Length", 0)):
-                        progress_step = ProgressStep(total=total_size)
-                        xml = Path(temp_dir) / "xml"
-                        with xml.open(mode="wb") as f:
-                            chunk_size = 1024 * 128
-                            for i, chunk in enumerate(response.iter_content(chunk_size=chunk_size)):
-                                if stopping():
-                                    break
-                                if progress := progress_step.progress(i * chunk_size):
-                                    update_status(EPGProgress(EPGstatus.LOADING, progress))
-                                f.write(chunk)
-                            else:
-                                return cls._process(xml, url, update_status, stopping)
-                    else:
-                        logger.warning("Download epg from '%s' has a size of 0", url)
-        # TODO clean ?
+                    xml = Path(temp_dir) / "xml"
+                    with xml.open(mode="wb") as f:
+                        total_size = int(response.headers.get("Content-Length", 0))
+                        progress_step = ProgressStep(total=total_size) if total_size else None
+                        chunk_size = 1024 * 128
+                        for i, chunk in enumerate(response.iter_content(chunk_size=chunk_size)):
+                            if stopping():
+                                break
+                            if progress_step and (progress := progress_step.progress(i * chunk_size)):
+                                update_status(EPGProgress(EPGstatus.LOADING, progress))
+                            f.write(chunk)
+                        else:
+                            return cls._process(xml, url, update_status, stopping)
         except (requests.RequestException, gzip.BadGzipFile, ET.ParseError):
-            logger.error(traceback.format_exc())  # debug
+            logger.error(traceback.format_exc())  # for debug
         return None
 
     @classmethod

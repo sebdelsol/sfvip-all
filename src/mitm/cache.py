@@ -17,7 +17,7 @@ MediaTypes = "vod", "series"
 ValidMediaTypes = Literal["vod", "series"]
 
 
-class StalkerQuery(NamedTuple):
+class MACQuery(NamedTuple):
     server: str
     type: ValidMediaTypes
 
@@ -38,8 +38,8 @@ class StalkerQuery(NamedTuple):
 DataT = list[dict[str, Any]]
 
 
-class StalkerContent(NamedTuple):
-    query: StalkerQuery
+class MACContent(NamedTuple):
+    query: MACQuery
     page: Optional[int]
     data: DataT
     total: int
@@ -47,7 +47,7 @@ class StalkerContent(NamedTuple):
     @classmethod
     def get_from(cls, flow: http.HTTPFlow) -> Optional[Self]:
         if (
-            (query := StalkerQuery.get_from(flow))
+            (query := MACQuery.get_from(flow))
             and (json_content := response_json(flow.response))
             and isinstance(json_content, dict)
             and (js := json_content.get("js"))
@@ -85,7 +85,7 @@ class AllUpdated(NamedTuple):
     all_names: dict[ValidMediaTypes, str] = {}
     all_updates: dict[ValidMediaTypes, str] = {}
 
-    def all_title(self, query: StalkerQuery) -> str:
+    def all_title(self, query: MACQuery) -> str:
         return self.all_names.get(query.type, "")
 
     def _days_ago(self, path: Path) -> str:
@@ -99,7 +99,7 @@ class AllUpdated(NamedTuple):
             case _:
                 return self.several_days % days
 
-    def update_all_title(self, query: StalkerQuery, path: Path) -> str:
+    def update_all_title(self, query: MACQuery, path: Path) -> str:
         return f"🔄 {self.all_updates.get(query.type)}\n{self._days_ago(path)}"
 
 
@@ -117,7 +117,7 @@ class CacheProgress(NamedTuple):
 UpdateCacheProgressT = Callable[[CacheProgress], None]
 
 
-class StalkerCache:
+class MACCache:
     encoding = "utf-8"
     cached_marker = "ListCached"
     cached_marker_bytes = cached_marker.encode()
@@ -135,15 +135,15 @@ class StalkerCache:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         logger.info("Cache is in '%s'", self.cache_dir)
 
-    def file_path(self, query: StalkerQuery) -> Path:
+    def file_path(self, query: MACQuery) -> Path:
         return self.cache_dir / sanitize_filename(f"{query.server}.{query.type}")
 
     @contextmanager
-    def file(self, query: StalkerQuery, mode: Literal["r", "w"]) -> Iterator[IO[str] | None]:
+    def file(self, query: MACQuery, mode: Literal["r", "w"]) -> Iterator[IO[str] | None]:
         path = self.file_path(query)
         with mutex.SystemWideMutex(f"file lock for {path}"):
             try:
-                with path.open(mode, encoding=StalkerCache.encoding) as file:
+                with path.open(mode, encoding=MACCache.encoding) as file:
                     logger.info("%s '%s'", "Load cache from" if mode == "r" else "Save cache in", file.name)
                     yield file
             except (PermissionError, FileNotFoundError):
@@ -151,10 +151,10 @@ class StalkerCache:
 
     def save_response(self, flow: http.HTTPFlow) -> None:
         if (
-            get_query_key(flow.request, "category") == StalkerCache.update_all_category
+            get_query_key(flow.request, "category") == MACCache.update_all_category
             and (response := flow.response)
-            and StalkerCache.cached_marker_bytes not in response.headers
-            and (content := StalkerContent.get_from(flow))
+            and MACCache.cached_marker_bytes not in response.headers
+            and (content := MACContent.get_from(flow))
         ):
             self.current_server = content.query.server
             if content.page == 1:
@@ -178,8 +178,8 @@ class StalkerCache:
             self.data = []
 
     def load_response(self, flow: http.HTTPFlow) -> None:
-        if get_query_key(flow.request, "category") == StalkerCache.cached_all_category and (
-            query := StalkerQuery.get_from(flow)
+        if get_query_key(flow.request, "category") == MACCache.cached_all_category and (
+            query := MACQuery.get_from(flow)
         ):
             with self.file(query, "r") as file:
                 if file:
@@ -187,14 +187,14 @@ class StalkerCache:
                         content=file.read(),
                         headers={
                             "Content-Type": "application/json",
-                            StalkerCache.cached_marker: "",
+                            MACCache.cached_marker: "",
                         },
                     )
 
     def inject_all_cached_category(self, flow: http.HTTPFlow):
         # pylint: disable=too-many-boolean-expressions
         if (
-            (query := StalkerQuery.get_from(flow))
+            (query := MACQuery.get_from(flow))
             and (response := flow.response)
             and (json_content := response_json(response))
             and isinstance(json_content, dict)
@@ -203,17 +203,17 @@ class StalkerCache:
             and categories
             and (all_category := categories[0])
             and isinstance(all_category, dict)
-            and (all_category.get("id") == StalkerCache.update_all_category)
+            and (all_category.get("id") == MACCache.update_all_category)
         ):
             all_title = self.all_updated.all_title(query)
             logger.info("Rename '%s' category for '%s'", all_title, query.server)
             all_category["title"] = all_title
             if (path := self.file_path(query)) and path.is_file():
-                all_category["id"] = StalkerCache.cached_all_category
+                all_category["id"] = MACCache.cached_all_category
                 update_all_category = dict(
-                    alias=StalkerCache.update_all_category,
+                    alias=MACCache.update_all_category,
                     censored=0,
-                    id=StalkerCache.update_all_category,
+                    id=MACCache.update_all_category,
                     title=self.all_updated.update_all_title(query, path),
                 )
                 categories.insert(1, update_all_category)
