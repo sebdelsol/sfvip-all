@@ -4,7 +4,17 @@ import time
 from contextlib import contextmanager
 from enum import Enum, auto
 from pathlib import Path
-from typing import IO, Any, Callable, Iterator, Literal, NamedTuple, Optional, Self
+from typing import (
+    IO,
+    Any,
+    Callable,
+    Iterator,
+    Literal,
+    NamedTuple,
+    Optional,
+    Self,
+    TypeVar,
+)
 
 from mitmproxy import http
 
@@ -33,49 +43,6 @@ class MACQuery(NamedTuple):
                 type=media_type,
             )
         return None
-
-
-DataT = list[dict[str, Any]]
-
-
-class MACContent(NamedTuple):
-    query: MACQuery
-    page: Optional[int]
-    data: DataT
-    total: int
-
-    @classmethod
-    def get_from(cls, flow: http.HTTPFlow) -> Optional[Self]:
-        if (
-            (query := MACQuery.get_from(flow))
-            and (json_content := response_json(flow.response))
-            and isinstance(json_content, dict)
-            and (js := json_content.get("js"))
-            and isinstance(js, dict)
-        ):
-            return cls(
-                query=query,
-                page=get_int(get_query_key(flow.request, "p")),
-                data=js.get("data", []),
-                total=js.get("total_items", 0),
-            )
-        return None
-
-    # TODO clean: extend data in this class ?
-    def final(self, data: DataT) -> dict[str, dict[str, Any]]:
-        return {
-            "js": dict(
-                max_page_items=self.total,
-                total_items=self.total,
-                data=data,
-            )
-        }
-
-
-def sanitize_filename(filename: str) -> str:
-    for char in "/?<>\\:*|":
-        filename = filename.replace(char, ".")
-    return filename
 
 
 class AllUpdated(NamedTuple):
@@ -116,6 +83,60 @@ class CacheProgress(NamedTuple):
 
 UpdateCacheProgressT = Callable[[CacheProgress], None]
 
+DataT = list[dict[str, Any]]
+T = TypeVar("T")
+
+
+def get_js(response: http.Response, wanted_type: type[T]) -> Optional[T]:
+    if (
+        (json_content := response_json(response))
+        and isinstance(json_content, dict)
+        and (js := json_content.get("js"))
+        and isinstance(js, wanted_type)
+        and js
+    ):
+        return js
+    return None
+
+
+def set_js(obj: Any) -> dict[str, Any]:
+    return {"js": obj}
+
+
+class MACContent:
+    def __init__(self, update_progress: UpdateCacheProgressT) -> None:
+        self.data: DataT = []
+        self.progress_step = ProgressStep(step=0.0005)
+        self.update_progress = update_progress
+
+    def extend(self, flow: http.HTTPFlow) -> Optional[dict]:
+        if flow.response and (js := get_js(flow.response, dict)):
+            data = js.get("data", [])
+            total = js.get("total_items", 0)
+            page = get_int(get_query_key(flow.request, "p"))
+            self.data.extend(data)
+            if page == 1:  # page
+                self.progress_step.set_total(total)
+                self.update_progress(CacheProgress(CacheProgressEvent.START))
+            if self.progress_step and (progress := self.progress_step.progress(len(self.data))):
+                self.update_progress(CacheProgress(CacheProgressEvent.SHOW, progress))
+            if len(self.data) >= total:
+                self.update_progress(CacheProgress(CacheProgressEvent.STOP))
+                return set_js(
+                    dict(
+                        max_page_items=total,
+                        total_items=total,
+                        data=self.data,
+                    )
+                )
+        return None
+
+
+def sanitize_filename(filename: str) -> str:
+    for char in "/?<>\\:*|":
+        filename = filename.replace(char, ".")
+    return filename
+
 
 class MACCache:
     encoding = "utf-8"
@@ -126,8 +147,7 @@ class MACCache:
 
     def __init__(self, roaming: Path, update_progress: UpdateCacheProgressT, all_updated: AllUpdated) -> None:
         self.data: DataT = []
-        self.current_server = None
-        self.progress_step = None
+        self.contents: dict[str, MACContent] = {}
         self.update_progress = update_progress
         self.all_updated = all_updated
         # TODO clean unused cache ?
@@ -154,28 +174,20 @@ class MACCache:
             get_query_key(flow.request, "category") == MACCache.update_all_category
             and (response := flow.response)
             and MACCache.cached_marker_bytes not in response.headers
-            and (content := MACContent.get_from(flow))
+            and (query := MACQuery.get_from(flow))
         ):
-            self.current_server = content.query.server
-            if content.page == 1:
-                self.data = content.data
-                self.progress_step = ProgressStep(step=0.0005, total=content.total)
-                self.update_progress(CacheProgress(CacheProgressEvent.START))
-            else:
-                self.data.extend(content.data)
-            if self.progress_step and (progress := self.progress_step.progress(len(self.data))):
-                self.update_progress(CacheProgress(CacheProgressEvent.SHOW, progress))
-            # are we done ?
-            if len(self.data) >= content.total:
-                self.update_progress(CacheProgress(CacheProgressEvent.STOP))
-                with self.file(content.query, "w") as file:
+            if query.server not in self.contents:
+                self.contents[query.server] = MACContent(self.update_progress)
+            if final := self.contents[query.server].extend(flow):
+                with self.file(query, "w") as file:
                     if file:
-                        file.write(json.dumps(content.final(self.data)))
+                        file.write(json.dumps(final))
+                        del self.contents[query.server]
 
     def stop(self, flow: http.HTTPFlow) -> None:
-        if flow.request.host_header == self.current_server:
+        if (server := flow.request.host_header) in self.contents:
             self.update_progress(CacheProgress(CacheProgressEvent.STOP))
-            self.data = []
+            del self.contents[server]
 
     def load_response(self, flow: http.HTTPFlow) -> None:
         if get_query_key(flow.request, "category") == MACCache.cached_all_category and (
@@ -196,11 +208,7 @@ class MACCache:
         if (
             (query := MACQuery.get_from(flow))
             and (response := flow.response)
-            and (json_content := response_json(response))
-            and isinstance(json_content, dict)
-            and (categories := json_content.get("js"))
-            and isinstance(categories, list)
-            and categories
+            and (categories := get_js(response, list))
             and (all_category := categories[0])
             and isinstance(all_category, dict)
             and (all_category.get("id") == MACCache.update_all_category)

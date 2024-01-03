@@ -49,6 +49,9 @@ class ProgressStep:
     def increment_total(self, increment: float):
         self._total += increment
 
+    def set_total(self, total: float) -> None:
+        self._total = total
+
     def progress(self, current: float) -> Optional[float]:
         progress = current / (self._total or 1)
         if progress - self._last >= self._step:

@@ -1,5 +1,6 @@
 __pycache__/
 .sfvip*/
+test/
 temp/
 *.log
 api_keys.py

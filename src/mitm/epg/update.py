@@ -4,7 +4,6 @@ import logging
 import multiprocessing
 import tempfile
 import time
-import traceback
 import unicodedata
 from enum import Enum, auto
 from pathlib import Path
@@ -42,7 +41,7 @@ StoppingT = Callable[[], bool]
 
 def _normalize(name: str) -> str:
     name = name.lower()
-    for char in ".-/(){}[]: ":
+    for char in "*,.-/(){}[]: ":
         name = name.replace(char, "")
     name = name.replace("+", "plus")
     # remove accents
@@ -59,11 +58,15 @@ def _valid_url(url: str) -> bool:
 
 
 class EPGupdate(NamedTuple):
+    _chunk_size = 1024 * 128
     channels: dict[str, list[InternalProgramme]] = {}
 
     @classmethod
     def _get(cls, url: str, update_status: UpdateStatusT, stopping: StoppingT, timeout: int) -> Optional[Self]:
         try:
+            if Path(url).is_file():  # for debug purpose
+                return cls._process(Path(url), url, update_status, stopping)
+
             update_status(EPGProgress(EPGstatus.LOADING))
             with tempfile.TemporaryDirectory() as temp_dir:
                 with requests.get(url, stream=True, timeout=timeout) as response:
@@ -72,17 +75,16 @@ class EPGupdate(NamedTuple):
                     with xml.open(mode="wb") as f:
                         total_size = int(response.headers.get("Content-Length", 0))
                         progress_step = ProgressStep(total=total_size) if total_size else None
-                        chunk_size = 1024 * 128
-                        for i, chunk in enumerate(response.iter_content(chunk_size=chunk_size)):
+                        for i, chunk in enumerate(response.iter_content(chunk_size=EPGupdate._chunk_size)):
                             if stopping():
                                 break
-                            if progress_step and (progress := progress_step.progress(i * chunk_size)):
+                            if progress_step and (progress := progress_step.progress(i * EPGupdate._chunk_size)):
                                 update_status(EPGProgress(EPGstatus.LOADING, progress))
                             f.write(chunk)
                         else:
                             return cls._process(xml, url, update_status, stopping)
-        except (requests.RequestException, gzip.BadGzipFile, ET.ParseError):
-            logger.error(traceback.format_exc())  # for debug
+        except (requests.RequestException, gzip.BadGzipFile, ET.ParseError) as error:
+            logger.error("%s", error)
         return None
 
     @classmethod
@@ -90,6 +92,7 @@ class EPGupdate(NamedTuple):
         update_status(EPGProgress(EPGstatus.PROCESSING))
         with gzip.GzipFile(xml) if url.endswith(".gz") else xml.open("rb") as f:
             channels: dict[str, list[InternalProgramme]] = {}
+            normalized: dict[str, str] = {}
             progress_step = ProgressStep()
             elem: ET.ElementBase
             title: str = ""
@@ -108,13 +111,14 @@ class EPGupdate(NamedTuple):
                     case "channel":
                         progress_step.increment_total(1)
                     case "title":
-                        title = elem.text
+                        title = elem.text or ""  # child of <programme>
                     case "desc":
-                        desc = elem.text
+                        desc = elem.text or ""  # child of <programme>
                     case "programme":
-                        if channel := elem.get("channel", None):
-                            channel = _normalize(channel)
-                            if channel not in channels:
+                        if channel_id := elem.get("channel", None):
+                            if channel_id not in normalized:
+                                normalized[channel_id] = _normalize(channel_id)
+                            if (channel := normalized[channel_id]) not in channels:
                                 channels[channel] = []
                                 if progress := progress_step.progress(len(channels)):
                                     update_status(EPGProgress(EPGstatus.PROCESSING, progress))
@@ -122,8 +126,8 @@ class EPGupdate(NamedTuple):
                                 InternalProgramme(
                                     start=elem.get("start", ""),
                                     stop=elem.get("stop", ""),
-                                    title=title,
-                                    desc=desc,
+                                    title=title or "",
+                                    desc=desc or "",
                                 )
                             )
                         title = ""
@@ -136,11 +140,10 @@ class EPGupdate(NamedTuple):
     @classmethod
     def from_url(cls, url: str, update_status: UpdateStatusT, stopping: StoppingT, timeout: int) -> Self:
         if url:
-            if _valid_url(url):
+            if _valid_url(url) or Path(url).is_file():
                 logger.info("Load epg channels from '%s'", url)
                 if (update := cls._get(url, update_status, stopping, timeout)) is not None:
-                    logger.info("Epg channels updated from '%s'", url)
-                    logger.info("%s Epg channels found", len(update.channels))
+                    logger.info("%s Epg channels found from '%s'", len(update.channels), url)
                     update_status(EPGProgress(EPGstatus.READY))
                     return update
                 update_status(EPGProgress(EPGstatus.FAILED))
@@ -149,6 +152,9 @@ class EPGupdate(NamedTuple):
         else:
             update_status(EPGProgress(EPGstatus.NO_EPG))
         return cls()
+
+    def has_programmes(self, channel: str) -> bool:
+        return bool(self.channels.get(_normalize(channel)))
 
     def get_programmes(self, channel: str) -> Iterator[dict[str, str]]:
         now = time.time()
