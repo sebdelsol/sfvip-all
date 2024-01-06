@@ -66,6 +66,11 @@ You need to have [**Visual Studio Community Edition**](https://www.visualstudio.
 
 <img src="resources/VS.png">
 
+### Build an ***x86*** version
+You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
+```console
+rustup target add i686-pc-windows-msvc
+```
 ### Build a specific version
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]

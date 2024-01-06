@@ -78,13 +78,14 @@ class LocalProxies:
     _mitmproxy_start_timeout = 5
 
     def __init__(self, app_info: AppInfo, inject_in_live: bool, upstreams: set[str], ui: UI) -> None:
-        self._epg_updater = EpgUpdater(app_info.config, self.epg_update, ui)
+        self._epg_updater = EpgUpdater(app_info.config, self.epg_update, self.epg_confidence_update, ui)
         self._cache_progress = CacheProgressListener(ui)
         self._addon = SfVipAddOn(
             get_all_name(inject_in_live),
             get_all_updated(),
             app_info.roaming,
             self._epg_updater.update_status,
+            self._epg_updater.add_channel_found,
             self._cache_progress.update_progress,
             app_info.config.EPG.requests_timeout,
         )
@@ -99,6 +100,9 @@ class LocalProxies:
 
     def epg_update(self, url: str) -> None:
         self._addon.epg_update(url)
+
+    def epg_confidence_update(self, confidence: int) -> None:
+        self._addon.epg_confidence_update(confidence)
 
     def __enter__(self) -> Self:
         with self._bind_free_ports:

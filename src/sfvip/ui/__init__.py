@@ -1,9 +1,10 @@
 import ctypes
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, ttk
 from typing import Callable, Optional, Sequence
 
 from ...mitm.epg.update import EPGProgress
+from .hover_msg import HoverMessageWindow
 from .infos import AppInfo, Info, InfosWindow
 from .logo import LogoWindow, PulseReason
 from .progress import ProgressBar
@@ -15,16 +16,20 @@ from .window import AskWindow, MessageWindow, Window
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 
+# pylint: disable=too-many-instance-attributes
 class UI(tk.Tk):
     """basic UI with a tk mainloop, the app has to run in a thread"""
 
     def __init__(self, app_info: AppInfo) -> None:
         super().__init__()
+        style = ttk.Style()
+        style.theme_use("clam")  # do not change after pls
         self.withdraw()  # we rely on some StickyWindow instead
         self._splash_img = tk.PhotoImage(file=app_info.splash)  # keep a reference for tk
         self.wm_iconphoto(True, self._splash_img)
         self.progress_bar = ProgressBar()
         self.splash = SplashWindow(self._splash_img)
+        self.hover_message = HoverMessageWindow()
         self._infos = InfosWindow(app_info)
         self._logo = LogoWindow(app_info.logo, self._infos)
         Window.set_logo(app_info.logo)
@@ -50,6 +55,9 @@ class UI(tk.Tk):
 
     def set_epg_status(self, epg_status: EPGProgress) -> None:
         self._infos.set_epg_status(epg_status)
+
+    def set_epg_confidence_update(self, confidence: int, callback: Callable[[int], None]) -> None:
+        self._infos.set_epg_confidence_update(confidence, callback)
 
     def set_app_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
         self._infos.set_app_auto_update(is_checked, callback)

@@ -1,3 +1,8 @@
+## 1.4.12.7
+* Better match with external EPG channels.
+* External EPG confidence slider (for fuzzy matches cutoff).
+* Show confidence level when an EPG channel is found.
+
 ## 1.4.12.6
 * Fix external EPG that failed to download (because of missing headers content length).
 

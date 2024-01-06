@@ -36,6 +36,8 @@
   "NoEpg": "Nessun EPG",
   "EpgUrl": "EPG esterno",
   "InvalidUrl": "URL non valido",
+  "EpgConfidence": "Livello di confidenza EPG",
+  "EPGFoundConfidence": "Canale trovato nell'EPG esterno con confidenza %s",
   "UpdatedToday": "Aggiornato oggi",
   "Updated1DayAgo": "Aggiornato 1 giorno fa",
   "UpdatedDaysAgo": "Aggiornato %s giorni fa",

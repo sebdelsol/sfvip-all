@@ -7,7 +7,7 @@ from typing import Optional
 from mitmproxy import http
 
 from ..cache import AllUpdated, MACCache, UpdateCacheProgressT
-from ..epg import EPG, UpdateStatusT
+from ..epg import EPG, ChannelFoundT, UpdateStatusT
 from ..utils import get_query_key, response_json
 from .all import AllCategoryName, AllPanels
 
@@ -54,15 +54,19 @@ class SfVipAddOn:
         all_updated: AllUpdated,
         roaming: Path,
         update_status: UpdateStatusT,
+        channel_found: ChannelFoundT,
         update_progress: UpdateCacheProgressT,
         timeout: int,
     ) -> None:
         self.mac_cache = MACCache(roaming, update_progress, all_updated)
-        self.epg = EPG(update_status, timeout)
+        self.epg = EPG(update_status, channel_found, timeout)
         self.panels = AllPanels(all_name)
 
     def epg_update(self, url: str):
         self.epg.ask_update(url)
+
+    def epg_confidence_update(self, confidence: int):
+        self.epg.update_confidence(confidence)
 
     def running(self) -> None:
         self.epg.start()
@@ -92,6 +96,10 @@ class SfVipAddOn:
         if flow.response and not flow.response.stream:
             if action := self.is_api_request(flow.request):
                 match action:
+                    # TODO
+                    # case "get_all_channels":
+                    #     tt = response_json(flow.response)
+                    #     print()
                     case "get_series_info":
                         fix_series_info(flow.response)
                     case "get_live_streams":

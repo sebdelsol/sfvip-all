@@ -12,6 +12,7 @@ from .widgets import (
     Border,
     Button,
     CheckBox,
+    HorizontalScale,
     ListView,
     get_border,
     set_vscrollbar_style,
@@ -31,6 +32,7 @@ class Info(NamedTuple):
 class _InfoTheme:
     pad = 2
     button_pad = 7
+    bg_interact = "#1F1F1F"
     bg_headers = "#242424"
     bg_rows = "#2A2A2A"
     separator = "#303030"
@@ -130,7 +132,15 @@ def _epg() -> Style:
 
 
 def _epg_url() -> Style:
-    return _InfoStyle.app("").smaller(2).grey
+    return _InfoStyle.app("").smaller(2).no_truncate.grey
+
+
+def _epg_confidence_label() -> Style:
+    return _InfoStyle.app(LOC.EpgConfidence).no_truncate.grey
+
+
+def _epg_confidence(confidence: int) -> Style:
+    return _InfoStyle.app(f"{confidence}%").no_truncate.grey
 
 
 def _epg_status_styles(progress: str) -> dict[EPGstatus | None, Style]:
@@ -142,10 +152,6 @@ def _epg_status_styles(progress: str) -> dict[EPGstatus | None, Style]:
         EPGstatus.NO_EPG: _InfoStyle.app(LOC.NoEpg).grey,
         EPGstatus.INVALID_URL: _InfoStyle.app(LOC.InvalidUrl).red,
     }
-
-
-def _epg_width() -> int:
-    return max(len(style.to_tk["text"]) for style in _epg_status_styles(" 100%").values())
 
 
 def _epg_status(epg_status: EPGProgress) -> Style:
@@ -259,13 +265,32 @@ class InfosWindow(_ProxiesWindow):
         epg_label = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_epg().to_tk)
         self._epg_url = tk.Entry(
             epg_frame,
-            bg=_InfoTheme.bg_headers,
+            bg=_InfoTheme.bg_interact,
             disabledbackground=_InfoTheme.bg_rows,
             **_epg_url().to_tk,
-            insertbackground="white",
+            insertbackground="grey",
+            borderwidth=0,
+            highlightthickness=0,
             width=50,
         )
-        self._epg_status = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, width=_epg_width())
+        self._epg_status = tk.Label(epg_frame, bg=_InfoTheme.bg_rows)
+        epg_confidence_frame = tk.Frame(frame, bg=_InfoTheme.bg_rows)
+        epg_confidence_label = tk.Label(
+            epg_confidence_frame, bg=_InfoTheme.bg_rows, **_epg_confidence_label().to_tk
+        )
+        self._epg_confidence = tk.Label(epg_confidence_frame, bg=_InfoTheme.bg_rows, width=4, anchor=tk.E)
+        self._epg_confidence_slider = HorizontalScale(
+            epg_confidence_frame,
+            from_=0,
+            to=100,
+            bg=_InfoTheme.bg_rows,
+            trough_color=_InfoTheme.bg_interact,
+            trough_height=3,
+            slider_width=7,
+            slider_height=10,
+            slider_color="grey",
+            slider_color_active="white",
+        )
         separator5 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
         row = 0
@@ -297,8 +322,13 @@ class InfosWindow(_ProxiesWindow):
         row += 1
         epg_frame.grid(row=row, columnspan=3, sticky=tk.NSEW)
         epg_label.pack(padx=pad, side=tk.LEFT)
-        self._epg_url.pack(pady=pad, side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self._epg_url.pack(pady=pad * 2, side=tk.LEFT, fill=tk.BOTH, expand=True)
         self._epg_status.pack(padx=pad, side=tk.LEFT)
+        row += 1
+        epg_confidence_frame.grid(row=row, columnspan=3, sticky=tk.NSEW)
+        epg_confidence_label.pack(padx=pad, side=tk.LEFT)
+        self._epg_confidence_slider.pack(pady=pad, side=tk.LEFT, fill=tk.X, expand=True)
+        self._epg_confidence.pack(padx=pad, side=tk.LEFT)
         row += 1
         separator5.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
@@ -315,6 +345,22 @@ class InfosWindow(_ProxiesWindow):
     def set_epg_status(self, epg_status: EPGProgress) -> None:
         self._epg_url.config(state=tk.DISABLED if epg_status.status is EPGstatus.LOADING else tk.NORMAL)
         self._epg_status.config(**_epg_status(epg_status).to_tk)
+
+    def set_epg_confidence_update(self, confidence: int, callback: Callable[[int], None]) -> None:
+        def _callback(event: tk.Event) -> None:
+            try:
+                confidence = round(self._epg_confidence_slider.get())
+                self._epg_confidence.config(**_epg_confidence(confidence).to_tk)
+                if event.type == tk.EventType.ButtonRelease:
+                    callback(confidence)
+            except ValueError:
+                pass
+
+        confidence = max(0, min(confidence, 100))
+        self._epg_confidence_slider.set(confidence)
+        self._epg_confidence.config(**_epg_confidence(confidence).to_tk)
+        self._epg_confidence_slider.bind("<ButtonRelease-1>", _callback)
+        self._epg_confidence_slider.bind("<B1-Motion>", _callback)
 
     def set_app_update(
         self,

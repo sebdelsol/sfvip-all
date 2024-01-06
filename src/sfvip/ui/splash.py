@@ -9,7 +9,7 @@ class SplashWindow(StickyWindow):
     """splash screen"""
 
     _bg = "black"  # color for set_click_through
-    _offset = Offset(centered=True)
+    _offset = Offset(center=(0.5, 0.5))
 
     def __init__(self, image: tk.PhotoImage) -> None:
         super().__init__(SplashWindow._offset, bg=SplashWindow._bg)

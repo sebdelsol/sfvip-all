@@ -6,9 +6,7 @@ from .ui import UI
 
 class CacheProgressListener:
     def __init__(self, ui: UI) -> None:
-        self._cache_progress_job_runner = JobRunner[CacheProgress](
-            self._on_progress_changed, "Cache progress listener"
-        )
+        self._cache_progress_job_runner = JobRunner[CacheProgress](self._on_progress_changed, "Cache progress job")
         self._ui = ui
 
     @property

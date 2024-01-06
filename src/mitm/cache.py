@@ -122,13 +122,7 @@ class MACContent:
                 self.update_progress(CacheProgress(CacheProgressEvent.SHOW, progress))
             if len(self.data) >= total:
                 self.update_progress(CacheProgress(CacheProgressEvent.STOP))
-                return set_js(
-                    dict(
-                        max_page_items=total,
-                        total_items=total,
-                        data=self.data,
-                    )
-                )
+                return set_js(dict(max_page_items=total, total_items=total, data=self.data))
         return None
 
 

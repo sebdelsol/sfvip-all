@@ -31,7 +31,6 @@ def _get_bar_style() -> str:
     fg = "#1c8cbc"
     bar_style_name = "bar.Horizontal.TProgressbar"
     style = ttk.Style()
-    style.theme_use("clam")
     style.configure(bar_style_name, troughcolor=bg, bordercolor=bg, background=fg, lightcolor=fg, darkcolor=fg)
     return bar_style_name
 

@@ -2,21 +2,21 @@
 import gzip
 import logging
 import multiprocessing
+import re
 import tempfile
-import time
-import unicodedata
 from enum import Enum, auto
 from pathlib import Path
-from typing import Callable, Iterator, NamedTuple, Optional, Self
+from typing import IO, Callable, Iterator, NamedTuple, Optional, Self
 from urllib.parse import urlparse
 
 import lxml.etree as ET
 import requests
+from thefuzz import fuzz, process
 
 from shared.job_runner import JobRunner
 
 from ..utils import ProgressStep
-from .programme import EPGprogramme, InternalProgramme
+from .programme import InternalProgramme
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +40,10 @@ StoppingT = Callable[[], bool]
 
 
 def _normalize(name: str) -> str:
-    name = name.lower()
-    for char in "*,.-/(){}[]: ":
-        name = name.replace(char, "")
-    name = name.replace("+", "plus")
-    # remove accents
-    nfkd_form = unicodedata.normalize("NFKD", name)
-    return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
+    name = re.sub(r"(\.)([\d]+)", r"\2", name)  # turn channel.2 into channel2
+    for sub, repl in (".+", "plus"), ("+", "plus"), ("*", "star"):
+        name = name.replace(sub, repl)
+    return name
 
 
 def _valid_url(url: str) -> bool:
@@ -55,6 +52,56 @@ def _valid_url(url: str) -> bool:
         return bool(result.scheme and result.netloc and result.scheme in ("http", "https"))
     except ValueError:
         return False
+
+
+def parse_programme(
+    file_obj: IO[bytes] | gzip.GzipFile,
+    handle_channel: Callable[[str, str], None],
+    handle_programme: Callable[[str, InternalProgramme], None],
+) -> Iterator[None]:
+    display_name: Optional[str] = None
+    elem: ET.ElementBase
+    title: str = ""
+    desc: str = ""
+    for _, elem in ET.iterparse(
+        file_obj,
+        events=("end",),
+        tag=("channel", "display-name", "programme", "title", "desc"),
+        remove_blank_text=True,
+        remove_comments=True,
+        remove_pis=True,
+    ):
+        match elem.tag:
+            case "display-name":  # child of <channel>
+                display_name = elem.text
+            case "channel":
+                if display_name and (channel_id := elem.get("id", None)):
+                    handle_channel(channel_id, display_name)
+                display_name = None
+            case "title":  # child of <programme>
+                title = elem.text or ""
+            case "desc":  # child of <programme>
+                desc = elem.text or ""
+            case "programme":
+                if channel_id := elem.get("channel", None):
+                    handle_programme(
+                        channel_id,
+                        InternalProgramme(
+                            start=elem.get("start", ""),
+                            stop=elem.get("stop", ""),
+                            title=title or "",
+                            desc=desc or "",
+                        ),
+                    )
+                title = ""
+                desc = ""
+        elem.clear(False)
+        yield
+
+
+class FoundProgammes(NamedTuple):
+    list: list[InternalProgramme]
+    confidence: int
 
 
 class EPGupdate(NamedTuple):
@@ -92,50 +139,31 @@ class EPGupdate(NamedTuple):
         update_status(EPGProgress(EPGstatus.PROCESSING))
         with gzip.GzipFile(xml) if url.endswith(".gz") else xml.open("rb") as f:
             channels: dict[str, list[InternalProgramme]] = {}
+            display_names: dict[str, str] = {}
             normalized: dict[str, str] = {}
             progress_step = ProgressStep()
-            elem: ET.ElementBase
-            title: str = ""
-            desc: str = ""
-            for _, elem in ET.iterparse(
-                f,
-                events=("end",),
-                tag=("channel", "programme", "title", "desc"),
-                remove_blank_text=True,
-                remove_comments=True,
-                remove_pis=True,
-            ):
+
+            def handle_channel(channel_id: str, display_name: str) -> None:
+                progress_step.increment_total(1)
+                display_names[channel_id] = display_name
+
+            def handle_programme(channel_id: str, programme: InternalProgramme) -> None:
+                if channel_id not in normalized:
+                    normalized[channel_id] = _normalize(channel_id)
+                if (channel := normalized[channel_id]) not in channels:
+                    channels[channel] = []
+                    if display_name := display_names.get(channel_id):
+                        if display_name not in channels:
+                            channels[_normalize(display_name)] = channels[channel]
+                    if progress := progress_step.increment_progress(1):
+                        update_status(EPGProgress(EPGstatus.PROCESSING, progress))
+                channels[channel].append(programme)
+
+            for _ in parse_programme(f, handle_channel, handle_programme):
                 if stopping():
-                    break
-                match elem.tag:
-                    case "channel":
-                        progress_step.increment_total(1)
-                    case "title":
-                        title = elem.text or ""  # child of <programme>
-                    case "desc":
-                        desc = elem.text or ""  # child of <programme>
-                    case "programme":
-                        if channel_id := elem.get("channel", None):
-                            if channel_id not in normalized:
-                                normalized[channel_id] = _normalize(channel_id)
-                            if (channel := normalized[channel_id]) not in channels:
-                                channels[channel] = []
-                                if progress := progress_step.progress(len(channels)):
-                                    update_status(EPGProgress(EPGstatus.PROCESSING, progress))
-                            channels[channel].append(
-                                InternalProgramme(
-                                    start=elem.get("start", ""),
-                                    stop=elem.get("stop", ""),
-                                    title=title or "",
-                                    desc=desc or "",
-                                )
-                            )
-                        title = ""
-                        desc = ""
-                elem.clear(False)
-            else:
-                return cls(channels)
-            return None
+                    return None
+            logger.info("%s Epg channels found from '%s'", progress_step.total, url)
+            return cls(channels)
 
     @classmethod
     def from_url(cls, url: str, update_status: UpdateStatusT, stopping: StoppingT, timeout: int) -> Self:
@@ -143,7 +171,6 @@ class EPGupdate(NamedTuple):
             if _valid_url(url) or Path(url).is_file():
                 logger.info("Load epg channels from '%s'", url)
                 if (update := cls._get(url, update_status, stopping, timeout)) is not None:
-                    logger.info("%s Epg channels found from '%s'", len(update.channels), url)
                     update_status(EPGProgress(EPGstatus.READY))
                     return update
                 update_status(EPGProgress(EPGstatus.FAILED))
@@ -153,14 +180,26 @@ class EPGupdate(NamedTuple):
             update_status(EPGProgress(EPGstatus.NO_EPG))
         return cls()
 
-    def has_programmes(self, channel: str) -> bool:
-        return bool(self.channels.get(_normalize(channel)))
-
-    def get_programmes(self, channel: str) -> Iterator[dict[str, str]]:
-        now = time.time()
-        for programme in self.channels.get(_normalize(channel), ()):
-            if programme := EPGprogramme.from_programme(programme, now):
-                yield programme
+    def get_programmes(self, channel: str, confidence: int) -> Optional[FoundProgammes]:
+        if self.channels:
+            normalized = _normalize(channel)
+            if result := process.extractOne(
+                normalized,
+                self.channels.keys(),
+                scorer=fuzz.token_sort_ratio,
+                score_cutoff=100 - confidence,
+            ):
+                normalized, score = result[:2]
+                logger.info(
+                    "Found Epg %s for %s with confidence %s%% (cut off @%s%%)",
+                    normalized,
+                    channel,
+                    score,
+                    100 - confidence,
+                )
+                if programmes := self.channels.get(normalized):
+                    return FoundProgammes(programmes, int(score))
+        return None
 
 
 class EPGupdater(JobRunner[str]):

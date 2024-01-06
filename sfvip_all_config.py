@@ -20,6 +20,7 @@ class AppDefaultConfig(ConfigLoader):
 
     class EPG:
         url: str | None = None
+        confidence: int = 30
         requests_timeout: int = 5
 
     class AllCategory:

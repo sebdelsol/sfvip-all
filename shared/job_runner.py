@@ -9,17 +9,18 @@ logger = logging.getLogger(__name__)
 
 
 class _Jobs(Generic[T]):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, check_new: bool) -> None:
         self._objs: "multiprocessing.SimpleQueue[T | None]" = multiprocessing.SimpleQueue()
         self._stopping = multiprocessing.Event()
         self._running = multiprocessing.Event()
+        self._check_new = check_new
         self._last_obj: Optional[T] = None
         self._name = name
 
     def add_job(self, obj: T) -> None:
         if self._running.is_set():
             # check it's a different job
-            if obj != self._last_obj:
+            if not self._check_new or obj != self._last_obj:
                 # stop last job
                 self._stopping.set()
                 self._last_obj = obj
@@ -58,9 +59,9 @@ class JobRunner(Generic[T]):
     all following methods should be called from the same process EXCEPT add_job & wait_running
     """
 
-    def __init__(self, job: Callable[[T], None], name: str) -> None:
+    def __init__(self, job: Callable[[T], None], name: str, check_new: bool = True) -> None:
         self._job = job
-        self._jobs = _Jobs[T](name)
+        self._jobs = _Jobs[T](name, check_new)
         self._jobs_runner = None
 
     def _run_jobs(self) -> None:

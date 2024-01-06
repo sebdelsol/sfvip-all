@@ -22,7 +22,8 @@ def response_json(response: Optional[http.Response]) -> Any:
         if (
             response
             and (content := response.text)
-            and "application/json" in response.headers.get("content-type", "")
+            # could be other types like javascript
+            # and "application/json" in response.headers.get("content-type", "")
             and (content_json := json.loads(content))
         ):
             return content_json
@@ -43,14 +44,23 @@ def get_int(text: Optional[str]) -> Optional[int]:
 class ProgressStep:
     def __init__(self, step: float = 0.01, total: float = 0) -> None:
         self._total = total
+        self._current = 0
         self._last = 0
         self._step = step
+
+    @property
+    def total(self) -> float:
+        return self._total
 
     def increment_total(self, increment: float):
         self._total += increment
 
     def set_total(self, total: float) -> None:
         self._total = total
+
+    def increment_progress(self, increment: float) -> Optional[float]:
+        self._current += increment
+        return self.progress(self._current)
 
     def progress(self, current: float) -> Optional[float]:
         progress = current / (self._total or 1)

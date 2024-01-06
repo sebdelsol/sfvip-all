@@ -8,7 +8,6 @@ from .style import Style
 def set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
     """flat, no arrow, bg=color of slider"""
     style = ttk.Style()
-    style.theme_use("clam")
     style.layout(
         "Vertical.TScrollbar",
         [
@@ -34,6 +33,67 @@ def set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
     style.map("Vertical.TScrollbar", background=[("active", active_slider)])
 
 
+# pylint: disable=too-many-ancestors
+class HorizontalScale(ttk.Scale):
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        master: tk.BaseWidget,
+        from_: int,
+        to: int,
+        bg: str,
+        trough_color: str,
+        trough_height: int,
+        slider_width: int,
+        slider_height: int,
+        slider_color: str,
+        slider_color_active: str,
+    ) -> None:
+        scale_name = "custom.Horizontal.TScale"
+        slider_name = "custom.Horizontal.Scale.slider"
+        through_name = "custom.Horizontal.Scale.trough"
+        style = ttk.Style()
+        # need to keep refernces of tk.PhotoImage
+        self.through = tk.PhotoImage("through", width=1, height=slider_height, master=master)
+        self.set_img_color_middle(self.through, bg, trough_color, trough_height)
+        self.slider = tk.PhotoImage("slider", width=slider_width, height=slider_height, master=master)
+        self.set_img_color(self.slider, slider_color)
+        self.slider_active = tk.PhotoImage("slider2", width=slider_width, height=slider_height, master=master)
+        self.set_img_color(self.slider_active, slider_color_active)
+        style.element_create(slider_name, "image", self.slider, ("active", self.slider_active))
+        style.element_create(through_name, "image", self.through)
+        style.layout(
+            scale_name,
+            [
+                (
+                    through_name,
+                    {
+                        "sticky": "nswe",
+                        "children": [(slider_name, {"side": "left", "sticky": ""})],
+                    },
+                )
+            ],
+        )
+        super().__init__(master, from_=from_, to=to, style=scale_name, cursor="sb_h_double_arrow")
+
+    @staticmethod
+    def get_line(img: tk.PhotoImage, color: str) -> str:
+        return f"{{{' '.join(color for i in range(img.width()))}}}"
+
+    def set_img_color(self, img: tk.PhotoImage, color: str) -> None:
+        pixel_line = self.get_line(img, color)
+        pixels = " ".join(pixel_line for i in range(img.height()))
+        img.put(pixels)
+
+    def set_img_color_middle(self, img: tk.PhotoImage, color: str, color2: str, height: int) -> None:
+        pixel_line = self.get_line(img, color)
+        pixel_line2 = self.get_line(img, color2)
+        middle = int(round((img.height() - height) / 2))
+        middles = tuple(i + middle for i in range(height))
+        pixels = " ".join(pixel_line2 if i in middles else pixel_line for i in range(img.height()))
+        img.put(pixels)
+
+
 class Border(NamedTuple):
     bg: str
     size: float
@@ -44,7 +104,6 @@ def get_border(border: Border, **kwargs: Any) -> dict[str, Any]:
     return dict(highlightbackground=border.bg, highlightthickness=border.size, highlightcolor=border.bg, **kwargs)
 
 
-# pylint: disable=too-many-ancestors
 class _AutoScrollbar(ttk.Scrollbar):
     def set(self, first: float | str, last: float | str) -> None:
         if float(first) <= 0.0 and float(last) >= 1.0:
@@ -103,7 +162,7 @@ class Button(tk.Button):
         mouseover: str,
         border: Optional[Border] = None,
         attached_to: Optional[tk.Frame] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         # create a frame for the border, note: do not pack
         self._frame = tk.Frame(master, bg=bg, **(get_border(border) if border else {}))

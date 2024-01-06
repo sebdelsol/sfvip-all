@@ -8,7 +8,6 @@ def _get_bar_style(bg: str) -> str:
     fg = "#1c8cbc"
     bar_style_name = "bar.Horizontal.TProgressbar"
     style = ttk.Style()
-    style.theme_use("clam")
     style.configure(
         bar_style_name,
         troughcolor=bg,
@@ -23,9 +22,8 @@ def _get_bar_style(bg: str) -> str:
 class ProgressBar(StickyWindow):
     _bg = "#1c1b1a"
     _height = 10
-    _width_ratio = 2.35
-    _offsety = 53
-    _offset = Offset(centered=True, regular=(0, _offsety), maximized=(0, _offsety))
+    _width_ratio = 0.42
+    _offset = Offset(center=(0.5, 0.5), regular=(0, 53))
 
     def __init__(self) -> None:
         super().__init__(ProgressBar._offset, bg=ProgressBar._bg, takefocus=0)
@@ -39,7 +37,7 @@ class ProgressBar(StickyWindow):
         self._progressbar.pack(expand=True, fill=tk.BOTH)
 
     def change_position(self, rect: Rect) -> None:
-        w, h = round(rect.w / ProgressBar._width_ratio), ProgressBar._height
+        w, h = round(rect.w * ProgressBar._width_ratio), ProgressBar._height
         rect = rect.position(self._offset, w, h)
         self.geometry(rect.to_geometry())
 

@@ -1,5 +1,5 @@
 # packages to run the app for both environments
-mitmproxy>=10.1.5
+mitmproxy>=10.1.6
 watchdog>=3.0.0
 # for downloading the player and libmpv
 feedparser>=6.0.10
@@ -8,3 +8,4 @@ py-cpuinfo>=9.0.0
 requests>=2.31.0
 # for EPG
 lxml>=4.9.4
+thefuzz>=0.20.0

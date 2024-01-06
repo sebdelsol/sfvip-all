@@ -7,8 +7,8 @@ from ...winapi import monitor
 
 class Offset(NamedTuple):
     regular: tuple[int, int] = 0, 0
-    maximized: tuple[int, int] = 0, 0
-    centered: bool = False
+    maximized: Optional[tuple[int, int]] = None
+    center: tuple[float, float] = 0, 0
 
 
 infinity = float("inf")
@@ -25,10 +25,9 @@ class Rect(NamedTuple):
         return all(attr != infinity for attr in (self.x, self.y, self.w, self.h))
 
     def position(self, offset: Offset, w: int, h: int) -> Self:
-        x, y = offset.maximized if self.is_maximized else offset.regular
-        if offset.centered:
-            return self.__class__(self.x + x + (self.w - w) * 0.5, self.y + y + (self.h - h) * 0.5, w, h)
-        return self.__class__(self.x + x, self.y + y, w, h)
+        x, y = offset.maximized if (self.is_maximized and offset.maximized) else offset.regular
+        x_ratio, y_ratio = offset.center
+        return self.__class__(self.x + x + (self.w - w) * x_ratio, self.y + y + (self.h - h) * y_ratio, w, h)
 
     def to_geometry(self) -> str:
         return f"{self.w}x{self.h}+{self.x:.0f}+{self.y:.0f}"
@@ -115,6 +114,11 @@ class StickyWindows:
                 if state.rect != StickyWindows._current_rect:
                     StickyWindows._current_rect = state.rect
                     StickyWindows.change_position_all(Maximized.fix(state.rect))
+
+    @staticmethod
+    def update_position(win: StickyWindow) -> None:
+        if rect := StickyWindows._current_rect:
+            win.change_position(rect)
 
 
 class Maximized:

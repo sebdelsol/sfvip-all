@@ -1,5 +1,6 @@
 # nuitka-project: --include-module=mitmproxy_windows
 # nuitka-project: --enable-plugin=tk-inter
+# nuitka-project: --nofollow-import-to=numpy
 
 from src import set_logging
 
