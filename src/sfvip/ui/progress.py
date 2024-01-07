@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from .sticky import Offset, Rect, StickyWindow
+from .sticky import Offset, Rect, StickyWindow, offset_centered
 
 
 def _get_bar_style(bg: str) -> str:
@@ -23,7 +23,7 @@ class ProgressBar(StickyWindow):
     _bg = "#1c1b1a"
     _height = 10
     _width_ratio = 0.42
-    _offset = Offset(center=(0.5, 0.5), regular=(0, 53))
+    _offset = Offset(center=offset_centered, regular=(0, 53))
 
     def __init__(self) -> None:
         super().__init__(ProgressBar._offset, bg=ProgressBar._bg, takefocus=0)

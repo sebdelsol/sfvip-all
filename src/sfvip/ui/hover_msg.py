@@ -9,8 +9,8 @@ from .style import Style
 class HoverMessageWindow(StickyWindow):
     """splash screen"""
 
+    _bg = "#101010"
     _stl = Style().font("Calibri").font_size(14).bold
-    _bg = "#101010"  # color for set_click_through
     _offset = Offset(regular=(30, 35), center=(0.025, 0))
 
     def __init__(self) -> None:

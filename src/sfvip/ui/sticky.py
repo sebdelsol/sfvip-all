@@ -12,6 +12,7 @@ class Offset(NamedTuple):
 
 
 infinity = float("inf")
+offset_centered = (0.5, 0.5)
 
 
 class Rect(NamedTuple):
@@ -25,8 +26,8 @@ class Rect(NamedTuple):
         return all(attr != infinity for attr in (self.x, self.y, self.w, self.h))
 
     def position(self, offset: Offset, w: int, h: int) -> Self:
-        x, y = offset.maximized if (self.is_maximized and offset.maximized) else offset.regular
         x_ratio, y_ratio = offset.center
+        x, y = offset.maximized if (self.is_maximized and offset.maximized) else offset.regular
         return self.__class__(self.x + x + (self.w - w) * x_ratio, self.y + y + (self.h - h) * y_ratio, w, h)
 
     def to_geometry(self) -> str:
@@ -34,7 +35,7 @@ class Rect(NamedTuple):
 
     def is_middle_inside(self, rect: Self) -> bool:
         x, y = self.x + self.w * 0.5, self.y + self.h * 0.5
-        return rect.x <= x <= rect.x + rect.w and rect.y <= y <= rect.y + rect.h
+        return (rect.x <= x <= rect.x + rect.w) and (rect.y <= y <= rect.y + rect.h)
 
 
 class WinState(NamedTuple):

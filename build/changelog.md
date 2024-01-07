@@ -1,3 +1,6 @@
+## 1.4.12.8
+* Cleaner UI.
+
 ## 1.4.12.7
 * Better match with external EPG channels.
 * External EPG confidence slider (for fuzzy matches cutoff).

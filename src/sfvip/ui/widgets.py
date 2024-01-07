@@ -14,7 +14,12 @@ def set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
             (
                 "Vertical.Scrollbar.trough",
                 {
-                    "children": [("Vertical.Scrollbar.thumb", {"expand": "1", "sticky": "nswe"})],
+                    "children": [
+                        (
+                            "Vertical.Scrollbar.thumb",
+                            {"expand": "1", "sticky": "nswe"},
+                        )
+                    ],
                     "sticky": "ns",
                 },
             )
@@ -35,7 +40,9 @@ def set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
 
 # pylint: disable=too-many-ancestors
 class HorizontalScale(ttk.Scale):
-    # pylint: disable=too-many-arguments
+    _count = 0
+
+    # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
         self,
         master: tk.BaseWidget,
@@ -48,17 +55,19 @@ class HorizontalScale(ttk.Scale):
         slider_height: int,
         slider_color: str,
         slider_color_active: str,
+        length: int,
     ) -> None:
-        scale_name = "custom.Horizontal.TScale"
-        slider_name = "custom.Horizontal.Scale.slider"
-        through_name = "custom.Horizontal.Scale.trough"
+        scale_name = f"custom{HorizontalScale._count}.Horizontal.TScale"
+        slider_name = f"custom{HorizontalScale._count}.Horizontal.Scale.slider"
+        through_name = f"custom{HorizontalScale._count}.Horizontal.Scale.trough"
+        HorizontalScale._count += 1
         style = ttk.Style()
-        # need to keep refernces of tk.PhotoImage
+        # need to keep references of tk.PhotoImage
         self.through = tk.PhotoImage("through", width=1, height=slider_height, master=master)
-        self.set_img_color_middle(self.through, bg, trough_color, trough_height)
         self.slider = tk.PhotoImage("slider", width=slider_width, height=slider_height, master=master)
-        self.set_img_color(self.slider, slider_color)
         self.slider_active = tk.PhotoImage("slider2", width=slider_width, height=slider_height, master=master)
+        self.set_img_color_middle(self.through, bg, trough_color, trough_height)
+        self.set_img_color(self.slider, slider_color)
         self.set_img_color(self.slider_active, slider_color_active)
         style.element_create(slider_name, "image", self.slider, ("active", self.slider_active))
         style.element_create(through_name, "image", self.through)
@@ -74,24 +83,16 @@ class HorizontalScale(ttk.Scale):
                 )
             ],
         )
-        super().__init__(master, from_=from_, to=to, style=scale_name, cursor="sb_h_double_arrow")
+        super().__init__(master, from_=from_, to=to, style=scale_name, length=length)
 
     @staticmethod
-    def get_line(img: tk.PhotoImage, color: str) -> str:
-        return f"{{{' '.join(color for i in range(img.width()))}}}"
-
-    def set_img_color(self, img: tk.PhotoImage, color: str) -> None:
-        pixel_line = self.get_line(img, color)
-        pixels = " ".join(pixel_line for i in range(img.height()))
-        img.put(pixels)
+    def set_img_color(img: tk.PhotoImage, color: str) -> None:
+        img.put(color, to=(0, 0, img.width(), img.height()))  # type: ignore
 
     def set_img_color_middle(self, img: tk.PhotoImage, color: str, color2: str, height: int) -> None:
-        pixel_line = self.get_line(img, color)
-        pixel_line2 = self.get_line(img, color2)
+        self.set_img_color(img, color)
         middle = int(round((img.height() - height) / 2))
-        middles = tuple(i + middle for i in range(height))
-        pixels = " ".join(pixel_line2 if i in middles else pixel_line for i in range(img.height()))
-        img.put(pixels)
+        img.put(color2, to=(0, middle, img.width(), middle + height))  # type: ignore
 
 
 class Border(NamedTuple):
@@ -258,19 +259,132 @@ class ListView(tk.Frame):
             self._frame_rows.columnconfigure(column, minsize=width)
 
 
-class CheckBox(tk.Checkbutton):
-    def __init__(self, master: tk.BaseWidget, bg: str, **kwargs: Any) -> None:
+# TODO remove ?
+# class CheckBox(tk.Checkbutton):
+#     # pylint: disable=too-many-arguments
+#     def __init__(
+#         self,
+#         master: tk.BaseWidget,
+#         bg: str,
+#         box_color: str,
+#         indicator_colors: tuple[str, str],
+#         size: tuple[int, int],
+#         **kwargs: Any,
+#     ) -> None:
+#         self._checked = tk.BooleanVar()
+#         self._changed_callback = None
+
+#         w, h = size
+#         self.box = tk.PhotoImage("box", width=w, height=h, master=master)
+#         self.set_img_color(self.box, box_color, indicator_colors[0], False)
+#         self.box_selected = tk.PhotoImage("box_selected", width=w, height=h, master=master)
+#         self.set_img_color(self.box_selected, box_color, indicator_colors[1], True)
+
+#         super().__init__(
+#             master,
+#             bg=bg,
+#             bd=0,
+#             offrelief=tk.SUNKEN,
+#             padx=5,
+#             selectcolor=bg,
+#             activebackground=bg,
+#             activeforeground=kwargs.get("fg", "white"),
+#             variable=self._checked,
+#             command=self._on_check_changed,
+#             image=self.box,
+#             selectimage=self.box_selected,
+#             indicatoron=False,
+#             compound=tk.LEFT,
+#             **kwargs,
+#         )
+
+#     @staticmethod
+#     def set_img_color(img: tk.PhotoImage, fill_color: str, select_color: str, on: bool) -> None:
+#         w, h = img.width(), img.height()
+#         img.put(fill_color, to=(0, 0, w, h))  # type: ignore
+#         img.put(select_color, to=(w - h + 1, 1, w - 1, h - 1) if on else (1, 1, h - 1, h - 1))  # type: ignore
+
+#     def _on_check_changed(self) -> None:
+#         if self._changed_callback:
+#             self._changed_callback(self._checked.get())
+
+#     def set_callback(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+#         self._changed_callback = callback
+#         self._checked.set(is_checked)
+#         self._on_check_changed()
+
+
+class CheckBox(ttk.Checkbutton):
+    _count = 0
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        master: tk.BaseWidget,
+        bg: str,
+        box_color: str,
+        indicator_colors: tuple[str, str],
+        size: tuple[int, int],
+        **kwargs: Any,
+    ) -> None:
         self._checked = tk.BooleanVar()
         self._changed_callback = None
+        style = ttk.Style()
+        style_name = f"custom{CheckBox._count}.TCheckbutton"
+        tickbox_name = f"custom{CheckBox._count}.tickbox"
+        CheckBox._count += 1
+        style.configure(
+            style_name,
+            indicatorrelief=tk.FLAT,
+            borderwidth=0,
+            background=bg,
+            foreground=kwargs["fg"],
+            font=kwargs["font"],
+        )
+        w, h = size
+        self.box = tk.PhotoImage("box", width=w, height=h, master=master)
+        self.box_selected = tk.PhotoImage("box_selected", width=w, height=h, master=master)
+        self.set_img_color(self.box, box_color, indicator_colors[0], False)
+        self.set_img_color(self.box_selected, box_color, indicator_colors[1], True)
+        style.element_create(tickbox_name, "image", self.box, ("selected", self.box_selected))
+
+        style.layout(
+            style_name,
+            [
+                (
+                    "Checkbutton.padding",
+                    {
+                        "sticky": "nswe",
+                        "children": [
+                            (tickbox_name, {"side": "left", "sticky": ""}),
+                            (
+                                "Checkbutton.focus",
+                                {
+                                    "side": "left",
+                                    "sticky": "w",
+                                    "children": [("Checkbutton.label", {"sticky": "nswe"})],
+                                },
+                            ),
+                        ],
+                    },
+                )
+            ],
+        )
+        style.map(style_name, background=[("active", bg)])
         super().__init__(
             master,
-            bg=bg,
-            activebackground=bg,
-            activeforeground=kwargs.get("fg", "white"),
             variable=self._checked,
             command=self._on_check_changed,
-            **kwargs,
+            takefocus=False,
+            style=style_name,
+            text=f"  {kwargs['text']}",
         )
+
+    @staticmethod
+    def set_img_color(img: tk.PhotoImage, fill_color: str, select_color: str, on: bool) -> None:
+        w, h = img.width(), img.height()
+        img.put(fill_color, to=(0, 0, w, h))  # type: ignore
+        img.put(select_color, to=(w - h + 1, 1, w - 1, h - 1) if on else (1, 1, h - 1, h - 1))  # type: ignore
 
     def _on_check_changed(self) -> None:
         if self._changed_callback:

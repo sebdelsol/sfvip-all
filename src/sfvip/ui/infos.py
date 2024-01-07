@@ -40,14 +40,25 @@ class _InfoTheme:
     button = dict(bg="#1F1E1D", mouseover="#3F3F41", border=Border(bg="white", size=0.75, relief="groove"))
     listview = dict(bg_headers=bg_headers, bg_rows=bg_rows, bg_separator=separator)
     listview_scrollbar = dict(bg=bg_rows, slider="white", active_slider="grey")
+    checkbox = dict(box_color=bg_interact, indicator_colors=("grey", "#00A000"), size=(20, 8))
+    confidence_slider = dict(
+        trough_color=bg_interact,
+        trough_height=3,
+        slider_width=4,
+        slider_height=10,
+        slider_color="grey",
+        slider_color_active="white",
+        length=300,
+    )
+    url_entry = dict(insertbackground="grey", borderwidth=0, highlightthickness=0)
 
 
 class _InfoStyle:
     stl = Style().font("Calibri").font_size(12).max_width(30)
-    arrow = stl("➜").color("#555555").bigger(5)
-    upstream = stl.copy().color("#A0A0A0")
-    proxy = stl.copy().white
-    name = upstream.copy()
+    arrow = stl("⇨").color("#555555").bigger(4)
+    upstream = stl.copy().color("#A0A0A0").smaller(2)
+    proxy = stl.copy().color("#C0C0C0").smaller(2)
+    name = stl.copy().color("#A0A0A0")
     blank = stl("")
     app_warn = stl.copy().smaller(2).no_truncate
     app = stl.copy().smaller(2)
@@ -55,7 +66,7 @@ class _InfoStyle:
 
 def _get_infos_headers(app_name: str) -> Sequence[Style]:
     return (
-        _InfoStyle.name(LOC.User).bigger(2).bold,
+        _InfoStyle.name(LOC.User).bold,
         _InfoStyle.blank,
         _InfoStyle.proxy(LOC.Proxy % app_name).bigger(2).bold,
         _InfoStyle.blank,
@@ -93,17 +104,13 @@ def _get_app_button_text(action: Optional[str] = None, version: Optional[str] = 
     return _InfoStyle.app(f"{action or ''} v{version or ''}").no_truncate.white
 
 
-def _get_app_auto_update() -> Style:
+def _get_auto_update() -> Style:
     return _InfoStyle.app(LOC.CheckUpdate).grey
 
 
 def _get_libmpv_version(version: Optional[str] = None) -> Style:
     version = version if version else LOC.UnknownVersion
     return _InfoStyle.app(f"Libmpv {version}").grey
-
-
-def _get_libmpv_auto_update() -> Style:
-    return _InfoStyle.app(LOC.CheckUpdate).grey
 
 
 def _get_libmpv_button_text(action: Optional[str] = None, version: Optional[str] = None) -> Style:
@@ -117,10 +124,6 @@ def _get_player_button_text(action: Optional[str] = None, version: Optional[str]
 def _get_player_version(version: Optional[str] = None) -> Style:
     version = version if version else LOC.UnknownVersion
     return _InfoStyle.app(f"Sfvip Player v{version}").grey
-
-
-def _get_player_auto_update() -> Style:
-    return _InfoStyle.app(LOC.CheckUpdate).grey
 
 
 def _are_infos_valid(infos: Sequence[Info]) -> bool:
@@ -242,8 +245,6 @@ class InfosWindow(_ProxiesWindow):
     # pylint: disable=too-many-instance-attributes, too-many-statements, too-many-locals
     def __init__(self, app_info: AppInfo) -> None:
         super().__init__(app_info)
-        pad = _InfoTheme.pad
-        button_pad = _InfoTheme.button_pad
         frame = self._frame
         # widgets
         header_frame = tk.Frame(frame, bg=_InfoTheme.bg_headers)
@@ -251,14 +252,20 @@ class InfosWindow(_ProxiesWindow):
         separator = tk.Frame(frame, bg=_InfoTheme.separator)
         self._app_button = Button(frame, **_InfoTheme.button)  # type: ignore
         app_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_app_version(app_info).to_tk)
-        self._app_update = CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_app_auto_update().to_tk)
+        self._app_update = CheckBox(
+            frame, bg=_InfoTheme.bg_rows, **_InfoTheme.checkbox, **_get_auto_update().to_tk
+        )
         separator2 = tk.Frame(frame, bg=_InfoTheme.separator)
         self._player_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_player_version().to_tk)
-        self._player_update = CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_player_auto_update().to_tk)
+        self._player_update = CheckBox(
+            frame, bg=_InfoTheme.bg_rows, **_InfoTheme.checkbox, **_get_auto_update().to_tk
+        )
         self._player_button = Button(frame, **_InfoTheme.button)  # type: ignore
         separator3 = tk.Frame(frame, bg=_InfoTheme.separator)
         self._libmpv_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_libmpv_version().to_tk)
-        self._libmpv_update = CheckBox(frame, bg=_InfoTheme.bg_rows, **_get_libmpv_auto_update().to_tk)
+        self._libmpv_update = CheckBox(
+            frame, bg=_InfoTheme.bg_rows, **_InfoTheme.checkbox, **_get_auto_update().to_tk
+        )
         self._libmpv_button = Button(frame, **_InfoTheme.button)  # type: ignore
         separator4 = tk.Frame(frame, bg=_InfoTheme.separator)
         epg_frame = tk.Frame(frame, bg=_InfoTheme.bg_rows)
@@ -267,11 +274,8 @@ class InfosWindow(_ProxiesWindow):
             epg_frame,
             bg=_InfoTheme.bg_interact,
             disabledbackground=_InfoTheme.bg_rows,
+            **_InfoTheme.url_entry,
             **_epg_url().to_tk,
-            insertbackground="grey",
-            borderwidth=0,
-            highlightthickness=0,
-            width=50,
         )
         self._epg_status = tk.Label(epg_frame, bg=_InfoTheme.bg_rows)
         epg_confidence_frame = tk.Frame(frame, bg=_InfoTheme.bg_rows)
@@ -284,15 +288,12 @@ class InfosWindow(_ProxiesWindow):
             from_=0,
             to=100,
             bg=_InfoTheme.bg_rows,
-            trough_color=_InfoTheme.bg_interact,
-            trough_height=3,
-            slider_width=7,
-            slider_height=10,
-            slider_color="grey",
-            slider_color_active="white",
+            **_InfoTheme.confidence_slider,  # type:ignore
         )
         separator5 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
+        pad = _InfoTheme.pad
+        button_pad = _InfoTheme.button_pad
         row = 0
         header_frame.grid(row=row, columnspan=3, padx=pad, sticky=tk.NSEW)
         app_warn_label.pack(expand=True, anchor=tk.W)
