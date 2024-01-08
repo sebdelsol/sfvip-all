@@ -259,61 +259,6 @@ class ListView(tk.Frame):
             self._frame_rows.columnconfigure(column, minsize=width)
 
 
-# TODO remove ?
-# class CheckBox(tk.Checkbutton):
-#     # pylint: disable=too-many-arguments
-#     def __init__(
-#         self,
-#         master: tk.BaseWidget,
-#         bg: str,
-#         box_color: str,
-#         indicator_colors: tuple[str, str],
-#         size: tuple[int, int],
-#         **kwargs: Any,
-#     ) -> None:
-#         self._checked = tk.BooleanVar()
-#         self._changed_callback = None
-
-#         w, h = size
-#         self.box = tk.PhotoImage("box", width=w, height=h, master=master)
-#         self.set_img_color(self.box, box_color, indicator_colors[0], False)
-#         self.box_selected = tk.PhotoImage("box_selected", width=w, height=h, master=master)
-#         self.set_img_color(self.box_selected, box_color, indicator_colors[1], True)
-
-#         super().__init__(
-#             master,
-#             bg=bg,
-#             bd=0,
-#             offrelief=tk.SUNKEN,
-#             padx=5,
-#             selectcolor=bg,
-#             activebackground=bg,
-#             activeforeground=kwargs.get("fg", "white"),
-#             variable=self._checked,
-#             command=self._on_check_changed,
-#             image=self.box,
-#             selectimage=self.box_selected,
-#             indicatoron=False,
-#             compound=tk.LEFT,
-#             **kwargs,
-#         )
-
-#     @staticmethod
-#     def set_img_color(img: tk.PhotoImage, fill_color: str, select_color: str, on: bool) -> None:
-#         w, h = img.width(), img.height()
-#         img.put(fill_color, to=(0, 0, w, h))  # type: ignore
-#         img.put(select_color, to=(w - h + 1, 1, w - 1, h - 1) if on else (1, 1, h - 1, h - 1))  # type: ignore
-
-#     def _on_check_changed(self) -> None:
-#         if self._changed_callback:
-#             self._changed_callback(self._checked.get())
-
-#     def set_callback(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
-#         self._changed_callback = callback
-#         self._checked.set(is_checked)
-#         self._on_check_changed()
-
-
 class CheckBox(ttk.Checkbutton):
     _count = 0
 
@@ -329,12 +274,13 @@ class CheckBox(ttk.Checkbutton):
     ) -> None:
         self._checked = tk.BooleanVar()
         self._changed_callback = None
+        self._get_text = None
         style = ttk.Style()
-        style_name = f"custom{CheckBox._count}.TCheckbutton"
+        self.style_name = f"custom{CheckBox._count}.TCheckbutton"
         tickbox_name = f"custom{CheckBox._count}.tickbox"
         CheckBox._count += 1
         style.configure(
-            style_name,
+            self.style_name,
             indicatorrelief=tk.FLAT,
             borderwidth=0,
             background=bg,
@@ -342,14 +288,15 @@ class CheckBox(ttk.Checkbutton):
             font=kwargs["font"],
         )
         w, h = size
-        self.box = tk.PhotoImage("box", width=w, height=h, master=master)
-        self.box_selected = tk.PhotoImage("box_selected", width=w, height=h, master=master)
-        self.set_img_color(self.box, box_color, indicator_colors[0], False)
-        self.set_img_color(self.box_selected, box_color, indicator_colors[1], True)
+        y = max(0, int(kwargs["font"].split()[1]) - size[1])  # vertical alignement
+        self.box = tk.PhotoImage("box", width=w, height=h + y, master=master)
+        self.box_selected = tk.PhotoImage("box_selected", width=w, height=h + y, master=master)
+        self.set_img_color(self.box, y, box_color, indicator_colors[0], False)
+        self.set_img_color(self.box_selected, y, box_color, indicator_colors[1], True)
         style.element_create(tickbox_name, "image", self.box, ("selected", self.box_selected))
 
         style.layout(
-            style_name,
+            self.style_name,
             [
                 (
                     "Checkbutton.padding",
@@ -358,7 +305,7 @@ class CheckBox(ttk.Checkbutton):
                         "children": [
                             (tickbox_name, {"side": "left", "sticky": ""}),
                             (
-                                "Checkbutton.focus",
+                                "Checkbutton.padding",
                                 {
                                     "side": "left",
                                     "sticky": "w",
@@ -370,27 +317,42 @@ class CheckBox(ttk.Checkbutton):
                 )
             ],
         )
-        style.map(style_name, background=[("active", bg)])
+        style.map(self.style_name, background=[("active", bg)])
         super().__init__(
             master,
             variable=self._checked,
             command=self._on_check_changed,
             takefocus=False,
-            style=style_name,
-            text=f"  {kwargs['text']}",
+            style=self.style_name,
+            text=kwargs["text"],
+            padding=(5, 0),
         )
 
     @staticmethod
-    def set_img_color(img: tk.PhotoImage, fill_color: str, select_color: str, on: bool) -> None:
+    def set_img_color(img: tk.PhotoImage, y: int, fill_color: str, select_color: str, on: bool) -> None:
         w, h = img.width(), img.height()
-        img.put(fill_color, to=(0, 0, w, h))  # type: ignore
-        img.put(select_color, to=(w - h + 1, 1, w - 1, h - 1) if on else (1, 1, h - 1, h - 1))  # type: ignore
+        img.put(fill_color, to=(0, y, w, h))  # type: ignore
+        to = (w - h + y + 1, y + 1, w - 1, h - 1) if on else (1, y + 1, h - y - 1, h - 1)
+        img.put(select_color, to=to)  # type: ignore
 
     def _on_check_changed(self) -> None:
+        is_checked = self._checked.get()
+        style = ttk.Style()
+        if self._get_text:
+            text = self._get_text(is_checked).to_tk
+            style.configure(
+                self.style_name,
+                foreground=text["fg"],
+                font=text["font"],
+            )
+            self.config(text=text["text"])
         if self._changed_callback:
-            self._changed_callback(self._checked.get())
+            self._changed_callback(is_checked)
 
-    def set_callback(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+    def set_callback(
+        self, is_checked: bool, callback: Callable[[bool], None], get_text: Callable[[bool], Style]
+    ) -> None:
+        self._get_text = get_text
         self._changed_callback = callback
         self._checked.set(is_checked)
         self._on_check_changed()

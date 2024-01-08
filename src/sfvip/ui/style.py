@@ -14,7 +14,7 @@ class Style(str):
         tk.Button(text=text2) # check Style.to_tk
     """
 
-    _known_font_styles = "bold", "italic"
+    _known_font_styles = "bold", "italic", "overstrike"
 
     def __init__(self, _="") -> None:
         self._fg = "white"

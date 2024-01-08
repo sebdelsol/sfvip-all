@@ -124,14 +124,13 @@ class EPGupdate(NamedTuple):
                         progress_step = ProgressStep(total=total_size) if total_size else None
                         for i, chunk in enumerate(response.iter_content(chunk_size=EPGupdate._chunk_size)):
                             if stopping():
-                                break
+                                return None
                             if progress_step and (progress := progress_step.progress(i * EPGupdate._chunk_size)):
                                 update_status(EPGProgress(EPGstatus.LOADING, progress))
                             f.write(chunk)
-                        else:
-                            return cls._process(xml, url, update_status, stopping)
-        except (requests.RequestException, gzip.BadGzipFile, ET.ParseError) as error:
-            logger.error("%s", error)
+                return cls._process(xml, url, update_status, stopping)
+        except (requests.RequestException, gzip.BadGzipFile, ET.ParseError, EOFError) as error:
+            logger.error("%s: %s", error.__class__.__name__, error)
         return None
 
     @classmethod

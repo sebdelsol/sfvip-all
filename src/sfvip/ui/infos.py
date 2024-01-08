@@ -36,21 +36,47 @@ class _InfoTheme:
     bg_headers = "#242424"
     bg_rows = "#2A2A2A"
     separator = "#303030"
-    border = Border(bg="#808080", size=1, relief="")
-    button = dict(bg="#1F1E1D", mouseover="#3F3F41", border=Border(bg="white", size=0.75, relief="groove"))
-    listview = dict(bg_headers=bg_headers, bg_rows=bg_rows, bg_separator=separator)
-    listview_scrollbar = dict(bg=bg_rows, slider="white", active_slider="grey")
-    checkbox = dict(box_color=bg_interact, indicator_colors=("grey", "#00A000"), size=(20, 8))
+    border = Border(
+        bg="#808080",
+        size=1,
+        relief="",
+    )
+    button = dict(
+        bg="#1F1E1D",
+        mouseover="#3F3F41",
+        border=Border(bg="white", size=0.75, relief="groove"),
+    )
+    listview = dict(
+        bg_headers=bg_headers,
+        bg_rows=bg_rows,
+        bg_separator=separator,
+    )
+    listview_scrollbar = dict(
+        bg=bg_rows,
+        slider="white",
+        active_slider="grey",
+    )
+    checkbox = dict(
+        box_color=bg_interact,
+        indicator_colors=("grey", "#00A000"),
+        size=(20, 8),
+    )
     confidence_slider = dict(
         trough_color=bg_interact,
         trough_height=3,
-        slider_width=4,
+        slider_width=5,
         slider_height=10,
         slider_color="grey",
         slider_color_active="white",
         length=300,
     )
-    url_entry = dict(insertbackground="grey", borderwidth=0, highlightthickness=0)
+    entry = dict(
+        insertbackground="grey",
+        selectbackground="grey",
+        selectforeground="white",
+        borderwidth=0,
+        highlightthickness=0,
+    )
 
 
 class _InfoStyle:
@@ -104,8 +130,9 @@ def _get_app_button_text(action: Optional[str] = None, version: Optional[str] = 
     return _InfoStyle.app(f"{action or ''} v{version or ''}").no_truncate.white
 
 
-def _get_auto_update() -> Style:
-    return _InfoStyle.app(LOC.CheckUpdate).grey
+def _get_auto_update(on: bool = True) -> Style:
+    msg = _InfoStyle.app(LOC.CheckUpdate)
+    return msg.grey if on else msg.color("#606060").overstrike
 
 
 def _get_libmpv_version(version: Optional[str] = None) -> Style:
@@ -143,7 +170,11 @@ def _epg_confidence_label() -> Style:
 
 
 def _epg_confidence(confidence: int) -> Style:
-    return _InfoStyle.app(f"{confidence}%").no_truncate.grey
+    return _InfoStyle.app(f"{confidence}").grey
+
+
+def _epg_confidence_percent() -> Style:
+    return _InfoStyle.app("%").grey
 
 
 def _epg_status_styles(progress: str) -> dict[EPGstatus | None, Style]:
@@ -238,7 +269,7 @@ class _ProxiesWindow(StickyWindow):
         self._fade.fade(fade_duration_ms=250, out=False)
 
     def hide(self) -> None:
-        self._fade.fade(fade_duration_ms=250, out=True, wait_ms=100)
+        self._fade.fade(fade_duration_ms=250, out=True, wait_ms=250)
 
 
 class InfosWindow(_ProxiesWindow):
@@ -274,7 +305,7 @@ class InfosWindow(_ProxiesWindow):
             epg_frame,
             bg=_InfoTheme.bg_interact,
             disabledbackground=_InfoTheme.bg_rows,
-            **_InfoTheme.url_entry,
+            **_InfoTheme.entry,
             **_epg_url().to_tk,
         )
         self._epg_status = tk.Label(epg_frame, bg=_InfoTheme.bg_rows)
@@ -282,7 +313,18 @@ class InfosWindow(_ProxiesWindow):
         epg_confidence_label = tk.Label(
             epg_confidence_frame, bg=_InfoTheme.bg_rows, **_epg_confidence_label().to_tk
         )
-        self._epg_confidence = tk.Label(epg_confidence_frame, bg=_InfoTheme.bg_rows, width=4, anchor=tk.E)
+        self._epg_confidence = tk.Entry(
+            epg_confidence_frame,
+            bg=_InfoTheme.bg_interact,
+            disabledbackground=_InfoTheme.bg_rows,
+            width=3,
+            justify=tk.RIGHT,
+            **_InfoTheme.entry,
+            **_epg_confidence(100).to_tk,
+        )
+        epg_confidence_percent = tk.Label(
+            epg_confidence_frame, bg=_InfoTheme.bg_rows, **_epg_confidence_percent().to_tk
+        )
         self._epg_confidence_slider = HorizontalScale(
             epg_confidence_frame,
             from_=0,
@@ -327,9 +369,10 @@ class InfosWindow(_ProxiesWindow):
         self._epg_status.pack(padx=pad, side=tk.LEFT)
         row += 1
         epg_confidence_frame.grid(row=row, columnspan=3, sticky=tk.NSEW)
-        epg_confidence_label.pack(padx=pad, side=tk.LEFT)
-        self._epg_confidence_slider.pack(pady=pad, side=tk.LEFT, fill=tk.X, expand=True)
-        self._epg_confidence.pack(padx=pad, side=tk.LEFT)
+        epg_confidence_label.pack(padx=(pad, 0), side=tk.LEFT)
+        self._epg_confidence.pack(side=tk.LEFT)
+        epg_confidence_percent.pack(side=tk.LEFT)
+        self._epg_confidence_slider.pack(padx=pad * 2, pady=pad, side=tk.LEFT, fill=tk.X, expand=True)
         row += 1
         separator5.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
@@ -348,20 +391,46 @@ class InfosWindow(_ProxiesWindow):
         self._epg_status.config(**_epg_status(epg_status).to_tk)
 
     def set_epg_confidence_update(self, confidence: int, callback: Callable[[int], None]) -> None:
-        def _callback(event: tk.Event) -> None:
+        def _set_confidence_entry(confidence: int) -> None:
+            self._epg_confidence.delete(0, tk.END)
+            self._epg_confidence.insert(0, _epg_confidence(confidence).to_tk["text"])
+
+        def _callback_slider(event: tk.Event) -> None:
             try:
+                self._epg_confidence.config(state=tk.NORMAL)
                 confidence = round(self._epg_confidence_slider.get())
-                self._epg_confidence.config(**_epg_confidence(confidence).to_tk)
+                _set_confidence_entry(confidence)
                 if event.type == tk.EventType.ButtonRelease:
                     callback(confidence)
+                else:
+                    self._epg_confidence.config(state=tk.DISABLED)
             except ValueError:
                 pass
 
+        def _callback_entry(_) -> None:
+            try:
+                confidence = int(self._epg_confidence.get())
+                self._epg_confidence_slider.set(confidence)
+                callback(confidence)
+            except ValueError:
+                confidence = round(self._epg_confidence_slider.get())
+            _set_confidence_entry(confidence)
+
+        def _validate(entry: str) -> bool:
+            if entry == "":
+                return True
+            if str.isdigit(entry) and 0 <= (confidence := int(entry)) <= 100:
+                self._epg_confidence_slider.set(confidence)
+                return True
+            return False
+
         confidence = max(0, min(confidence, 100))
         self._epg_confidence_slider.set(confidence)
-        self._epg_confidence.config(**_epg_confidence(confidence).to_tk)
-        self._epg_confidence_slider.bind("<ButtonRelease-1>", _callback)
-        self._epg_confidence_slider.bind("<B1-Motion>", _callback)
+        _set_confidence_entry(confidence)
+        self._epg_confidence.config(validate="all", validatecommand=(self.register(_validate), "%P"))
+        self._epg_confidence_slider.bind("<ButtonRelease-1>", _callback_slider)
+        self._epg_confidence_slider.bind("<B1-Motion>", _callback_slider)
+        self._epg_confidence.bind("<FocusOut>", _callback_entry)
 
     def set_app_update(
         self,
@@ -373,7 +442,7 @@ class InfosWindow(_ProxiesWindow):
         self._set_button_action(self._app_button, action)
 
     def set_app_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
-        self._app_update.set_callback(is_checked, callback)
+        self._app_update.set_callback(is_checked, callback, _get_auto_update)
 
     def set_libmpv_version(self, version: Optional[str]) -> None:
         self._libmpv_version.config(**_get_libmpv_version(version).to_tk)
@@ -389,7 +458,7 @@ class InfosWindow(_ProxiesWindow):
         self._set_button_action(self._libmpv_button, action)
 
     def set_libmpv_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
-        self._libmpv_update.set_callback(is_checked, callback)
+        self._libmpv_update.set_callback(is_checked, callback, _get_auto_update)
 
     def set_player_version(self, version: Optional[str]) -> None:
         self._player_version.config(**_get_player_version(version).to_tk)
@@ -405,4 +474,4 @@ class InfosWindow(_ProxiesWindow):
         self._set_button_action(self._player_button, action)
 
     def set_player_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
-        self._player_update.set_callback(is_checked, callback)
+        self._player_update.set_callback(is_checked, callback, _get_auto_update)

@@ -26,10 +26,11 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-{sloc}-000000.svg?logo=file-code&logoColor=a0a0a0)
 
-[![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-{nuitka_version}-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>or</sub></sup>
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-{pyinstaller_version}-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
+<sup><sub>&ensp; + &ensp;</sub></sup>
+[![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).

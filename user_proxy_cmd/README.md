@@ -20,10 +20,11 @@ SfvipUserProxy --remove
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
 ![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-196-000000.svg?logo=file-code&logoColor=a0a0a0)
 
-[![Nsis](https://img.shields.io/badge/Nsis-3.09-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
-[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-1.9.5-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
+[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-1.9.7-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>or</sub></sup>
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-6.3.0-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
+<sup><sub>&ensp; + &ensp;</sub></sup>
+[![Nsis](https://img.shields.io/badge/Nsis-3.09-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
 
 ```console
 python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme]

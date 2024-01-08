@@ -1,3 +1,7 @@
+## 1.4.12.9
+* Entry added for EPG confidence.
+* Fix another external EPG download issue.
+
 ## 1.4.12.8
 * Cleaner UI.
 
