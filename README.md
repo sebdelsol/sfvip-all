@@ -2,29 +2,30 @@
 ***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 * Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
-* Support an **external EPG**.
+* Support an **external EPG**[^1].
 
 <img src="resources/all.png">
 
+[^1]: External EPG works with XC and MAC (Stalker) accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.9 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.9/x64/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.1830.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.10 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.10/x64/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.1833.0_</sup></sub>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.9 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.9/x86/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.1830.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.10 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.10/x86/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.1833.0_</sup></sub>
 
-Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
+Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
 Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[^1]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
+[^2]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.7-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3117/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.2.1-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-6916-000000.svg?logo=file-code&logoColor=a0a0a0)
+![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7000-000000.svg?logo=file-code&logoColor=a0a0a0)
 
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-1.9.7-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>or</sub></sup>

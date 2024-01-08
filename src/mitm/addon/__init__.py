@@ -8,7 +8,7 @@ from mitmproxy import http
 
 from ..cache import AllUpdated, MACCache, UpdateCacheProgressT
 from ..epg import EPG, ChannelFoundT, UpdateStatusT
-from ..utils import get_query_key, response_json
+from ..utils import APIRequest, Request, get_query_key, response_json
 from .all import AllCategoryName, AllPanels
 
 logger = logging.getLogger(__name__)
@@ -28,24 +28,30 @@ def fix_series_info(response: http.Response) -> None:
             response.text = json.dumps(info)
 
 
-def get_short_epg(flow: http.HTTPFlow, epg: EPG) -> None:
-    if (response := flow.response) and (stream_id := get_query_key(flow.request, "stream_id")):
+def get_short_epg(flow: http.HTTPFlow, epg: EPG, api: APIRequest) -> None:
+    if response := flow.response:
+
+        def _get(stream_id: str, limit: str, listing: str):
+            if _id := get_query_key(flow.request, stream_id):
+                _limit = get_query_key(flow.request, limit)
+                if _listing := epg.get(server, _id, _limit, api):
+                    response.text = json.dumps({listing: _listing})
+
         server = flow.request.host_header
-        limit = get_query_key(flow.request, "limit")
-        if epg_listings := tuple(epg.get(server, stream_id, limit)):
-            response.text = json.dumps({"epg_listings": epg_listings})
+        match api:
+            case APIRequest.XC:
+                _get("stream_id", "limit", "epg_listings")
+            case APIRequest.MAC:
+                _get("ch_id", "size", "js")
 
 
-def set_epg_server(flow: http.HTTPFlow, epg: EPG) -> None:
-    if not get_query_key(flow.request, "category_id"):
-        server = flow.request.host_header
-        epg.set_server_channels(server, response_json(flow.response))
+def set_epg_server(flow: http.HTTPFlow, epg: EPG, api: APIRequest) -> None:
+    server = flow.request.host_header
+    epg.set_server_channels(server, response_json(flow.response), api)
 
 
 class SfVipAddOn:
     """mitmproxy addon to inject the all category"""
-
-    _api_requests = "player_api.php?", "portal.php?"
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -77,48 +83,46 @@ class SfVipAddOn:
     def wait_running(self, timeout: int) -> bool:
         return self.epg.wait_running(timeout)
 
-    @staticmethod
-    def is_api_request(request: http.Request) -> Optional[str]:
-        if any(api_request in request.path for api_request in SfVipAddOn._api_requests):
-            return get_query_key(request, "action")
-        return None
-
     async def request(self, flow: http.HTTPFlow) -> None:
-        if action := self.is_api_request(flow.request):
-            match action:
-                case "get_ordered_list":
+        if request := Request.is_api(flow.request):
+            match request:
+                case APIRequest.MAC, "get_ordered_list":
                     self.mac_cache.load_response(flow)
                 case _:
                     self.mac_cache.stop(flow)
-                    self.panels.serve_all(flow, action)
+                    if request.action:
+                        self.panels.serve_all(flow, request.action)
 
     async def response(self, flow: http.HTTPFlow) -> None:
         if flow.response and not flow.response.stream:
-            if action := self.is_api_request(flow.request):
-                match action:
-                    # TODO
-                    # case "get_all_channels":
-                    #     tt = response_json(flow.response)
-                    #     print()
-                    case "get_series_info":
-                        fix_series_info(flow.response)
-                    case "get_live_streams":
-                        set_epg_server(flow, self.epg)
-                    case "get_short_epg":
-                        get_short_epg(flow, self.epg)
-                    case "get_ordered_list":
+            if request := Request.is_api(flow.request):
+                match request:
+                    case APIRequest.MAC, "get_short_epg":
+                        get_short_epg(flow, self.epg, APIRequest.MAC)
+                    case APIRequest.MAC, "get_all_channels":
+                        set_epg_server(flow, self.epg, APIRequest.MAC)
+                    case APIRequest.MAC, "get_ordered_list":
                         self.mac_cache.save_response(flow)
-                    case "get_categories":
+                    case APIRequest.MAC, "get_categories":
                         self.mac_cache.inject_all_cached_category(flow)
-                    case _:
+                    case APIRequest.XC, "get_series_info":
+                        fix_series_info(flow.response)
+                    case APIRequest.XC, "get_live_streams":
+                        set_epg_server(flow, self.epg, APIRequest.XC)
+                    case APIRequest.XC, "get_short_epg" if not get_query_key(flow.request, "category_id"):
+                        get_short_epg(flow, self.epg, APIRequest.XC)
+                    case APIRequest.XC, action if action:
                         self.panels.inject_all(flow, action)
 
     async def error(self, flow: http.HTTPFlow):
-        if self.is_api_request(flow.request) == "get_ordered_list":
-            self.mac_cache.stop(flow)
+        if request := Request.is_api(flow.request):
+            match request:
+                case APIRequest.MAC, "get_ordered_list":
+                    self.mac_cache.stop(flow)
 
-    async def responseheaders(self, flow: http.HTTPFlow) -> None:
+    @staticmethod
+    async def responseheaders(flow: http.HTTPFlow) -> None:
         """all reponses are streamed except the api requests"""
-        if not self.is_api_request(flow.request):
+        if not Request.is_api(flow.request):
             if flow.response:
                 flow.response.stream = True

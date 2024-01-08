@@ -1,3 +1,6 @@
+## 1.4.12.10
+* External EPG for MAC accounts.
+
 ## 1.4.12.9
 * Entry added for EPG confidence.
 * Fix another external EPG download issue.

@@ -2,10 +2,11 @@
 ***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 * Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
-* Support an **external EPG**.
+* Support an **external EPG**[^1].
 
 <img src="resources/all.png">
 
+[^1]: External EPG works with XC and MAC (Stalker) accounts.
 # Download
 [<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version} x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/{github_path}/raw/master/{exe_x64_link})
 <sub><sup>_by Microsoft Defender • {exe_x64_engine} • {exe_x64_signature}_</sup></sub>
@@ -13,11 +14,11 @@
 [<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version} x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/{github_path}/raw/master/{exe_x86_link})
 <sub><sup>_by Microsoft Defender • {exe_x86_engine} • {exe_x86_signature}_</sup></sub>
 
-Check the [***changelog***](build/changelog.md) and ***notes***[^1].  
+Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
 Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[^1]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
+[^2]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
 
 # Build
