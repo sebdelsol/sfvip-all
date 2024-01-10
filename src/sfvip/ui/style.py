@@ -1,3 +1,4 @@
+import textwrap
 from typing import Any, Optional, Self
 
 
@@ -21,7 +22,8 @@ class Style(str):
         self._font = "Calibri"
         self._font_size = 10
         self._font_styles: set[str] = set()
-        self._max_width = None
+        self._wrap: Optional[int] = None
+        self._max_width: Optional[int] = None
 
     def __call__(self, text: str) -> Self:
         return self.copy(text)
@@ -33,12 +35,17 @@ class Style(str):
         a_copy._font = self._font
         a_copy._font_size = self._font_size
         a_copy._font_styles = set(self._font_styles)
+        a_copy._wrap = self._wrap
         a_copy._max_width = self._max_width
         return a_copy
 
     @property
     def no_truncate(self) -> Self:
         self._max_width = None
+        return self
+
+    def wrap(self, wrap: int) -> Self:
+        self._wrap = wrap
         return self
 
     def max_width(self, max_width: int) -> Self:
@@ -78,7 +85,9 @@ class Style(str):
     def to_tk(self) -> dict[str, Any]:
         # Note: self is callable and tk calls its kwargs in widget creation
         text = str(self)
-        if self._max_width and len(text) > self._max_width:
+        if self._wrap:
+            text = "\n".join(textwrap.wrap(text, width=self._wrap))
+        elif self._max_width and len(text) > self._max_width:
             assert self._max_width >= 3
             text = f"{text[:self._max_width-3]}..."
         return dict(text=text, fg=self._fg, font=self._font_str)

@@ -20,8 +20,6 @@ from mitmproxy.net import server_spec
 from .addon import SfVipAddOn
 
 logger = logging.getLogger(__name__)
-# do not pollute the log
-logging.getLogger("mitmproxy.proxy.server").setLevel(logging.WARNING)
 
 
 # use only the needed addons,

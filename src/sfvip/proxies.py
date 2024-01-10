@@ -6,9 +6,10 @@ from urllib.parse import urlparse, urlsplit, urlunsplit
 from translations.loc import LOC
 
 from ..mitm import MitmLocalProxy, Mode, validate_upstream
-from ..mitm.addon import AllCategoryName, SfVipAddOn
+from ..mitm.addon import AddonAllConfig, AddonCallbacks, AllCategoryName, SfVipAddOn
 from ..mitm.cache import AllUpdated
 from ..winapi import mutex
+from .accounts import AccountsProxies
 from .app_info import AppInfo
 from .cache import CacheProgressListener
 from .epg import EpgUpdater
@@ -29,7 +30,7 @@ def _find_port(excluded_ports: set[int], retry: int) -> int:
             if port not in excluded_ports:
                 excluded_ports.add(port)
                 return port
-            logging.warning("port %s already in use", port)
+            logger.warning("port %s already in use", port)
     raise LocalproxyError(LOC.NoSocketPort)
 
 
@@ -52,21 +53,20 @@ def _fix_upstream(url: str) -> Optional[str]:
     return None
 
 
-def get_all_name(inject_in_live: bool) -> AllCategoryName:
-    return AllCategoryName(
-        live=LOC.AllChannels if inject_in_live else None,
-        series=LOC.AllSeries,
-        vod=LOC.AllMovies,
-    )
-
-
-def get_all_updated() -> AllUpdated:
-    return AllUpdated(
-        today=LOC.UpdatedToday,
-        one_day=LOC.Updated1DayAgo,
-        several_days=LOC.UpdatedDaysAgo,
-        all_names={"vod": LOC.AllMovies, "series": LOC.AllSeries},
-        all_updates={"vod": LOC.UpdateAllMovies, "series": LOC.UpdateAllSeries},
+def get_all_config(inject_in_live: bool) -> AddonAllConfig:
+    return AddonAllConfig(
+        AllCategoryName(
+            live=LOC.AllChannels if inject_in_live else None,
+            series=LOC.AllSeries,
+            vod=LOC.AllMovies,
+        ),
+        AllUpdated(
+            today=LOC.UpdatedToday,
+            one_day=LOC.Updated1DayAgo,
+            several_days=LOC.UpdatedDaysAgo,
+            all_names={"vod": LOC.AllMovies, "series": LOC.AllSeries},
+            all_updates={"vod": LOC.UpdateAllMovies, "series": LOC.UpdateAllSeries},
+        ),
     )
 
 
@@ -77,19 +77,22 @@ class LocalProxies:
     _find_ports_retry = 10
     _mitmproxy_start_timeout = 5
 
-    def __init__(self, app_info: AppInfo, inject_in_live: bool, upstreams: set[str], ui: UI) -> None:
+    def __init__(self, app_info: AppInfo, inject_in_live: bool, accounts_proxies: AccountsProxies, ui: UI) -> None:
         self._epg_updater = EpgUpdater(app_info.config, self.epg_update, self.epg_confidence_update, ui)
         self._cache_progress = CacheProgressListener(ui)
         self._addon = SfVipAddOn(
-            get_all_name(inject_in_live),
-            get_all_updated(),
+            accounts_proxies.urls,
+            get_all_config(inject_in_live),
             app_info.roaming,
-            self._epg_updater.update_status,
-            self._epg_updater.add_channel_found,
-            self._cache_progress.update_progress,
+            AddonCallbacks(
+                self._epg_updater.update_status,
+                self._epg_updater.add_channel_found,
+                self._epg_updater.add_show_epg,
+                self._cache_progress.update_progress,
+            ),
             app_info.config.EPG.requests_timeout,
         )
-        self._upstreams = upstreams
+        self._upstreams = accounts_proxies.upstreams
         self._by_upstreams: dict[str, str] = {}
         self._mitm_proxy: Optional[MitmLocalProxy] = None
         self._bind_free_ports = mutex.SystemWideMutex("bind free ports for local proxies")

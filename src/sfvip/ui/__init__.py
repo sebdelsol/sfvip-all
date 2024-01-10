@@ -4,7 +4,7 @@ from tkinter import filedialog, ttk
 from typing import Callable, Optional, Sequence
 
 from ...mitm.epg.update import EPGProgress
-from .hover_msg import HoverMessageWindow
+from .hover import HoverChannelEpg, HoverMessage
 from .infos import AppInfo, Info, InfosWindow
 from .logo import LogoWindow, PulseReason
 from .progress import ProgressBar
@@ -29,7 +29,8 @@ class UI(tk.Tk):
         self.wm_iconphoto(True, self._splash_img)
         self.progress_bar = ProgressBar()
         self.splash = SplashWindow(self._splash_img)
-        self.hover_message = HoverMessageWindow()
+        self.hover_message = HoverMessage()
+        self.hover_epg = HoverChannelEpg()
         self._infos = InfosWindow(app_info)
         self._logo = LogoWindow(app_info.logo, self._infos)
         Window.set_logo(app_info.logo)

@@ -1,18 +1,19 @@
 import logging
 import multiprocessing
 import time
-from typing import Any, Callable, Iterator, Optional, Sequence
+from typing import Any, Callable, Iterator, Optional
 
 from shared.job_runner import JobRunner
 
-from ..utils import APIRequest, get_int
-from .programme import EPGprogramme, EPGprogrammeMAC, EPGprogrammeXC, ProgrammeDict
+from ..utils import APItype, get_int
+from .programme import EPGprogramme, EPGprogrammeM3U, EPGprogrammeMAC, EPGprogrammeXC
 from .server import EPGserverChannels
 from .update import EPGupdater, FoundProgammes, UpdateStatusT
 
 logger = logging.getLogger(__name__)
 
 ChannelFoundT = Callable[[int], None]
+ShowEpgT = Callable[[tuple[EPGprogramme, ...]], None]
 
 
 class ConfidenceUpdater(JobRunner[int]):
@@ -32,12 +33,17 @@ class ConfidenceUpdater(JobRunner[int]):
 
 
 class EPG:
+    _programme_type = {APItype.XC: EPGprogrammeXC, APItype.MAC: EPGprogrammeMAC, APItype.M3U: EPGprogrammeM3U}
+
     # all following methods should be called from the same process EXCEPT add_job & wait_running
-    def __init__(self, update_status: UpdateStatusT, channel_found: ChannelFoundT, timeout: int) -> None:
+    def __init__(
+        self, update_status: UpdateStatusT, channel_found: ChannelFoundT, show_epg: ShowEpgT, timeout: int
+    ) -> None:
         self.servers: dict[str, EPGserverChannels] = {}
         self.updater = EPGupdater(update_status, timeout)
         self.confidence_updater = ConfidenceUpdater()
         self._channel_found = channel_found
+        self._show_epg = show_epg
 
     def ask_update(self, url: str) -> None:
         self.updater.add_job(url)
@@ -56,44 +62,47 @@ class EPG:
         self.updater.stop()
         self.confidence_updater.stop()
 
-    def set_server_channels(self, server: Optional[str], channels: Any, api: APIRequest) -> None:
+    def set_server_channels(self, server: Optional[str], channels: Any, api: APItype) -> None:
         if server:
             self.servers[server] = EPGserverChannels(server, channels, api)
 
-    def _get(
+    def _get_listing(
         self,
-        epg_programme: EPGprogramme,
+        programme_type: EPGprogramme,
         programmes: FoundProgammes,
-        channel_id: str,
+        epg_id: str,
         limit: Optional[str],
-    ) -> Iterator[ProgrammeDict]:
+    ) -> Iterator[EPGprogramme]:
         count = 0
         now = time.time()
         int_limit = get_int(limit)
         for programme in programmes.list:
-            if programme := epg_programme.from_programme(programme, now):
+            if programme := programme_type.from_programme(programme, now):
                 yield programme
                 count += 1
                 if int_limit and count >= int_limit:
                     break
         if count > 0:
-            logger.info("Get epg for %s", channel_id)
+            logger.info("Get epg for %s", epg_id)
             self._channel_found(programmes.confidence)
 
-    def get(
-        self, server: Optional[str], stream_id: str, limit: Optional[str], api: APIRequest
-    ) -> Optional[Sequence[ProgrammeDict]]:
+    def ask_stream(
+        self, server: Optional[str], stream_id: str, limit: Optional[str], api: APItype
+    ) -> Optional[tuple[EPGprogramme, ...]]:
         if (
             server
-            and (update := self.updater.update)
             and (server_channels := self.servers.get(server))
-            and (channel_id := server_channels.get(stream_id))
+            and (epg_id := server_channels.get(stream_id))
             and (confidence := self.confidence_updater.confidence)
+            and (update := self.updater.update)
         ):
-            if programmes := update.get_programmes(channel_id, confidence):
-                match api:
-                    case APIRequest.XC:
-                        return tuple(self._get(EPGprogrammeXC, programmes, channel_id, limit))
-                    case APIRequest.MAC:
-                        return tuple(self._get(EPGprogrammeMAC, programmes, channel_id, limit))
+            if programmes := update.get_programmes(epg_id, confidence):
+                if programme_type := EPG._programme_type.get(api):
+                    return tuple(self._get_listing(programme_type, programmes, epg_id, limit))
         return None
+
+    def ask_m3u_stream(self, server: Optional[str], stream_id: str) -> bool:
+        if listing := self.ask_stream(server, stream_id, "1", APItype.M3U):
+            self._show_epg(listing)
+            return True
+        return False

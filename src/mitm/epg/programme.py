@@ -1,7 +1,7 @@
 import base64
 import logging
 from datetime import datetime
-from typing import NamedTuple, Optional, Protocol, Self
+from typing import NamedTuple, Optional, Self
 
 logger = logging.getLogger(__name__)
 
@@ -44,16 +44,7 @@ class Schedule(NamedTuple):
         return self._get_date(self.end)
 
 
-ProgrammeDict = dict[str, str | int]
-
-
-class EPGprogramme(Protocol):
-    @classmethod
-    def from_programme(cls, programme: InternalProgramme, now: float) -> Optional[ProgrammeDict]:
-        ...
-
-
-class EPGprogrammeXC(ProgrammeDict):
+class EPGprogrammeXC(dict[str, str]):
     @classmethod
     def from_programme(cls, programme: InternalProgramme, now: float) -> Optional[Self]:
         if schedule := Schedule.from_programme(programme, now):
@@ -72,7 +63,7 @@ class EPGprogrammeXC(ProgrammeDict):
         return base64.b64encode(text.replace("\\", "").encode()).decode()
 
 
-class EPGprogrammeMAC(ProgrammeDict):
+class EPGprogrammeMAC(dict[str, str | int]):
     @classmethod
     def from_programme(cls, programme: InternalProgramme, now: float) -> Optional[Self]:
         if schedule := Schedule.from_programme(programme, now):
@@ -90,3 +81,24 @@ class EPGprogrammeMAC(ProgrammeDict):
     @staticmethod
     def get_text(text: str) -> str:
         return text.replace("\\", "")
+
+
+class EPGprogrammeM3U(dict[str, str | int]):
+    @classmethod
+    def from_programme(cls, programme: InternalProgramme, now: float) -> Optional[Self]:
+        if schedule := Schedule.from_programme(programme, now):
+            return cls(
+                title=cls.get_text(programme.title),
+                descr=cls.get_text(programme.desc),
+                start=schedule.get_start_date(),
+                end=schedule.get_end_date(),
+                start_timestamp=schedule.start,
+            )
+        return None
+
+    @staticmethod
+    def get_text(text: str) -> str:
+        return text.replace("\\", "")
+
+
+EPGprogramme = EPGprogrammeXC | EPGprogrammeMAC | EPGprogrammeM3U

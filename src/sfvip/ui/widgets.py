@@ -1,4 +1,5 @@
 import tkinter as tk
+from math import cos, sin
 from tkinter import ttk
 from typing import Any, Callable, Collection, NamedTuple, Optional, Sequence
 
@@ -356,3 +357,47 @@ class CheckBox(ttk.Checkbutton):
         self._changed_callback = callback
         self._checked.set(is_checked)
         self._on_check_changed()
+
+
+# pylint: disable=too-many-ancestors
+class RoundedBox(tk.Canvas):
+    _rounded_box_tag = "canvas"
+
+    def __init__(self, master: tk.BaseWidget, radius: int, box_color: str, **kwargs) -> None:
+        self.radius = radius
+        self.box_color = box_color
+        self.added_widget = None
+        super().__init__(master, bd=0, highlightthickness=0, **kwargs)
+
+    # pylint: disable=too-many-arguments
+    def create_rounded_box(
+        self, x1: int, y1: int, x2: int, y2: int, radius: int, res: int, color: str = "black"
+    ) -> None:
+        self.delete(self._rounded_box_tag)
+        points = []
+        points.append((x1 + radius, y1, x2 - radius, y1))
+        for i in range(res):
+            points.append((x2 - radius + sin(i / res * 2) * radius, y1 + radius - cos(i / res * 2) * radius))
+        points.append((x2, y1 + radius, x2, y2 - radius))
+        for i in range(res):
+            points.append((x2 - radius + cos(i / res * 2) * radius, y2 - radius + sin(i / res * 2) * radius))
+        points.append((x2 - radius, y2, x1 + radius, y2))
+        for i in range(res):
+            points.append((x1 + radius - sin(i / res * 2) * radius, y2 - radius + cos(i / res * 2) * radius))
+        points.append((x1, y2 - radius, x1, y1 + radius))
+        for i in range(res):
+            points.append((x1 + radius - cos(i / res * 2) * radius, y1 + radius - sin(i / res * 2) * radius))
+        self.create_polygon(points, fill=color, tags=self._rounded_box_tag)
+
+    def add_widget(self, widget: tk.Widget) -> None:
+        self.added_widget = widget
+        self.create_window(self.radius, self.radius, window=widget, anchor=tk.NW)
+
+    def update_widget(self) -> None:
+        if self.added_widget:
+            self.added_widget.update_idletasks()
+            w = self.added_widget.winfo_reqwidth() + 2 * self.radius
+            h = self.added_widget.winfo_reqheight() + 2 * self.radius
+            self.config(width=w, height=h)
+            self.create_rounded_box(0, 0, w, h, self.radius, self.radius, color=self.box_color)
+            self.update_idletasks()

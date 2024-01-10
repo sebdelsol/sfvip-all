@@ -26,6 +26,8 @@ import sys
 
 from shared import get_bitness_str
 
+logger = logging.getLogger(__name__)
+
 
 def is_py_installer() -> bool:
     return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
@@ -39,7 +41,7 @@ def is_built() -> bool:
     return is_py_installer() or is_nuitka()
 
 
-def set_logging() -> None:
+def set_logging(from_) -> None:
     if is_py_installer():
         # pylint: disable=import-outside-toplevel
         import time
@@ -53,8 +55,18 @@ def set_logging() -> None:
         logfile = None  # it's handled in dev.builder.nuitka
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format="%(asctime)s - %(message)s")
-    logging.info("Run Python %s %s", platform.python_version(), get_bitness_str(platform.machine().endswith("64")))
-    if is_py_installer():
-        logging.info("Build by PyInstaller")
-    elif is_nuitka():
-        logging.info("Build by Nuitka")
+
+    if from_ == "__main__":
+        logger.info(
+            "Run Python %s %s",
+            platform.python_version(),
+            get_bitness_str(platform.machine().endswith("64")),
+        )
+        if is_py_installer():
+            logger.info("Build by PyInstaller")
+        elif is_nuitka():
+            logger.info("Build by Nuitka")
+    else:
+        # do not pollute the log
+        for module in "ipytv.playlist", "ipytv.channel", "mitmproxy.proxy.server":
+            logging.getLogger(module).setLevel(logging.WARNING)

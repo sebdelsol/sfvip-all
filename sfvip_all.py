@@ -4,7 +4,9 @@
 
 from src import set_logging
 
-set_logging()
+set_logging(__name__)
+
+# TODO tips for epg confidence
 
 if __name__ == "__main__":
     # reduce what's imported in the proxies process
@@ -26,10 +28,11 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "fakev0":
         Build.version = "0"
 
-    logging.info("Main process started")
+    logger = logging.getLogger(__name__)
+    logger.info("Main process started")
     run_app(
         at_very_last.register,
         AppInfo.from_build(Build, Github, app_dir=Path(__file__).parent),
         keep_logs=6,
     )
-    logging.info("Main process exit")
+    logger.info("Main process exit")

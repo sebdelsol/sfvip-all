@@ -179,24 +179,24 @@ class EPGupdate(NamedTuple):
             update_status(EPGProgress(EPGstatus.NO_EPG))
         return cls()
 
-    def get_programmes(self, channel: str, confidence: int) -> Optional[FoundProgammes]:
+    def get_programmes(self, epg_id: str, confidence: int) -> Optional[FoundProgammes]:
         if self.channels:
-            normalized = _normalize(channel)
+            normalized_epg_id = _normalize(epg_id)
             if result := process.extractOne(
-                normalized,
+                normalized_epg_id,
                 self.channels.keys(),
                 scorer=fuzz.token_sort_ratio,
                 score_cutoff=100 - confidence,
             ):
-                normalized, score = result[:2]
+                normalized_epg_id, score = result[:2]
                 logger.info(
                     "Found Epg %s for %s with confidence %s%% (cut off @%s%%)",
-                    normalized,
-                    channel,
+                    normalized_epg_id,
+                    epg_id,
                     score,
                     100 - confidence,
                 )
-                if programmes := self.channels.get(normalized):
+                if programmes := self.channels.get(normalized_epg_id):
                     return FoundProgammes(programmes, int(score))
         return None
 

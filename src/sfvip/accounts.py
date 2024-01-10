@@ -35,8 +35,6 @@ class _UniqueNames(dict[str, int]):
 class _Account(SimpleNamespace):
     """a sfvip account"""
 
-    _playlist_ext = ".m3u", ".m3u8"
-
     def __init__(self, **kwargs: str) -> None:
         # pylint: disable=invalid-name
         self.Name: str
@@ -44,9 +42,9 @@ class _Account(SimpleNamespace):
         self.HttpProxy: str
         super().__init__(**kwargs)
 
-    def is_playlist(self) -> bool:
+    def is_local_playlist(self) -> bool:
         path = Path(self.Address)
-        return path.suffix in _Account._playlist_ext or path.is_file()
+        return path.is_file()
 
 
 class _Accounts(list[_Account]):
@@ -126,9 +124,14 @@ class AccountsProxies:
         return {account.HttpProxy for account in self._accounts_to_set}
 
     @property
+    def urls(self) -> set[str]:
+        self._database.load()
+        return {account.Address for account in self._accounts_to_set}
+
+    @property
     def _accounts_to_set(self) -> _Accounts:
-        """don't handle m3u playlists"""
-        return _Accounts(account for account in self._database.accounts if not account.is_playlist())
+        """don't handle m3u local playlists"""
+        return _Accounts(account for account in self._database.accounts if not account.is_local_playlist())
 
     def _set_proxies(self, proxies: dict[str, str], msg: str) -> None:
         names = _UniqueNames()

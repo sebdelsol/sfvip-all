@@ -6,7 +6,7 @@
 
 <img src="resources/all.png">
 
-[^1]: External EPG works with XC and MAC (Stalker) accounts.
+[^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
 [<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version} x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/{github_path}/raw/master/{exe_x64_link})
 <sub><sup>_by Microsoft Defender • {exe_x64_engine} • {exe_x64_signature}_</sup></sub>

@@ -1,9 +1,15 @@
 import json
-from enum import StrEnum
-from typing import Any, NamedTuple, Optional, Self
+from enum import Enum, auto
+from typing import Any, Optional
 
 from mitmproxy import http
 from mitmproxy.coretypes.multidict import MultiDictView
+
+
+class APItype(Enum):
+    XC = auto()
+    MAC = auto()
+    M3U = auto()
 
 
 def _query(request: http.Request) -> MultiDictView[str, str]:
@@ -31,23 +37,6 @@ def response_json(response: Optional[http.Response]) -> Any:
     except json.JSONDecodeError:
         pass
     return None
-
-
-class APIRequest(StrEnum):
-    XC = "player_api.php?"
-    MAC = "portal.php?"
-
-
-class Request(NamedTuple):
-    api: APIRequest
-    action: Optional[str]
-
-    @classmethod
-    def is_api(cls, request: http.Request) -> Optional[Self]:
-        for api in APIRequest:
-            if api.value in request.path:
-                return cls(api, get_query_key(request, "action"))
-        return None
 
 
 def get_int(text: Optional[str]) -> Optional[int]:
