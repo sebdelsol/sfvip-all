@@ -1,6 +1,6 @@
 import logging
 import threading
-from typing import Any, Callable, Iterable, Iterator, Optional
+from typing import Any, Callable, Generic, Iterable, Optional, Self, TypeVar
 
 from ipytv import playlist
 from ipytv.channel import IPTVChannel
@@ -11,37 +11,54 @@ from ..utils import APItype
 logger = logging.getLogger(__name__)
 
 
-def _stream_to_epgs(
-    channels: Iterable[Any],
-    channel_type: type,
-    get_stream_id: Callable[[Any], Any],
-    get_epg_ids: Callable[[Any], Iterator[Any]],
-) -> Iterator[tuple[str, str]]:
-    for channel in channels:
-        if isinstance(channel, channel_type):
-            stream_id = get_stream_id(channel)
-            if isinstance(stream_id, (str, int)):
-                for epg_id in get_epg_ids(channel):
-                    if epg_id and isinstance(epg_id, str):
-                        yield str(stream_id), epg_id
-                        break
+T = TypeVar("T")
 
 
-def _xc_stream_to_epgs(channels: Any) -> Optional[dict[str, str]]:
+class StreamTo(Generic[T]):
+    def __init__(
+        self,
+        get_stream_id: Callable[[T], Any],
+        get_epg_id: Callable[[T], Any],
+        get_name: Callable[[T], Any],
+    ) -> None:
+        self.epgs: dict[str, str] = {}
+        self.names: dict[str, str] = {}
+        self.get_stream_id = get_stream_id
+        self.get_epg_id = get_epg_id
+        self.get_name = get_name
+
+    def populate(self, channels: Iterable[Any], channels_type: type) -> Self:
+        epgs, names = self.epgs, self.names
+        for channel in channels:
+            if isinstance(channel, channels_type):
+                if (stream_id := self.get_stream_id(channel)) and isinstance(stream_id, (str, int)):
+                    stream_id = str(stream_id)
+                    if (epg_id := self.get_epg_id(channel)) and isinstance(epg_id, str):
+                        epgs[stream_id] = epg_id
+                    if (name := self.get_name(channel)) and isinstance(name, str):
+                        names[stream_id] = name
+                        if stream_id not in epgs:
+                            epgs[stream_id] = name
+        return self
+
+
+def xc_stream_to(channels: Any) -> Optional[StreamTo]:
     if isinstance(channels, list):
 
         def get_stream_id(channel: dict) -> Any:
             return channel.get("stream_id")
 
-        def get_epg_ids(channel: dict) -> Iterator[Any]:
-            for epg_key in "epg_channel_id", "name":
-                yield channel.get(epg_key)
+        def get_epg_id(channel: dict) -> Any:
+            return channel.get("epg_channel_id")
 
-        return dict(_stream_to_epgs(channels, dict, get_stream_id, get_epg_ids))
+        def get_name(channel: dict) -> Any:
+            return channel.get("name")
+
+        return StreamTo[dict](get_stream_id, get_epg_id, get_name).populate(channels, dict)
     return None
 
 
-def _mac_stream_to_epgs(channels: Any) -> Optional[dict[str, str]]:
+def mac_stream_to(channels: Any) -> Optional[StreamTo]:
     if (
         isinstance(channels, dict)
         and (js := channels.get("js"))
@@ -53,52 +70,64 @@ def _mac_stream_to_epgs(channels: Any) -> Optional[dict[str, str]]:
         def get_stream_id(channel: dict) -> Any:
             return channel.get("id")
 
-        def get_epg_ids(channel: dict) -> Iterator[Any]:
-            for epg_key in "xmltv_id", "name":
-                yield channel.get(epg_key)
+        def get_epg_id(channel: dict) -> Any:
+            return channel.get("xmltv_id")
 
-        return dict(_stream_to_epgs(channels, dict, get_stream_id, get_epg_ids))
+        def get_name(channel: dict) -> Any:
+            return channel.get("name")
+
+        return StreamTo[dict](get_stream_id, get_epg_id, get_name).populate(channels, dict)
     return None
 
 
-def _m3u_stream_to_epgs(channels: Any) -> Optional[dict[str, str]]:
+def m3u_stream_to(channels: Any) -> Optional[StreamTo]:
     try:
 
         def get_stream_id(channel: IPTVChannel) -> Any:
             return channel.url
 
-        def get_epg_ids(channel: IPTVChannel) -> Iterator[Any]:
-            for epg_key in "tvg-id", "tvg-name":  # tvg-logo # TODO
-                yield channel.attributes.get(epg_key)
+        def get_epg_id(channel: IPTVChannel) -> Any:
+            return channel.attributes.get("tvg-id")
+
+        def get_name(channel: IPTVChannel) -> Any:
+            return channel.attributes.get("tvg-name")
 
         channels = playlist.loads(channels)
-        return dict(_stream_to_epgs(channels, IPTVChannel, get_stream_id, get_epg_ids))
+        return StreamTo[IPTVChannel](get_stream_id, get_epg_id, get_name).populate(channels, IPTVChannel)
     except IPyTVException as error:
         logger.error("%s: %s", error.__class__.__name__, error)
         return None
 
 
 class EPGserverChannels:
-    _stream_to_epgs_get = {
-        APItype.XC: _xc_stream_to_epgs,
-        APItype.MAC: _mac_stream_to_epgs,
-        APItype.M3U: _m3u_stream_to_epgs,
+    _stream_to_get = {
+        APItype.XC: xc_stream_to,
+        APItype.MAC: mac_stream_to,
+        APItype.M3U: m3u_stream_to,
     }
 
     def __init__(self, server: str, channels: Any, api: APItype) -> None:
         self.server = server
-        self.stream_to_epgs: dict[str, str] = {}
-        self.stream_to_epgs_lock = threading.Lock()
+        self.stream_to: Optional[StreamTo] = None
+        self.stream_to_lock = threading.Lock()
         threading.Thread(target=self._set, args=(channels, api)).start()
 
     def _set(self, channels: Any, api: APItype) -> None:
         logger.info("Set channels for %s", self.server)
-        if _stream_to_epgs_get := EPGserverChannels._stream_to_epgs_get.get(api):
-            if stream_to_epgs := _stream_to_epgs_get(channels):
-                with self.stream_to_epgs_lock:
-                    self.stream_to_epgs = stream_to_epgs
-                logger.info("%d channels found for %s", len(stream_to_epgs), self.server)
+        if _stream_to_get := EPGserverChannels._stream_to_get.get(api):
+            if stream_to := _stream_to_get(channels):
+                with self.stream_to_lock:
+                    self.stream_to = stream_to
+                logger.info("%d channels found for %s", len(stream_to.epgs), self.server)
 
-    def get(self, stream_id: str) -> Optional[str]:
-        with self.stream_to_epgs_lock:
-            return self.stream_to_epgs.get(stream_id)
+    def get_epg(self, stream_id: str) -> Optional[str]:
+        with self.stream_to_lock:
+            if self.stream_to:
+                return self.stream_to.epgs.get(stream_id)
+            return None
+
+    def get_name(self, stream_id: str) -> Optional[str]:
+        with self.stream_to_lock:
+            if self.stream_to:
+                return self.stream_to.names.get(stream_id)
+            return None

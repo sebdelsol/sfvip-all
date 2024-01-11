@@ -179,8 +179,8 @@ def _epg_confidence_percent() -> Style:
 
 def _epg_status_styles(progress: str) -> dict[EPGstatus | None, Style]:
     return {
-        EPGstatus.LOADING: _InfoStyle.app(f"{LOC.Loading}{progress}").grey,
-        EPGstatus.PROCESSING: _InfoStyle.app(f"{LOC.Processing}{progress}").grey,
+        EPGstatus.LOADING: _InfoStyle.app(f"{LOC.Loading}{progress}").white,
+        EPGstatus.PROCESSING: _InfoStyle.app(f"{LOC.Processing}{progress}").white,
         EPGstatus.READY: _InfoStyle.app(LOC.Ready).lime_green,
         EPGstatus.FAILED: _InfoStyle.app(LOC.Failed).red,
         EPGstatus.NO_EPG: _InfoStyle.app(LOC.NoEpg).grey,

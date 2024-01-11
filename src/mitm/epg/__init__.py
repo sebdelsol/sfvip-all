@@ -1,7 +1,7 @@
 import logging
 import multiprocessing
 import time
-from typing import Any, Callable, Iterator, Optional
+from typing import Any, Callable, Iterator, NamedTuple, Optional
 
 from shared.job_runner import JobRunner
 
@@ -12,8 +12,23 @@ from .update import EPGupdater, FoundProgammes, UpdateStatusT
 
 logger = logging.getLogger(__name__)
 
-ChannelFoundT = Callable[[int], None]
-ShowEpgT = Callable[[tuple[EPGprogramme, ...]], None]
+
+class ShowChannel(NamedTuple):
+    show: bool
+    name: Optional[str] = None
+    confidence: Optional[int] = None
+
+
+ShowChannelT = Callable[[ShowChannel], None]
+
+
+class ShowEpg(NamedTuple):
+    show: bool
+    name: Optional[str] = None
+    programmes: Optional[tuple[EPGprogramme, ...]] = None
+
+
+ShowEpgT = Callable[[ShowEpg], None]
 
 
 class ConfidenceUpdater(JobRunner[int]):
@@ -37,13 +52,15 @@ class EPG:
 
     # all following methods should be called from the same process EXCEPT add_job & wait_running
     def __init__(
-        self, update_status: UpdateStatusT, channel_found: ChannelFoundT, show_epg: ShowEpgT, timeout: int
+        self, update_status: UpdateStatusT, show_channel: ShowChannelT, show_epg: ShowEpgT, timeout: int
     ) -> None:
         self.servers: dict[str, EPGserverChannels] = {}
         self.updater = EPGupdater(update_status, timeout)
         self.confidence_updater = ConfidenceUpdater()
-        self._channel_found = channel_found
-        self._show_epg = show_epg
+        self.show_channel = show_channel
+        self.channel_shown = False
+        self.show_epg = show_epg
+        self.epg_shown = False
 
     def ask_update(self, url: str) -> None:
         self.updater.add_job(url)
@@ -66,12 +83,9 @@ class EPG:
         if server:
             self.servers[server] = EPGserverChannels(server, channels, api)
 
+    @staticmethod
     def _get_listing(
-        self,
-        programme_type: EPGprogramme,
-        programmes: FoundProgammes,
-        epg_id: str,
-        limit: Optional[str],
+        programme_type: EPGprogramme, programmes: FoundProgammes, limit: Optional[str]
     ) -> Iterator[EPGprogramme]:
         count = 0
         now = time.time()
@@ -82,9 +96,6 @@ class EPG:
                 count += 1
                 if int_limit and count >= int_limit:
                     break
-        if count > 0:
-            logger.info("Get epg for %s", epg_id)
-            self._channel_found(programmes.confidence)
 
     def ask_stream(
         self, server: Optional[str], stream_id: str, limit: Optional[str], api: APItype
@@ -92,17 +103,43 @@ class EPG:
         if (
             server
             and (server_channels := self.servers.get(server))
-            and (epg_id := server_channels.get(stream_id))
+            and (epg_id := server_channels.get_epg(stream_id))
             and (confidence := self.confidence_updater.confidence)
             and (update := self.updater.update)
         ):
             if programmes := update.get_programmes(epg_id, confidence):
                 if programme_type := EPG._programme_type.get(api):
-                    return tuple(self._get_listing(programme_type, programmes, epg_id, limit))
+                    if listing := tuple(self._get_listing(programme_type, programmes, limit)):
+                        logger.info("Get epg for %s", epg_id)
+                        name = self.ask_name(server, stream_id)
+                        self.show_channel(ShowChannel(True, name, programmes.confidence))
+                        self.channel_shown = True
+                        return listing
         return None
 
-    def ask_m3u_stream(self, server: Optional[str], stream_id: str) -> bool:
-        if listing := self.ask_stream(server, stream_id, "1", APItype.M3U):
-            self._show_epg(listing)
+    def ask_name(self, server: Optional[str], stream_id: str) -> Optional[str]:
+        if (
+            server
+            and (server_channels := self.servers.get(server))
+            and (name := server_channels.get_name(stream_id))
+        ):
+            return name
+        return None
+
+    def start_m3u_stream(self, server: Optional[str], stream_id: str) -> bool:
+        if programmes := self.ask_stream(server, stream_id, "1", APItype.M3U):
+            name = self.ask_name(server, stream_id)
+            self.show_epg(ShowEpg(True, name, programmes))
+            self.epg_shown = True
+            logger.info("Start showing epg for %s", name)
             return True
         return False
+
+    # def stop_m3u_stream(self, server: Optional[str], path: str) -> bool:
+    def hide_epg(self) -> None:
+        if self.epg_shown:
+            self.show_epg(ShowEpg(False))
+            self.epg_shown = False
+        if self.channel_shown:
+            self.show_channel(ShowChannel(False))
+            self.channel_shown = False

@@ -6,7 +6,7 @@ from .sticky import Offset, Rect, StickyWindow, offset_centered
 
 def _get_bar_style(bg: str) -> str:
     fg = "#1c8cbc"
-    bar_style_name = "bar.Horizontal.TProgressbar"
+    bar_style_name = "stickybar.Horizontal.TProgressbar"
     style = ttk.Style()
     style.configure(
         bar_style_name,

@@ -37,7 +37,7 @@
   "EpgUrl": "Zunanji EPG",
   "InvalidUrl": "Nepravilen url naslov",
   "EpgConfidence": "Stopnja zaupanja EPG",
-  "EPGFoundConfidence": "Kanal najden v zunanjem EPG s stopnjo zaupanja %s",
+  "EPGFoundConfidence": "%s najdenih v zunanjem EPG s stopnjo zaupanja %s",
   "UpdatedToday": "Posodobljeno danes",
   "Updated1DayAgo": "Posodobljeno pred 1 dnem",
   "UpdatedDaysAgo": "Posodobljeno pred %s dnevi",

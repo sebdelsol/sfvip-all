@@ -86,7 +86,7 @@ class LocalProxies:
             app_info.roaming,
             AddonCallbacks(
                 self._epg_updater.update_status,
-                self._epg_updater.add_channel_found,
+                self._epg_updater.add_show_channel,
                 self._epg_updater.add_show_epg,
                 self._cache_progress.update_progress,
             ),

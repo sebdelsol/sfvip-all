@@ -49,6 +49,8 @@ class WinState(NamedTuple):
 class StickyWindow(tk.Toplevel):
     """follow position, hide & show when needed"""
 
+    show_when_no_border = False
+
     def __init__(self, offset: Offset, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.withdraw()
@@ -91,14 +93,16 @@ class StickyWindows:
         return StickyWindows._current_rect
 
     @staticmethod
-    def change_position_all(rect: Rect) -> None:
+    def change_position_all(rect: Rect, border: bool) -> None:
         for sticky in StickyWindows._instances:
-            sticky.change_position(rect)
+            if border or sticky.show_when_no_border:
+                sticky.change_position(rect)
 
     @staticmethod
-    def bring_to_front_all(is_topmost: bool, is_foreground: bool) -> None:
+    def bring_to_front_all(is_topmost: bool, is_foreground: bool, border: bool) -> None:
         for sticky in StickyWindows._instances:
-            sticky.bring_to_front(is_topmost, is_foreground)
+            if border or sticky.show_when_no_border:
+                sticky.bring_to_front(is_topmost, is_foreground)
 
     @staticmethod
     def withdraw_all() -> None:
@@ -106,15 +110,24 @@ class StickyWindows:
             sticky.withdraw()
 
     @staticmethod
+    def withdraw_all_no_border() -> None:
+        for sticky in StickyWindows._instances:
+            if not sticky.show_when_no_border:
+                sticky.withdraw()
+
+    @staticmethod
     def on_state_changed(state: WinState) -> None:
         with StickyWindows._lock:  # sure to be sequential
-            if state.no_border or state.is_minimized:
+            if state.is_minimized:
                 StickyWindows.withdraw_all()
-            elif state.rect.valid():
-                StickyWindows.bring_to_front_all(state.is_topmost, state.is_foreground)
+                return
+            if state.no_border:
+                StickyWindows.withdraw_all_no_border()
+            if state.rect.valid():
+                StickyWindows.bring_to_front_all(state.is_topmost, state.is_foreground, not state.no_border)
                 if state.rect != StickyWindows._current_rect:
                     StickyWindows._current_rect = state.rect
-                    StickyWindows.change_position_all(Maximized.fix(state.rect))
+                    StickyWindows.change_position_all(Maximized.fix(state.rect), not state.no_border)
 
     @staticmethod
     def update_position(win: StickyWindow) -> None:

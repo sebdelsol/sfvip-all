@@ -37,10 +37,10 @@
   "EpgUrl": "Εξωτερικό EPG",
   "InvalidUrl": "Μη έγκυρο url",
   "EpgConfidence": "Επίπεδο εμπιστοσύνης EPG",
-  "EPGFoundConfidence": "Κανάλι που βρέθηκε στο εξωτερικό EPG με εμπιστοσύνη %s",
+  "EPGFoundConfidence": "%s βρέθηκε στο εξωτερικό EPG με %s εμπιστοσύνη",
   "UpdatedToday": "Ενημερώθηκε σήμερα",
   "Updated1DayAgo": "Ενημερώθηκε πριν από 1 ημέρα",
   "UpdatedDaysAgo": "Ενημερώθηκε πριν από %s ημέρες",
-  "UpdateAllSeries": "Ενημέρωση Όλες οι σειρές",
+  "UpdateAllSeries": "Ενημέρωση όλων των σειρών",
   "UpdateAllMovies": "Ενημέρωση όλων των ταινιών"
 }

@@ -37,7 +37,7 @@
   "EpgUrl": "External EPG",
   "InvalidUrl": "Invalid url",
   "EpgConfidence": "EPG confidence level",
-  "EPGFoundConfidence": "Channel found in the external EPG with %s confidence",
+  "EPGFoundConfidence": "%s found in the external EPG with %s confidence",
   "UpdatedToday": "Updated today",
   "Updated1DayAgo": "Updated 1 day ago",
   "UpdatedDaysAgo": "Updated %s days ago",

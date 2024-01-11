@@ -37,9 +37,9 @@
   "EpgUrl": "EPG externe",
   "InvalidUrl": "Url non valide",
   "EpgConfidence": "Niveau de confiance de l'EPG",
-  "EPGFoundConfidence": "Chaîne trouvée dans l'EPG externe avec un niveau de confiance de %s",
+  "EPGFoundConfidence": "%s trouvé dans l'EPG externe avec un niveau de confiance de %s",
   "UpdatedToday": "Mis à jour aujourd'hui",
-  "Updated1DayAgo": "Mise à jour il y a 1 jour",
+  "Updated1DayAgo": "Mis à jour il y a 1 jour",
   "UpdatedDaysAgo": "Mise à jour il y a %s jours",
   "UpdateAllSeries": "Mise à jour de toutes les séries",
   "UpdateAllMovies": "Mise à jour de tous les films"

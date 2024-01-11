@@ -37,10 +37,10 @@
   "EpgUrl": "Внешний EPG",
   "InvalidUrl": "Неверный url",
   "EpgConfidence": "Уровень доверия к EPG",
-  "EPGFoundConfidence": "Канал найден во внешнем EPG с доверием %s",
+  "EPGFoundConfidence": "%s найдено во внешнем EPG с уверенностью %s",
   "UpdatedToday": "Обновлено сегодня",
-  "Updated1DayAgo": "Обновлен 1 день назад",
+  "Updated1DayAgo": "Обновлено 1 день назад",
   "UpdatedDaysAgo": "Обновлено %s дней назад",
-  "UpdateAllSeries": "Обновить все сериалы",
+  "UpdateAllSeries": "Обновить все серии",
   "UpdateAllMovies": "Обновить все фильмы"
 }

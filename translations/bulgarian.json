@@ -37,7 +37,7 @@
   "EpgUrl": "Външен EPG",
   "InvalidUrl": "Невалиден URL адрес",
   "EpgConfidence": "Ниво на доверие на EPG",
-  "EPGFoundConfidence": "Каналът е намерен във външния EPG с ниво на доверие %s",
+  "EPGFoundConfidence": "%s намерени във външния EPG с %s доверителна стойност",
   "UpdatedToday": "Актуализиран днес",
   "Updated1DayAgo": "Актуализиран преди 1 ден",
   "UpdatedDaysAgo": "Актуализиран преди %s дни",

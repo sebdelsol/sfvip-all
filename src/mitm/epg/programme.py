@@ -83,7 +83,13 @@ class EPGprogrammeMAC(dict[str, str | int]):
         return text.replace("\\", "")
 
 
-class EPGprogrammeM3U(dict[str, str | int]):
+class EPGprogrammeM3U(NamedTuple):
+    title: str
+    descr: str
+    start: str
+    start_timestamp: int
+    duration: int
+
     @classmethod
     def from_programme(cls, programme: InternalProgramme, now: float) -> Optional[Self]:
         if schedule := Schedule.from_programme(programme, now):
@@ -91,8 +97,8 @@ class EPGprogrammeM3U(dict[str, str | int]):
                 title=cls.get_text(programme.title),
                 descr=cls.get_text(programme.desc),
                 start=schedule.get_start_date(),
-                end=schedule.get_end_date(),
                 start_timestamp=schedule.start,
+                duration=schedule.end - schedule.start,
             )
         return None
 

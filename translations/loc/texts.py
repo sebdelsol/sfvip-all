@@ -42,7 +42,7 @@ class Texts(NamedTuple):
     EpgUrl: str = "External EPG"
     InvalidUrl: str = "Invalid url"
     EpgConfidence: str = "EPG confidence level"
-    EPGFoundConfidence: str = "Channel found in the external EPG with %s confidence"
+    EPGFoundConfidence: str = "%s found in the external EPG with %s confidence"
     UpdatedToday: str = "Updated today"
     Updated1DayAgo: str = "Updated 1 day ago"
     UpdatedDaysAgo: str = "Updated %s days ago"

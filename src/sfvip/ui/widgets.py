@@ -295,7 +295,6 @@ class CheckBox(ttk.Checkbutton):
         self.set_img_color(self.box, y, box_color, indicator_colors[0], False)
         self.set_img_color(self.box_selected, y, box_color, indicator_colors[1], True)
         style.element_create(tickbox_name, "image", self.box, ("selected", self.box_selected))
-
         style.layout(
             self.style_name,
             [
@@ -401,3 +400,38 @@ class RoundedBox(tk.Canvas):
             self.config(width=w, height=h)
             self.create_rounded_box(0, 0, w, h, self.radius, self.radius, color=self.box_color)
             self.update_idletasks()
+
+
+# pylint: disable=too-many-ancestors
+class HorizontalProgressBar(ttk.Progressbar):
+    _count = 0
+
+    def __init__(self, master: tk.BaseWidget, bg: str, fg: str, height: int, **kwargs: Any) -> None:
+        style_name = f"custom{HorizontalProgressBar._count}.Horizontal.TProgressbar"
+        bar_name = f"custom{HorizontalProgressBar._count}.Horizontal.Progressbar.pbar"
+        HorizontalProgressBar._count += 1
+        style = ttk.Style()
+        self.pbar = tk.PhotoImage("pbar", width=1, height=height, master=master)  # keep reference
+        self.pbar.put(fg, to=(0, 0, self.pbar.width(), self.pbar.height()))  # type: ignore
+        style.element_create(bar_name, "image", self.pbar)
+        style.layout(
+            style_name,
+            [
+                (
+                    "Horizontal.Progressbar.trough",
+                    {
+                        "sticky": "nswe",
+                        "children": [(bar_name, {"side": "left", "sticky": "ns"})],
+                    },
+                )
+            ],
+        )
+        style.configure(
+            style_name,
+            troughcolor=bg,
+            bordercolor=bg,
+            background=fg,
+            lightcolor=bg,
+            darkcolor=bg,
+        )
+        super().__init__(master, style=style_name, orient=tk.HORIZONTAL, **kwargs)

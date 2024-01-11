@@ -37,7 +37,7 @@
   "EpgUrl": "Екстерни ЕПГ",
   "InvalidUrl": "Неважећи УРЛ",
   "EpgConfidence": "ЕПГ ниво поузданости",
-  "EPGFoundConfidence": "Канал пронађен у екстерном ЕПГ-у са %s поузданости",
+  "EPGFoundConfidence": "%s пронађено у екстерном ЕПГ-у са %s поузданости",
   "UpdatedToday": "Ажурирано данас",
   "Updated1DayAgo": "Ажурирано пре 1 дан",
   "UpdatedDaysAgo": "Ажурирано пре %s дана",

@@ -37,7 +37,7 @@
   "EpgUrl": "Harici EPG",
   "InvalidUrl": "Geçersiz url",
   "EpgConfidence": "EPG güven seviyesi",
-  "EPGFoundConfidence": "Harici EPG'de %s güvenle bulunan kanal",
+  "EPGFoundConfidence": "%s güvenle harici EPG'de %s bulundu",
   "UpdatedToday": "Bugün güncellendi",
   "Updated1DayAgo": "1 gün önce güncellendi",
   "UpdatedDaysAgo": "%s gün önce güncellendi",
