@@ -1,6 +1,7 @@
 # packages to run the app for both environments
 mitmproxy>=10.1.6
 watchdog>=3.0.0
+tkinter-tooltip>=2.2.0
 # for downloading the player and libmpv
 feedparser>=6.0.10
 py7zr>=0.20.6

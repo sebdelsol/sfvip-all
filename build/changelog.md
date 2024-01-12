@@ -1,3 +1,6 @@
+## 1.4.20 (upcoming)
+* Tooltips.
+
 ## 1.4.12.12
 * EPG for M3U: show the upcoming schedule with `e` keyboard shortcut.
 

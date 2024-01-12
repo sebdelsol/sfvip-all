@@ -42,5 +42,7 @@
   "Updated1DayAgo": "Actualizado hace 1 día",
   "UpdatedDaysAgo": "Actualizado hace %s días",
   "UpdateAllSeries": "Actualizar todas las series",
-  "UpdateAllMovies": "Actualizar todas las películas"
+  "UpdateAllMovies": "Actualizar todas las películas",
+  "TooltipConfidence0": "0%: no confías en la EPG, por lo que tendrás muchas menos coincidencias con canales de TV",
+  "TooltipConfidence100": "100%: confías plenamente en la EPG, y siempre obtendrás una coincidencia, a veces de mala calidad"
 }

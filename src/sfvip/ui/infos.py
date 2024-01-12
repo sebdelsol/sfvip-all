@@ -1,6 +1,8 @@
 import tkinter as tk
 from typing import Any, Callable, NamedTuple, Optional, Sequence
 
+from tktooltip import ToolTip
+
 from translations.loc import LOC
 
 from ...mitm.epg.update import EPGProgress, EPGstatus
@@ -165,6 +167,11 @@ def _epg_url() -> Style:
     return _InfoStyle.app("").smaller(2).no_truncate.grey
 
 
+def epg_confidence_tooltip() -> str:
+    msg = "".join((f"\n\n • {text}" for text in (LOC.TooltipConfidence0, LOC.TooltipConfidence100)))
+    return f"{LOC.EpgConfidence}:{msg}"
+
+
 def _epg_confidence_label() -> Style:
     return _InfoStyle.app(LOC.EpgConfidence).no_truncate.grey
 
@@ -191,6 +198,11 @@ def _epg_status_styles(progress: str) -> dict[EPGstatus | None, Style]:
 def _epg_status(epg_status: EPGProgress) -> Style:
     progress = "" if epg_status.progress is None else f" {epg_status.progress:.0%}"
     return _epg_status_styles(progress).get(epg_status.status, _InfoStyle.app("").grey)
+
+
+def set_tooltip(msg: str, *widgets: tk.Widget) -> None:
+    for widget in widgets:
+        ToolTip(widget, msg=msg, delay=0, bg=_InfoTheme.bg_interact, fg="grey", follow=True)
 
 
 class _ProxiesWindow(StickyWindow):
@@ -378,6 +390,8 @@ class InfosWindow(_ProxiesWindow):
         row += 1
         super()._layout(row=row)
         frame.columnconfigure(2, weight=1)
+        # tooltips
+        set_tooltip(epg_confidence_tooltip(), epg_confidence_label)
 
     def set_epg_url_update(self, epg_url: Optional[str], callback: Callable[[str], None]) -> None:
         self._epg_url.delete(0, tk.END)

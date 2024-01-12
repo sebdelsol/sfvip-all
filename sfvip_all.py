@@ -6,8 +6,6 @@ from src import set_logging
 
 set_logging(__name__)
 
-# TODO tips for epg confidence
-
 if __name__ == "__main__":
     # reduce what's imported in the proxies process
     import logging

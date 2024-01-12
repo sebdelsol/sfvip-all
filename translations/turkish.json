@@ -42,5 +42,7 @@
   "Updated1DayAgo": "1 gün önce güncellendi",
   "UpdatedDaysAgo": "%s gün önce güncellendi",
   "UpdateAllSeries": "Tüm serileri güncelle",
-  "UpdateAllMovies": "Tüm filmleri güncelle"
+  "UpdateAllMovies": "Tüm filmleri güncelle",
+  "TooltipConfidence0": "0: EPG'ye güvenmiyorsunuz, bu nedenle TV kanallarıyla çok daha az eşleşmeniz olacak",
+  "TooltipConfidence100": "100: EPG'ye tamamen güvenirsiniz ve bazen düşük kalitede de olsa her zaman bir eşleşme elde edersiniz"
 }
