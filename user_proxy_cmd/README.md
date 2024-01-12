@@ -21,9 +21,9 @@ SfvipUserProxy --remove
 ![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-196-000000.svg?logo=file-code&logoColor=a0a0a0)
 
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-1.9.7-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
-<sup><sub>or</sub></sup>
+<sup><sub>**or**</sub></sup>
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-6.3.0-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
-<sup><sub>&ensp; + &ensp;</sub></sup>
+<sup><sub>&ensp; **+** &ensp;</sub></sup>
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
 
 ```console

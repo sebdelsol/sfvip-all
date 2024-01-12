@@ -1,3 +1,6 @@
+## 1.4.12.12
+* EPG for M3U: show the upcoming schedule with `e` keyboard shortcut.
+
 ## 1.4.12.11
 * External EPG for M3U _online_ accounts: show current channel programme only.
 

@@ -41,6 +41,9 @@ def is_built() -> bool:
     return is_py_installer() or is_nuitka()
 
 
+log_polluters = "ipytv.playlist", "ipytv.channel", "mitmproxy.proxy.server"
+
+
 def set_logging(from_) -> None:
     if is_py_installer():
         # pylint: disable=import-outside-toplevel
@@ -68,5 +71,5 @@ def set_logging(from_) -> None:
             logger.info("Build by Nuitka")
     else:
         # do not pollute the log
-        for module in "ipytv.playlist", "ipytv.channel", "mitmproxy.proxy.server":
-            logging.getLogger(module).setLevel(logging.WARNING)
+        for polluter in log_polluters:
+            logging.getLogger(polluter).setLevel(logging.WARNING)

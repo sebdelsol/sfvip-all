@@ -10,3 +10,4 @@ requests>=2.31.0
 lxml>=4.9.4
 thefuzz>=0.20.0
 m3u-ipytv>=0.2.7
+keyboard>=0.13.5

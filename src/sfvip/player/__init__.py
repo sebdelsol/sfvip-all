@@ -77,17 +77,18 @@ class _PlayerWindowWatcher:
 
     def start(self, pid: int) -> None:
         self._watcher = WindowWatcher(pid)
-        self._watcher.set_callback(sticky.StickyWindows.on_state_changed)
+        sticky.sticky_windows.set_followed_pid(pid)
+        self._watcher.set_callback(sticky.sticky_windows.on_state_changed)
         self._watcher.start()
 
     def stop(self) -> None:
         if self._watcher:
             self._watcher.stop()
-            sticky.StickyWindows.withdraw_all()
+            sticky.sticky_windows.withdraw_all()
 
     @property
     def rect(self) -> Optional[sticky.Rect]:
-        return sticky.StickyWindows.get_rect()
+        return sticky.sticky_windows.get_rect()
 
 
 class _Launcher:

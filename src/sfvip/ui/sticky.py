@@ -2,7 +2,7 @@ import threading
 import tkinter as tk
 from typing import Any, NamedTuple, Optional, Self
 
-from ...winapi import monitor
+from ...winapi import monitor, win
 
 
 class Offset(NamedTuple):
@@ -58,7 +58,7 @@ class StickyWindow(tk.Toplevel):
         self._offset = offset
         # prevent closing (alt-f4)
         self.protocol("WM_DELETE_WINDOW", lambda: None)
-        StickyWindows.register(self)
+        sticky_windows.register(self)
 
     def change_position(self, rect: Rect) -> None:
         w, h = self.winfo_reqwidth(), self.winfo_reqheight()
@@ -78,61 +78,64 @@ class StickyWindow(tk.Toplevel):
 
 
 class StickyWindows:
-    """pure class, handle on_state_changed on all StickyWindow"""
+    """handle on_state_changed on all StickyWindow"""
 
-    _current_rect: Optional[Rect] = None
-    _instances: list[StickyWindow] = []
-    _lock = threading.Lock()
+    def __init__(self) -> None:
+        self._followed_pid: Optional[int] = None
+        self._current_rect: Optional[Rect] = None
+        self._instances: list[StickyWindow] = []
+        self._lock = threading.Lock()
 
-    @staticmethod
-    def register(instance: StickyWindow) -> None:
-        StickyWindows._instances.append(instance)
+    def register(self, instance: StickyWindow) -> None:
+        self._instances.append(instance)
 
-    @staticmethod
-    def get_rect() -> Optional[Rect]:
-        return StickyWindows._current_rect
+    def set_followed_pid(self, pid: int) -> None:
+        self._followed_pid = pid
 
-    @staticmethod
-    def change_position_all(rect: Rect, border: bool) -> None:
-        for sticky in StickyWindows._instances:
+    def get_rect(self) -> Optional[Rect]:
+        return self._current_rect
+
+    def change_position_all(self, rect: Rect, border: bool) -> None:
+        for sticky in self._instances:
             if border or sticky.show_when_no_border:
                 sticky.change_position(rect)
 
-    @staticmethod
-    def bring_to_front_all(is_topmost: bool, is_foreground: bool, border: bool) -> None:
-        for sticky in StickyWindows._instances:
+    def bring_to_front_all(self, is_topmost: bool, is_foreground: bool, border: bool) -> None:
+        for sticky in self._instances:
             if border or sticky.show_when_no_border:
                 sticky.bring_to_front(is_topmost, is_foreground)
 
-    @staticmethod
-    def withdraw_all() -> None:
-        for sticky in StickyWindows._instances:
+    def withdraw_all(self) -> None:
+        for sticky in self._instances:
             sticky.withdraw()
 
-    @staticmethod
-    def withdraw_all_no_border() -> None:
-        for sticky in StickyWindows._instances:
+    def withdraw_all_no_border(self) -> None:
+        for sticky in self._instances:
             if not sticky.show_when_no_border:
                 sticky.withdraw()
 
-    @staticmethod
-    def on_state_changed(state: WinState) -> None:
-        with StickyWindows._lock:  # sure to be sequential
+    def on_state_changed(self, state: WinState) -> None:
+        with self._lock:  # sure to be sequential
             if state.is_minimized:
-                StickyWindows.withdraw_all()
+                self.withdraw_all()
                 return
             if state.no_border:
-                StickyWindows.withdraw_all_no_border()
+                self.withdraw_all_no_border()
             if state.rect.valid():
-                StickyWindows.bring_to_front_all(state.is_topmost, state.is_foreground, not state.no_border)
-                if state.rect != StickyWindows._current_rect:
-                    StickyWindows._current_rect = state.rect
-                    StickyWindows.change_position_all(Maximized.fix(state.rect), not state.no_border)
+                self.bring_to_front_all(state.is_topmost, state.is_foreground, not state.no_border)
+                if state.rect != self._current_rect:
+                    self._current_rect = state.rect
+                    self.change_position_all(Maximized.fix(state.rect), not state.no_border)
 
-    @staticmethod
-    def update_position(win: StickyWindow) -> None:
-        if rect := StickyWindows._current_rect:
-            win.change_position(rect)
+    def update_position(self, window: StickyWindow) -> None:
+        if rect := self._current_rect:
+            window.change_position(rect)
+
+    def has_focus(self) -> bool:
+        return win.is_foreground(self._followed_pid) if self._followed_pid else False
+
+
+sticky_windows = StickyWindows()
 
 
 class Maximized:

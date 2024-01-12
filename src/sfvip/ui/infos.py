@@ -44,7 +44,7 @@ class _InfoTheme:
     button = dict(
         bg="#1F1E1D",
         mouseover="#3F3F41",
-        border=Border(bg="white", size=0.75, relief="groove"),
+        border=Border(bg="white", size=0, relief="groove"),
     )
     listview = dict(
         bg_headers=bg_headers,
@@ -111,7 +111,7 @@ def _get_row(info: Info) -> Sequence[Style]:
 
 
 def _get_relaunch_button() -> Style:
-    return _InfoStyle.stl(LOC.RestartFixProxy).no_truncate.white
+    return _InfoStyle.stl(LOC.RestartFixProxy).no_truncate.red
 
 
 def _get_app_version(app_info: AppInfo) -> Style:
@@ -222,7 +222,7 @@ class _ProxiesWindow(StickyWindow):
         button_pad = _InfoTheme.button_pad
         self._header_frame.grid(row=row, columnspan=3, sticky=tk.NSEW)
         self._header_frame.columnconfigure(0, weight=1)
-        self._relaunch_button.grid(padx=button_pad, pady=button_pad, sticky=tk.NSEW)
+        self._relaunch_button.grid(padx=button_pad, pady=button_pad, sticky=tk.NS)
         self._relaunch_button.grid_remove()
         row += 1
         self._listview.grid(row=row, columnspan=3, sticky=tk.NSEW)

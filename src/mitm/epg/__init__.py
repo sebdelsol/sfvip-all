@@ -25,7 +25,7 @@ ShowChannelT = Callable[[ShowChannel], None]
 class ShowEpg(NamedTuple):
     show: bool
     name: Optional[str] = None
-    programmes: Optional[tuple[EPGprogramme, ...]] = None
+    programmes: Optional[tuple[EPGprogrammeM3U, ...]] = None
 
 
 ShowEpgT = Callable[[ShowEpg], None]
@@ -127,9 +127,9 @@ class EPG:
         return None
 
     def start_m3u_stream(self, server: Optional[str], stream_id: str) -> bool:
-        if programmes := self.ask_stream(server, stream_id, "1", APItype.M3U):
+        if programmes := self.ask_stream(server, stream_id, "15", APItype.M3U):
             name = self.ask_name(server, stream_id)
-            self.show_epg(ShowEpg(True, name, programmes))
+            self.show_epg(ShowEpg(True, name, programmes))  # type: ignore #we know those are EPGprogrammeM3U
             self.epg_shown = True
             logger.info("Start showing epg for %s", name)
             return True

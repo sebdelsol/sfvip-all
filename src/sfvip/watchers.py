@@ -6,6 +6,7 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Any, Callable, NamedTuple, Optional, Self
 
+import keyboard
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 from watchdog.observers.api import BaseObserver
@@ -201,3 +202,29 @@ class WindowWatcher(StartStopContextManager):
             self._event_loop.stop()
             self._thread.join()
             self._callback = None
+
+
+class _CallbackKeyboardWatcher(NamedTuple):
+    CallbackFunc = Callable[[str], None]
+
+    func: CallbackFunc
+
+    def __call__(self, key: str) -> None:
+        self.func(key)
+
+
+class KeyboardWatcher(StartStopContextManager):
+    def __init__(self, keys: str, callback: _CallbackKeyboardWatcher.CallbackFunc) -> None:
+        self._callback = _CallbackKeyboardWatcher(callback)
+        self._keys = keys
+
+    def start(self) -> None:
+        keyboard.on_press(self._on_keyboard_event)
+        logger.info("Watch started on keyboard")
+
+    def stop(self) -> None:
+        logger.info("Watch stopped on keyboard")
+
+    def _on_keyboard_event(self, event: keyboard.KeyboardEvent) -> None:
+        if event.name and event.name in self._keys:
+            self._callback(event.name)

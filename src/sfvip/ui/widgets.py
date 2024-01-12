@@ -6,6 +6,7 @@ from typing import Any, Callable, Collection, NamedTuple, Optional, Sequence
 from .style import Style
 
 
+# TODO use custom style
 def set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
     """flat, no arrow, bg=color of slider"""
     style = ttk.Style()
@@ -35,6 +36,7 @@ def set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
         relief="flat",
         lightcolor=bg,
         darkcolor=bg,
+        arrowsize=7,
     )
     style.map("Vertical.TScrollbar", background=[("active", active_slider)])
 
@@ -140,7 +142,7 @@ class _VscrollCanvas(tk.Canvas):
         # set the scroll region when the frame content changes
         self.frame.bind("<Configure>", self._on_configure)
         # bind the mousewheel
-        self.bind_all("<MouseWheel>", self._on_mousewheel)
+        self.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
 
     def _on_configure(self, _) -> None:
         w, h = self.frame.winfo_reqwidth(), self.frame.winfo_reqheight()
@@ -362,16 +364,21 @@ class CheckBox(ttk.Checkbutton):
 class RoundedBox(tk.Canvas):
     _rounded_box_tag = "canvas"
 
-    def __init__(self, master: tk.BaseWidget, radius: int, box_color: str, **kwargs) -> None:
+    def __init__(
+        self, master: tk.BaseWidget, radius: int, box_color: str, max_height: Optional[int] = None, **kwargs
+    ) -> None:
         self.radius = radius
-        self.box_color = box_color
         self.added_widget = None
+        self.box_color = box_color
+        self.max_height = max_height
         super().__init__(master, bd=0, highlightthickness=0, **kwargs)
+        self.scroll = tk.Canvas(self, bg=box_color, bd=0, highlightthickness=0)
+        self.create_window(self.radius, self.radius, window=self.scroll, anchor=tk.NW)
+        self.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
 
     # pylint: disable=too-many-arguments
-    def create_rounded_box(
-        self, x1: int, y1: int, x2: int, y2: int, radius: int, res: int, color: str = "black"
-    ) -> None:
+    def create_rounded_box(self, x1: int, y1: int, x2: int, y2: int, color: str = "black") -> None:
+        radius, res = self.radius, self.radius
         self.delete(self._rounded_box_tag)
         points = []
         points.append((x1 + radius, y1, x2 - radius, y1))
@@ -390,16 +397,22 @@ class RoundedBox(tk.Canvas):
 
     def add_widget(self, widget: tk.Widget) -> None:
         self.added_widget = widget
-        self.create_window(self.radius, self.radius, window=widget, anchor=tk.NW)
+        self.scroll.create_window(0, 0, window=widget, anchor=tk.NW)
 
     def update_widget(self) -> None:
         if self.added_widget:
             self.added_widget.update_idletasks()
-            w = self.added_widget.winfo_reqwidth() + 2 * self.radius
-            h = self.added_widget.winfo_reqheight() + 2 * self.radius
-            self.config(width=w, height=h)
-            self.create_rounded_box(0, 0, w, h, self.radius, self.radius, color=self.box_color)
+            w, h = self.added_widget.winfo_reqwidth(), self.added_widget.winfo_reqheight()
+            box_h = min(h, self.max_height) if self.max_height else h
+            w_box, h_box = w + 2 * self.radius, box_h + 2 * self.radius
+            self.scroll.config(scrollregion=(0, 0, w, h), width=w, height=box_h)
+            self.scroll.yview_moveto(0)  # reset scroll position
+            self.create_rounded_box(0, 0, w_box, h_box, color=self.box_color)
+            self.config(width=w_box, height=h_box)
             self.update_idletasks()
+
+    def _on_mousewheel(self, event: tk.Event) -> None:
+        self.scroll.yview_scroll(-1 if event.delta > 0 else 1, "units")
 
 
 # pylint: disable=too-many-ancestors

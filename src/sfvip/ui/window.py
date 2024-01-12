@@ -45,7 +45,7 @@ class _Title:
 
 class _Ask:
     bg = _Theme.bg
-    button = dict(bg="#1F1E1D", border=Border(bg="#3F3F41", size=0.75, relief="groove"))
+    button = dict(bg="#1F1E1D", border=Border(bg="#3F3F41", size=0, relief="groove"))
     button_pad = 7
     text = _Theme.text.copy().bigger(5)
     space = 20

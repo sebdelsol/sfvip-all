@@ -8,11 +8,11 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.11 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.11/x64/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.1995.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.12 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.12/x64/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.2043.0_</sup></sub>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.11 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.11/x86/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.1995.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.12 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.12/x86/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.2043.0_</sup></sub>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
@@ -25,12 +25,12 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.7-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3117/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.2.1-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7301-000000.svg?logo=file-code&logoColor=a0a0a0)
+![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7419-000000.svg?logo=file-code&logoColor=a0a0a0)
 
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-1.9.7-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
-<sup><sub>or</sub></sup>
+<sup><sub>**or**</sub></sup>
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-6.3.0-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
-<sup><sub>&ensp; + &ensp;</sub></sup>
+<sup><sub>&ensp; **+** &ensp;</sub></sup>
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
@@ -78,7 +78,7 @@ rustup target add i686-pc-windows-msvc
 python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]
 ```
 ### Upgrade dependencies
-It checks for _Nsis_, _Python_ minor update and all _packages dependencies_:
+It checks for _Nsis_, _Python minor update_ and all _packages dependencies_:
 ```console
 python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean] [--force]
 ```

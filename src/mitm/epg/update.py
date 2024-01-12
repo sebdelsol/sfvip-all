@@ -129,7 +129,7 @@ class EPGupdate(NamedTuple):
                                 update_status(EPGProgress(EPGstatus.LOADING, progress))
                             f.write(chunk)
                 return cls._process(xml, url, update_status, stopping)
-        except (requests.RequestException, gzip.BadGzipFile, ET.ParseError, EOFError) as error:
+        except (requests.RequestException, gzip.BadGzipFile, ET.ParseError, EOFError, BufferError) as error:
             logger.error("%s: %s", error.__class__.__name__, error)
         return None
 

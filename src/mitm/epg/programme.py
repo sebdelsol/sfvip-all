@@ -35,13 +35,17 @@ class Schedule(NamedTuple):
 
     @staticmethod
     def _get_date(timestamp: int) -> str:
-        return datetime.fromtimestamp(timestamp).strftime(r"%Y-%m-%d %H:%M:%S")
+        return datetime.fromtimestamp(timestamp).strftime(r"%Y-%m-%d %H:%M")
+
+    @staticmethod
+    def _get_hour(timestamp: int) -> str:
+        return datetime.fromtimestamp(timestamp).strftime(r"%H:%M")
 
     def get_start_date(self) -> str:
         return self._get_date(self.start)
 
     def get_end_date(self) -> str:
-        return self._get_date(self.end)
+        return self._get_hour(self.end)
 
 
 class EPGprogrammeXC(dict[str, str]):
@@ -87,6 +91,7 @@ class EPGprogrammeM3U(NamedTuple):
     title: str
     descr: str
     start: str
+    end: str
     start_timestamp: int
     duration: int
 
@@ -97,6 +102,7 @@ class EPGprogrammeM3U(NamedTuple):
                 title=cls.get_text(programme.title),
                 descr=cls.get_text(programme.desc),
                 start=schedule.get_start_date(),
+                end=schedule.get_end_date(),
                 start_timestamp=schedule.start,
                 duration=schedule.end - schedule.start,
             )
