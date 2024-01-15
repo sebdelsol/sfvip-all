@@ -8,6 +8,8 @@ class Texts(NamedTuple):
     UserProxy: str = "User Proxy"
     NoProxy: str = "Proxy missing"
     Proxy: str = "%s Proxy"
+    ShowProxies: str = "Show proxies"
+    HideProxies: str = "Hide proxies"
     RestartFixProxy: str = "Restart to fix the proxies"
     ShouldUseVersion: str = "You should use the %s version"
     SearchWholeCatalog: str = "Search your whole catalog"

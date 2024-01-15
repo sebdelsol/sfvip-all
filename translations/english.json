@@ -3,6 +3,8 @@
   "UserProxy": "User Proxy",
   "NoProxy": "Proxy missing",
   "Proxy": "%s Proxy",
+  "ShowProxies": "Show proxies",
+  "HideProxies": "Hide proxies",
   "RestartFixProxy": "Restart to fix the proxies",
   "ShouldUseVersion": "You should use the %s version",
   "SearchWholeCatalog": "Search your whole catalog",

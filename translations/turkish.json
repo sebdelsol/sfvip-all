@@ -3,6 +3,8 @@
   "UserProxy": "Kullanıcı Proxy'si",
   "NoProxy": "Proxy eksik",
   "Proxy": "%s Vekil",
+  "ShowProxies": "Proxy'leri göster",
+  "HideProxies": "Proxy'leri gizle",
   "RestartFixProxy": "Proxy'leri düzeltmek için yeniden başlatın",
   "ShouldUseVersion": "%s sürümünü kullanmalısınız",
   "SearchWholeCatalog": "Tüm kataloğunuzda arama yapın",

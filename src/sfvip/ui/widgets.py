@@ -36,7 +36,7 @@ def set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
         relief="flat",
         lightcolor=bg,
         darkcolor=bg,
-        arrowsize=7,
+        arrowsize=8,
     )
     style.map("Vertical.TScrollbar", background=[("active", active_slider)])
 
@@ -145,54 +145,12 @@ class _VscrollCanvas(tk.Canvas):
         self.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
 
     def _on_configure(self, _) -> None:
+        self.frame.update_idletasks()
         w, h = self.frame.winfo_reqwidth(), self.frame.winfo_reqheight()
         self.config(scrollregion=(0, 0, w, h), width=w, height=h)
 
     def _on_mousewheel(self, event: tk.Event) -> None:
         self.yview_scroll(int(-1 * (event.delta / 12)), "units")
-
-
-class Button(tk.Button):
-    """
-    button with a colored border
-    with a mouseover color
-    """
-
-    # pylint: disable=too-many-arguments
-    def __init__(
-        self,
-        master: tk.BaseWidget,
-        bg: str,
-        mouseover: str,
-        border: Optional[Border] = None,
-        attached_to: Optional[tk.Frame] = None,
-        **kwargs: Any,
-    ) -> None:
-        # create a frame for the border, note: do not pack
-        self._frame = tk.Frame(master, bg=bg, **(get_border(border) if border else {}))
-        self._attached_to = attached_to if attached_to else self._frame
-        active = dict(activebackground=bg, activeforeground=kwargs.get("fg", "white"))
-        # create the button
-        super().__init__(self._frame, bg=bg, bd=0, **active, **kwargs)
-        super().pack(fill="both", expand=True)
-        # handle mouseover
-        self.bind("<Enter>", lambda _: self.config(bg=mouseover), add="+")
-        self.bind("<Leave>", lambda _: self.config(bg=bg), add="+")
-
-    def grid(self, **kwargs: Any) -> None:
-        self._frame.grid(**kwargs)
-        if self._attached_to:
-            self._attached_to.grid()
-
-    def grid_remove(self) -> None:
-        self._frame.grid_remove()
-        if self._attached_to:
-            self._attached_to.grid_remove()
-
-    def pack(self, **kwargs: Any) -> None:
-        self._frame.pack(**kwargs)
-        if self._attached_to:
-            self._attached_to.pack()
 
 
 class ListView(tk.Frame):
@@ -206,15 +164,15 @@ class ListView(tk.Frame):
         super().__init__(master)
         # headers
         self._frame_headers = tk.Frame(self, bg=bg_headers)
-        self._frame_headers.pack(fill="both", expand=True)
+        self._frame_headers.pack(fill=tk.BOTH, expand=True)
         # headers separator
         sep = tk.Frame(self, bg=bg_separator)
-        sep.pack(fill="both", expand=True)
+        sep.pack(fill=tk.BOTH, expand=True)
         # rows
         frame_rows = tk.Frame(self)
         canvas = _VscrollCanvas(frame_rows, bg=bg_rows)
         self._frame_rows = canvas.frame
-        frame_rows.pack(fill="both", expand=True)
+        frame_rows.pack(fill=tk.BOTH, expand=True)
         # for use later
         self._bg_headers = bg_headers
         self._bg_rows = bg_rows
@@ -260,6 +218,49 @@ class ListView(tk.Frame):
         for column, width in enumerate(self._widths):
             self._frame_headers.columnconfigure(column, minsize=width)
             self._frame_rows.columnconfigure(column, minsize=width)
+
+
+class Button(tk.Button):
+    """
+    button with a colored border
+    with a mouseover color
+    """
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        master: tk.BaseWidget,
+        bg: str,
+        mouseover: str,
+        border: Optional[Border] = None,
+        attached_to: Optional[tk.Frame] = None,
+        **kwargs: Any,
+    ) -> None:
+        # create a frame for the border, note: do not pack
+        self._frame = tk.Frame(master, bg=bg, **(get_border(border) if border else {}))
+        self._attached_to = attached_to if attached_to else self._frame
+        active = dict(activebackground=bg, activeforeground=kwargs.get("fg", "white"))
+        # create the button
+        super().__init__(self._frame, bg=bg, bd=0, **active, **kwargs)
+        super().pack(fill=tk.BOTH, expand=True)
+        # handle mouseover
+        self.bind("<Enter>", lambda _: self.config(bg=mouseover), add="+")
+        self.bind("<Leave>", lambda _: self.config(bg=bg), add="+")
+
+    def grid(self, **kwargs: Any) -> None:
+        self._frame.grid(**kwargs)
+        if self._attached_to:
+            self._attached_to.grid()
+
+    def grid_remove(self) -> None:
+        self._frame.grid_remove()
+        if self._attached_to:
+            self._attached_to.grid_remove()
+
+    def pack(self, **kwargs: Any) -> None:
+        self._frame.pack(**kwargs)
+        if self._attached_to:
+            self._attached_to.pack()
 
 
 class CheckBox(ttk.Checkbutton):

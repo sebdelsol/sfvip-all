@@ -32,7 +32,7 @@ class Info(NamedTuple):
 
 
 class _InfoTheme:
-    pad = 2
+    pad = 4
     button_pad = 7
     bg_interact = "#1F1F1F"
     bg_headers = "#242424"
@@ -44,9 +44,14 @@ class _InfoTheme:
         relief="",
     )
     button = dict(
-        bg="#1F1E1D",
+        bg="black",
         mouseover="#3F3F41",
         border=Border(bg="white", size=0, relief="groove"),
+    )
+    button_proxy = dict(
+        bg=bg_headers,
+        mouseover="#3F3F41",
+        border=button["border"],
     )
     listview = dict(
         bg_headers=bg_headers,
@@ -114,6 +119,10 @@ def _get_row(info: Info) -> Sequence[Style]:
 
 def _get_relaunch_button() -> Style:
     return _InfoStyle.stl(LOC.RestartFixProxy).no_truncate.red
+
+
+def _get_proxies_button(on: bool) -> Style:
+    return _InfoStyle.app(f"▲ {LOC.HideProxies} ▲" if on else f"▼ {LOC.ShowProxies} ▼").color("#A0A0A0")
 
 
 def _get_app_version(app_info: AppInfo) -> Style:
@@ -205,6 +214,7 @@ def set_tooltip(msg: str, *widgets: tk.Widget) -> None:
         ToolTip(widget, msg=msg, delay=0, bg=_InfoTheme.bg_interact, fg="grey", follow=True)
 
 
+# pylint: disable=too-many-instance-attributes
 class _ProxiesWindow(StickyWindow):
     """installed proxies infos"""
 
@@ -222,22 +232,39 @@ class _ProxiesWindow(StickyWindow):
         self._bind_mouse_hover(self._frame)
         self._fade = Fade(self)
         # widgets
+        self.config = app_info.config
         self._header_frame = tk.Frame(self._frame, bg=_InfoTheme.bg_headers)
-        self._relaunch_button = Button(
-            self._header_frame, **_InfoTheme.button, **_get_relaunch_button().to_tk, attached_to=self._header_frame
+        self._relaunch_button = Button(self._header_frame, **_InfoTheme.button, **_get_relaunch_button().to_tk)
+        self._proxies_button = Button(
+            self._header_frame,
+            **_InfoTheme.button_proxy,
+            **_get_proxies_button(self.config.App.show_proxies).to_tk,
         )
-        self._listview = ListView(self._frame, **_InfoTheme.listview, pad=_InfoTheme.pad)
-        self._listview.set_headers(_get_infos_headers(app_info.name))
+        self._proxies = ListView(self._frame, **_InfoTheme.listview, pad=_InfoTheme.pad)
+        self._proxies.set_headers(_get_infos_headers(app_info.name))
         set_vscrollbar_style(**_InfoTheme.listview_scrollbar)
+        self._proxies_button.bind("<Button-1>", self.show_proxies)
+
+    def show_proxies(self, _) -> None:
+        proxies_shown = self.config.App.show_proxies = not self.config.App.show_proxies
+        self._proxies_button.config(**_get_proxies_button(proxies_shown).to_tk)
+        if proxies_shown:
+            self._proxies.grid()
+        else:
+            self._proxies.grid_remove()
+        self.geometry("")  # resize the window
 
     def _layout(self, row: int) -> None:
         button_pad = _InfoTheme.button_pad
         self._header_frame.grid(row=row, columnspan=3, sticky=tk.NSEW)
         self._header_frame.columnconfigure(0, weight=1)
-        self._relaunch_button.grid(padx=button_pad, pady=button_pad, sticky=tk.NS)
+        self._relaunch_button.grid(row=0, padx=button_pad, pady=button_pad, sticky=tk.NSEW)
         self._relaunch_button.grid_remove()
+        self._proxies_button.grid(row=1, sticky=tk.NSEW)
         row += 1
-        self._listview.grid(row=row, columnspan=3, sticky=tk.NSEW)
+        self._proxies.grid(row=row, columnspan=3, sticky=tk.NSEW)
+        if not self.config.App.show_proxies:
+            self._proxies.grid_remove()
         self._frame.rowconfigure(row, weight=1)
 
     def _set_button_action(self, button: Button, action: Optional[Callable[..., None]], *args: Any) -> None:
@@ -269,7 +296,7 @@ class _ProxiesWindow(StickyWindow):
         rows = [_get_row(info) for info in infos]
         if not rows:
             rows = [_get_row(Info("", "-", ""))]
-        self._listview.set_rows(rows)
+        self._proxies.set_rows(rows)
         # add relaunch if not valid
         valid = _are_infos_valid(infos)
         relaunch = player_relaunch if not valid and player_relaunch else None
@@ -384,7 +411,7 @@ class InfosWindow(_ProxiesWindow):
         epg_confidence_label.pack(padx=(pad, 0), side=tk.LEFT)
         self._epg_confidence.pack(side=tk.LEFT)
         epg_confidence_percent.pack(side=tk.LEFT)
-        self._epg_confidence_slider.pack(padx=pad * 2, pady=pad, side=tk.LEFT, fill=tk.X, expand=True)
+        self._epg_confidence_slider.pack(padx=pad * 2, pady=(pad, pad * 2), side=tk.LEFT, fill=tk.X, expand=True)
         row += 1
         separator5.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1

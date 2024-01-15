@@ -3,6 +3,8 @@
   "UserProxy": "Усер Проки",
   "NoProxy": "Прокси недостаје",
   "Proxy": "%s Проки",
+  "ShowProxies": "Прикажи проксије",
+  "HideProxies": "Сакриј проксије",
   "RestartFixProxy": "Поново покрените да бисте поправили проксије",
   "ShouldUseVersion": "Требало би да користите верзију %s",
   "SearchWholeCatalog": "Претражите цео каталог",

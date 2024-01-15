@@ -6,6 +6,7 @@ class AppDefaultConfig(ConfigLoader):
         auto_update: bool = True
         retry_minutes: int = 10
         requests_timeout: int = 3
+        show_proxies: bool = False
 
     class Player:
         exe: str | None = None
