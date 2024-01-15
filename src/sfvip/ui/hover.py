@@ -1,6 +1,6 @@
 import itertools
 import tkinter as tk
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from src.mitm.epg import ShowEpg
 
@@ -9,7 +9,14 @@ from ...winapi import win
 from .fx import Fade
 from .sticky import Offset, StickyWindow, sticky_windows
 from .style import Style
-from .widgets import Border, Button, HorizontalProgressBar, RoundedBox, RoundedBoxScroll
+from .widgets import (
+    Border,
+    Button,
+    GetWidgetT,
+    HorizontalProgressBar,
+    RoundedBox,
+    RoundedBoxScroll,
+)
 
 # TODO check max width & height
 
@@ -28,11 +35,7 @@ class _HoverWindow(StickyWindow):
     box_color = "#101010"
     radius = 7
 
-    def __init__(
-        self,
-        get_widget: Callable[[tk.Widget], tk.Widget],
-        get_scrolling_widget: Optional[Callable[[tk.Widget], tk.Widget]] = None,
-    ) -> None:
+    def __init__(self, get_widget: GetWidgetT, get_scrolling_widget: Optional[GetWidgetT] = None) -> None:
         super().__init__(self.offset, bg=self.bg)
         self.attributes("-alpha", 0)
         self.withdraw()
@@ -82,7 +85,7 @@ class _HoverWindow(StickyWindow):
 
 
 class HoverMessage(_HoverWindow):
-    offset = Offset(regular=(22, 35))
+    offset = Offset(regular=(22, 84))
     stl = Style().font("Calibri").font_size(14).bold
 
     def __init__(self) -> None:
@@ -174,7 +177,7 @@ class HoverChannelProgrammes(_HoverWindow):
     wait_before_fade = None
     click_through = False
     max_height = 600
-    offset = Offset(regular=(22, 45))
+    offset = HoverMessage.offset
     stl_channel = Style().font("Calibri").font_size(15).bold
     stl_button = Style().font("Calibri").font_size(10)
     n_programme = 15

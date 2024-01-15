@@ -1,7 +1,7 @@
 import tkinter as tk
-from math import cos, sin
+from math import cos, pi, sin
 from tkinter import ttk
-from typing import Any, Callable, Collection, NamedTuple, Optional, Sequence
+from typing import Any, Callable, Collection, Iterator, NamedTuple, Optional, Sequence
 
 from .style import Style
 
@@ -361,9 +361,13 @@ class CheckBox(ttk.Checkbutton):
         self._on_check_changed()
 
 
+GetWidgetT = Callable[[tk.Widget], tk.Widget]
+
+
 # pylint: disable=too-many-ancestors
 class RoundedBox(tk.Canvas):
     _rounded_box_tag = "canvas"
+    minimum_steps = 10  # lower values give pixelated corners
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -371,7 +375,7 @@ class RoundedBox(tk.Canvas):
         master: tk.BaseWidget,
         radius: int,
         box_color: str,
-        get_widget: Callable[[tk.Widget], tk.Widget],
+        get_widget: GetWidgetT,
         max_height: Optional[int] = None,
         **kwargs,
     ) -> None:
@@ -380,25 +384,28 @@ class RoundedBox(tk.Canvas):
         self.box_color = box_color
         self.max_height = max_height
         self.widget = get_widget(self)
-        self.create_window(self.radius, self.radius, window=self.widget, anchor=tk.NW)
+        self.cos_sin_r = tuple(self.get_cos_sin())
+        self.create_window(radius, radius, window=self.widget, anchor=tk.NW)
+
+    # https://gist.github.com/honix/6433bcd40131f42f9502?permalink_comment_id=4832448#gistcomment-4832448
+    def get_cos_sin(self) -> Iterator[tuple[float, float]]:
+        radius, res = self.radius, max(RoundedBox.minimum_steps, self.radius)
+        for i in range(0, res + 1):
+            angle = pi * (i / res) * 0.5
+            yield (cos(angle) - 1) * radius, (sin(angle) - 1) * radius
 
     # pylint: disable=too-many-arguments
-    def create_rounded_box(self, x1: int, y1: int, x2: int, y2: int, color: str = "black") -> None:
-        radius, res = self.radius, self.radius
-        self.delete(self._rounded_box_tag)
+    def create_rounded_box(self, x0: int, y0: int, x1: int, y1: int, color: str = "black") -> None:
         points = []
-        points.append((x1 + radius, y1, x2 - radius, y1))
-        for i in range(res):
-            points.append((x2 - radius + sin(i / res * 2) * radius, y1 + radius - cos(i / res * 2) * radius))
-        points.append((x2, y1 + radius, x2, y2 - radius))
-        for i in range(res):
-            points.append((x2 - radius + cos(i / res * 2) * radius, y2 - radius + sin(i / res * 2) * radius))
-        points.append((x2 - radius, y2, x1 + radius, y2))
-        for i in range(res):
-            points.append((x1 + radius - sin(i / res * 2) * radius, y2 - radius + cos(i / res * 2) * radius))
-        points.append((x1, y2 - radius, x1, y1 + radius))
-        for i in range(res):
-            points.append((x1 + radius - cos(i / res * 2) * radius, y1 + radius - sin(i / res * 2) * radius))
+        for cos_r, sin_r in self.cos_sin_r:
+            points.append((x1 + sin_r, y0 - cos_r))
+        for cos_r, sin_r in self.cos_sin_r:
+            points.append((x1 + cos_r, y1 + sin_r))
+        for cos_r, sin_r in self.cos_sin_r:
+            points.append((x0 - sin_r, y1 + cos_r))
+        for cos_r, sin_r in self.cos_sin_r:
+            points.append((x0 - cos_r, y0 - sin_r))
+        self.delete(self._rounded_box_tag)
         self.create_polygon(points, fill=color, tags=self._rounded_box_tag)
 
     def update_widget(self) -> None:
@@ -418,8 +425,8 @@ class RoundedBoxScroll(RoundedBox):
         master: tk.BaseWidget,
         radius: int,
         box_color: str,
-        get_widget: Callable[[tk.Widget], tk.Widget],
-        get_scrolling_widget: Callable[[tk.Widget], tk.Widget],
+        get_widget: GetWidgetT,
+        get_scrolling_widget: GetWidgetT,
         max_height: Optional[int] = None,
         **kwargs,
     ) -> None:

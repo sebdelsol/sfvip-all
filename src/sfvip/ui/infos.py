@@ -122,7 +122,7 @@ def _get_relaunch_button() -> Style:
 
 
 def _get_proxies_button(on: bool) -> Style:
-    return _InfoStyle.app(f"▲ {LOC.HideProxies} ▲" if on else f"▼ {LOC.ShowProxies} ▼").color("#A0A0A0")
+    return _InfoStyle.app(f"{LOC.HideProxies} ▲" if on else f"{LOC.ShowProxies} ▼").color("#A0A0A0")
 
 
 def _get_app_version(app_info: AppInfo) -> Style:
@@ -241,6 +241,7 @@ class _ProxiesWindow(StickyWindow):
             **_get_proxies_button(self.config.App.show_proxies).to_tk,
         )
         self._proxies = ListView(self._frame, **_InfoTheme.listview, pad=_InfoTheme.pad)
+        self.separator = tk.Frame(self._frame, bg=_InfoTheme.separator)
         self._proxies.set_headers(_get_infos_headers(app_info.name))
         set_vscrollbar_style(**_InfoTheme.listview_scrollbar)
         self._proxies_button.bind("<Button-1>", self.show_proxies)
@@ -261,6 +262,8 @@ class _ProxiesWindow(StickyWindow):
         self._relaunch_button.grid(row=0, padx=button_pad, pady=button_pad, sticky=tk.NSEW)
         self._relaunch_button.grid_remove()
         self._proxies_button.grid(row=1, sticky=tk.NSEW)
+        row += 1
+        self.separator.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
         self._proxies.grid(row=row, columnspan=3, sticky=tk.NSEW)
         if not self.config.App.show_proxies:
@@ -376,42 +379,42 @@ class InfosWindow(_ProxiesWindow):
         pad = _InfoTheme.pad
         button_pad = _InfoTheme.button_pad
         row = 0
-        header_frame.grid(row=row, columnspan=3, padx=pad, sticky=tk.NSEW)
-        app_warn_label.pack(expand=True, anchor=tk.W)
+        header_frame.grid(row=row, columnspan=3, sticky=tk.NSEW)
+        app_warn_label.pack(expand=True, padx=pad, anchor=tk.W)
         row += 1
         separator.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
-        app_version.grid(row=row, padx=pad, sticky=tk.W)
+        app_version.grid(row=row, padx=pad, pady=pad, sticky=tk.W)
         self._app_update.grid(row=row, column=1, padx=pad, sticky=tk.EW)
         self._app_button.grid(row=row, column=2, padx=button_pad, pady=button_pad, sticky=tk.EW)
         self._app_button.grid_remove()
         row += 1
         separator2.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
-        self._player_version.grid(row=row, column=0, padx=pad, sticky=tk.W)
+        self._player_version.grid(row=row, column=0, padx=pad, pady=pad, sticky=tk.W)
         self._player_update.grid(row=row, column=1, padx=pad, sticky=tk.EW)
         self._player_button.grid(row=row, column=2, padx=button_pad, pady=button_pad, sticky=tk.EW)
         self._player_button.grid_remove()
         row += 1
         separator3.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
-        self._libmpv_version.grid(row=row, column=0, padx=pad, sticky=tk.W)
+        self._libmpv_version.grid(row=row, column=0, padx=pad, pady=pad, sticky=tk.W)
         self._libmpv_update.grid(row=row, column=1, padx=pad, sticky=tk.EW)
         self._libmpv_button.grid(row=row, column=2, padx=button_pad, pady=button_pad, sticky=tk.EW)
         self._libmpv_button.grid_remove()
         row += 1
         separator4.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
-        epg_frame.grid(row=row, columnspan=3, sticky=tk.NSEW)
-        epg_label.pack(padx=pad, side=tk.LEFT)
-        self._epg_url.pack(pady=pad * 2, side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self._epg_status.pack(padx=pad, side=tk.LEFT)
+        epg_frame.grid(row=row, columnspan=3, padx=pad, pady=pad, sticky=tk.NSEW)
+        epg_label.pack(side=tk.LEFT)
+        self._epg_url.pack(side=tk.LEFT, padx=pad, fill=tk.BOTH, expand=True)
+        self._epg_status.pack(side=tk.LEFT)
         row += 1
-        epg_confidence_frame.grid(row=row, columnspan=3, sticky=tk.NSEW)
-        epg_confidence_label.pack(padx=(pad, 0), side=tk.LEFT)
+        epg_confidence_frame.grid(row=row, columnspan=3, padx=pad, pady=(0, pad), sticky=tk.NSEW)
+        epg_confidence_label.pack(side=tk.LEFT)
         self._epg_confidence.pack(side=tk.LEFT)
         epg_confidence_percent.pack(side=tk.LEFT)
-        self._epg_confidence_slider.pack(padx=pad * 2, pady=(pad, pad * 2), side=tk.LEFT, fill=tk.X, expand=True)
+        self._epg_confidence_slider.pack(padx=(pad, 0), side=tk.LEFT, fill=tk.X, expand=True)
         row += 1
         separator5.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
