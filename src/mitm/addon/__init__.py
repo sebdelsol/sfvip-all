@@ -2,9 +2,11 @@
 import json
 import logging
 from pathlib import Path
-from typing import NamedTuple, Optional, Sequence
+from typing import NamedTuple, Optional
+from urllib.parse import urlparse
 
 from mitmproxy import http
+from mitmproxy.proxy.server_hooks import ServerConnectionHookData
 
 from ..cache import AllUpdated, MACCache, UpdateCacheProgressT
 from ..epg import EPG, ShowChannelT, ShowEpgT, UpdateStatusT
@@ -33,9 +35,9 @@ def get_short_epg(flow: http.HTTPFlow, epg: EPG, api: APItype) -> None:
 
         def set_response(stream_id: str, limit: str, programmes: str) -> None:
             server = flow.request.host_header
-            if _id := get_query_key(flow.request, stream_id):
-                _limit = get_query_key(flow.request, limit)
-                if _listing := epg.ask_stream(server, _id, _limit, api):
+            if _id := get_query_key(flow, stream_id):
+                _limit = get_query_key(flow, limit)
+                if _listing := epg.ask_epg(server, _id, _limit, api):
                     response.text = json.dumps({programmes: _listing})
 
         match api:
@@ -58,14 +60,57 @@ def set_epg_server(flow: http.HTTPFlow, epg: EPG, api: APItype) -> None:
 class ApiRequest:
     _api = {"portal.php?": APItype.MAC, "player_api.php?": APItype.XC}
 
-    def __init__(self, urls: set[str]) -> None:
-        self.urls = urls
+    def __init__(self, accounts_urls: set[str]) -> None:
+        self.accounts_urls = accounts_urls
 
-    def __call__(self, request: http.Request) -> Optional[APItype]:
+    def __call__(self, flow: http.HTTPFlow) -> Optional[APItype]:
+        request = flow.request
         for request_part, api in ApiRequest._api.items():
             if request_part in request.path:
                 return api
-        return APItype.M3U if request.url in self.urls else None
+        return APItype.M3U if request.url in self.accounts_urls else None
+
+
+class M3UStream:
+    def __init__(self, epg: EPG) -> None:
+        self.current_urls = None
+        self.current_address = None
+        self.epg = epg
+
+    def start(self, flow: http.HTTPFlow) -> bool:
+        if flow.response:
+            server = flow.request.host_header
+            url = flow.request.url
+            if self.epg.m3u_stream_started(server, url):
+                redirect = flow.response.headers.get(b"location")
+                if isinstance(redirect, str):
+                    self.current_urls = url, redirect
+                    try:
+                        result = urlparse(redirect)
+                        self.current_address = result.hostname, result.port
+                    except ValueError:
+                        self.current_address = None
+                else:
+                    self.current_urls = (url,)
+                    self.current_address = None
+                return True
+        return False
+
+    def stop(self, flow: http.HTTPFlow) -> bool:
+        url = flow.request.url
+        if self.current_urls and url in self.current_urls:
+            self.epg.m3u_stream_stopped()
+            self.current_urls = None
+            self.current_address = None
+            return True
+        return False
+
+    def disconnect(self, data: ServerConnectionHookData) -> None:
+        if self.current_address and (address := data.server.peername):
+            if address == self.current_address:
+                self.epg.m3u_stream_stopped()
+                self.current_urls = None
+                self.current_address = None
 
 
 class AddonCallbacks(NamedTuple):
@@ -95,6 +140,7 @@ class SfVipAddOn:
         self.api_request = ApiRequest(accounts_urls)
         self.mac_cache = MACCache(roaming, callbacks.update_progress, all_config.all_updated)
         self.epg = EPG(callbacks.update_status, callbacks.show_channel, callbacks.show_epg, timeout)
+        self.m3u_stream = M3UStream(self.epg)
         self.panels = AllPanels(all_config.all_name)
 
     def epg_update(self, url: str):
@@ -113,8 +159,9 @@ class SfVipAddOn:
         return self.epg.wait_running(timeout)
 
     async def request(self, flow: http.HTTPFlow) -> None:
-        if api := self.api_request(flow.request):
-            match api, get_query_key(flow.request, "action"):
+        # print("REQUEST", flow.request.pretty_url)
+        if api := self.api_request(flow):
+            match api, get_query_key(flow, "action"):
                 case APItype.MAC, "get_ordered_list":
                     self.mac_cache.load_response(flow)
                 case APItype.MAC, _:
@@ -123,11 +170,11 @@ class SfVipAddOn:
                     self.panels.serve_all(flow, action)
 
     async def response(self, flow: http.HTTPFlow) -> None:
-        # print(flow.request.pretty_url)
-        if not self.epg.start_m3u_stream(flow.request.host_header, flow.request.url):
+        # print("RESPONSE", flow.request.pretty_url, flow.response and flow.response.status_code)
+        if not self.m3u_stream.start(flow):
             if flow.response and not flow.response.stream:
-                if api := self.api_request(flow.request):
-                    match api, get_query_key(flow.request, "action"):
+                if api := self.api_request(flow):
+                    match api, get_query_key(flow, "action"):
                         case APItype.M3U, _:
                             set_epg_server(flow, self.epg, api)
                         case APItype.MAC, "get_short_epg":
@@ -142,21 +189,26 @@ class SfVipAddOn:
                             fix_series_info(flow.response)
                         case APItype.XC, "get_live_streams":
                             set_epg_server(flow, self.epg, api)
-                        case APItype.XC, "get_short_epg" if not get_query_key(flow.request, "category_id"):
+                        case APItype.XC, "get_short_epg" if not get_query_key(flow, "category_id"):
                             get_short_epg(flow, self.epg, api)
                         case APItype.XC, action if action:
                             self.panels.inject_all(flow, action)
 
     async def error(self, flow: http.HTTPFlow):
-        # print('ERROR', flow.request.pretty_url)
-        self.epg.hide_epg()
-        if api := self.api_request(flow.request):
-            match api, get_query_key(flow.request, "action"):
-                case APItype.MAC, "get_ordered_list":
-                    self.mac_cache.stop(flow)
+        # print("ERROR", flow.request.pretty_url)
+        if not self.m3u_stream.stop(flow):
+            if api := self.api_request(flow):
+                match api, get_query_key(flow, "action"):
+                    case APItype.MAC, "get_ordered_list":
+                        self.mac_cache.stop(flow)
 
     async def responseheaders(self, flow: http.HTTPFlow) -> None:
         """all reponses are streamed except the api requests"""
-        if not self.api_request(flow.request):
+        # print("STREAM", flow.request.pretty_url)
+        if not self.api_request(flow):
             if flow.response:
                 flow.response.stream = True
+
+    async def server_disconnected(self, data: ServerConnectionHookData):
+        # print("DISCONNECT", data.server.peername)
+        self.m3u_stream.disconnect(data)

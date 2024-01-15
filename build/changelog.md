@@ -1,5 +1,8 @@
-## 1.4.20 (upcoming)
-* Tooltips.
+## 1.4.20
+* Fix bug where it was not possible to update the external epg if it had failed.
+* EPG for M3U: fix bug where it didn't close when stopping the streaming.
+* EPG for M3U: button to close the schedule.
+* Tooltips added to explain EPG confidence.
 
 ## 1.4.12.12
 * EPG for M3U: show the upcoming schedule with `e` keyboard shortcut.

@@ -97,7 +97,7 @@ class EPG:
                 if int_limit and count >= int_limit:
                     break
 
-    def ask_stream(
+    def ask_epg(
         self, server: Optional[str], stream_id: str, limit: Optional[str], api: APItype
     ) -> Optional[tuple[EPGprogramme, ...]]:
         if (
@@ -126,18 +126,19 @@ class EPG:
             return name
         return None
 
-    def start_m3u_stream(self, server: Optional[str], stream_id: str) -> bool:
-        if programmes := self.ask_stream(server, stream_id, "15", APItype.M3U):
+    def m3u_stream_started(self, server: Optional[str], stream_id: str) -> bool:
+        if programmes := self.ask_epg(server, stream_id, "15", APItype.M3U):
             name = self.ask_name(server, stream_id)
             self.show_epg(ShowEpg(True, name, programmes))  # type: ignore #we know those are EPGprogrammeM3U
-            self.epg_shown = True
             logger.info("Start showing epg for %s", name)
+            self.epg_shown = True
             return True
         return False
 
     # def stop_m3u_stream(self, server: Optional[str], path: str) -> bool:
-    def hide_epg(self) -> None:
+    def m3u_stream_stopped(self) -> None:
         if self.epg_shown:
+            logger.info("Stop showing epg")
             self.show_epg(ShowEpg(False))
             self.epg_shown = False
         if self.channel_shown:

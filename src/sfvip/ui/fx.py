@@ -76,22 +76,29 @@ class Fade:
     def __init__(self, win: tk.Toplevel) -> None:
         self._win = win
         self._after = None
+        self._after_added = None
 
-    def fade(self, fade_duration_ms: int, out: bool, wait_ms: int = 0) -> None:
+    def fade(self, fade_duration_ms: int, out: bool, wait_ms: int = 0, max_alpha: float = 1.0) -> None:
         dalpha = Fade._fade_dt_ms / fade_duration_ms if fade_duration_ms > 0 else 1.0
         dalpha = (-1 if out else 1) * dalpha
-        if self._after:
-            self._win.after_cancel(self._after)
 
         def fade() -> None:
             self._after = None
             alpha = self._win.attributes("-alpha") + dalpha
-            self._win.attributes("-alpha", max(0.0, min(alpha, 1.0)))
-            if 0.0 < alpha < 1.0:
+            self._win.attributes("-alpha", max(0.0, min(alpha, max_alpha)))
+            if 0.0 < alpha < max_alpha:
                 self._after = self._win.after(Fade._fade_dt_ms, fade)
             elif out:
                 self._win.withdraw()
 
         if not out:
             self._win.deiconify()
+        if self._after:
+            self._win.after_cancel(self._after)
+        if self._after_added:
+            self._win.after_cancel(self._after_added)
         self._after = self._win.after(wait_ms, fade)
+
+    def fade_in_and_out(self, fade_in: int, fade_out: int, wait: int = 0, max_alpha: float = 1.0) -> None:
+        self.fade(fade_in, out=False, max_alpha=max_alpha)
+        self._after_added = self._win.after(wait, self.fade, fade_out, True, 0, max_alpha)

@@ -104,12 +104,19 @@ class FoundProgammes(NamedTuple):
     confidence: int
 
 
+ChannelsT = dict[str, list[InternalProgramme]]
+
+
 class EPGupdate(NamedTuple):
     _chunk_size = 1024 * 128
-    channels: dict[str, list[InternalProgramme]] = {}
+    url: str
+    status: EPGstatus
+    channels: ChannelsT = {}
 
     @classmethod
-    def _get(cls, url: str, update_status: UpdateStatusT, stopping: StoppingT, timeout: int) -> Optional[Self]:
+    def _get(
+        cls, url: str, update_status: UpdateStatusT, stopping: StoppingT, timeout: int
+    ) -> Optional[ChannelsT]:
         try:
             if Path(url).is_file():  # for debug purpose
                 return cls._process(Path(url), url, update_status, stopping)
@@ -134,10 +141,12 @@ class EPGupdate(NamedTuple):
         return None
 
     @classmethod
-    def _process(cls, xml: Path, url: str, update_status: UpdateStatusT, stopping: StoppingT) -> Optional[Self]:
+    def _process(
+        cls, xml: Path, url: str, update_status: UpdateStatusT, stopping: StoppingT
+    ) -> Optional[ChannelsT]:
         update_status(EPGProgress(EPGstatus.PROCESSING))
         with gzip.GzipFile(xml) if url.endswith(".gz") else xml.open("rb") as f:
-            channels: dict[str, list[InternalProgramme]] = {}
+            channels: ChannelsT = {}
             display_names: dict[str, str] = {}
             normalized: dict[str, str] = {}
             progress_step = ProgressStep()
@@ -162,22 +171,22 @@ class EPGupdate(NamedTuple):
                 if stopping():
                     return None
             logger.info("%s Epg channels found from '%s'", progress_step.total, url)
-            return cls(channels)
+            return channels
 
     @classmethod
-    def from_url(cls, url: str, update_status: UpdateStatusT, stopping: StoppingT, timeout: int) -> Self:
+    def from_url(cls, url: str, update_status: UpdateStatusT, stopping: StoppingT, timeout: int) -> Optional[Self]:
         if url:
             if _valid_url(url) or Path(url).is_file():
                 logger.info("Load epg channels from '%s'", url)
-                if (update := cls._get(url, update_status, stopping, timeout)) is not None:
+                if (channels := cls._get(url, update_status, stopping, timeout)) is not None:
                     update_status(EPGProgress(EPGstatus.READY))
-                    return update
+                    return cls(url, EPGstatus.READY, channels)
                 update_status(EPGProgress(EPGstatus.FAILED))
-            else:
-                update_status(EPGProgress(EPGstatus.INVALID_URL))
-        else:
-            update_status(EPGProgress(EPGstatus.NO_EPG))
-        return cls()
+                return cls(url, EPGstatus.FAILED)
+            update_status(EPGProgress(EPGstatus.INVALID_URL))
+            return cls(url, EPGstatus.INVALID_URL)
+        update_status(EPGProgress(EPGstatus.NO_EPG))
+        return cls(url, EPGstatus.NO_EPG)
 
     def get_programmes(self, epg_id: str, confidence: int) -> Optional[FoundProgammes]:
         if self.channels:
@@ -207,12 +216,16 @@ class EPGupdater(JobRunner[str]):
         self._update: Optional[EPGupdate] = None
         self._update_status = update_status
         self._timeout = timeout
-        super().__init__(self._updating, "Epg updater")
+        super().__init__(self._updating, "Epg updater", check_new=False)
 
     def _updating(self, url: str) -> None:
-        if update := EPGupdate.from_url(url, self._update_status, self.stopping, self._timeout):
-            with self._update_lock:
-                self._update = update
+        with self._update_lock:
+            current_update = self._update
+        # update only if url is different or last update failed
+        if not current_update or current_update.url != url or current_update.status == EPGstatus.FAILED:
+            if update := EPGupdate.from_url(url, self._update_status, self.stopping, self._timeout):
+                with self._update_lock:
+                    self._update = update
 
     @property
     def update(self) -> Optional[EPGupdate]:

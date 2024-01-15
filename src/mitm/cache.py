@@ -34,7 +34,7 @@ class MACQuery(NamedTuple):
     @classmethod
     def get_from(cls, flow: http.HTTPFlow) -> Optional[Self]:
         if (
-            (media_type := get_query_key(flow.request, "type"))
+            (media_type := get_query_key(flow, "type"))
             and media_type in MediaTypes
             and ((server := flow.request.host_header))
         ):
@@ -113,7 +113,7 @@ class MACContent:
         if flow.response and (js := get_js(flow.response, dict)):
             data = js.get("data", [])
             total = js.get("total_items", 0)
-            page = get_int(get_query_key(flow.request, "p"))
+            page = get_int(get_query_key(flow, "p"))
             self.data.extend(data)
             if page == 1:  # page
                 self.progress_step.set_total(total)
@@ -165,7 +165,7 @@ class MACCache:
 
     def save_response(self, flow: http.HTTPFlow) -> None:
         if (
-            get_query_key(flow.request, "category") == MACCache.update_all_category
+            get_query_key(flow, "category") == MACCache.update_all_category
             and (response := flow.response)
             and MACCache.cached_marker_bytes not in response.headers
             and (query := MACQuery.get_from(flow))
@@ -184,9 +184,7 @@ class MACCache:
             del self.contents[server]
 
     def load_response(self, flow: http.HTTPFlow) -> None:
-        if get_query_key(flow.request, "category") == MACCache.cached_all_category and (
-            query := MACQuery.get_from(flow)
-        ):
+        if get_query_key(flow, "category") == MACCache.cached_all_category and (query := MACQuery.get_from(flow)):
             with self.file(query, "r") as file:
                 if file:
                     flow.response = http.Response.make(

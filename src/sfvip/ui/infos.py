@@ -397,8 +397,13 @@ class InfosWindow(_ProxiesWindow):
         self._epg_url.delete(0, tk.END)
         if epg_url:
             self._epg_url.insert(0, epg_url)
-        self._epg_url.bind("<Return>", lambda _: callback(self._epg_url.get()))
-        self._epg_url.bind("<FocusOut>", lambda _: callback(self._epg_url.get()))
+
+        def _callback(_) -> None:
+            if self._epg_url["state"] == tk.NORMAL:
+                callback(self._epg_url.get())
+
+        self._epg_url.bind("<Return>", _callback)
+        self._epg_url.bind("<FocusOut>", _callback)
 
     def set_epg_status(self, epg_status: EPGProgress) -> None:
         self._epg_url.config(state=tk.DISABLED if epg_status.status is EPGstatus.LOADING else tk.NORMAL)

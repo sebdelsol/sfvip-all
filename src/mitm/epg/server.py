@@ -107,18 +107,17 @@ class EPGserverChannels:
     }
 
     def __init__(self, server: str, channels: Any, api: APItype) -> None:
-        self.server = server
         self.stream_to: Optional[StreamTo] = None
         self.stream_to_lock = threading.Lock()
-        threading.Thread(target=self._set, args=(channels, api)).start()
+        threading.Thread(target=self._populate, args=(channels, api, server)).start()
 
-    def _set(self, channels: Any, api: APItype) -> None:
-        logger.info("Set channels for %s", self.server)
+    def _populate(self, channels: Any, api: APItype, server: str) -> None:
+        logger.info("Set channels for %s", server)
         if _stream_to_get := EPGserverChannels._stream_to_get.get(api):
             if stream_to := _stream_to_get(channels):
                 with self.stream_to_lock:
                     self.stream_to = stream_to
-                logger.info("%d channels found for %s", len(stream_to.epgs), self.server)
+                logger.info("%d channels found for %s", len(stream_to.epgs), server)
 
     def get_epg(self, stream_id: str) -> Optional[str]:
         with self.stream_to_lock:

@@ -43,6 +43,6 @@
   "UpdatedDaysAgo": "Aggiornato %s giorni fa",
   "UpdateAllSeries": "Aggiorna tutte le serie",
   "UpdateAllMovies": "Aggiorna tutti i film",
-  "TooltipConfidence0": "0%: non ci si fida dell'EPG, quindi si avranno molte meno corrispondenze con i canali televisivi",
-  "TooltipConfidence100": "100%: ci si fida completamente dell'EPG e si ottiene sempre una corrispondenza, a volte di scarsa qualità."
+  "TooltipConfidence0": "0 %: non ci si fida dell'EPG, quindi si avranno molte meno corrispondenze con i canali TV",
+  "TooltipConfidence100": "100 %: ci si fida completamente dell'EPG e si ottiene sempre una corrispondenza, a volte di scarsa qualità."
 }

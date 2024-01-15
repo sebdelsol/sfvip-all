@@ -43,6 +43,6 @@
   "UpdatedDaysAgo": "Updated %s days ago",
   "UpdateAllSeries": "Update All series",
   "UpdateAllMovies": "Update All movies",
-  "TooltipConfidence0": "0%: you don't trust the EPG, so you'll have far fewer matches with TV channels",
-  "TooltipConfidence100": "100%: you trust the EPG completely, and you'll always get a match, sometimes of poor quality"
+  "TooltipConfidence0": "0 %: You don't trust the EPG, so you'll have far fewer matches with TV channels",
+  "TooltipConfidence100": "100 %: You trust the EPG completely and you'll always get a match, sometimes of poor quality"
 }

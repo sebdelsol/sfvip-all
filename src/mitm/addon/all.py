@@ -87,8 +87,8 @@ class AllPanels:
     def serve_all(self, flow: http.HTTPFlow, action: str) -> None:
         if action in self.category_panel:
             panel = self.category_panel[action]
-            category_id = get_query_key(flow.request, "category_id")
+            category_id = get_query_key(flow, "category_id")
             if category_id == panel.all_category_id:
                 # turn an all category query into a whole catalog query
-                del_query_key(flow.request, "category_id")
+                del_query_key(flow, "category_id")
                 _log("serve", panel, action)

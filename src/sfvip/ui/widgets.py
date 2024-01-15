@@ -364,17 +364,22 @@ class CheckBox(ttk.Checkbutton):
 class RoundedBox(tk.Canvas):
     _rounded_box_tag = "canvas"
 
+    # pylint: disable=too-many-arguments
     def __init__(
-        self, master: tk.BaseWidget, radius: int, box_color: str, max_height: Optional[int] = None, **kwargs
+        self,
+        master: tk.BaseWidget,
+        radius: int,
+        box_color: str,
+        get_widget: Callable[[tk.Widget], tk.Widget],
+        max_height: Optional[int] = None,
+        **kwargs,
     ) -> None:
+        super().__init__(master, bd=0, highlightthickness=0, **kwargs)
         self.radius = radius
-        self.added_widget = None
         self.box_color = box_color
         self.max_height = max_height
-        super().__init__(master, bd=0, highlightthickness=0, **kwargs)
-        self.scroll = tk.Canvas(self, bg=box_color, bd=0, highlightthickness=0)
-        self.create_window(self.radius, self.radius, window=self.scroll, anchor=tk.NW)
-        self.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
+        self.widget = get_widget(self)
+        self.create_window(self.radius, self.radius, window=self.widget, anchor=tk.NW)
 
     # pylint: disable=too-many-arguments
     def create_rounded_box(self, x1: int, y1: int, x2: int, y2: int, color: str = "black") -> None:
@@ -395,24 +400,54 @@ class RoundedBox(tk.Canvas):
             points.append((x1 + radius - cos(i / res * 2) * radius, y1 + radius - sin(i / res * 2) * radius))
         self.create_polygon(points, fill=color, tags=self._rounded_box_tag)
 
-    def add_widget(self, widget: tk.Widget) -> None:
-        self.added_widget = widget
-        self.scroll.create_window(0, 0, window=widget, anchor=tk.NW)
+    def update_widget(self) -> None:
+        self.widget.update_idletasks()
+        w, h = self.widget.winfo_reqwidth(), self.widget.winfo_reqheight()
+        box_h = min(h, self.max_height) if self.max_height else h
+        w_box, h_box = w + 2 * self.radius, box_h + 2 * self.radius
+        self.create_rounded_box(0, 0, w_box, h_box, color=self.box_color)
+        self.config(width=w_box, height=h_box)
+        self.update_idletasks()
+
+
+class RoundedBoxScroll(RoundedBox):
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        master: tk.BaseWidget,
+        radius: int,
+        box_color: str,
+        get_widget: Callable[[tk.Widget], tk.Widget],
+        get_scrolling_widget: Callable[[tk.Widget], tk.Widget],
+        max_height: Optional[int] = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(master, radius, box_color, get_widget, max_height, **kwargs)
+        self.scroll = tk.Canvas(self, bg=self.box_color, bd=0, highlightthickness=0)
+        self.scrolling_widget = get_scrolling_widget(self.scroll)
+        self.scroll.create_window(0, 0, window=self.scrolling_widget, anchor=tk.NW)
+        self.scroll_id = self.create_window(0, 0, window=self.scroll, anchor=tk.NW)
+        self.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
 
     def update_widget(self) -> None:
-        if self.added_widget:
-            self.added_widget.update_idletasks()
-            w, h = self.added_widget.winfo_reqwidth(), self.added_widget.winfo_reqheight()
-            box_h = min(h, self.max_height) if self.max_height else h
-            w_box, h_box = w + 2 * self.radius, box_h + 2 * self.radius
-            self.scroll.config(scrollregion=(0, 0, w, h), width=w, height=box_h)
-            self.scroll.yview_moveto(0)  # reset scroll position
-            self.create_rounded_box(0, 0, w_box, h_box, color=self.box_color)
-            self.config(width=w_box, height=h_box)
-            self.update_idletasks()
+        self.widget.update_idletasks()
+        w, h = self.widget.winfo_reqwidth(), self.widget.winfo_reqheight()
+
+        self.scrolling_widget.update_idletasks()
+        ws, hs = self.scrolling_widget.winfo_reqwidth(), self.scrolling_widget.winfo_reqheight()
+        box_h = min(hs, self.max_height) if self.max_height else hs
+        w_box, h_box = max(w, ws) + 2 * self.radius, h + box_h + 2 * self.radius
+
+        self.scroll.config(scrollregion=(0, 0, w_box, hs), width=w_box, height=box_h)
+        self.moveto(self.scroll_id, self.radius, self.radius + h)
+
+        self.create_rounded_box(0, 0, w_box, h_box, color=self.box_color)
+        self.config(width=w_box, height=h_box)
+        self.update_idletasks()
 
     def _on_mousewheel(self, event: tk.Event) -> None:
-        self.scroll.yview_scroll(-1 if event.delta > 0 else 1, "units")
+        if self.scroll:
+            self.scroll.yview_scroll(-1 if event.delta > 0 else 1, "units")
 
 
 # pylint: disable=too-many-ancestors
