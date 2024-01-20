@@ -1,4 +1,8 @@
-## 1.4.20
+## 1.4.12.21
+* Show/hide proxies in the _Sfvip All_ window.
+* Fix EPG rounded box.
+
+## 1.4.12.20
 * Fix bug where it was not possible to update the external epg if it had failed.
 * EPG for M3U: fix bug where it didn't close when stopping the streaming.
 * EPG for M3U: button to close the schedule.

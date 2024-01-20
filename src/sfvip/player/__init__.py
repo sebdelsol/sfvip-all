@@ -184,6 +184,7 @@ class Player:
         with self._process_lock:
             if self._process:
                 if self._process.poll() is None:  # still running ?
+                    logger.info("Stopping the player")
                     self._process.terminate()
                     return True
         return False
