@@ -61,8 +61,10 @@ def get_all_config(inject_in_live: bool) -> AddonAllConfig:
             today=LOC.UpdatedToday,
             one_day=LOC.Updated1DayAgo,
             several_days=LOC.UpdatedDaysAgo,
-            # TODO rename : "All movies (fast in cache)"
-            all_names={"vod": LOC.AllMovies, "series": LOC.AllSeries},
+            all_names={
+                "vod": f"{LOC.AllMovies} - {LOC.FastCached}",
+                "series": f"{LOC.AllSeries} - {LOC.FastCached}",
+            },
             all_updates={"vod": LOC.UpdateAllMovies, "series": LOC.UpdateAllSeries},
         ),
     )
@@ -72,8 +74,8 @@ class LocalProxies:
     """start a local proxy for each upstream proxies (no upstream proxy count as one)"""
 
     _localhost = "http://127.0.0.1:{port}"
+    _mitmproxy_start_timeout = 10
     _find_ports_retry = 10
-    _mitmproxy_start_timeout = 5
 
     def __init__(self, app_info: AppInfo, inject_in_live: bool, accounts_proxies: AccountsProxies, ui: UI) -> None:
         self._epg_updater = EpgUpdater(app_info.config, self.epg_update, self.epg_confidence_update, ui)

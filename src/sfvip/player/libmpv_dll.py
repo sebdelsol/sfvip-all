@@ -13,6 +13,7 @@ from translations.loc import LOC
 
 from ...config_loader import ConfigLoader
 from ..ui.window import AskWindow, ProgressWindow
+from ..utils.clean_files import CleanFilesIn
 from ..utils.downloader import download_and_unpack, exceptions
 from .cpu import Cpu
 
@@ -156,6 +157,7 @@ class LibmpvDll:
 
 
 class _OldDlls:
+    _n_keep_old = 3
     _pattern = LibmpvDll.pattern
     _running_pattern = "*mpv*.old.running.*"
 
@@ -163,15 +165,20 @@ class _OldDlls:
         self._libdir = libdir
         self._moved_dlls: list[tuple[Path, Path]] = []
 
+    @property
+    def old_dir(self) -> Path:
+        return self._libdir / "old"
+
     def clean(self) -> None:
         for running in self._libdir.glob(_OldDlls._running_pattern):
             try:
                 running.unlink()
             except PermissionError:
                 pass
+        CleanFilesIn(self.old_dir).keep(_OldDlls._n_keep_old, f"{_OldDlls._pattern}.*")
 
     def move(self) -> None:
-        old_dir = self._libdir / "old"
+        old_dir = self.old_dir
         old_dir.mkdir(parents=True, exist_ok=True)
         for dll in self._libdir.glob(_OldDlls._pattern):
             for i in count(start=1):

@@ -1,3 +1,6 @@
+## 1.4.12.23
+* Clean old caches & libmpv dlls.
+
 ## 1.4.12.22
 * Faster startup.
 

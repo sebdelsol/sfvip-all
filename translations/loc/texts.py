@@ -33,6 +33,7 @@ class Texts(NamedTuple):
     AllSeries: str = "All Series"
     AllMovies: str = "All Movies"
     AllChannels: str = "All Channels"
+    FastCached: str = "fast in cache"
     AlreadyRunning: str = "%s is running. Please close it to continue."
     PlayerTooOld: str = "%s is too old. Version %s or above is needed."
     UpgradeFailed: str = "%s upgrade failed. Do you want to retry ?"

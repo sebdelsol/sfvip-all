@@ -138,16 +138,27 @@ class MACCache:
     cached_marker_bytes = cached_marker.encode()
     cached_all_category = "cached_all_category"
     update_all_category = "*"
+    clean_after_days = 15
 
     def __init__(self, roaming: Path, update_progress: UpdateCacheProgressT, all_updated: AllUpdated) -> None:
         self.data: DataT = []
         self.contents: dict[str, MACContent] = {}
         self.update_progress = update_progress
         self.all_updated = all_updated
-        # TODO clean unused cache ?
         self.cache_dir = roaming / "cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         logger.info("Cache is in '%s'", self.cache_dir)
+        self.clean()
+
+    def clean(self):
+        for file in self.cache_dir.iterdir():
+            if file.suffix.replace(".", "") in MediaTypes:
+                last_accessed_days = (time.time() - file.stat().st_atime) / (3600 * 24)
+                if last_accessed_days >= MACCache.clean_after_days:
+                    try:
+                        file.unlink(missing_ok=True)
+                    except PermissionError:
+                        logger.warning("Can't remove %s", file)
 
     def file_path(self, query: MACQuery) -> Path:
         return self.cache_dir / sanitize_filename(f"{query.server}.{query.type}")

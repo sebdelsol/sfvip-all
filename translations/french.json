@@ -28,6 +28,7 @@
   "AllSeries": "Toutes les séries",
   "AllMovies": "Tous les films",
   "AllChannels": "Toutes les chaînes",
+  "FastCached": "rapide en cache",
   "AlreadyRunning": "%s est en cours d'exécution. Veuillez le fermer pour continuer.",
   "PlayerTooOld": "%s est trop ancien. La version %s ou supérieure est nécessaire.",
   "UpgradeFailed": "La mise à jour de %s a échoué. Voulez-vous réessayer ?",

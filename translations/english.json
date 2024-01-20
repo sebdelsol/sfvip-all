@@ -28,6 +28,7 @@
   "AllSeries": "All Series",
   "AllMovies": "All Movies",
   "AllChannels": "All Channels",
+  "FastCached": "fast in cache",
   "AlreadyRunning": "%s is running. Please close it to continue.",
   "PlayerTooOld": "%s is too old. Version %s or above is needed.",
   "UpgradeFailed": "%s upgrade failed. Do you want to retry ?",

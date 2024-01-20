@@ -28,7 +28,8 @@
   "AllSeries": "Tutte le serie",
   "AllMovies": "Tutti i film",
   "AllChannels": "Tutti i canali",
-  "AlreadyRunning": "%s è in esecuzione. Chiudere per continuare.",
+  "FastCached": "veloce nella cache",
+  "AlreadyRunning": "%s è in esecuzione. Chiuderlo per continuare.",
   "PlayerTooOld": "%s è troppo vecchio. È necessaria la versione %s o superiore.",
   "UpgradeFailed": "L'aggiornamento %s non è riuscito. Si desidera riprovare?",
   "Loading": "Caricamento",
@@ -45,6 +46,6 @@
   "UpdatedDaysAgo": "Aggiornato %s giorni fa",
   "UpdateAllSeries": "Aggiorna tutte le serie",
   "UpdateAllMovies": "Aggiorna tutti i film",
-  "TooltipConfidence0": "0 %: non ci si fida dell'EPG, quindi si avranno molte meno corrispondenze con i canali TV",
+  "TooltipConfidence0": "0 %: Non ci si fida dell'EPG, quindi si avranno molte meno corrispondenze con i canali TV.",
   "TooltipConfidence100": "100 %: ci si fida completamente dell'EPG e si ottiene sempre una corrispondenza, a volte di scarsa qualità."
 }
