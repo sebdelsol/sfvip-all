@@ -5,21 +5,18 @@ from urllib.parse import urlparse, urlsplit, urlunsplit
 
 from translations.loc import LOC
 
-from ..mitm import MitmLocalProxy, Mode, validate_upstream
 from ..mitm.addon import AddonAllConfig, AddonCallbacks, AllCategoryName, SfVipAddOn
 from ..mitm.cache import AllUpdated
+from ..mitm.proxies import MitmLocalProxy, Mode, validate_upstream
 from ..winapi import mutex
 from .accounts import AccountsProxies
 from .app_info import AppInfo
 from .cache import CacheProgressListener
 from .epg import EpgUpdater
+from .exceptions import LocalproxyError
 from .ui import UI
 
 logger = logging.getLogger(__name__)
-
-
-class LocalproxyError(Exception):
-    pass
 
 
 def _find_port(excluded_ports: set[int], retry: int) -> int:

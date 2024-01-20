@@ -5,24 +5,28 @@ from translations.loc import LOC
 from .accounts import AccountsProxies
 from .app_info import AppInfo
 from .app_updater import AltLastRegisterT, AppAutoUpdater, AppUpdater
+from .exceptions import LocalproxyError, PlayerNotFoundError
 from .player import Player, PlayerLanguageLoader
-from .player.exception import PlayerNotFoundError
-from .proxies import LocalProxies, LocalproxyError
 from .ui import UI
 from .utils.clean_files import CleanFilesIn
 
 logger = logging.getLogger(__name__)
-exceptions = PlayerNotFoundError, LocalproxyError
 
 
 def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: int) -> None:
     logger.info("Run %s %s %s", app_info.name, app_info.version, app_info.bitness)
+    exceptions = PlayerNotFoundError, LocalproxyError
     LOC.set_tranlastions(app_info.translations)
     LOC.set_language(PlayerLanguageLoader().language)
     app_config = app_info.config.update()
     ui = UI(app_info)
     try:
         player = Player(app_info, ui)
+        # for faster startup perception
+        ui.splash.show(player.rect)
+        # pylint: disable=import-outside-toplevel
+        from .proxies import LocalProxies
+
         app_updater = AppUpdater(app_info, at_last_register)
         app_auto_updater = AppAutoUpdater(app_updater, app_config, ui, player.stop)
         inject_in_live = app_config.AllCategory.inject_in_live if player.has_all_channels else True

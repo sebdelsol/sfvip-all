@@ -25,6 +25,7 @@ class SplashWindow(StickyWindow):
             self.bring_to_front(is_topmost=True, is_foreground=True)
         self.attributes("-alpha", 1.0)
         self.deiconify()
+        self.update()  # force show if tk mainloop isn't started yet
 
     def hide(self, fade_duration_ms: int, wait_ms: int = 0) -> None:
         self._fade.fade(fade_duration_ms, out=True, wait_ms=wait_ms)

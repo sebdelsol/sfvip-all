@@ -129,7 +129,7 @@ class Player:
         self._libmpv_updater = PlayerLibmpvAutoUpdater(self._player_exe.exe, app_info.config, ui, self.relaunch)
         self._player_updater = PlayerAutoUpdater(self._player_exe, app_info.config, ui, self.relaunch)
         self._window_watcher = _PlayerWindowWatcher()
-        self._rect_loader: Optional[_PlayerRectLoader] = None
+        self._rect_loader = _PlayerRectLoader()
         self._process: Optional[subprocess.Popen[bytes]] = None
         self._process_lock = threading.Lock()
         self._launcher = _Launcher()

@@ -1,3 +1,6 @@
+## 1.4.12.22
+* Faster startup.
+
 ## 1.4.12.21
 * Show/hide proxies in the _Sfvip All_ window.
 * Fix EPG rounded box.

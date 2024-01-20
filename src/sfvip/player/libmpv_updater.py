@@ -18,7 +18,7 @@ class PlayerLibmpvAutoUpdater:
     def __init__(
         self, player_path: Path, app_config: AppConfig, ui: UI, relaunch_player: Callable[[int], None]
     ) -> None:
-        self._libmpv_dll = LibmpvDll(player_path, app_config.Player.Libmpv.requests_timeout)
+        self._libmpv_dll = LibmpvDll(player_path, app_config.Libmpv.requests_timeout)
         self._relaunch_player = relaunch_player
         self._installed_version = None
         self._scheduler = Scheduler()
@@ -27,14 +27,14 @@ class PlayerLibmpvAutoUpdater:
 
     def __enter__(self) -> Self:
         self._ui.set_libmpv_version(self._libmpv_dll.get_version())
-        self._ui.set_libmpv_auto_update(self._app_config.Player.Libmpv.auto_update, self._on_auto_update_changed)
+        self._ui.set_libmpv_auto_update(self._app_config.Libmpv.auto_update, self._on_auto_update_changed)
         return self
 
     def __exit__(self, *_) -> None:
         self._scheduler.cancel_all()
 
     def _on_auto_update_changed(self, auto_update: bool) -> None:
-        self._app_config.Player.Libmpv.auto_update = auto_update
+        self._app_config.Player.auto_update = auto_update
         self._scheduler.cancel_all()
         if auto_update:
             self._scheduler.next(self._check, 0)
@@ -73,4 +73,4 @@ class PlayerLibmpvAutoUpdater:
                 elif self._installed_version == version:
                     self._ui.set_libmpv_update(LOC.Install, install, version)
             else:
-                self._scheduler.next(self._check, self._app_config.Player.Libmpv.retry_minutes * 60)
+                self._scheduler.next(self._check, self._app_config.Libmpv.retry_minutes * 60)

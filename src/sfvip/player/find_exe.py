@@ -10,10 +10,10 @@ from translations.loc import LOC
 
 from ...winapi.version import get_version_string
 from ..app_info import AppInfo
+from ..exceptions import PlayerNotFoundError
 from ..ui import UI
 from .cpu import Cpu, is64_exe
 from .downloader import download_player
-from .exception import PlayerNotFoundError
 from .registry import Registry
 
 logger = logging.getLogger(__name__)
