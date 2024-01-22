@@ -19,57 +19,52 @@ class AtVeryLast:
 
 at_very_last = AtVeryLast()
 
-# pylint: disable=wrong-import-position
-import logging
-import platform
-import sys
 
-from shared import get_bitness_str
+# pylint: disable=import-outside-toplevel, import-outside-toplevel
+def set_logging_and_exclude(*log_polluters) -> None:
+    import logging
 
-logger = logging.getLogger(__name__)
+    from shared import is_py_installer
 
-
-def is_py_installer() -> bool:
-    return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
-
-
-def is_nuitka() -> bool:
-    return "__compiled__" in globals()
-
-
-def is_built() -> bool:
-    return is_py_installer() or is_nuitka()
-
-
-log_polluters = "ipytv.playlist", "ipytv.channel", "mitmproxy.proxy.server"
-
-
-def set_logging(from_) -> None:
     if is_py_installer():
-        # pylint: disable=import-outside-toplevel
+        import os
+        import sys
         import time
+        import traceback
         from pathlib import Path
+        from types import TracebackType
+        from typing import NoReturn
 
         from build_config import Build
 
-        time_ms = round(time.time() * 1000)
-        logfile = Path(Build.logs_dir) / f"{Build.name} - {time_ms}.log"
+        class StreamToLogger:
+            def __init__(self, logger_write: Callable[[str], None]):
+                self.logger_write = logger_write
+                self.buf = []
+
+            def write(self, msg: str):
+                if msg.endswith("\n"):
+                    self.buf.append(msg.removesuffix("\n"))
+                    self.logger_write("".join(self.buf))
+                    self.buf = []
+                else:
+                    self.buf.append(msg)
+
+            def flush(self):
+                pass
+
+        def excepthook(_type: type[BaseException], _value: BaseException, _traceback: TracebackType) -> NoReturn:
+            traceback.print_exception(_type, _value, _traceback)
+            sys.exit(0)  # pyinstaller won't show its crash window
+
+        sys.excepthook = excepthook  # remove the pyinstaller crash window in the main thread
+        sys.stderr = StreamToLogger(logging.error)  # add exception traceback in loggging.error
+        logfile = Path(Build.logs_dir) / f"{Build.name} - {round(time.time() * 1000)} - {os.getpid()}.log"
     else:
         logfile = None  # it's handled in dev.builder.nuitka
 
     logging.basicConfig(filename=logfile, level=logging.INFO, format="%(asctime)s - %(message)s")
 
-    if from_ == "__main__":
-        logger.info(
-            "Run Python %s %s",
-            platform.python_version(),
-            get_bitness_str(platform.machine().endswith("64")),
-        )
-        if is_py_installer():
-            logger.info("Build by PyInstaller")
-        elif is_nuitka():
-            logger.info("Build by Nuitka")
-    else:
-        # do not pollute the log
-        for polluter in log_polluters:
-            logging.getLogger(polluter).setLevel(logging.WARNING)
+    # do not pollute the log
+    for polluter in log_polluters:
+        logging.getLogger(polluter).setLevel(logging.WARNING)

@@ -18,6 +18,7 @@ class IncludeFilesNuitka(IncludeFiles):
 
 class Nuitka(Distribution):
     name = "Nuitka"
+    excluded_module_option = "nofollow-import-to"
 
     def __init__(self, build: CfgBuild, mingw: bool, do_run: bool) -> None:
         super().__init__(build, do_run)
@@ -25,6 +26,7 @@ class Nuitka(Distribution):
             self.args = (
                 "--enable-console" if build.enable_console else "--disable-console",
                 *IncludeFilesNuitka(build.files, build.ico).all,
+                *self.get_excluded_modules(build.excluded),
                 f"--windows-icon-from-ico={build.ico}",
                 f"--output-filename={build.name}.exe",
                 f"--product-version={build.version}",

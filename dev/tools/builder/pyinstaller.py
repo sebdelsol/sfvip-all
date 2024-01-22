@@ -20,6 +20,7 @@ class IncludeFilesPyInstaller(IncludeFiles):
 
 class Pyinstaller(Distribution):
     name = "PyInstaller"
+    excluded_module_option = "exclude-module"
 
     def __init__(self, build: CfgBuild, do_run: bool) -> None:
         super().__init__(build, do_run)
@@ -27,6 +28,7 @@ class Pyinstaller(Distribution):
             self.args = (
                 "--console" if build.enable_console else "--windowed",
                 *IncludeFilesPyInstaller(build.files, build.ico).all,
+                *self.get_excluded_modules(build.excluded),
                 f"--icon={Path(build.ico).resolve()}",
                 f"--name={build.name}",
                 "-y",

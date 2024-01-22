@@ -12,6 +12,7 @@ class Build:
     logs_dir = ""
     enable_console = True
     files = ()
+    excluded = ()
     install_finish_page = False
     install_cmd = f"{name}.exe", "install"
     uninstall_cmd = f"{name}.exe", "uninstall"

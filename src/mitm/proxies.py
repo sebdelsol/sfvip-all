@@ -17,6 +17,8 @@ from mitmproxy.addons import (
 from mitmproxy.master import Master
 from mitmproxy.net import server_spec
 
+from shared import LogProcess
+
 from .addon import SfVipAddOn
 
 logger = logging.getLogger(__name__)
@@ -64,21 +66,21 @@ class MitmLocalProxy(multiprocessing.Process):
         super().__init__()
 
     def run(self) -> None:
-        logger.info("Mitmproxy process started")
-        threading.Thread(target=self._wait_for_stop).start()
-        if self._modes:
-            # launch one proxy per mode
-            modes = [mode.to_mitm() for mode in self._modes]
-            # do not verify upstream server SSL/TLS certificates
-            opts = options.Options(ssl_insecure=True, mode=modes)
-            loop = asyncio.get_event_loop()
-            with self._master_lock:
-                self._master = Master(opts, event_loop=loop)
-                self._master.addons.add(self._addon, *_minimum_addons())
-            loop.run_until_complete(self._master.run())
-        else:
-            self._addon.running()
-            self._stop.wait()
+        with LogProcess(logger, "Mitmproxy"):
+            threading.Thread(target=self._wait_for_stop).start()
+            if self._modes:
+                # launch one proxy per mode
+                modes = [mode.to_mitm() for mode in self._modes]
+                # do not verify upstream server SSL/TLS certificates
+                opts = options.Options(ssl_insecure=True, mode=modes)
+                loop = asyncio.get_event_loop()
+                with self._master_lock:
+                    self._master = Master(opts, event_loop=loop)
+                    self._master.addons.add(self._addon, *_minimum_addons())
+                loop.run_until_complete(self._master.run())
+            else:
+                self._addon.running()
+                self._stop.wait()
 
     def _wait_for_stop(self) -> None:
         self._stop.wait()
@@ -87,7 +89,6 @@ class MitmLocalProxy(multiprocessing.Process):
                 self._master.shutdown()
             else:
                 self._addon.done()
-        logger.info("Mitmproxy process exit")
 
     def wait_running(self, timeout: int) -> bool:
         return self._addon.wait_running(timeout)

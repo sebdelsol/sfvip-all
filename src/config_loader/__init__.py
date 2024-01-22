@@ -6,7 +6,8 @@ from pathlib import Path
 from types import FunctionType, MappingProxyType, MethodType, SimpleNamespace
 from typing import IO, Any, Iterator, Literal, Optional, Self, cast, get_type_hints
 
-from .. import is_built
+from shared import is_built
+
 from ..winapi import mutex
 
 logger = logging.getLogger(__name__)

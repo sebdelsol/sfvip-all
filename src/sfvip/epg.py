@@ -12,6 +12,7 @@ from .ui.sticky import sticky_windows
 from .watchers import KeyboardWatcher
 
 
+# TODO remove channel shown when exiting XTREAM & MAC account
 class HoverEPG:
     def __init__(self, ui: UI) -> None:
         self.ui = ui

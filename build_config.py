@@ -21,6 +21,7 @@ class Build:
     dir = "build"
     enable_console = False
     logs_dir = "../logs"
+    excluded = ("numpy",)
     files = Splash, Logo, Translations
     install_finish_page = True
     install_cmd = ()

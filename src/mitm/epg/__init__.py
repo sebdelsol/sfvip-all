@@ -111,13 +111,13 @@ class EPG:
                 if programme_type := EPG._programme_type.get(api):
                     if listing := tuple(self._get_listing(programme_type, programmes, limit)):
                         logger.info("Get epg for %s", epg_id)
-                        name = self.ask_name(server, stream_id)
+                        name = self.ask_stream(server, stream_id)
                         self.show_channel(ShowChannel(True, name, programmes.confidence))
                         self.channel_shown = True
                         return listing
         return None
 
-    def ask_name(self, server: Optional[str], stream_id: str) -> Optional[str]:
+    def ask_stream(self, server: Optional[str], stream_id: str) -> Optional[str]:
         if (
             server
             and (server_channels := self.servers.get(server))
@@ -128,8 +128,8 @@ class EPG:
 
     def m3u_stream_started(self, server: Optional[str], stream_id: str) -> bool:
         if programmes := self.ask_epg(server, stream_id, "15", APItype.M3U):
-            name = self.ask_name(server, stream_id)
-            self.show_epg(ShowEpg(True, name, programmes))  # type: ignore #we know those are EPGprogrammeM3U
+            name = self.ask_stream(server, stream_id)
+            self.show_epg(ShowEpg(True, name, programmes))  # type: ignore # we know those are EPGprogrammeM3U
             logger.info("Start showing epg for %s", name)
             self.epg_shown = True
             return True

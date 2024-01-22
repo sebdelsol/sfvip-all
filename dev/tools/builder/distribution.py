@@ -2,7 +2,7 @@ import shutil
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import ClassVar, Iterator, Optional, Sequence
 
 from ..env import PythonEnv
 from ..scanner import VirusScanner
@@ -13,6 +13,7 @@ from ..utils.protocols import CfgBuild
 
 class Distribution(ABC):
     name: ClassVar[str]
+    excluded_module_option: ClassVar[str]
     _retry_antivirus_lock = 5
 
     def __init__(self, build: CfgBuild, do_run: bool) -> None:
@@ -60,6 +61,10 @@ class Distribution(ABC):
         if self.check_exe(python_env):
             return True
         return False
+
+    def get_excluded_modules(self, excluded: Sequence[str]) -> Iterator[str]:
+        for module in excluded:
+            yield f"--{self.excluded_module_option}={module}"
 
     @abstractmethod
     def create(self, python_exe: Path, build_dir: Path) -> Optional[Path]:

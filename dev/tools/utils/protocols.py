@@ -34,6 +34,10 @@ class CfgBuild(Protocol):
     def files(self) -> Sequence[CfgFile | CfgFileResize]:
         ...
 
+    @property
+    def excluded(self) -> Sequence[str]:
+        ...
+
 
 class CfgGithub(Protocol):
     owner: str
