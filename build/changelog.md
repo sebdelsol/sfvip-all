@@ -1,3 +1,7 @@
+## 1.4.12.24
+* Bump _mitmproxy_ to 10.2.2.
+* Build with _Pyinstaller_.
+
 ## 1.4.12.23
 * Clean old caches & libmpv dlls.
 

@@ -1,7 +1,7 @@
 # nuitka-project: --include-module=mitmproxy_windows
 # nuitka-project: --enable-plugin=tk-inter
 
-from src import set_logging_and_exclude
+from src import at_very_last, set_logging_and_exclude
 
 set_logging_and_exclude("ipytv.playlist", "ipytv.channel", "mitmproxy.proxy.server")
 
@@ -22,7 +22,6 @@ if __name__ == "__main__":
 
     from build_config import Build, Github
     from shared import LogProcess
-    from src import at_very_last
     from src.sfvip import AppInfo, run_app
 
     # for debug purpose only
