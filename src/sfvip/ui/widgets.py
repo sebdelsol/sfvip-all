@@ -6,41 +6,6 @@ from typing import Any, Callable, Collection, Iterator, NamedTuple, Optional, Se
 from .style import Style
 
 
-# TODO use custom style
-def set_vscrollbar_style(bg: str, slider: str, active_slider: str) -> None:
-    """flat, no arrow, bg=color of slider"""
-    style = ttk.Style()
-    style.layout(
-        "Vertical.TScrollbar",
-        [
-            (
-                "Vertical.Scrollbar.trough",
-                {
-                    "children": [
-                        (
-                            "Vertical.Scrollbar.thumb",
-                            {"expand": "1", "sticky": "nswe"},
-                        )
-                    ],
-                    "sticky": "ns",
-                },
-            )
-        ],
-    )
-    style.configure(
-        "Vertical.TScrollbar",
-        background=slider,
-        gripcount=0,
-        bordercolor=bg,
-        troughcolor=bg,
-        relief="flat",
-        lightcolor=bg,
-        darkcolor=bg,
-        arrowsize=8,
-    )
-    style.map("Vertical.TScrollbar", background=[("active", active_slider)])
-
-
 # pylint: disable=too-many-ancestors
 class HorizontalScale(ttk.Scale):
     _count = 0
@@ -108,6 +73,13 @@ def get_border(border: Border, **kwargs: Any) -> dict[str, Any]:
     return dict(highlightbackground=border.bg, highlightthickness=border.size, highlightcolor=border.bg, **kwargs)
 
 
+class ScrollBar(NamedTuple):
+    bg: str
+    slider: str
+    active_slider: str
+    thickness: int
+
+
 class _AutoScrollbar(ttk.Scrollbar):
     def set(self, first: float | str, last: float | str) -> None:
         if float(first) <= 0.0 and float(last) >= 1.0:
@@ -118,15 +90,18 @@ class _AutoScrollbar(ttk.Scrollbar):
 
 
 class _VscrollCanvas(tk.Canvas):
+    _count = 0
+
     """
     Canvas with an automatic vertical scrollbar
     use _VAutoScrollableCanvas.frame to populate it
     """
 
-    def __init__(self, master: tk.BaseWidget, **kwargs: Any) -> None:
+    def __init__(self, master: tk.BaseWidget, scrollbar: ScrollBar, **kwargs: Any) -> None:
         super().__init__(master, bd=0, highlightthickness=0, **kwargs)  # w/o border
         # set the vertical scrollbar
-        vscrollbar = _AutoScrollbar(master, orient="vertical")
+        style = self.set_scrollbar_style(scrollbar)
+        vscrollbar = _AutoScrollbar(master, orient="vertical", style=style)
         self.config(yscrollcommand=vscrollbar.set, yscrollincrement="2")
         vscrollbar.config(command=self.yview)
         self.scrollbar = vscrollbar
@@ -152,6 +127,44 @@ class _VscrollCanvas(tk.Canvas):
     def _on_mousewheel(self, event: tk.Event) -> None:
         self.yview_scroll(int(-1 * (event.delta / 12)), "units")
 
+    @staticmethod
+    def set_scrollbar_style(scrollbar: ScrollBar) -> str:
+        """flat, no arrow, bg=color of slider"""
+
+        style_name = f"custom{_VscrollCanvas._count}.Vertical.TScrollbar"
+        _VscrollCanvas._count += 1
+        style = ttk.Style()
+        style.layout(
+            style_name,
+            [
+                (
+                    "Vertical.Scrollbar.trough",
+                    {
+                        "children": [
+                            (
+                                "Vertical.Scrollbar.thumb",
+                                {"expand": "1", "sticky": "nswe"},
+                            )
+                        ],
+                        "sticky": "ns",
+                    },
+                )
+            ],
+        )
+        style.configure(
+            style_name,
+            background=scrollbar.slider,
+            gripcount=0,
+            bordercolor=scrollbar.bg,
+            troughcolor=scrollbar.bg,
+            relief="flat",
+            lightcolor=scrollbar.bg,
+            darkcolor=scrollbar.bg,
+            arrowsize=scrollbar.thickness,
+        )
+        style.map(style_name, background=[("active", scrollbar.active_slider)])
+        return style_name
+
 
 class ListView(tk.Frame):
     """
@@ -160,7 +173,15 @@ class ListView(tk.Frame):
     """
 
     # pylint: disable=too-many-arguments
-    def __init__(self, master: tk.BaseWidget, bg_headers: str, bg_rows: str, bg_separator: str, pad: int) -> None:
+    def __init__(
+        self,
+        master: tk.BaseWidget,
+        bg_headers: str,
+        bg_rows: str,
+        bg_separator: str,
+        scrollbar: ScrollBar,
+        pad: int,
+    ) -> None:
         super().__init__(master)
         # headers
         self._frame_headers = tk.Frame(self, bg=bg_headers)
@@ -170,7 +191,7 @@ class ListView(tk.Frame):
         sep.pack(fill=tk.BOTH, expand=True)
         # rows
         frame_rows = tk.Frame(self)
-        canvas = _VscrollCanvas(frame_rows, bg=bg_rows)
+        canvas = _VscrollCanvas(frame_rows, scrollbar, bg=bg_rows)
         self._frame_rows = canvas.frame
         frame_rows.pack(fill=tk.BOTH, expand=True)
         # for use later

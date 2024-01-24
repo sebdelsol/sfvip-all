@@ -16,8 +16,8 @@ from .widgets import (
     CheckBox,
     HorizontalScale,
     ListView,
+    ScrollBar,
     get_border,
-    set_vscrollbar_style,
 )
 
 
@@ -58,10 +58,11 @@ class _InfoTheme:
         bg_rows=bg_rows,
         bg_separator=separator,
     )
-    listview_scrollbar = dict(
+    listview_scrollbar = ScrollBar(
         bg=bg_rows,
-        slider="white",
-        active_slider="grey",
+        slider="grey",
+        active_slider="white",
+        thickness=8,
     )
     checkbox = dict(
         box_color=bg_interact,
@@ -219,7 +220,7 @@ class _ProxiesWindow(StickyWindow):
     """installed proxies infos"""
 
     _offset = Offset(regular=(-36, 36), maximized=(2, 35))
-    _max_height = 400
+    _max_height = 500
 
     def __init__(self, app_info: AppInfo) -> None:
         border = get_border(_InfoTheme.border)
@@ -240,10 +241,14 @@ class _ProxiesWindow(StickyWindow):
             **_InfoTheme.button_proxy,
             **_get_proxies_button(self.config.App.show_proxies).to_tk,
         )
-        self._proxies = ListView(self._frame, **_InfoTheme.listview, pad=_InfoTheme.pad)
+        self._proxies = ListView(
+            self._frame,
+            **_InfoTheme.listview,
+            scrollbar=_InfoTheme.listview_scrollbar,
+            pad=_InfoTheme.pad,
+        )
         self.separator = tk.Frame(self._frame, bg=_InfoTheme.separator)
         self._proxies.set_headers(_get_infos_headers(app_info.name))
-        set_vscrollbar_style(**_InfoTheme.listview_scrollbar)
         self._proxies_button.bind("<Button-1>", self.show_proxies)
 
     def show_proxies(self, _) -> None:
@@ -407,7 +412,7 @@ class InfosWindow(_ProxiesWindow):
         row += 1
         epg_frame.grid(row=row, columnspan=3, padx=pad, pady=pad, sticky=tk.NSEW)
         epg_label.pack(side=tk.LEFT)
-        self._epg_url.pack(side=tk.LEFT, padx=pad, fill=tk.BOTH, expand=True)
+        self._epg_url.pack(side=tk.LEFT, padx=pad, fill=tk.X, expand=True)
         self._epg_status.pack(side=tk.LEFT)
         row += 1
         epg_confidence_frame.grid(row=row, columnspan=3, padx=pad, pady=(0, pad), sticky=tk.NSEW)
