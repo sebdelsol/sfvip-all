@@ -1,4 +1,3 @@
-import msvcrt
 import os
 import queue
 import textwrap
@@ -7,34 +6,13 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import IO, Iterator, NamedTuple, Optional
 
-from .color import Low, Title, ToStyle, Warn
+from ..color import Low, ToStyle, Warn
+from . import clear_lines
 
 
 class _Line(NamedTuple):
     text: str
     is_error: bool
-
-
-def _line_clear() -> None:
-    print("\033[2K", end="")
-
-
-def _line_back() -> None:
-    print("\033[F", end="")
-
-
-def clear_lines(n: int) -> None:
-    for _ in range(n):
-        _line_clear()
-        _line_back()
-        _line_clear()
-
-
-def flushed_input(*text: str, to_style: ToStyle = Title) -> str:
-    while msvcrt.kbhit():
-        msvcrt.getch()
-    print(*text, end="", sep="")
-    return input(to_style()).lower()
 
 
 class CommandMonitor:

@@ -66,14 +66,10 @@ class StickyWindow(tk.Toplevel):
         self.geometry(rect.to_geometry())
 
     def bring_to_front(self, is_topmost: bool, is_foreground: bool) -> None:
-        # TODO !!!!!!!!!!!!!!!!!!!!????????????
-        if self.state() != "normal":
-            self.deiconify()
         if is_foreground:
-            if is_topmost:
-                self.attributes("-topmost", True)
-            else:
-                self.attributes("-topmost", True)
+            self.deiconify()
+            self.attributes("-topmost", True)
+            if not is_topmost:
                 self.attributes("-topmost", False)
 
 

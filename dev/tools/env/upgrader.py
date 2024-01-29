@@ -6,7 +6,8 @@ from typing import Iterator, NamedTuple, Optional
 
 from ..utils.color import Low, Ok, Title, Warn
 from ..utils.columns import Columns, Justify
-from ..utils.command import CommandMonitor, flushed_input
+from ..utils.monitor import flushed_input
+from ..utils.monitor.command import CommandMonitor
 from . import PythonEnv, RequiredBy
 from .python import upgrade_python
 

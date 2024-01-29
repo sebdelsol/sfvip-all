@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Iterator, Optional
 
 from ..utils.color import Title
-from ..utils.command import CommandMonitor
+from ..utils.monitor.pty import PtyMonitor
 from ..utils.protocols import CfgBuild
 from .distribution import Distribution
 from .files import IncludeFiles
@@ -40,11 +40,11 @@ class Nuitka(Distribution):
                 build.main,
             )
             if build.logs_dir:
-                logs = f"--force-stderr-spec=%PROGRAM%/../{build.logs_dir}/{build.name} - %TIME% - %PID%.log"
+                logs = f"--force-stderr-spec={{PROGRAM}}/../{build.logs_dir}/{build.name} - {{TIME}} - {{PID}}.log"
                 self.args = logs, *self.args
 
     def create(self, python_exe: Path, build_dir: Path) -> Optional[Path]:
-        ok = CommandMonitor(
+        ok = PtyMonitor(
             python_exe,
             "-m",
             "nuitka",

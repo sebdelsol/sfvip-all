@@ -9,7 +9,7 @@ from shared.feed import FeedEntries
 from shared.version import Version
 
 from ..utils.color import Ok, Title, Warn
-from ..utils.command import flushed_input
+from ..utils.monitor import flushed_input
 from . import PythonEnv
 
 

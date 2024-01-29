@@ -14,12 +14,12 @@ if __name__ == "__main__":
         # if it's a subprocess execution will stop here
         multiprocessing.freeze_support()
 
-    # pylint: disable=ungrouped-imports
     # reduce what's imported in the subprocesses
     import logging
     import sys
     from pathlib import Path
 
+    # pylint: disable=ungrouped-imports
     from build_config import Build, Github
     from shared import LogProcess
     from src.sfvip import AppInfo, run_app
@@ -28,10 +28,11 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "fakev0":
         Build.version = "0"
 
+    app_dir = Path(__file__).parent
     logger = logging.getLogger(__name__)
     with LogProcess(logger, "Main"):
         run_app(
             at_very_last.register,
-            AppInfo.from_build(Build, Github, app_dir=Path(__file__).parent),
-            keep_logs=6,
+            AppInfo.from_build(Build, Github, app_dir=app_dir),
+            keep_logs=3 * 2,
         )
