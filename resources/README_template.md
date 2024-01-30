@@ -35,11 +35,11 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
-### Create the environments
-You need ***Python {py_major_version}*** [***x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) and [***x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) installed to create the environments:
+
+### Create the _x64_ environments
+You need [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) and [***Rust***](https://www.rust-lang.org/fr).
 ```console
 py -{py_major_version}-64 -m dev.create
-py -{py_major_version}-32 -m dev.create
 ```
 ### Activate the _x64_ environment
 ```console
@@ -68,10 +68,11 @@ You need to have [**Visual Studio Community Edition**](https://www.visualstudio.
 
 <img src="resources/VS.png">
 
-### Build an ***x86*** version
-You need to [***install Rust***](https://www.rust-lang.org/fr) and `i686-pc-windows-msvc` to build the x86 version of mitmproxy:  
+### Create the _x86_ environment
+You need [***Python {py_major_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) and `i686-pc-windows-msvc`.
 ```console
 rustup target add i686-pc-windows-msvc
+py -{py_major_version}-32 -m dev.create
 ```
 ### Build a specific version
 ```console

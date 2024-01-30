@@ -1,3 +1,6 @@
+## 1.4.12.26
+* Bump _Nuitka_ to 2.0.
+
 ## 1.4.12.25
 * Fix _Sfvip All_ window UI.
 
