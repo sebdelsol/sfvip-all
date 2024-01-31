@@ -1,6 +1,6 @@
 import msvcrt
 
-from ..color import Title, ToStyle
+from ..utils.color import Title, ToStyle
 
 
 def _line_clear() -> None:

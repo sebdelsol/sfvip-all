@@ -4,10 +4,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, NamedTuple, Optional
 
+from ..monitor import flushed_input
+from ..monitor.command import CommandMonitor
 from ..utils.color import Low, Ok, Title, Warn
 from ..utils.columns import Columns, Justify
-from ..utils.monitor import flushed_input
-from ..utils.monitor.command import CommandMonitor
 from . import PythonEnv, RequiredBy
 from .python import upgrade_python
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import IO, Iterator, NamedTuple, Optional
 
-from ..color import Low, ToStyle, Warn
+from ..utils.color import Low, ToStyle, Warn
 from . import clear_lines
 
 

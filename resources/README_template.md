@@ -64,12 +64,12 @@ It's the _recommended option:_
 ```console
 python -m dev.build
 ```
-You need to have [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig) installed before building:
+You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig) installed:
 
 <img src="resources/VS.png">
 
 ### Create the _x86_ environment
-You need [***Python {py_major_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) and `i686-pc-windows-msvc`.
+You need [***Python {py_major_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) and `i686-pc-windows-msvc` for rust.
 ```console
 rustup target add i686-pc-windows-msvc
 py -{py_major_version}-32 -m dev.create

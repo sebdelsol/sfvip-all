@@ -4,8 +4,8 @@ from types import ModuleType
 
 from shared.version import Version
 
+from ..monitor.command import CommandMonitor
 from ..utils.color import Low, Ok, Title, Warn
-from ..utils.monitor.command import CommandMonitor
 from ..utils.protocols import CfgEnvironments
 from . import PythonEnv, get_bitness_str
 

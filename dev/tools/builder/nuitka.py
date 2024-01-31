@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Iterator, Optional
 
+from ..monitor.pty import PtyMonitor
 from ..utils.color import Title
-from ..utils.monitor.pty import PtyMonitor
 from ..utils.protocols import CfgBuild
 from .distribution import Distribution
 from .files import IncludeFiles

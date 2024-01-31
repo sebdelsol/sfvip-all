@@ -3,8 +3,8 @@ from typing import Iterator, Optional
 
 import pyinstaller_versionfile
 
+from ..monitor.command import CommandMonitor
 from ..utils.color import Title, Warn
-from ..utils.monitor.command import CommandMonitor
 from ..utils.protocols import CfgBuild
 from .distribution import Distribution
 from .files import IncludeFiles

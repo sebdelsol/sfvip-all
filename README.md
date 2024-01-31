@@ -25,7 +25,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.7-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3117/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.2.2-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7735-000000.svg?logo=file-code&logoColor=a0a0a0)
+![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7747-000000.svg?logo=file-code&logoColor=a0a0a0)
 
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>**or**</sub></sup>
@@ -64,12 +64,12 @@ It's the _recommended option:_
 ```console
 python -m dev.build
 ```
-You need to have [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig) installed before building:
+You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig) installed:
 
 <img src="resources/VS.png">
 
 ### Create the _x86_ environment
-You need [***Python 3.11 x86***](https://www.python.org/ftp/python/3.11.7/python-3.11.7.exe) and `i686-pc-windows-msvc`.
+You need [***Python 3.11 x86***](https://www.python.org/ftp/python/3.11.7/python-3.11.7.exe) and `i686-pc-windows-msvc` for rust.
 ```console
 rustup target add i686-pc-windows-msvc
 py -3.11-32 -m dev.create
