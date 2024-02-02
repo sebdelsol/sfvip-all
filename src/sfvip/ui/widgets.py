@@ -398,7 +398,7 @@ class RoundedBox(tk.Canvas):
         box_color: str,
         get_widget: GetWidgetT,
         max_height: Optional[int] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__(master, bd=0, highlightthickness=0, **kwargs)
         self.radius = radius
@@ -417,7 +417,7 @@ class RoundedBox(tk.Canvas):
 
     # pylint: disable=too-many-arguments
     def create_rounded_box(self, x0: int, y0: int, x1: int, y1: int, color: str = "black") -> None:
-        points = []
+        points: list[tuple[float, float]] = []
         for cos_r, sin_r in self.cos_sin_r:
             points.append((x1 + sin_r, y0 - cos_r))
         for cos_r, sin_r in self.cos_sin_r:
@@ -449,7 +449,7 @@ class RoundedBoxScroll(RoundedBox):
         get_widget: GetWidgetT,
         get_scrolling_widget: GetWidgetT,
         max_height: Optional[int] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__(master, radius, box_color, get_widget, max_height, **kwargs)
         self.scroll = tk.Canvas(self, bg=self.box_color, bd=0, highlightthickness=0)

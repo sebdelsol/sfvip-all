@@ -21,7 +21,7 @@ at_very_last = AtVeryLast()
 
 
 # pylint: disable=import-outside-toplevel, import-outside-toplevel
-def set_logging_and_exclude(*log_polluters) -> None:
+def set_logging_and_exclude(*log_polluters: str) -> None:
     import logging
 
     from shared import is_py_installer
@@ -40,7 +40,7 @@ def set_logging_and_exclude(*log_polluters) -> None:
         class StreamToLogger:
             def __init__(self, logger_write: Callable[[str], None]):
                 self.logger_write = logger_write
-                self.buf = []
+                self.buf: list[str] = []
 
             def write(self, msg: str):
                 if msg.endswith("\n"):
