@@ -26,12 +26,10 @@ class StartStopContextManager:
         self.stop()
 
     @abstractmethod
-    def start(self) -> None:
-        ...
+    def start(self) -> None: ...
 
     @abstractmethod
-    def stop(self) -> None:
-        ...
+    def stop(self) -> None: ...
 
 
 class _CallbackFileWatcher(NamedTuple):

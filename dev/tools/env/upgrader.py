@@ -24,7 +24,7 @@ class _Pckg(NamedTuple):
 
 
 class _PckgsColumns(Columns[_Pckg]):
-    ...
+    pass
 
 
 class Upgrader:
@@ -65,21 +65,21 @@ class Upgrader:
         """install all requirements, return what's been installed"""
         with tempfile.TemporaryDirectory() as temp_dir:
             report_file = Path(temp_dir) / "report.json"
-            if self._install(
+            self._install(
                 *(("--dry-run",) if dry_run else ()),
                 *("--report", str(report_file)),
                 *("--upgrade-strategy", "eager" if eager else "only-if-needed"),
                 *sum((("-r", requirements) for requirements in self._python_env.requirements), ()),
                 *sum((("-c", constraints) for constraints in self._python_env.constraints), ()),
-            ):
-                if report_file.exists():
-                    with report_file.open(mode="r", encoding="utf8") as f:
-                        report = json.load(f)
-                    for pckg in report["install"]:
-                        name = pckg["metadata"]["name"]
-                        version = pckg["metadata"]["version"]
-                        url = pckg["download_info"]["url"]
-                        yield _Pckg(name=name, version=version, url=url, required_by=self._required_by.get(name))
+            )
+            if report_file.exists():
+                with report_file.open(mode="r", encoding="utf8") as f:
+                    report = json.load(f)
+                for pckg in report["install"]:
+                    name = pckg["metadata"]["name"]
+                    version = pckg["metadata"]["version"]
+                    url = pckg["download_info"]["url"]
+                    yield _Pckg(name=name, version=version, url=url, required_by=self._required_by.get(name))
 
     def _install_package(self, pckg: _Pckg) -> bool:
         """install one pckg constrained by all other pckgs' versions in the environment"""

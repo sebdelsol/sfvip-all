@@ -36,5 +36,4 @@ class IncludeFiles(ABC):
                 yield file
 
     @abstractmethod
-    def get_file(self, path: Path) -> Iterator[str]:
-        ...
+    def get_file(self, path: Path) -> Iterator[str]: ...

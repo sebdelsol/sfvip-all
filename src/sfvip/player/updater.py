@@ -96,8 +96,7 @@ _updating = ThreadGuardian()
 
 
 class SetRelaunchT(Protocol):
-    def __call__(self, sleep_duration_s: float = ..., can_relaunch: Optional[threading.Event] = ...) -> None:
-        ...
+    def __call__(self, sleep_duration_s: float = ..., can_relaunch: Optional[threading.Event] = ...) -> None: ...
 
 
 class PlayerAutoUpdater:

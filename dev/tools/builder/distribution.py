@@ -67,5 +67,4 @@ class Distribution(ABC):
             yield f"--{self.excluded_module_option}={module}"
 
     @abstractmethod
-    def create(self, python_exe: Path, build_dir: Path) -> Optional[Path]:
-        ...
+    def create(self, python_exe: Path, build_dir: Path) -> Optional[Path]: ...

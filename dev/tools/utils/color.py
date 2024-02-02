@@ -20,8 +20,7 @@ except ImportError:
 
 
 class ToStyle(Protocol):  # to handle hint for the callable default parameter
-    def __call__(self, txt: str = "") -> str:
-        ...
+    def __call__(self, txt: str = "") -> str: ...
 
 
 def _use_style(style: str) -> ToStyle:

@@ -23,20 +23,16 @@ class CfgBuild(Protocol):
     install_finish_page: bool
 
     @property
-    def install_cmd(self) -> Sequence[str]:
-        ...
+    def install_cmd(self) -> Sequence[str]: ...
 
     @property
-    def uninstall_cmd(self) -> Sequence[str]:
-        ...
+    def uninstall_cmd(self) -> Sequence[str]: ...
 
     @property
-    def files(self) -> Sequence[CfgFile | CfgFileResize]:
-        ...
+    def files(self) -> Sequence[CfgFile | CfgFileResize]: ...
 
     @property
-    def excluded(self) -> Sequence[str]:
-        ...
+    def excluded(self) -> Sequence[str]: ...
 
 
 class CfgGithub(Protocol):
@@ -51,55 +47,44 @@ class CfgTemplate(Protocol):
 
 class CfgTemplates(Protocol):
     @property
-    def all(self) -> Sequence[CfgTemplate]:
-        ...
+    def all(self) -> Sequence[CfgTemplate]: ...
 
 
 class _CfgEnvironment(Protocol):
     path: str
 
     @property
-    def constraints(self) -> Sequence[str]:
-        ...
+    def constraints(self) -> Sequence[str]: ...
 
 
 class CfgEnvironments(Protocol):
     python: str
 
     @property
-    def requirements(self) -> Sequence[str]:
-        ...
-
-    # pylint: disable=invalid-name
-    @property
-    def X86(self) -> _CfgEnvironment:
-        ...
+    def requirements(self) -> Sequence[str]: ...
 
     @property
-    def X64(self) -> _CfgEnvironment:
-        ...
+    def X86(self) -> _CfgEnvironment: ...  # pylint: disable=invalid-name
+
+    @property
+    def X64(self) -> _CfgEnvironment: ...  # pylint: disable=invalid-name
 
 
 class CfgTexts(Protocol):
     language: str
 
     @staticmethod
-    def as_dict() -> dict[str, str]:
-        ...
+    def as_dict() -> dict[str, str]: ...
 
 
 class CfgLOC(Protocol):
     @property
-    def AlreadyRunning(self) -> str:  # pylint: disable=invalid-name
-        ...
+    def AlreadyRunning(self) -> str: ...  # pylint: disable=invalid-name
 
     @property
-    def Retry(self) -> str:  # pylint: disable=invalid-name
-        ...
+    def Retry(self) -> str: ...  # pylint: disable=invalid-name
 
     @property
-    def all_languages(self) -> Sequence[str]:
-        ...
+    def all_languages(self) -> Sequence[str]: ...
 
-    def set_language(self, language: Optional[str]) -> None:
-        ...
+    def set_language(self, language: Optional[str]) -> None: ...

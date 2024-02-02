@@ -26,8 +26,7 @@ class Build(Protocol):
     logs_dir: str
 
     @property
-    def files(self) -> Sequence[Files]:
-        ...
+    def files(self) -> Sequence[Files]: ...
 
 
 APP_64BIT = sys.maxsize == (2**63) - 1
