@@ -73,8 +73,7 @@ class IsNewer:
 
 
 def translate(texts: CfgTexts, all_languages: Sequence[str], translation_dir: CfgFile) -> None:
-    assert isinstance(texts, type)
-    is_newer_texts = IsNewer(texts)
+    is_newer_texts = IsNewer(texts.__class__)
     args = Args().parse_args()
     languages = [args.language] if args.language and args.language in all_languages else all_languages
     for target_language in languages:

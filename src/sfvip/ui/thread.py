@@ -38,12 +38,14 @@ class ThreadUI:
             value: Optional[R] = None
             exception: Optional[Exception] = None
 
+        ret = Return()
+
         def run() -> None:
             try:
                 ThreadUI._is_main_loop_running.wait()
-                Return.value = target(*args, **kwargs)
+                ret.value = target(*args, **kwargs)
             except self._exceptions as exception:
-                Return.exception = exception
+                ret.exception = exception
             finally:
                 if self._create_mainloop:
                     self._ui.after(0, self._ui.quit)
@@ -63,6 +65,6 @@ class ThreadUI:
             while thread.is_alive():
                 thread.join(timeout=0)
                 self._ui.update()
-            if Return.exception is not None:
-                raise Return.exception
-        return Return.value
+            if ret.exception is not None:
+                raise ret.exception
+        return ret.value

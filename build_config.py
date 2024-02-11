@@ -1,60 +1,63 @@
+from typing import ClassVar
+
+
 class Splash:
-    path = "resources/Sfvip All.png"
+    path: ClassVar = "resources/Sfvip All.png"
 
 
 class Logo:
-    path = "resources/logo.png"
-    src = "resources/Sfvip All.png"
-    resize = 28, 28
+    path: ClassVar = "resources/logo.png"
+    src: ClassVar = "resources/Sfvip All.png"
+    resize: ClassVar = 28, 28
 
 
 class Translations:
-    path = "translations"
+    path: ClassVar = "translations"
 
 
 class Build:
-    ico = "resources/Sfvip All.png"
-    main = "sfvip_all.py"
-    company = "sebdelsol"
-    name = "Sfvip All"
-    version = "1.4.12.27"
-    dir = "build"
-    enable_console = False
-    logs_dir = "../logs"
-    excluded = ("numpy",)
-    files = Splash, Logo, Translations
-    install_finish_page = True
-    install_cmd = ()
-    uninstall_cmd = ()
+    ico: ClassVar = "resources/Sfvip All.png"
+    main: ClassVar = "sfvip_all.py"
+    company: ClassVar = "sebdelsol"
+    name: ClassVar = "Sfvip All"
+    version: ClassVar = "1.4.12.27"
+    dir: ClassVar = "build"
+    enable_console: ClassVar = False
+    logs_dir: ClassVar = "../logs"
+    excluded: ClassVar = ("numpy",)
+    files: ClassVar = Splash, Logo, Translations
+    install_finish_page: ClassVar = True
+    install_cmd: ClassVar = ()
+    uninstall_cmd: ClassVar = ()
 
 
 class Environments:
-    requirements = "requirements.txt", "requirements.dev.txt"
-    python = "3.11"
+    requirements: ClassVar = "requirements.txt", "requirements.dev.txt"
+    python: ClassVar = "3.11"
 
     class X64:
-        path = ".sfvip64"
-        constraints = ()
+        path: ClassVar = ".sfvip64"
+        constraints: ClassVar = ()
 
     class X86:
-        path = ".sfvip86"
-        constraints = ()
+        path: ClassVar = ".sfvip86"
+        constraints: ClassVar = ()
 
 
 class Github:
-    owner = "sebdelsol"
-    repo = "sfvip-all"
+    owner: ClassVar = "sebdelsol"
+    repo: ClassVar = "sfvip-all"
 
 
 class Readme:
-    src = "resources/README_template.md"
-    dst = "README.md"
+    src: ClassVar = "resources/README_template.md"
+    dst: ClassVar = "README.md"
 
 
 class Post:
-    src = "resources/post_template.txt"
-    dst = f"{Build.dir}/{Build.version}/post.txt"
+    src: ClassVar = "resources/post_template.txt"
+    dst: ClassVar = f"{Build.dir}/{Build.version}/post.txt"
 
 
 class Templates:
-    all = Readme, Post
+    all: ClassVar = Readme, Post

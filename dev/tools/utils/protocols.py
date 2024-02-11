@@ -1,4 +1,4 @@
-from typing import Optional, Protocol, Sequence, runtime_checkable
+from typing import ClassVar, Optional, Protocol, Sequence, runtime_checkable
 
 
 class CfgFile(Protocol):
@@ -71,10 +71,9 @@ class CfgEnvironments(Protocol):
 
 
 class CfgTexts(Protocol):
-    language: str
+    language: ClassVar[str]
 
-    @staticmethod
-    def as_dict() -> dict[str, str]: ...
+    def as_dict(self) -> dict[str, str]: ...
 
 
 class CfgLOC(Protocol):

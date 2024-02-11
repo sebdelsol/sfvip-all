@@ -1,8 +1,12 @@
-from typing import NamedTuple
+import dataclasses
+from dataclasses import dataclass
+from typing import ClassVar
 
 
-class Texts(NamedTuple):
-    language = "english"
+# pylint: disable=too-many-instance-attributes, invalid-name
+@dataclass
+class Texts:
+    language: ClassVar[str] = "english"
 
     User: str = "User"
     UserProxy: str = "User Proxy"
@@ -56,6 +60,5 @@ class Texts(NamedTuple):
         "100 %: You trust the EPG completely and you'll always get a match, sometimes of poor quality"
     )
 
-    @staticmethod
-    def as_dict() -> dict[str, str]:
-        return Texts._field_defaults  # pylint: disable=no-member
+    def as_dict(self) -> dict[str, str]:
+        return dataclasses.asdict(self)

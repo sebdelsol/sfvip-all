@@ -30,6 +30,7 @@ def _get_default_language() -> str:
 class _LOC(Texts):
     _encoding = "utf-8"
 
+    # pylint: disable=super-init-not-called
     def __init__(self) -> None:
         self._language = _get_default_language()
         self._translations = None

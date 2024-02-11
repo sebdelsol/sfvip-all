@@ -54,9 +54,10 @@
         "**/__pycache__": true
     },
     // env
-    // "python.envFile": "${workspaceFolder}/.sfvip64/",
-    // "python.terminal.activateEnvironment": true,
-    // "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.envFile": "${workspaceFolder}/.sfvip64/",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
     "python.analysis.autoFormatStrings": true,
-    "python.createEnvironment.trigger": "off",
+    "python.analysis.enablePytestExtra": false,
+    "python.createEnvironment.trigger": "off",    
 }

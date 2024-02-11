@@ -101,7 +101,7 @@ class Hook:
     def __init__(self, window: WindowExe, event_callback: Callable[[HWND], None]) -> None:
         self._lock = threading.Lock()
         self._hwnd = window.hwnd
-        self._hooks: list[ctypes.c_int64 if APP_64 else ctypes.c_int32] = []
+        self._hooks: list[ctypes.c_int64 | ctypes.c_int32] = []
         self._events = _Events(window.hwnd, event_callback)
         _event_proc = _WinEventProcType(self._handle_event)  # keep a strong reference or crash
         self._hook_args = 0, _event_proc, window.pid, window.tid, _WINEVENT_OUTOFCONTEXT | _WINEVENT_SKIPOWNTHREAD
