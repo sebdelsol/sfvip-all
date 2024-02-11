@@ -20,6 +20,9 @@
     // type checking (pylance)
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "workspace",
+    // "python.analysis.diagnosticSeverityOverrides": { 
+    //     "reportArgumentType" : "information"
+    // },
     // black
     "black-formatter.args": [
         "--line-length=115"
@@ -51,10 +54,9 @@
         "**/__pycache__": true
     },
     // env
-    "python.envFile": "${workspaceFolder}/.sfvip64/",
-    "python.terminal.activateEnvironment": true,
-    "python.terminal.activateEnvInCurrentTerminal": true,
+    // "python.envFile": "${workspaceFolder}/.sfvip64/",
+    // "python.terminal.activateEnvironment": true,
+    // "python.terminal.activateEnvInCurrentTerminal": true,
     "python.analysis.autoFormatStrings": true,
-    "python.analysis.enablePytestExtra": false,
     "python.createEnvironment.trigger": "off",
 }

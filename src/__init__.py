@@ -67,4 +67,4 @@ def set_logging_and_exclude(*log_polluters: str) -> None:
 
     # do not pollute the log
     for polluter in log_polluters:
-        logging.getLogger(polluter).setLevel(logging.WARNING)
+        logging.getLogger(polluter).setLevel(logging.ERROR)

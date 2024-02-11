@@ -49,6 +49,7 @@ class ConfidenceUpdater(JobRunner[int]):
 
 class EPG:
     _programme_type = {APItype.XC: EPGprogrammeXC, APItype.MAC: EPGprogrammeMAC, APItype.M3U: EPGprogrammeM3U}
+    _m3u_server = "m3u.server"
 
     # all following methods should be called from the same process EXCEPT add_job & wait_running
     def __init__(
@@ -81,6 +82,8 @@ class EPG:
 
     def set_server_channels(self, server: Optional[str], channels: Any, api: APItype) -> None:
         if server:
+            if api == APItype.M3U:
+                server = EPG._m3u_server
             self.servers[server] = EPGserverChannels(server, channels, api)
 
     @staticmethod
@@ -126,7 +129,8 @@ class EPG:
             return name
         return None
 
-    def m3u_stream_started(self, server: Optional[str], stream_id: str) -> bool:
+    def m3u_stream_started(self, stream_id: str) -> bool:
+        server = EPG._m3u_server
         if programmes := self.ask_epg(server, stream_id, "15", APItype.M3U):
             name = self.ask_stream(server, stream_id)
             self.show_epg(ShowEpg(True, name, programmes))  # type: ignore # we know those are EPGprogrammeM3U
@@ -135,7 +139,6 @@ class EPG:
             return True
         return False
 
-    # def stop_m3u_stream(self, server: Optional[str], path: str) -> bool:
     def m3u_stream_stopped(self) -> None:
         if self.epg_shown:
             logger.info("Stop showing epg")

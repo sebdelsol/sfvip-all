@@ -1,3 +1,6 @@
+## 1.4.12.27
+* Fix [EPG for m3U accounts](https://github.com/sebdelsol/sfvip-all/issues/12).
+
 ## 1.4.12.26
 * Bump _Nuitka_ to 2.0.
 

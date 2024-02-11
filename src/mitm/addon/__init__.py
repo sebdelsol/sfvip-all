@@ -14,6 +14,7 @@ from ..utils import APItype, get_query_key, response_json
 from .all import AllCategoryName, AllPanels
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def fix_series_info(response: http.Response) -> None:
@@ -72,45 +73,60 @@ class ApiRequest:
 
 
 class M3UStream:
+    _disconnected_after = 0.5
+
     def __init__(self, epg: EPG) -> None:
-        self.current_urls = None
-        self.current_address = None
+        self.current_address: Optional[tuple[str | None, int | None]]
+        self.current_urls: tuple[str, ...]
+        self.current_started: float
+        self.reinit()
         self.epg = epg
+
+    def is_current(self, url: str) -> bool:
+        return bool(self.current_urls and url in self.current_urls)
+
+    def reinit(self) -> None:
+        self.current_urls = ()
+        self.current_address = None
+        self.current_started = 0
 
     def start(self, flow: http.HTTPFlow) -> bool:
         if flow.response:
-            server = flow.request.host_header
             url = flow.request.url
-            if self.epg.m3u_stream_started(server, url):
-                redirect = flow.response.headers.get(b"location")
-                if isinstance(redirect, str):
-                    self.current_urls = url, redirect
-                    try:
-                        result = urlparse(redirect)
-                        self.current_address = result.hostname, result.port
-                    except ValueError:
-                        self.current_address = None
-                else:
-                    self.current_urls = (url,)
-                    self.current_address = None
-                return True
+            # already started ?
+            if not self.is_current(url):
+                if self.epg.m3u_stream_started(url):
+                    self.current_started = flow.timestamp_start
+                    redirect = flow.response.headers.get(b"location")
+                    if isinstance(redirect, str):
+                        self.current_urls = url, redirect
+                        try:
+                            result = urlparse(redirect)
+                            self.current_address = result.hostname, result.port
+                        except ValueError:
+                            self.current_address = flow.server_conn.ip_address
+                    else:
+                        self.current_urls = (url,)
+                        self.current_address = flow.server_conn.ip_address
+                    return True
         return False
 
     def stop(self, flow: http.HTTPFlow) -> bool:
         url = flow.request.url
-        if self.current_urls and url in self.current_urls:
+        if self.is_current(url):
             self.epg.m3u_stream_stopped()
-            self.current_urls = None
-            self.current_address = None
+            self.reinit()
             return True
         return False
 
     def disconnect(self, data: ServerConnectionHookData) -> None:
         if self.current_address and (address := data.server.peername):
             if address == self.current_address:
-                self.epg.m3u_stream_stopped()
-                self.current_urls = None
-                self.current_address = None
+                # do not stop if disconnected right away
+                started = data.server.timestamp_start
+                if started and started - self.current_started > M3UStream._disconnected_after:
+                    self.epg.m3u_stream_stopped()
+                    self.reinit()
 
 
 class AddonCallbacks(NamedTuple):
@@ -159,7 +175,7 @@ class SfVipAddOn:
         return self.epg.wait_running(timeout)
 
     async def request(self, flow: http.HTTPFlow) -> None:
-        # print("REQUEST", flow.request.pretty_url)
+        logger.debug("REQUEST %s", flow.request.pretty_url)
         if api := self.api_request(flow):
             match api, get_query_key(flow, "action"):
                 case APItype.MAC, "get_ordered_list":
@@ -170,7 +186,7 @@ class SfVipAddOn:
                     self.panels.serve_all(flow, action)
 
     async def response(self, flow: http.HTTPFlow) -> None:
-        # print("RESPONSE", flow.request.pretty_url, flow.response and flow.response.status_code)
+        logger.debug("RESPONSE %s %s", flow.request.pretty_url, flow.response and flow.response.status_code)
         if not self.m3u_stream.start(flow):
             if flow.response and not flow.response.stream:
                 if api := self.api_request(flow):
@@ -195,7 +211,7 @@ class SfVipAddOn:
                             self.panels.inject_all(flow, action)
 
     async def error(self, flow: http.HTTPFlow):
-        # print("ERROR", flow.request.pretty_url)
+        logger.debug("ERROR %s", flow.request.pretty_url)
         if not self.m3u_stream.stop(flow):
             if api := self.api_request(flow):
                 match api, get_query_key(flow, "action"):
@@ -204,11 +220,11 @@ class SfVipAddOn:
 
     async def responseheaders(self, flow: http.HTTPFlow) -> None:
         """all reponses are streamed except the api requests"""
-        # print("STREAM", flow.request.pretty_url)
+        logger.debug("STREAM %s", flow.request.pretty_url)
         if not self.api_request(flow):
             if flow.response:
                 flow.response.stream = True
 
     async def server_disconnected(self, data: ServerConnectionHookData):
-        # print("DISCONNECT", data.server.peername)
+        logger.debug("DISCONNECT %s %s", data.server.peername, data.server.transport_protocol)
         self.m3u_stream.disconnect(data)

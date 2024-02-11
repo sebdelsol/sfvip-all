@@ -8,11 +8,11 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.26 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.26/x64/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.2952.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.27 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.27/x64/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.3585.0_</sup></sub>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.26 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.26/x86/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.2952.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.27 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.27/x86/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.3585.0_</sup></sub>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
@@ -22,14 +22,14 @@ Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove a
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
 
 # Build
-[![Python](https://img.shields.io/badge/Python-3.11.7-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3117/)
+[![Python](https://img.shields.io/badge/Python-3.11.8-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3118/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.2.2-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7725-000000.svg?logo=file-code&logoColor=a0a0a0)
+![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7747-000000.svg?logo=file-code&logoColor=a0a0a0)
 
-[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.1-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
+[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.2-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>**or**</sub></sup>
-[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-6.3.0-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
+[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-6.4.0-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
 <sup><sub>&ensp; **+** &ensp;</sub></sup>
 [![Nsis](https://img.shields.io/badge/Nsis-3.09-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
 
@@ -37,7 +37,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 Check the [***build config***](build_config.py).
 
 ### Create the _x64_ environments
-You need [***Python 3.11 x64***](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) and [***Rust***](https://www.rust-lang.org/fr).
+You need [***Python 3.11 x64***](https://www.python.org/ftp/python/3.11.8/python-3.11.8-amd64.exe) and [***Rust***](https://www.rust-lang.org/fr).
 ```console
 py -3.11-64 -m dev.create
 ```
@@ -69,7 +69,7 @@ You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-u
 <img src="resources/VS.png">
 
 ### Create the _x86_ environment
-You need [***Python 3.11 x86***](https://www.python.org/ftp/python/3.11.7/python-3.11.7.exe) and `i686-pc-windows-msvc` for rust.
+You need [***Python 3.11 x86***](https://www.python.org/ftp/python/3.11.8/python-3.11.8.exe) and `i686-pc-windows-msvc` for rust.
 ```console
 rustup target add i686-pc-windows-msvc
 py -3.11-32 -m dev.create
