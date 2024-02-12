@@ -8,11 +8,11 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.27 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.27/x64/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.3585.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.28 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.28/x64/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.3626.0_</sup></sub>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.27 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.27/x86/Install%20Sfvip%20All.exe)
-<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.3585.0_</sup></sub>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.28 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="30"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="30">](https://github.com/sebdelsol/sfvip-all/raw/master/build/1.4.12.28/x86/Install%20Sfvip%20All.exe)
+<sub><sup>_by Microsoft Defender • 1.1.23110.2 • 1.403.3626.0_</sup></sub>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  

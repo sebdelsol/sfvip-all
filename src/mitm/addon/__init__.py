@@ -14,7 +14,7 @@ from ..utils import APItype, get_query_key, response_json
 from .all import AllCategoryName, AllPanels
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 
 def fix_series_info(response: http.Response) -> None:
