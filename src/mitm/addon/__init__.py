@@ -225,6 +225,6 @@ class SfVipAddOn:
             if flow.response:
                 flow.response.stream = True
 
-    async def server_disconnected(self, data: ServerConnectionHookData):
+    async def server_disconnected(self, data: ServerConnectionHookData) -> None:
         logger.debug("DISCONNECT %s %s", data.server.peername, data.server.transport_protocol)
         self.m3u_stream.disconnect(data)
