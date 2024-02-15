@@ -1,3 +1,6 @@
+## 1.4.12.29
+* Fix all categories name for MAC accounts.
+
 ## 1.4.12.28
 * Fix too verbose _mitmproxy_ process logs.
 

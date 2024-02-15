@@ -61,10 +61,8 @@ def get_all_config(inject_in_live: bool) -> AddonAllConfig:
             today=LOC.UpdatedToday,
             one_day=LOC.Updated1DayAgo,
             several_days=LOC.UpdatedDaysAgo,
-            all_names={
-                "vod": f"{LOC.AllMovies} - {LOC.FastCached}",
-                "series": f"{LOC.AllSeries} - {LOC.FastCached}",
-            },
+            fast_cached=LOC.FastCached,
+            all_names={"vod": LOC.AllMovies, "series": LOC.AllSeries},
             all_updates={"vod": LOC.UpdateAllMovies, "series": LOC.UpdateAllSeries},
         ),
     )

@@ -49,11 +49,13 @@ class AllUpdated(NamedTuple):
     today: str
     one_day: str
     several_days: str
+    fast_cached: str
     all_names: dict[ValidMediaTypes, str] = {}
     all_updates: dict[ValidMediaTypes, str] = {}
 
-    def all_title(self, query: MACQuery) -> str:
-        return self.all_names.get(query.type, "")
+    def all_title(self, query: MACQuery, is_cached: bool) -> str:
+        all_name = self.all_names.get(query.type, "")
+        return f"{all_name} - {self.fast_cached}" if is_cached else all_name
 
     def _days_ago(self, path: Path) -> str:
         timestamp = path.stat().st_mtime
@@ -67,7 +69,7 @@ class AllUpdated(NamedTuple):
                 return self.several_days % days
 
     def update_all_title(self, query: MACQuery, path: Path) -> str:
-        return f"🔄 {self.all_updates.get(query.type)}\n{self._days_ago(path)}"
+        return f"🔄 {self.all_updates.get(query.type)}\n({self._days_ago(path)})"
 
 
 class CacheProgressEvent(Enum):
@@ -216,10 +218,12 @@ class MACCache:
             and isinstance(all_category, dict)
             and (all_category.get("id") == MACCache.update_all_category)
         ):
-            all_title = self.all_updated.all_title(query)
+            path = self.file_path(query)
+            is_cached = path and path.is_file()
+            all_title = self.all_updated.all_title(query, is_cached=is_cached)
             logger.info("Rename '%s' category for '%s'", all_title, query.server)
             all_category["title"] = all_title
-            if (path := self.file_path(query)) and path.is_file():
+            if is_cached:
                 all_category["id"] = MACCache.cached_all_category
                 update_all_category = dict(
                     alias=MACCache.update_all_category,

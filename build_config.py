@@ -20,7 +20,7 @@ class Build:
     main: ClassVar = "sfvip_all.py"
     company: ClassVar = "sebdelsol"
     name: ClassVar = "Sfvip All"
-    version: ClassVar = "1.4.12.28"
+    version: ClassVar = "1.4.12.29"
     dir: ClassVar = "build"
     enable_console: ClassVar = False
     logs_dir: ClassVar = "../logs"
