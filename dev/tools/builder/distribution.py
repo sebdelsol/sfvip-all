@@ -38,7 +38,7 @@ class Distribution(ABC):
         if self.do_run:
             print(Title(f"Build with {self.name}"), Ok(python_env.package_version(self.name)))
             build_dir = self.dist.build_dir(python_env) / self.name.lower()
-            build_dir.mkdir(exist_ok=True)
+            build_dir.mkdir(exist_ok=True, parents=True)
             built_dist = self.create(python_env.exe, build_dir)
             if built_dist is None:
                 return False
