@@ -35,12 +35,7 @@ class Release:
             print(Title("Update Release"), Ok(tag))
         except UnknownObjectException:
             try:
-                release = self.repo.create_git_release(
-                    tag=tag,
-                    name=tag,
-                    message="",
-                    target_commitish="master",
-                )
+                release = self.repo.create_git_release(tag=tag, name=tag, message="", target_commitish="master")
                 print(Title("Create release"), Ok(tag))
             except GithubException:
                 release = None
@@ -65,6 +60,7 @@ class ReleaseCreator:
             print(Warn(". Not clean"), Low(str(exe.name)))
             return InstallerRelease(bitness)
         if not release:
+            print(Warn(". No release for"), Low(str(exe.name)))
             return InstallerRelease(bitness)
         existing_assets = {Path(url := asset.browser_download_url).name: url for asset in release.get_assets()}
         if url := existing_assets.get(exe.name):

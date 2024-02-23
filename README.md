@@ -18,7 +18,7 @@ Check the [***changelog***](build/changelog.md) and ***notes***[^2].
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
 Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?label=Downloads%20since%20v1.4.12.30&logo=github)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all)
+[![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=blue&label=Downloads&logo=github)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all) <sup>for **v1.4.12.29** and above</sup>
 
 [^2]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
@@ -27,7 +27,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.8-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3118/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.2.2-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7787-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7783-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.3-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>**or**</sub></sup>
@@ -66,7 +66,7 @@ It's the _recommended option:_
 ```console
 python -m dev.build
 ```
-You need [**Visual Studio Community Edition**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig) installed:
+You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig):
 
 <img src="resources/VS.png">
 
