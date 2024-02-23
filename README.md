@@ -27,7 +27,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.8-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3118/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.2.2-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7792-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7787-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.3-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>**or**</sub></sup>

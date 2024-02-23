@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, NamedTuple, Optional
 
@@ -24,33 +23,29 @@ class InstallerRelease(NamedTuple):
 class Release:
     def __init__(self, dist: Dist, github: CfgGithub) -> None:
         self.dist = dist
-        self.github = github
-        self.auth = Auth.Token(GITHUB_TOKEN)
-
-    @contextmanager
-    def get(self, version: str) -> Iterator[Optional[GitRelease]]:
-        with Github(auth=self.auth) as git:
+        with Github(auth=Auth.Token(GITHUB_TOKEN)) as git:
             user = git.get_user()
-            assert user.login == self.github.owner
-            repo = user.get_repo(self.github.repo)
-            tag = f"{self.dist.build_name}.{version}"
+            assert user.login == github.owner
+            self.repo = user.get_repo(github.repo)
+
+    def get(self, version: str) -> Optional[GitRelease]:
+        tag = f"{self.dist.build_name}.{version}"
+        try:
+            release = self.repo.get_release(tag)
+            print(Title("Update Release"), Ok(tag))
+        except UnknownObjectException:
             try:
-                release = repo.get_release(tag)
-                print(Title("Update Release"), Ok(tag))
-            except UnknownObjectException:
-                try:
-                    tag = f"{self.dist.build_name}.{version}"
-                    release = repo.create_git_release(
-                        tag=tag,
-                        name=tag,
-                        message="",
-                        target_commitish="master",
-                    )
-                    print(Title("Create release"), Ok(tag))
-                except GithubException:
-                    print(Warn("Can't create release"), Ok(tag))
-                    release = None
-            yield release
+                release = self.repo.create_git_release(
+                    tag=tag,
+                    name=tag,
+                    message="",
+                    target_commitish="master",
+                )
+                print(Title("Create release"), Ok(tag))
+            except GithubException:
+                release = None
+                print(Warn("Can't create release"), Ok(tag))
+        return release
 
 
 class ReleaseCreator:
@@ -84,10 +79,10 @@ class ReleaseCreator:
             return InstallerRelease(bitness)
 
     def create_all(self, version: str) -> Iterator[InstallerRelease]:
-        with self.release.get(version) as release:
-            for python_env in self.all_python_envs:
-                yield self.add_installer(python_env, release)
+        release = self.release.get(version)
+        for python_env in self.all_python_envs:
+            yield self.add_installer(python_env, release)
 
     def create(self, python_env: PythonEnv, version: str) -> InstallerRelease:
-        with self.release.get(version) as release:
-            return self.add_installer(python_env, release)
+        release = self.release.get(version)
+        return self.add_installer(python_env, release)
