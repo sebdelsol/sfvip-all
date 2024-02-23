@@ -1,3 +1,6 @@
+## 1.4.12.30
+* Use Github releases for downloads and updates.
+
 ## 1.4.12.29
 * Fix all categories name for MAC accounts.
 

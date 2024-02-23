@@ -1,14 +1,13 @@
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Iterator, Optional
 from urllib.parse import quote
 
-from .env.envs import PythonEnv, PythonEnvs
+from .env.envs import PythonEnvs
 from .env.python import PythonVersion
 from .nsis import MakeNSIS
-from .scanner.file import ScanFile
+from .release import ReleaseCreator
 from .utils.color import Low, Ok, Title, Warn
-from .utils.dist import Dist
 from .utils.protocols import (
     CfgBuild,
     CfgEnvironments,
@@ -47,15 +46,12 @@ def _get_sloc(path: Path) -> int:
         return 0
 
 
-def _get_exe_args(dist: Dist, python_env: PythonEnv) -> dict[str, str]:
-    exe = dist.installer_exe(python_env)
-    scan_file = ScanFile(exe)
-    return {
-        f"exe_{python_env.bitness}_link": quote(str(exe.as_posix())),
-        f"exe_{python_env.bitness}_engine": scan_file.engine,
-        f"exe_{python_env.bitness}_signature": scan_file.signature,
-        f"exe_{python_env.bitness}_clean": "clean-brightgreen" if scan_file.clean else "failed-red",
-    }
+def _get_exe_args(build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> Iterator[tuple[str, str]]:
+    for installer in ReleaseCreator(build, environments, github).create_all(build.version):
+        yield f"exe_{installer.bitness}_release", installer.url
+        yield f"exe_{installer.bitness}_engine", installer.scan.engine
+        yield f"exe_{installer.bitness}_signature", installer.scan.signature
+        yield f"exe_{installer.bitness}_clean", "clean-brightgreen" if installer.scan.clean else "failed-red"
 
 
 class Templater:
@@ -68,10 +64,8 @@ class Templater:
         pyinstaller_version = _version_of(python_envs, "PyInstaller")
         mitmproxy_version = _version_of(python_envs, "mitmproxy")
         if python_version and nuitka_version and pyinstaller_version and mitmproxy_version:
-            dist = Dist(build)
             self.template_format = dict(
-                **_get_exe_args(dist, python_envs.x64),
-                **_get_exe_args(dist, python_envs.x86),
+                dict(arg for arg in _get_exe_args(build, environments, github)),
                 py_major_version=str(PythonVersion(python_version).major),
                 py_version_compact=python_version.replace(".", ""),
                 github_path=f"{github.owner}/{github.repo}",
@@ -85,6 +79,8 @@ class Templater:
                 nuitka_version=nuitka_version,
                 py_version=python_version,
                 ico_link=quote(build.ico),
+                github_owner=github.owner,
+                github_repo=github.repo,
                 version=build.version,
                 name=build.name,
             )

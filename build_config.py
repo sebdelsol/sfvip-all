@@ -20,7 +20,7 @@ class Build:
     main: ClassVar = "sfvip_all.py"
     company: ClassVar = "sebdelsol"
     name: ClassVar = "Sfvip All"
-    version: ClassVar = "1.4.12.29"
+    version: ClassVar = "1.4.12.30"
     dir: ClassVar = "build"
     enable_console: ClassVar = False
     logs_dir: ClassVar = "../logs"
@@ -56,7 +56,7 @@ class Readme:
 
 class Post:
     src: ClassVar = "resources/post_template.txt"
-    dst: ClassVar = f"{Build.dir}/{Build.version}/post.txt"
+    dst: ClassVar = f"{Build.dir}/temp/post.{Build.version}.txt"
 
 
 class Templates:

@@ -4,11 +4,11 @@ import subprocess
 import sys
 from functools import cached_property
 from pathlib import Path
-from typing import Literal, Optional, Sequence
+from typing import Optional, Sequence
 
 import pkg_resources
 
-from shared import get_bitness_str
+from shared import BitnessT, get_bitness_str
 from shared.version import Version
 
 from ..monitor.command import CommandMonitor
@@ -42,7 +42,7 @@ class PythonEnv:
         return self._env_path / "scripts" / "python.exe"
 
     @cached_property
-    def bitness(self) -> Literal["x64", "x86"]:
+    def bitness(self) -> BitnessT:
         return get_bitness_str(self.is_64)
 
     @cached_property

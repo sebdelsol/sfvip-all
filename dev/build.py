@@ -4,7 +4,6 @@ from build_config import Github, Translations
 from translations.loc import LOC
 
 from .tools.builder import Builder
-from .tools.cleaner import clean_old_build
 from .tools.publisher import Publisher
 from .tools.templater import Templater
 from .tools.utils.protocols import CfgBuild, CfgEnvironments, CfgTemplate, CfgTemplates
@@ -22,7 +21,6 @@ def do_build(
         Templater(build, environments, Github).create_all(templates)
         if publisher:
             publisher.show_versions()
-        clean_old_build(build, environments, Github, readme)
     else:
         Templater(build, environments, Github).create(readme)
 

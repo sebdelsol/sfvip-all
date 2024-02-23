@@ -2,14 +2,14 @@ import json
 import tempfile
 from enum import StrEnum
 from pathlib import Path
-from typing import Iterator, Literal, NamedTuple, Optional, Self, Sequence
-from urllib.parse import quote
+from typing import Iterator, NamedTuple, Optional, Self, Sequence
 
 import requests
 
-from shared.update import AppLatestUpdate, AppUpdate
+from shared.update import AppLatestUpdate, AppUpdate, BitnessT
 
 from .env.envs import EnvArgs, PythonEnv, PythonEnvs
+from .release import ReleaseCreator
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import Dist, repr_size
 from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub
@@ -24,18 +24,14 @@ class Args(EnvArgs):
 class AppLatestUpdateLocal(AppLatestUpdate):
     encoding = "utf-8"
 
-    def from_exe(self, exe: Path, version: str) -> Optional[AppUpdate]:
-        url = f"{self._github_dir}/{quote(str(exe.as_posix()))}"
-        return AppUpdate.from_exe(url, exe, version)
-
-    def local_load(self, bitness: Literal["x64", "x86"]) -> Optional[AppUpdate]:
+    def local_load(self, bitness: BitnessT) -> Optional[AppUpdate]:
         update_json = self._file(bitness)
         if update_json.exists():
             with update_json.open(mode="r", encoding=AppLatestUpdateLocal.encoding) as f:
                 return AppUpdate.from_dict(json.load(f))
         return None
 
-    def local_save(self, update: AppUpdate, bitness: Literal["x64", "x86"]) -> None:
+    def local_save(self, update: AppUpdate, bitness: BitnessT) -> None:
         update_json = self._file(bitness)
         with update_json.open(mode="w", encoding=AppLatestUpdateLocal.encoding) as f:
             json.dump(update._asdict(), f, indent=2)
@@ -85,6 +81,7 @@ class Publisher:
     def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
         self.build = build
         self.dist = Dist(build)
+        self.release = ReleaseCreator(build, environments, github)
         self.app_latest_update = AppLatestUpdateLocal(build, github)
         self.all_python_envs = PythonEnvs(environments).all
         self.environments = environments
@@ -92,11 +89,13 @@ class Publisher:
     def publish(self, python_env: PythonEnv) -> None:
         exe = self.dist.installer_exe(python_env)
         exe_str = str(exe.as_posix())
-        if update := self.app_latest_update.from_exe(exe, self.build.version):
-            self.app_latest_update.local_save(update, python_env.bitness)
-            print(Title("Publish update"), Ok(exe_str), Low(update.md5))
-        else:
-            print(Warn("Publish update failed"), Ok(exe_str))
+        version = self.build.version
+        if url := self.release.create(python_env, version).url:
+            if update := AppUpdate.from_exe(url, exe, version):
+                self.app_latest_update.local_save(update, python_env.bitness)
+                print(Title("Publish update"), Ok(exe_str), Low(update.md5))
+                return
+        print(Warn("Publish update failed"), Ok(exe_str))
 
     def publish_all(self) -> bool:
         args = Args().parse_args()

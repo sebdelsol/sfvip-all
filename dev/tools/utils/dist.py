@@ -28,13 +28,13 @@ class Dist:
     def dist_dir_name(self) -> str:
         return f"{Path(self.build.main).stem}.dist"
 
+    @property
+    def build_name(self) -> str:
+        return self.build.name.replace(" ", ".")
+
     def dist_dir(self, python_env: PythonEnv) -> Path:
         return self.build_dir(python_env) / self.dist_dir_name
 
     def installer_exe(self, python_env: PythonEnv, version: Optional[str] = None) -> Path:
-        return (
-            Path(self.build.dir)
-            / (version or self.build.version)
-            / python_env.bitness
-            / f"Install {self.build.name}.exe"
-        )
+        version = version or self.build.version
+        return self.build_dir(python_env) / f"Install.{self.build_name}.{version}.{python_env.bitness}.exe"

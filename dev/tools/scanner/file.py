@@ -4,8 +4,8 @@ from src.config_loader import ConfigLoader
 
 
 class ScanFile(ConfigLoader):
-    engine: str = ""
-    signature: str = ""
+    engine: str = "unknown"
+    signature: str = "unknown"
     clean: bool = False
 
     def __init__(self, file: Path) -> None:

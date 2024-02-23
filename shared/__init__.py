@@ -1,10 +1,12 @@
 import logging
 import platform
 import sys
-from typing import Literal, Self
+from typing import Self
+
+from .update import BitnessT
 
 
-def get_bitness_str(is_64: bool) -> Literal["x64", "x86"]:
+def get_bitness_str(is_64: bool) -> BitnessT:
     return "x64" if is_64 else "x86"
 
 

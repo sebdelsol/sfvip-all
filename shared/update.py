@@ -4,6 +4,8 @@ from typing import Any, Literal, NamedTuple, Optional, Protocol, Self
 
 import requests
 
+BitnessT = Literal["x64", "x86"]
+
 
 class BuildDir(Protocol):
     dir: str
@@ -52,13 +54,13 @@ class AppLatestUpdate:
         self._build_dir = build.dir
         self._github_dir = f"https://github.com/{github.owner}/{github.repo}/raw/master"
 
-    def _file(self, bitness: Literal["x64", "x86"]) -> Path:
+    def _file(self, bitness: BitnessT) -> Path:
         return Path(f"{self._build_dir}/update_{bitness}.json")
 
-    def _url(self, bitness: Literal["x64", "x86"]) -> str:
+    def _url(self, bitness: BitnessT) -> str:
         return f"{self._github_dir}/{self._file(bitness).as_posix()}"
 
-    def online_load(self, bitness: Literal["x64", "x86"], timeout: int) -> Optional[AppUpdate]:
+    def online_load(self, bitness: BitnessT, timeout: int) -> Optional[AppUpdate]:
         try:
             url = self._url(bitness)
             with requests.get(url, timeout=timeout) as response:

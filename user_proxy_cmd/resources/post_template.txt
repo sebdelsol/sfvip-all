@@ -3,6 +3,6 @@
 [SIZE=10px][I]Dodajte ili uklonite globalni korisnički proksi za sve korisnike / Add or remove a global user proxy for all users[/I][/SIZE]
 [ICODE]SfvipUserProxy http://127.0.0.1:8888[/ICODE][SIZE=10px] or [/SIZE][ICODE]SfvipUserProxy --remove[/ICODE]
 [HR][/HR]
-[URL='https://github.com/{github_path}/raw/master/{exe_x64_link}'][B]x64[/B][/URL] - [URL='https://github.com/{github_path}/raw/master/{exe_x86_link}'][B]x86[/B][/URL] - [URL='https://github.com/{github_path}/tree/master/user_proxy_cmd'][B]Github[/B][/URL]  
+[URL='{exe_x64_release}'][B]x64[/B][/URL] - [URL='{exe_x86_release}'][B]x86[/B][/URL] - [URL='https://github.com/{github_path}/tree/master/user_proxy_cmd'][B]Github[/B][/URL]  
 [HR][/HR]
 [SIZE=10px][I]Dodajte ⭐ ako vam odgovara / Add a ⭐ if you like it[/I][/SIZE]

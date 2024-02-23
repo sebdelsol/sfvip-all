@@ -27,7 +27,7 @@ class Readme:
 
 class Post:
     src: ClassVar = "user_proxy_cmd/resources/post_template.txt"
-    dst: ClassVar = f"{Build.dir}/{Build.version}/post.txt"
+    dst: ClassVar = f"{Build.dir}/temp/post.{Build.version}.txt"
 
 
 class Templates:

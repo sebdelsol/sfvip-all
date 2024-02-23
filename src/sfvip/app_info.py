@@ -2,10 +2,10 @@ import os
 import platform
 import sys
 from pathlib import Path
-from typing import Literal, NamedTuple, Protocol, Self, Sequence
+from typing import NamedTuple, Protocol, Self, Sequence
 
 from sfvip_all_config import AppDefaultConfig
-from shared import get_bitness_str
+from shared import BitnessT, get_bitness_str
 from shared.update import AppLatestUpdate, Github
 
 
@@ -44,8 +44,8 @@ class AppInfo(NamedTuple):
     logs_dir: Path
     current_dir: Path
     app_latest_update: AppLatestUpdate
-    bitness: Literal["x64", "x86"] = get_bitness_str(APP_64BIT)
-    os_bitness: Literal["x64", "x86"] = get_bitness_str(OS_64BIT)
+    bitness: BitnessT = get_bitness_str(APP_64BIT)
+    os_bitness: BitnessT = get_bitness_str(OS_64BIT)
 
     @classmethod
     def from_build(cls, build: Build, github: Github, app_dir: Path = Path()) -> Self:
