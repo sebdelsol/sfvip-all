@@ -39,4 +39,4 @@ class Environments(MasterEnvironments):
 
 
 if __name__ == "__main__":
-    do_build(Build, Environments, Templates, Readme)
+    do_build(Build, Environments, Templates)

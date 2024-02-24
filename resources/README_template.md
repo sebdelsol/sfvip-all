@@ -38,11 +38,21 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
 
-### Create the _x64_ environments
-You need [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) and [***Rust***](https://www.rust-lang.org/fr).
+### Create the environments
+You need [***Rust***](https://www.rust-lang.org/fr), [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) and [***x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe).
 ```console
+rustup target add i686-pc-windows-msvc
 py -{py_major_version}-64 -m dev.create
+py -{py_major_version}-32 -m dev.create
 ```
+Get a [***Github token***](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#personal-access-tokens-classic) and a [***DeepL API key***](https://www.deepl.com/en/docs-api/).  
+Store those in `api_keys.py`:
+```python3
+# api_keys.py
+GITHUB_TOKEN=your_github_token
+DEEPL_KEY=your_deepl_api_key
+```
+
 ### Activate the _x64_ environment
 ```console
 {env_x64}\scripts\activate
@@ -70,12 +80,6 @@ You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/downlo
 
 <img src="resources/VS.png">
 
-### Create the _x86_ environment
-You need [***Python {py_major_version} x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe) and `i686-pc-windows-msvc` for rust.
-```console
-rustup target add i686-pc-windows-msvc
-py -{py_major_version}-32 -m dev.create
-```
 ### Build a specific version
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]
@@ -85,13 +89,7 @@ It checks for _Nsis_, _Python minor update_ and all _packages dependencies_:
 ```console
 python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean] [--force]
 ```
-### Publish a release
-Get a [***Github token***](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#personal-access-tokens-classic) and set `GITHUB_TOKEN` in `api_keys.py`
-```python3
-# api_keys.py
-GITHUB_TOKEN=your_github_token
-```
-Publish a release:
+### Publish an update
 ```console
 python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```
@@ -100,14 +98,7 @@ It updates _Microsoft Defender_ engine and signatures before scanning:
 ```console
 python -m dev.scan [--x86 | --x64 | --both]
 ```
-
-### Translations
-Get a [***DeepL API key***](https://www.deepl.com/en/docs-api/) and set `DEEPL_KEY` in `api_keys.py`:
-```python3
-# api_keys.py
-DEEPL_KEY=your_deepl_api_key
-```
-Translate the [**UI**](translations/loc/texts.py):
+### [**UI**](translations/loc/texts.py) Translations
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```

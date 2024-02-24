@@ -1,7 +1,13 @@
 from pathlib import Path
 from typing import Iterator, NamedTuple, Optional
 
-from github import Auth, Github, GithubException, UnknownObjectException
+from github import (
+    Auth,
+    BadCredentialsException,
+    Github,
+    GithubException,
+    UnknownObjectException,
+)
 from github.GitRelease import GitRelease
 
 from api_keys import GITHUB_TOKEN
@@ -23,23 +29,32 @@ class InstallerRelease(NamedTuple):
 class Release:
     def __init__(self, dist: Dist, github: CfgGithub) -> None:
         self.dist = dist
-        with Github(auth=Auth.Token(GITHUB_TOKEN)) as git:
-            user = git.get_user()
-            assert user.login == github.owner
-            self.repo = user.get_repo(github.repo)
+        try:
+            with Github(auth=Auth.Token(GITHUB_TOKEN)) as git:
+                user = git.get_user()
+                assert user.login == github.owner
+                self.repo = user.get_repo(github.repo)
+        except BadCredentialsException:
+            self.repo = None
+            print(Warn("Can't access github"), Ok(f"{github.owner}/{github.repo}"))
 
     def get(self, version: str) -> Optional[GitRelease]:
-        tag = f"{self.dist.build_name}.{version}"
-        try:
-            release = self.repo.get_release(tag)
-            print(Title("Update Release"), Ok(tag))
-        except UnknownObjectException:
+        if self.repo:
+            tag = f"{self.dist.build_name}.{version}"
             try:
-                release = self.repo.create_git_release(tag=tag, name=tag, message="", target_commitish="master")
-                print(Title("Create release"), Ok(tag))
-            except GithubException:
-                release = None
-                print(Warn("Can't create release"), Ok(tag))
+                release = self.repo.get_release(tag)
+                print(Title("Update Release"), Ok(tag))
+            except UnknownObjectException:
+                try:
+                    release = self.repo.create_git_release(
+                        tag=tag, name=tag, message="", target_commitish="master"
+                    )
+                    print(Title("Create release"), Ok(tag))
+                except GithubException:
+                    release = None
+                    print(Warn("Can't create release"), Ok(tag))
+        else:
+            release = None
         return release
 
 

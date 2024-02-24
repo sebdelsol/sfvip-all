@@ -78,10 +78,16 @@ class Published(NamedTuple):
 class Publisher:
     timeout = 10
 
-    def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
+    def __init__(
+        self,
+        build: CfgBuild,
+        environments: CfgEnvironments,
+        github: CfgGithub,
+        release: Optional[ReleaseCreator] = None,
+    ) -> None:
         self.build = build
         self.dist = Dist(build)
-        self.release = ReleaseCreator(build, environments, github)
+        self.release = release or ReleaseCreator(build, environments, github)
         self.app_latest_update = AppLatestUpdateLocal(build, github)
         self.all_python_envs = PythonEnvs(environments).all
         self.environments = environments

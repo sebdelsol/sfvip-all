@@ -9,10 +9,10 @@
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.30 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.30/Install.Sfvip.All.1.4.12.30.x64.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.474.0_</sup></sup>
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.524.0_</sup></sup>
 
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.30 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.30/Install.Sfvip.All.1.4.12.30.x86.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.474.0_</sup></sup>
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.524.0_</sup></sup>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
@@ -27,7 +27,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [![Python](https://img.shields.io/badge/Python-3.11.8-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3118/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.2.2-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7783-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7813-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.3-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>**or**</sub></sup>
@@ -38,11 +38,21 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).
 
-### Create the _x64_ environments
-You need [***Python 3.11 x64***](https://www.python.org/ftp/python/3.11.8/python-3.11.8-amd64.exe) and [***Rust***](https://www.rust-lang.org/fr).
+### Create the environments
+You need [***Rust***](https://www.rust-lang.org/fr), [***Python 3.11 x64***](https://www.python.org/ftp/python/3.11.8/python-3.11.8-amd64.exe) and [***x86***](https://www.python.org/ftp/python/3.11.8/python-3.11.8.exe).
 ```console
+rustup target add i686-pc-windows-msvc
 py -3.11-64 -m dev.create
+py -3.11-32 -m dev.create
 ```
+Get a [***Github token***](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#personal-access-tokens-classic) and a [***DeepL API key***](https://www.deepl.com/en/docs-api/).  
+Store those in `api_keys.py`:
+```python3
+# api_keys.py
+GITHUB_TOKEN=your_github_token
+DEEPL_KEY=your_deepl_api_key
+```
+
 ### Activate the _x64_ environment
 ```console
 .sfvip64\scripts\activate
@@ -70,12 +80,6 @@ You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/downlo
 
 <img src="resources/VS.png">
 
-### Create the _x86_ environment
-You need [***Python 3.11 x86***](https://www.python.org/ftp/python/3.11.8/python-3.11.8.exe) and `i686-pc-windows-msvc` for rust.
-```console
-rustup target add i686-pc-windows-msvc
-py -3.11-32 -m dev.create
-```
 ### Build a specific version
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]
@@ -85,13 +89,7 @@ It checks for _Nsis_, _Python minor update_ and all _packages dependencies_:
 ```console
 python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean] [--force]
 ```
-### Publish a release
-Get a [***Github token***](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#personal-access-tokens-classic) and set `GITHUB_TOKEN` in `api_keys.py`
-```python3
-# api_keys.py
-GITHUB_TOKEN=your_github_token
-```
-Publish a release:
+### Publish an update
 ```console
 python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```
@@ -100,14 +98,7 @@ It updates _Microsoft Defender_ engine and signatures before scanning:
 ```console
 python -m dev.scan [--x86 | --x64 | --both]
 ```
-
-### Translations
-Get a [***DeepL API key***](https://www.deepl.com/en/docs-api/) and set `DEEPL_KEY` in `api_keys.py`:
-```python3
-# api_keys.py
-DEEPL_KEY=your_deepl_api_key
-```
-Translate the [**UI**](translations/loc/texts.py):
+### [**UI**](translations/loc/texts.py) Translations
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```

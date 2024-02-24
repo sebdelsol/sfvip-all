@@ -46,8 +46,8 @@ def _get_sloc(path: Path) -> int:
         return 0
 
 
-def _get_exe_args(build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> Iterator[tuple[str, str]]:
-    for installer in ReleaseCreator(build, environments, github).create_all(build.version):
+def _get_exe_args(release: ReleaseCreator, build: CfgBuild) -> Iterator[tuple[str, str]]:
+    for installer in release.create_all(build.version):
         yield f"exe_{installer.bitness}_release", installer.url
         yield f"exe_{installer.bitness}_engine", installer.scan.engine
         yield f"exe_{installer.bitness}_signature", installer.scan.signature
@@ -57,7 +57,14 @@ def _get_exe_args(build: CfgBuild, environments: CfgEnvironments, github: CfgGit
 class Templater:
     encoding = "utf-8"
 
-    def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
+    def __init__(
+        self,
+        build: CfgBuild,
+        environments: CfgEnvironments,
+        github: CfgGithub,
+        release: Optional[ReleaseCreator] = None,
+    ) -> None:
+        release = release or ReleaseCreator(build, environments, github)
         python_envs = PythonEnvs(environments)
         python_version = _version_of(python_envs, "Python")
         nuitka_version = _version_of(python_envs, "Nuitka")
@@ -65,7 +72,7 @@ class Templater:
         mitmproxy_version = _version_of(python_envs, "mitmproxy")
         if python_version and nuitka_version and pyinstaller_version and mitmproxy_version:
             self.template_format = dict(
-                dict(arg for arg in _get_exe_args(build, environments, github)),
+                dict(arg for arg in _get_exe_args(release, build)),
                 py_major_version=str(PythonVersion(python_version).major),
                 py_version_compact=python_version.replace(".", ""),
                 github_path=f"{github.owner}/{github.repo}",
@@ -100,3 +107,7 @@ class Templater:
     def create_all(self, templates: CfgTemplates) -> None:
         for template in templates.all:
             self.create(template)
+
+
+def get_template_by_name(templates: CfgTemplates, name: str) -> Optional[CfgTemplate]:
+    return {template.__name__: template for template in templates.all}.get(name)
