@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from ..env.envs import EnvArgs, PythonEnvs
+from ..publisher import Publisher
 from ..utils.color import Low, Ok, Title, Warn
 from ..utils.dist import Dist
 from ..utils.protocols import CfgBuild, CfgEnvironments
@@ -23,10 +24,11 @@ class VirusScanner(Defender):
             return scan.is_clean
         return False
 
-    def scan_all(self, build: CfgBuild, environments: CfgEnvironments) -> None:
+    def scan_all(self, build: CfgBuild, environments: CfgEnvironments, publisher: Publisher) -> None:
         self.update()
         args = EnvArgs().parse_args()
         dist = Dist(build)
         for python_env in PythonEnvs(environments, args).asked:
             self.scan(dist.dist_dir(python_env))
-            self.scan(dist.installer_exe(python_env))
+            if published := publisher.get_local_version(python_env):
+                self.scan(published.exe)

@@ -30,7 +30,7 @@ class LogProcess:
     def __enter__(self) -> Self:
         self.logger.info("%s process started", self.name)
         bitness = get_bitness_str(platform.machine().endswith("64"))
-        self.logger.info("Run Python %s %s", platform.python_version(), bitness)
+        self.logger.info("Run Python %s %s on %s", platform.python_version(), bitness, platform.platform())
         if is_py_installer():
             self.logger.info("Build by PyInstaller")
         elif is_nuitka():

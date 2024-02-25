@@ -1,8 +1,18 @@
-from build_config import Build, Environments, Github
+from build_config import Github
 
 from .tools.publisher import Publisher
+from .tools.templater import Templater
+from .tools.utils.protocols import CfgBuild, CfgEnvironments, CfgTemplates
 
-if __name__ == "__main__":
-    publisher = Publisher(Build, Environments, Github)
+
+def do_publish(build: CfgBuild, environments: CfgEnvironments, templates: CfgTemplates) -> None:
+    publisher = Publisher(build, environments, Github)
     publisher.publish_all()
     publisher.show_versions()
+    Templater(build, environments, Github, publisher).create_all(templates)
+
+
+if __name__ == "__main__":
+    import build_config
+
+    do_publish(build_config.Build, build_config.Environments, build_config.Templates)

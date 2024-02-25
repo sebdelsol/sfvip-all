@@ -1,12 +1,13 @@
 import subprocess
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Optional
 from urllib.parse import quote
 
 from .env.envs import PythonEnvs
 from .env.python import PythonVersion
 from .nsis import MakeNSIS
-from .release import ReleaseCreator
+from .publisher import Publisher
+from .scanner.file import ScanFile
 from .utils.color import Low, Ok, Title, Warn
 from .utils.protocols import (
     CfgBuild,
@@ -46,12 +47,22 @@ def _get_sloc(path: Path) -> int:
         return 0
 
 
-def _get_exe_args(release: ReleaseCreator, build: CfgBuild) -> Iterator[tuple[str, str]]:
-    for installer in release.create_all(build.version):
-        yield f"exe_{installer.bitness}_release", installer.url
-        yield f"exe_{installer.bitness}_engine", installer.scan.engine
-        yield f"exe_{installer.bitness}_signature", installer.scan.signature
-        yield f"exe_{installer.bitness}_clean", "clean-brightgreen" if installer.scan.clean else "failed-red"
+def _get_exe_kwargs(python_envs: PythonEnvs, publisher: Publisher) -> dict[str, str]:
+    kwargs = {}
+    local_versions = {local_version.bitness: local_version for local_version in publisher.get_local_versions()}
+    for python_env in python_envs.all:
+        bitness = python_env.bitness
+        local_version = local_versions.get(bitness)
+        scan = ScanFile(local_version.exe) if local_version else ScanFile
+        print(Ok(f". {local_version.version}.{bitness}") if local_version else Warn(f". No {bitness} version"))
+        kwargs |= {
+            f"version_{bitness}": local_version.version if local_version else "0",
+            f"exe_{bitness}_release": local_version.url if local_version else "",
+            f"exe_{bitness}_engine": scan.engine,
+            f"exe_{bitness}_signature": scan.signature,
+            f"exe_{bitness}_clean": "clean-brightgreen" if scan.clean else "failed-red",
+        }
+    return kwargs
 
 
 class Templater:
@@ -62,17 +73,17 @@ class Templater:
         build: CfgBuild,
         environments: CfgEnvironments,
         github: CfgGithub,
-        release: Optional[ReleaseCreator] = None,
+        publisher: Publisher,
     ) -> None:
-        release = release or ReleaseCreator(build, environments, github)
         python_envs = PythonEnvs(environments)
         python_version = _version_of(python_envs, "Python")
         nuitka_version = _version_of(python_envs, "Nuitka")
         pyinstaller_version = _version_of(python_envs, "PyInstaller")
         mitmproxy_version = _version_of(python_envs, "mitmproxy")
         if python_version and nuitka_version and pyinstaller_version and mitmproxy_version:
+            print(Title("Build template for"), Ok(build.name))
             self.template_format = dict(
-                dict(arg for arg in _get_exe_args(release, build)),
+                **_get_exe_kwargs(python_envs, publisher),
                 py_major_version=str(PythonVersion(python_version).major),
                 py_version_compact=python_version.replace(".", ""),
                 github_path=f"{github.owner}/{github.repo}",
@@ -88,13 +99,12 @@ class Templater:
                 ico_link=quote(build.ico),
                 github_owner=github.owner,
                 github_repo=github.repo,
-                version=build.version,
                 name=build.name,
             )
         else:
             self.template_format = None
 
-    def create(self, template: CfgTemplate) -> None:
+    def _create(self, template: CfgTemplate) -> None:
         src, dst = Path(template.src), Path(template.dst)
         if self.template_format:
             print(Title("Create"), Ok(dst.as_posix()), Low(f"from {src.as_posix()}"))
@@ -106,8 +116,8 @@ class Templater:
 
     def create_all(self, templates: CfgTemplates) -> None:
         for template in templates.all:
-            self.create(template)
+            self._create(template)
 
-
-def get_template_by_name(templates: CfgTemplates, name: str) -> Optional[CfgTemplate]:
-    return {template.__name__: template for template in templates.all}.get(name)
+    def create(self, templates: CfgTemplates, name: str) -> None:
+        if template := {template.__name__: template for template in templates.all}.get(name):
+            self._create(template)

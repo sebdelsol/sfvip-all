@@ -8,11 +8,11 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.30 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.30/Install.Sfvip.All.1.4.12.30.x64.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.524.0_</sup></sup>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.31 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.31/Install.Sfvip.All.1.4.12.31.x64.exe)
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.590.0_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.30 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.30/Install.Sfvip.All.1.4.12.30.x86.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.524.0_</sup></sup>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.31 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.31/Install.Sfvip.All.1.4.12.31.x86.exe)
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.590.0_</sup></sup>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
@@ -23,13 +23,19 @@ Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove a
 [^2]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
 
+# Logs
+The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
+The logs are to be found in the app folder:
+
+<img src="resources/logs.png"  width="400">  
+
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.8-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3118/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.2.2-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7813-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7810-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 
-[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.3-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
+[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.4-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>**or**</sub></sup>
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-6.4.0-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
 
@@ -39,7 +45,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 Check the [***build config***](build_config.py).
 
 ### Create the environments
-You need [***Rust***](https://www.rust-lang.org/fr), [***Python 3.11 x64***](https://www.python.org/ftp/python/3.11.8/python-3.11.8-amd64.exe) and [***x86***](https://www.python.org/ftp/python/3.11.8/python-3.11.8.exe).
+You need [***Rust***](https://www.rust-lang.org/fr), [***Python 3.11 x64***](https://www.python.org/ftp/python/3.11.8/python-3.11.8-amd64.exe) & [***x86***](https://www.python.org/ftp/python/3.11.8/python-3.11.8.exe):
 ```console
 rustup target add i686-pc-windows-msvc
 py -3.11-64 -m dev.create
@@ -84,21 +90,21 @@ You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/downlo
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]
 ```
+### Publish a release
+```console
+python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
+```
 ### Upgrade dependencies
 It checks for _Nsis_, _Python minor update_ and all _packages dependencies_:
 ```console
 python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean] [--force]
-```
-### Publish an update
-```console
-python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```
 ### Scan for virus
 It updates _Microsoft Defender_ engine and signatures before scanning:
 ```console
 python -m dev.scan [--x86 | --x64 | --both]
 ```
-### [**UI**](translations/loc/texts.py) Translations
+### Translate the [**UI**](translations/loc/texts.py)
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```

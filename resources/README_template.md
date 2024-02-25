@@ -8,10 +8,10 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version} x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x64_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x64} x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x64_release})
 <sup><sup>_by MS Defender • {exe_x64_engine} • {exe_x64_signature}_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version} x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x86_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x86} x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x86_release})
 <sup><sup>_by MS Defender • {exe_x86_engine} • {exe_x86_signature}_</sup></sup>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
@@ -22,6 +22,12 @@ Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove a
 
 [^2]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
+
+# Logs
+The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
+The logs are to be found in the app folder:
+
+<img src="resources/logs.png"  width="400">  
 
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
@@ -39,7 +45,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 Check the [***build config***](build_config.py).
 
 ### Create the environments
-You need [***Rust***](https://www.rust-lang.org/fr), [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) and [***x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe).
+You need [***Rust***](https://www.rust-lang.org/fr), [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) & [***x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe):
 ```console
 rustup target add i686-pc-windows-msvc
 py -{py_major_version}-64 -m dev.create
@@ -84,21 +90,21 @@ You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/downlo
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]
 ```
+### Publish a release
+```console
+python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
+```
 ### Upgrade dependencies
 It checks for _Nsis_, _Python minor update_ and all _packages dependencies_:
 ```console
 python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean] [--force]
-```
-### Publish an update
-```console
-python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```
 ### Scan for virus
 It updates _Microsoft Defender_ engine and signatures before scanning:
 ```console
 python -m dev.scan [--x86 | --x64 | --both]
 ```
-### [**UI**](translations/loc/texts.py) Translations
+### Translate the [**UI**](translations/loc/texts.py)
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```

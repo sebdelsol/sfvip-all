@@ -1,4 +1,4 @@
-[B][SIZE=20px]{name}[/B][/SIZE] {version}
+[B][SIZE=20px]{name}[/B][/SIZE] {version_x64}
 [HR][/HR]
 [SIZE=10px][I]Dodajte ili uklonite globalni korisnički proksi za sve korisnike / Add or remove a global user proxy for all users[/I][/SIZE]
 [ICODE]SfvipUserProxy http://127.0.0.1:8888[/ICODE][SIZE=10px] or [/SIZE][ICODE]SfvipUserProxy --remove[/ICODE]

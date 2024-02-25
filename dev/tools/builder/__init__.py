@@ -38,9 +38,7 @@ class Args(EnvArgs):
 
 
 class Builder:
-    def __init__(
-        self, build: CfgBuild, environments: CfgEnvironments, loc: CfgLOC, publisher: Optional[Publisher] = None
-    ) -> None:
+    def __init__(self, build: CfgBuild, environments: CfgEnvironments, loc: CfgLOC, publisher: Publisher) -> None:
         self.build = build
         self.dist = Dist(build)
         self.publisher = publisher
@@ -62,8 +60,8 @@ class Builder:
                 Upgrader(python_env).upgrade(eager=True)
             if self.builder.run(python_env):
                 if built := self.nsis.run(python_env):
-                    if self.publisher and self.args.publish:
-                        self.publisher.publish(python_env)
+                    if self.args.publish:
+                        self.publisher.publish(python_env, self.build.version)
                 return built
         print(Warn("Build failed"), Ok(name))
         return None

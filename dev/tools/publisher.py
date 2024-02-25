@@ -59,7 +59,8 @@ class Published(NamedTuple):
     url: str
     md5: str
     version: str
-    bitness: str
+    bitness: BitnessT
+    exe: Path
     valid: str
     size: str
 
@@ -70,53 +71,55 @@ class Published(NamedTuple):
             url=update.url,
             md5=update.md5,
             version=update.version,
+            exe=exe,
             valid=Valid.check_exe(exe, update),
             size=repr_size(exe),
         )
+
+    def __eq__(self, other: Self) -> bool:
+        fields = self._fields  # pylint: disable=no-member
+        return all(getattr(self, field) == getattr(other, field) for field in fields if field != "exe")
 
 
 class Publisher:
     timeout = 10
 
-    def __init__(
-        self,
-        build: CfgBuild,
-        environments: CfgEnvironments,
-        github: CfgGithub,
-        release: Optional[ReleaseCreator] = None,
-    ) -> None:
+    def __init__(self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub) -> None:
         self.build = build
         self.dist = Dist(build)
-        self.release = release or ReleaseCreator(build, environments, github)
+        self.release = ReleaseCreator(build, environments, github)
         self.app_latest_update = AppLatestUpdateLocal(build, github)
         self.all_python_envs = PythonEnvs(environments).all
         self.environments = environments
 
-    def publish(self, python_env: PythonEnv) -> None:
-        exe = self.dist.installer_exe(python_env)
+    def publish(self, python_env: PythonEnv, version: str) -> None:
+        exe = self.dist.installer_exe(python_env, version)
         exe_str = str(exe.as_posix())
         version = self.build.version
-        if url := self.release.create(python_env, version).url:
+        if url := self.release.create(python_env, version):
             if update := AppUpdate.from_exe(url, exe, version):
                 self.app_latest_update.local_save(update, python_env.bitness)
                 print(Title("Publish update"), Ok(exe_str), Low(update.md5))
                 return
         print(Warn("Publish update failed"), Ok(exe_str))
 
-    def publish_all(self) -> bool:
+    def publish_all(self) -> None:
         args = Args().parse_args()
         if not args.info:
-            if args.version:
-                self.build.version = args.version
+            version = args.version if args.version else self.build.version
             for python_env in PythonEnvs(self.environments, args).asked:
-                self.publish(python_env)
-        return not args.info
+                self.publish(python_env, version)
+
+    def get_local_version(self, python_env: PythonEnv) -> Optional[Published]:
+        if update := self.app_latest_update.local_load(python_env.bitness):
+            exe = self.dist.installer_exe(python_env, update.version)
+            return Published.from_update(update, exe, python_env)
+        return None
 
     def get_local_versions(self) -> Iterator[Published]:
         for python_env in self.all_python_envs:
-            if update := self.app_latest_update.local_load(python_env.bitness):
-                exe = self.dist.installer_exe(python_env, update.version)
-                yield Published.from_update(update, exe, python_env)
+            if published := self.get_local_version(python_env):
+                yield published
 
     def get_online_versions(self) -> Iterator[Published]:
         for python_env in self.all_python_envs:

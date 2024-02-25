@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterator, NamedTuple, Optional
+from typing import Optional
 
 from github import (
     Auth,
@@ -11,19 +11,11 @@ from github import (
 from github.GitRelease import GitRelease
 
 from api_keys import GITHUB_TOKEN
-from shared import BitnessT
 
 from .env.envs import PythonEnv, PythonEnvs
-from .scanner.file import ScanFile
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import Dist, repr_size
 from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub
-
-
-class InstallerRelease(NamedTuple):
-    bitness: BitnessT
-    scan: ScanFile | type[ScanFile] = ScanFile
-    url: str = ""
 
 
 class Release:
@@ -39,22 +31,19 @@ class Release:
             print(Warn("Can't access github"), Ok(f"{github.owner}/{github.repo}"))
 
     def get(self, version: str) -> Optional[GitRelease]:
-        if self.repo:
-            tag = f"{self.dist.build_name}.{version}"
+        if not self.repo:
+            return None
+        tag = f"{self.dist.build_name}.{version}"
+        try:
+            release = self.repo.get_release(tag)
+            print(Title("Update Release"), Ok(tag))
+        except UnknownObjectException:
             try:
-                release = self.repo.get_release(tag)
-                print(Title("Update Release"), Ok(tag))
-            except UnknownObjectException:
-                try:
-                    release = self.repo.create_git_release(
-                        tag=tag, name=tag, message="", target_commitish="master"
-                    )
-                    print(Title("Create release"), Ok(tag))
-                except GithubException:
-                    release = None
-                    print(Warn("Can't create release"), Ok(tag))
-        else:
-            release = None
+                release = self.repo.create_git_release(tag=tag, name=tag, message="", target_commitish="master")
+                print(Title("Create release"), Ok(tag))
+            except GithubException:
+                release = None
+                print(Warn("Can't create release"), Ok(tag))
         return release
 
 
@@ -64,36 +53,26 @@ class ReleaseCreator:
         self.release = Release(self.dist, github)
         self.all_python_envs = PythonEnvs(environments).all
 
-    def add_installer(self, python_env: PythonEnv, release: Optional[GitRelease]) -> InstallerRelease:
-        exe = self.dist.installer_exe(python_env)
-        bitness = python_env.bitness
+    def add_installer(self, python_env: PythonEnv, release: Optional[GitRelease], version: str) -> Optional[str]:
+        exe = self.dist.installer_exe(python_env, version)
         if not exe.is_file():
             print(Warn(". Missing"), Low(str(exe.name)))
-            return InstallerRelease(bitness)
-        scan_file = ScanFile(exe)
-        if not scan_file.clean:
-            print(Warn(". Not clean"), Low(str(exe.name)))
-            return InstallerRelease(bitness)
+            return None
         if not release:
             print(Warn(". No release for"), Low(str(exe.name)))
-            return InstallerRelease(bitness)
+            return None
         existing_assets = {Path(url := asset.browser_download_url).name: url for asset in release.get_assets()}
         if url := existing_assets.get(exe.name):
             print(Warn(". Already exists"), Low(str(exe.name)))
-            return InstallerRelease(bitness, scan_file, url)
+            return url
         try:
             asset = release.upload_asset(path=str(exe.resolve()), name=exe.name)
             print(Title(". Add"), Ok(str(exe.name)), Low(repr_size(exe)))
-            return InstallerRelease(bitness, scan_file, asset.browser_download_url)
+            return asset.browser_download_url
         except GithubException:
             print(Warn(". Can't upload"), Low(str(exe.name)))
-            return InstallerRelease(bitness)
+            return None
 
-    def create_all(self, version: str) -> Iterator[InstallerRelease]:
+    def create(self, python_env: PythonEnv, version: str) -> Optional[str]:
         release = self.release.get(version)
-        for python_env in self.all_python_envs:
-            yield self.add_installer(python_env, release)
-
-    def create(self, python_env: PythonEnv, version: str) -> InstallerRelease:
-        release = self.release.get(version)
-        return self.add_installer(python_env, release)
+        return self.add_installer(python_env, release, version)

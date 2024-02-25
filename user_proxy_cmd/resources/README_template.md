@@ -9,10 +9,10 @@ _Remove it:_
 ```
 
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version} x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x64_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x64} x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x64_release})
 <sup><sup>_by MS Defender • {exe_x64_engine} • {exe_x64_signature}_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version} x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x86_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x86} x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x86_release})
 <sup><sup>_by MS Defender • {exe_x86_engine} • {exe_x86_signature}_</sup></sup>
 
 # Build
@@ -27,5 +27,5 @@ _Remove it:_
 [![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
 
 ```console
-python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme]
+python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--publish]
 ```
