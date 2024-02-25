@@ -18,7 +18,7 @@ Check the [***changelog***](build/changelog.md) and ***notes***[^2].
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
 Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[![download](https://img.shields.io/github/downloads/{github_path}/total?color=blue&label=Downloads&logo=github)](https://tooomm.github.io/github-release-stats/?username={github_owner}&repository={github_repo}) <sup>for **v1.4.12.29** and above</sup>
+[![download](https://img.shields.io/github/downloads/{github_path}/total?color=blue&label=Downloads&logo=github)](https://tooomm.github.io/github-release-stats/?username={github_owner}&repository={github_repo}) <sup><sub>for _{name} v1.4.12.29_ and above</sub></sup>
 
 [^2]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  

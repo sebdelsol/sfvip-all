@@ -47,14 +47,18 @@ def _get_sloc(path: Path) -> int:
         return 0
 
 
-def _get_exe_kwargs(python_envs: PythonEnvs, publisher: Publisher) -> dict[str, str]:
+def _get_exe_kwargs(name: str, python_envs: PythonEnvs, publisher: Publisher) -> dict[str, str]:
     kwargs = {}
     local_versions = {local_version.bitness: local_version for local_version in publisher.get_local_versions()}
     for python_env in python_envs.all:
         bitness = python_env.bitness
         local_version = local_versions.get(bitness)
         scan = ScanFile(local_version.exe) if local_version else ScanFile
-        print(Ok(f". {local_version.version}.{bitness}") if local_version else Warn(f". No {bitness} version"))
+        print(
+            Ok(f". {name} {local_version.version} {bitness}")
+            if local_version
+            else Warn(f". No {name} {bitness} version")
+        )
         kwargs |= {
             f"version_{bitness}": local_version.version if local_version else "0",
             f"exe_{bitness}_release": local_version.url if local_version else "",
@@ -81,9 +85,9 @@ class Templater:
         pyinstaller_version = _version_of(python_envs, "PyInstaller")
         mitmproxy_version = _version_of(python_envs, "mitmproxy")
         if python_version and nuitka_version and pyinstaller_version and mitmproxy_version:
-            print(Title("Build template for"), Ok(build.name))
+            print(Title("Build"), Ok("template for"))
             self.template_format = dict(
-                **_get_exe_kwargs(python_envs, publisher),
+                **_get_exe_kwargs(build.name, python_envs, publisher),
                 py_major_version=str(PythonVersion(python_version).major),
                 py_version_compact=python_version.replace(".", ""),
                 github_path=f"{github.owner}/{github.repo}",

@@ -9,16 +9,16 @@
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.31 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.31/Install.Sfvip.All.1.4.12.31.x64.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.590.0_</sup></sup>
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.592.0_</sup></sup>
 
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.31 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.31/Install.Sfvip.All.1.4.12.31.x86.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.590.0_</sup></sup>
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.592.0_</sup></sup>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
 Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=blue&label=Downloads&logo=github)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all) <sup>for **v1.4.12.29** and above</sup>
+[![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=blue&label=Downloads&logo=github)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all) <sup><sub>for _Sfvip All v1.4.12.29_ and above</sub></sup>
 
 [^2]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
@@ -33,7 +33,7 @@ The logs are to be found in the app folder:
 [![Python](https://img.shields.io/badge/Python-3.11.8-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3118/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-10.2.2-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7810-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-7822-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.4-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>**or**</sub></sup>

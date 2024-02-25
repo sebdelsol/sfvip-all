@@ -10,17 +10,17 @@ SfvipUserProxy --remove
 
 # Download
 [<img src="https://custom-icon-badges.demolab.com/badge/SfvipUserProxy v0.4 x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/SfvipUserProxy.0.4/Install.SfvipUserProxy.0.4.x64.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.575.0_</sup></sup>
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.592.0_</sup></sup>
 
 [<img src="https://custom-icon-badges.demolab.com/badge/SfvipUserProxy v0.4 x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">](https://github.com/sebdelsol/sfvip-all/releases/download/SfvipUserProxy.0.4/Install.SfvipUserProxy.0.4.x86.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.575.0_</sup></sup>
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.592.0_</sup></sup>
 
 # Build
 [![Python](https://img.shields.io/badge/Python-3.11.8-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-3118/)
 [![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-173-000000.svg?logo=file-code&logoColor=a0a0a0)
+![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-203-000000.svg?logo=file-code&logoColor=a0a0a0)
 
-[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.3-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
+[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-2.0.4-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
 <sup><sub>**or**</sub></sup>
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-6.4.0-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
 
@@ -28,4 +28,13 @@ SfvipUserProxy --remove
 
 ```console
 python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--publish]
+```
+### Publish a release
+```console
+python -m user_proxy_cmd.dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
+```
+### Scan for virus
+It updates _Microsoft Defender_ engine and signatures before scanning:
+```console
+python -m user_proxy_cmd.dev.scan [--x86 | --x64 | --both]
 ```
