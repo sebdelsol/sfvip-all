@@ -17,7 +17,7 @@ class VirusScanner(Defender):
 
     def scan(self, file: Path) -> bool:
         if file.exists():
-            print(Title("Scan virus"), Ok(str(file.as_posix())), end=" ", flush=True)
+            print(Title("Virus scan"), Ok(str(file.as_posix())), end=" ", flush=True)
             scan = self._scan(file)
             print(Low("•"), scan)
             ScanFile(file).set(self.engine, self.signature, scan.is_clean)

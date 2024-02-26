@@ -1,24 +1,24 @@
-# <img src="{ico_link}" width="40" align="center"> {name}
+# <kbd><img src="{ico_link}" width="40" align="center"></kbd> {name}
 ***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 * Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
 * Support an **external EPG**[^1].
 
-<img src="resources/all.png">
+<kbd><img src="resources/all.png"></kbd>
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x64} x64-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x64_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x64}-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white" height="{h_download}"><img src="https://img.shields.io/badge/x64-informational.svg?logo=Windows10&logoColor=lightblue" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white" height="{h_download}">]({exe_x64_release})
 <sup><sup>_by MS Defender • {exe_x64_engine} • {exe_x64_signature}_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x86} x86-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="29"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="29">]({exe_x86_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x86}-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white" height="{h_download}"><img src="https://img.shields.io/badge/x86-informational.svg?logo=Windows10&logoColor=lightblue" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white" height="{h_download}">]({exe_x86_release})
 <sup><sup>_by MS Defender • {exe_x86_engine} • {exe_x86_signature}_</sup></sup>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
 Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
-[![download](https://img.shields.io/github/downloads/{github_path}/total?color=blue&label=Downloads&logo=github)](https://tooomm.github.io/github-release-stats/?username={github_owner}&repository={github_repo}) <sup><sub>for _{name} v1.4.12.29_ and above</sub></sup>
+[![download](https://img.shields.io/github/downloads/{github_path}/total?color=blue&label=Downloads&logo=github)](https://tooomm.github.io/github-release-stats/?username={github_owner}&repository={github_repo}) <sup><sub>for _{name} v1.4.12.30_ and above</sub></sup>
 
 [^2]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
@@ -27,7 +27,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
 The logs are to be found in the app folder:
 
-<img src="resources/logs.png"  width="400">  
+<kbd><img src="resources/logs.png"  width="400"></kbd>  
 
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
@@ -84,7 +84,7 @@ python -m dev.build
 ```
 You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig):
 
-<img src="resources/VS.png">
+<kbd><img src="resources/VS.png"></kbd>
 
 ### Build a specific version
 ```console
@@ -99,7 +99,7 @@ It checks for _Nsis_, _Python minor update_ and all _packages dependencies_:
 ```console
 python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean] [--force]
 ```
-### Scan for virus
+### Virus scan
 It updates _Microsoft Defender_ engine and signatures before scanning:
 ```console
 python -m dev.scan [--x86 | --x64 | --both]

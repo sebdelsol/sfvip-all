@@ -32,6 +32,8 @@
   "AlreadyRunning": "%s se está ejecutando. Por favor, ciérrelo para continuar.",
   "PlayerTooOld": "%s es demasiado antiguo. Se necesita la versión %s o superior.",
   "UpgradeFailed": "La actualización de %s ha fallado. ¿Desea reintentarlo?",
+  "LoadCache": "Cargando caché",
+  "SaveCache": "Guardando caché",
   "Loading": "Cargando",
   "Processing": "Procesando",
   "Ready": "Listo",

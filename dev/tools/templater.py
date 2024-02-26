@@ -71,6 +71,7 @@ def _get_exe_kwargs(name: str, python_envs: PythonEnvs, publisher: Publisher) ->
 
 class Templater:
     encoding = "utf-8"
+    h_download = 28
 
     def __init__(
         self,
@@ -82,9 +83,9 @@ class Templater:
         python_envs = PythonEnvs(environments)
         python_version = _version_of(python_envs, "Python")
         nuitka_version = _version_of(python_envs, "Nuitka")
-        pyinstaller_version = _version_of(python_envs, "PyInstaller")
         mitmproxy_version = _version_of(python_envs, "mitmproxy")
-        if python_version and nuitka_version and pyinstaller_version and mitmproxy_version:
+        pyinstaller_version = _version_of(python_envs, "PyInstaller")
+        if python_version and nuitka_version and mitmproxy_version and pyinstaller_version:
             print(Title("Build"), Ok("template for"))
             self.template_format = dict(
                 **_get_exe_kwargs(build.name, python_envs, publisher),
@@ -96,6 +97,7 @@ class Templater:
                 nsis_version=MakeNSIS().get_version(),
                 mitmproxy_version=mitmproxy_version,
                 script_main=Path(build.main).stem,
+                h_download=Templater.h_download,
                 env_x64=environments.X64.path,
                 env_x86=environments.X86.path,
                 nuitka_version=nuitka_version,

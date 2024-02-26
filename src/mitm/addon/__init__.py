@@ -9,7 +9,7 @@ from mitmproxy import http
 from mitmproxy.proxy.server_hooks import ServerConnectionHookData
 
 from ..cache import AllUpdated, MACCache, UpdateCacheProgressT
-from ..epg import EPG, ShowChannelT, ShowEpgT, UpdateStatusT
+from ..epg import EPG, EpgCallbacks
 from ..utils import APItype, get_query_key, response_json
 from .all import AllCategoryName, AllPanels
 
@@ -129,13 +129,6 @@ class M3UStream:
                     self.reinit()
 
 
-class AddonCallbacks(NamedTuple):
-    update_status: UpdateStatusT
-    show_channel: ShowChannelT
-    show_epg: ShowEpgT
-    update_progress: UpdateCacheProgressT
-
-
 class AddonAllConfig(NamedTuple):
     all_name: AllCategoryName
     all_updated: AllUpdated
@@ -150,12 +143,13 @@ class SfVipAddOn:
         accounts_urls: set[str],
         all_config: AddonAllConfig,
         roaming: Path,
-        callbacks: AddonCallbacks,
+        epg_callbacks: EpgCallbacks,
+        update_progress: UpdateCacheProgressT,
         timeout: int,
     ) -> None:
         self.api_request = ApiRequest(accounts_urls)
-        self.mac_cache = MACCache(roaming, callbacks.update_progress, all_config.all_updated)
-        self.epg = EPG(callbacks.update_status, callbacks.show_channel, callbacks.show_epg, timeout)
+        self.mac_cache = MACCache(roaming, update_progress, all_config.all_updated)
+        self.epg = EPG(roaming, epg_callbacks, timeout)
         self.m3u_stream = M3UStream(self.epg)
         self.panels = AllPanels(all_config.all_name)
 

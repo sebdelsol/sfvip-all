@@ -5,7 +5,7 @@ from urllib.parse import urlparse, urlsplit, urlunsplit
 
 from translations.loc import LOC
 
-from ..mitm.addon import AddonAllConfig, AddonCallbacks, AllCategoryName, SfVipAddOn
+from ..mitm.addon import AddonAllConfig, AllCategoryName, EpgCallbacks, SfVipAddOn
 from ..mitm.cache import AllUpdated
 from ..mitm.proxies import MitmLocalProxy, Mode, validate_upstream
 from ..winapi import mutex
@@ -82,12 +82,12 @@ class LocalProxies:
             accounts_proxies.urls,
             get_all_config(inject_in_live),
             app_info.roaming,
-            AddonCallbacks(
+            EpgCallbacks(
                 self._epg_updater.update_status,
                 self._epg_updater.add_show_channel,
                 self._epg_updater.add_show_epg,
-                self._cache_progress.update_progress,
             ),
+            self._cache_progress.update_progress,
             app_info.config.EPG.requests_timeout,
         )
         self._upstreams = accounts_proxies.upstreams

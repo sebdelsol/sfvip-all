@@ -32,6 +32,8 @@
   "AlreadyRunning": "%s is running. Please close it to continue.",
   "PlayerTooOld": "%s is too old. Version %s or above is needed.",
   "UpgradeFailed": "%s upgrade failed. Do you want to retry ?",
+  "LoadCache": "Loading cache",
+  "SaveCache": "Saving cache",
   "Loading": "Loading",
   "Processing": "Processing",
   "Ready": "Ready",
