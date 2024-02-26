@@ -41,6 +41,8 @@ class Texts:
     AlreadyRunning: str = "%s is running. Please close it to continue."
     PlayerTooOld: str = "%s is too old. Version %s or above is needed."
     UpgradeFailed: str = "%s upgrade failed. Do you want to retry ?"
+    LoadCache: str = "Loading cache"
+    SaveCache: str = "Saving cache"
     Loading: str = "Loading"
     Processing: str = "Processing"
     Ready: str = "Ready"

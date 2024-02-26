@@ -4,7 +4,7 @@ import logging
 import multiprocessing
 import re
 import tempfile
-from enum import Enum, auto
+from contextlib import contextmanager
 from pathlib import Path
 from typing import IO, Callable, Iterator, NamedTuple, Optional, Self
 from urllib.parse import urlparse
@@ -16,27 +16,17 @@ from thefuzz import fuzz, process
 from shared.job_runner import JobRunner
 
 from ..utils import ProgressStep
+from .cache import (
+    ChannelsCache,
+    ChannelsT,
+    EPGProcess,
+    EPGProgress,
+    EPGstatus,
+    UpdateStatusT,
+)
 from .programme import InternalProgramme
 
 logger = logging.getLogger(__name__)
-
-
-class EPGstatus(Enum):
-    LOADING = auto()
-    PROCESSING = auto()
-    READY = auto()
-    FAILED = auto()
-    NO_EPG = auto()
-    INVALID_URL = auto()
-
-
-class EPGProgress(NamedTuple):
-    status: EPGstatus
-    progress: Optional[float] = None
-
-
-UpdateStatusT = Callable[[EPGProgress], None]
-StoppingT = Callable[[], bool]
 
 
 def _normalize(name: str) -> str:
@@ -104,47 +94,35 @@ class FoundProgammes(NamedTuple):
     confidence: int
 
 
-ChannelsT = dict[str, list[InternalProgramme]]
-
-
 class EPGupdate(NamedTuple):
     _chunk_size = 1024 * 128
     url: str
     status: EPGstatus
     channels: ChannelsT = {}
 
-    @classmethod
-    def _get(
-        cls, url: str, update_status: UpdateStatusT, stopping: StoppingT, timeout: int
-    ) -> Optional[ChannelsT]:
-        try:
-            if Path(url).is_file():  # for debug purpose
-                return cls._process(Path(url), url, update_status, stopping)
-
-            update_status(EPGProgress(EPGstatus.LOADING))
-            with tempfile.TemporaryDirectory() as temp_dir:
-                with requests.get(url, stream=True, timeout=timeout) as response:
-                    response.raise_for_status()
-                    xml = Path(temp_dir) / "xml"
-                    with xml.open(mode="wb") as f:
-                        total_size = int(response.headers.get("Content-Length", 0))
-                        progress_step = ProgressStep(total=total_size) if total_size else None
-                        for i, chunk in enumerate(response.iter_content(chunk_size=EPGupdate._chunk_size)):
-                            if stopping():
-                                return None
-                            if progress_step and (progress := progress_step.progress(i * EPGupdate._chunk_size)):
-                                update_status(EPGProgress(EPGstatus.LOADING, progress))
-                            f.write(chunk)
-                return cls._process(xml, url, update_status, stopping)
-        except (requests.RequestException, gzip.BadGzipFile, ET.ParseError, EOFError, BufferError) as error:
-            logger.error("%s: %s", error.__class__.__name__, error)
-        return None
+    @contextmanager
+    @staticmethod
+    def _load_xml(url: str, epg_process: EPGProcess, timeout: int) -> Iterator[Optional[Path]]:
+        epg_process.update_status(EPGProgress(EPGstatus.LOADING))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with requests.get(url, stream=True, timeout=timeout) as response:
+                response.raise_for_status()
+                xml = Path(temp_dir) / "xml"
+                with xml.open(mode="wb") as f:
+                    total_size = int(response.headers.get("Content-Length", 0))
+                    progress_step = ProgressStep(total=total_size) if total_size else None
+                    for i, chunk in enumerate(response.iter_content(chunk_size=EPGupdate._chunk_size)):
+                        if epg_process.stopping():
+                            yield None
+                            return
+                        if progress_step and (progress := progress_step.progress(i * EPGupdate._chunk_size)):
+                            epg_process.update_status(EPGProgress(EPGstatus.LOADING, progress))
+                        f.write(chunk)
+                yield xml
 
     @classmethod
-    def _process(
-        cls, xml: Path, url: str, update_status: UpdateStatusT, stopping: StoppingT
-    ) -> Optional[ChannelsT]:
-        update_status(EPGProgress(EPGstatus.PROCESSING))
+    def _process(cls, xml: Path, url: str, epg_process: EPGProcess) -> Optional[ChannelsT]:
+        epg_process.update_status(EPGProgress(EPGstatus.PROCESSING))
         with gzip.GzipFile(xml) if url.endswith(".gz") else xml.open("rb") as f:
             channels: ChannelsT = {}
             display_names: dict[str, str] = {}
@@ -158,34 +136,55 @@ class EPGupdate(NamedTuple):
             def handle_programme(channel_id: str, programme: InternalProgramme) -> None:
                 if channel_id not in normalized:
                     normalized[channel_id] = _normalize(channel_id)
-                if (channel := normalized[channel_id]) not in channels:
+                channel = normalized[channel_id]
+                if channel not in channels:
                     channels[channel] = []
                     if display_name := display_names.get(channel_id):
                         if display_name not in channels:
                             channels[_normalize(display_name)] = channels[channel]
                     if progress := progress_step.increment_progress(1):
-                        update_status(EPGProgress(EPGstatus.PROCESSING, progress))
+                        epg_process.update_status(EPGProgress(EPGstatus.PROCESSING, progress))
                 channels[channel].append(programme)
 
             for _ in parse_programme(f, handle_channel, handle_programme):
-                if stopping():
+                if epg_process.stopping():
                     return None
             logger.info("%s Epg channels found from '%s'", progress_step.total, url)
             return channels
 
     @classmethod
-    def from_url(cls, url: str, update_status: UpdateStatusT, stopping: StoppingT, timeout: int) -> Optional[Self]:
+    def _get(cls, url: str, cache: ChannelsCache, epg_process: EPGProcess, timeout: int) -> Optional[ChannelsT]:
+        try:
+            if Path(url).is_file():  # for debug purpose
+                return cls._process(Path(url), url, epg_process)
+            with cls._load_xml(url, epg_process, timeout) as xml:
+                if not xml:
+                    return None
+                epg_process.update_status(EPGProgress(EPGstatus.LOAD_CACHE))
+                if channels := cache.load(xml, url):
+                    logger.info("Epg channels from '%s' found in cache", url)
+                    return channels
+                if channels := cls._process(xml, url, epg_process):
+                    epg_process.update_status(EPGProgress(EPGstatus.SAVE_CACHE))
+                    cache.save(xml, url, channels)
+                    return channels
+        except (requests.RequestException, gzip.BadGzipFile, ET.ParseError, EOFError, BufferError) as error:
+            logger.error("%s: %s", error.__class__.__name__, error)
+        return None
+
+    @classmethod
+    def from_url(cls, url: str, cache: ChannelsCache, epg_process: EPGProcess, timeout: int) -> Optional[Self]:
         if url:
             if _valid_url(url) or Path(url).is_file():
                 logger.info("Load epg channels from '%s'", url)
-                if (channels := cls._get(url, update_status, stopping, timeout)) is not None:
-                    update_status(EPGProgress(EPGstatus.READY))
+                if (channels := cls._get(url, cache, epg_process, timeout)) is not None:
+                    epg_process.update_status(EPGProgress(EPGstatus.READY))
                     return cls(url, EPGstatus.READY, channels)
-                update_status(EPGProgress(EPGstatus.FAILED))
+                epg_process.update_status(EPGProgress(EPGstatus.FAILED))
                 return cls(url, EPGstatus.FAILED)
-            update_status(EPGProgress(EPGstatus.INVALID_URL))
+            epg_process.update_status(EPGProgress(EPGstatus.INVALID_URL))
             return cls(url, EPGstatus.INVALID_URL)
-        update_status(EPGProgress(EPGstatus.NO_EPG))
+        epg_process.update_status(EPGProgress(EPGstatus.NO_EPG))
         return cls(url, EPGstatus.NO_EPG)
 
     def get_programmes(self, epg_id: str, confidence: int) -> Optional[FoundProgammes]:
@@ -211,10 +210,11 @@ class EPGupdate(NamedTuple):
 
 
 class EPGupdater(JobRunner[str]):
-    def __init__(self, update_status: UpdateStatusT, timeout: int) -> None:
+    def __init__(self, roaming: Path, update_status: UpdateStatusT, timeout: int) -> None:
+        self.epg_process = EPGProcess(update_status, self.stopping)
+        self._cache = ChannelsCache(roaming, self.epg_process)
         self._update_lock = multiprocessing.Lock()
         self._update: Optional[EPGupdate] = None
-        self._update_status = update_status
         self._timeout = timeout
         super().__init__(self._updating, "Epg updater", check_new=False)
 
@@ -223,7 +223,7 @@ class EPGupdater(JobRunner[str]):
             current_update = self._update
         # update only if url is different or last update failed
         if not current_update or current_update.url != url or current_update.status == EPGstatus.FAILED:
-            if update := EPGupdate.from_url(url, self._update_status, self.stopping, self._timeout):
+            if update := EPGupdate.from_url(url, self._cache, self.epg_process, self._timeout):
                 with self._update_lock:
                     self._update = update
 

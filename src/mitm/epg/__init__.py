@@ -1,6 +1,7 @@
 import logging
 import multiprocessing
 import time
+from pathlib import Path
 from typing import Any, Callable, Iterator, NamedTuple, Optional
 
 from shared.job_runner import JobRunner
@@ -31,6 +32,12 @@ class ShowEpg(NamedTuple):
 ShowEpgT = Callable[[ShowEpg], None]
 
 
+class EpgCallbacks(NamedTuple):
+    update_status: UpdateStatusT
+    show_channel: ShowChannelT
+    show_epg: ShowEpgT
+
+
 class ConfidenceUpdater(JobRunner[int]):
     def __init__(self) -> None:
         self._confidence_lock = multiprocessing.Lock()
@@ -52,15 +59,13 @@ class EPG:
     _m3u_server = "m3u.server"
 
     # all following methods should be called from the same process EXCEPT add_job & wait_running
-    def __init__(
-        self, update_status: UpdateStatusT, show_channel: ShowChannelT, show_epg: ShowEpgT, timeout: int
-    ) -> None:
+    def __init__(self, roaming: Path, callbacks: EpgCallbacks, timeout: int) -> None:
         self.servers: dict[str, EPGserverChannels] = {}
-        self.updater = EPGupdater(update_status, timeout)
+        self.updater = EPGupdater(roaming, callbacks.update_status, timeout)
         self.confidence_updater = ConfidenceUpdater()
-        self.show_channel = show_channel
+        self.show_channel = callbacks.show_channel
         self.channel_shown = False
-        self.show_epg = show_epg
+        self.show_epg = callbacks.show_epg
         self.epg_shown = False
 
     def ask_update(self, url: str) -> None:

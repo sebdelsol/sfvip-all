@@ -1,3 +1,6 @@
+## 1.4.12.32
+* EPG programmes are cached for faster access.
+
 ## 1.4.12.31
 * Platform added in the logs.
 * Bump _Nuitka_ to 2.0.4.

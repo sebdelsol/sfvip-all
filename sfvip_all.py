@@ -26,7 +26,7 @@ if __name__ == "__main__":
     from src.sfvip import AppInfo, run_app
 
     # for debug purpose only
-    if len(sys.argv) > 1 and sys.argv[1] == "fakev0":
+    if "fakev0" in sys.argv[1:]:
         Build.version = "0"
 
     app_dir = Path(__file__).parent

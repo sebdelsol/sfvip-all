@@ -149,7 +149,7 @@ class MACCache:
         self.all_updated = all_updated
         self.cache_dir = roaming / "cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        logger.info("Cache is in '%s'", self.cache_dir)
+        logger.info("Mac cache is in '%s'", self.cache_dir)
         self.clean()
 
     def clean(self):

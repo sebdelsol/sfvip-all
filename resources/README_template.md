@@ -4,7 +4,7 @@
 * Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
 * Support an **external EPG**[^1].
 
-<img src="resources/all.png">
+<kbd><img src="resources/all.png"></kbd>
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
@@ -27,7 +27,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
 The logs are to be found in the app folder:
 
-<img src="resources/logs.png"  width="400">  
+<kbd><img src="resources/logs.png"  width="400"></kbd>  
 
 # Build
 [![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
@@ -84,7 +84,7 @@ python -m dev.build
 ```
 You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig):
 
-<img src="resources/VS.png">
+<kbd><img src="resources/VS.png"></kbd>
 
 ### Build a specific version
 ```console

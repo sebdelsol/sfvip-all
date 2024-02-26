@@ -32,6 +32,8 @@
   "AlreadyRunning": "%s çalışıyor. Devam etmek için lütfen kapatın.",
   "PlayerTooOld": "%s çok eski. Sürüm %s veya üzeri gereklidir.",
   "UpgradeFailed": "%s yükseltmesi başarısız oldu. Yeniden denemek ister misiniz?",
+  "LoadCache": "Önbellek yükleniyor",
+  "SaveCache": "Önbelleği kaydetme",
   "Loading": "Yükleniyor",
   "Processing": "İşleme",
   "Ready": "Hazır",

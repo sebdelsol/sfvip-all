@@ -1,8 +1,9 @@
-import hashlib
 from pathlib import Path
 from typing import Any, Literal, NamedTuple, Optional, Protocol, Self
 
 import requests
+
+from .md5 import compute_md5
 
 BitnessT = Literal["x64", "x86"]
 
@@ -14,14 +15,6 @@ class BuildDir(Protocol):
 class Github(Protocol):
     owner: str
     repo: str
-
-
-def compute_md5(exe: Path, chunk_size: int = 2**20) -> str:
-    hash_md5 = hashlib.md5()
-    with exe.open("rb") as f:
-        for chunk in iter(lambda: f.read(chunk_size), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
 
 
 class AppUpdate(NamedTuple):
