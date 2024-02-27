@@ -1,5 +1,11 @@
+## 1.4.12.33
+* Info window stays longer.
+* Bump _Nuitka_ to 2.0.5.
+* Fix & Clean EPG cache.
+* Fix tooltip.
+
 ## 1.4.12.32
-* EPG programmes are cached for faster access.
+* EPG is cached for faster access.
 
 ## 1.4.12.31
 * Platform added in the logs.

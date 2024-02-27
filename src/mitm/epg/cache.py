@@ -73,40 +73,56 @@ class ChannelsCache(CacheCleaner):
     def save(self, xml: Path, url: str, channels: ChannelsT) -> None:
         with self.open(url, "wb") as f:
             if f:
-                self.pickle_dump(f, xml, channels)
+                if not self.pickle_dump(f, xml, channels):
+                    f.truncate(0)  # clear
 
-    def pickle_dump(self, f: IO[bytes], xml: Path, channels: ChannelsT) -> None:
+    def pickle_dump(self, f: IO[bytes], xml: Path, channels: ChannelsT) -> bool:
         try:
             self.epg_process.update_status(EPGProgress(EPGstatus.SAVE_CACHE))
-            if n_chunks := math.ceil(len(channels) / ChannelsCache.chunk_size):
-                pickle.dump(compute_md5(xml), f)
-                pickle.dump(n_chunks, f)
-                it = iter(channels)
-                for i in range(n_chunks):
-                    if self.epg_process.stopping():
-                        return
-                    self.epg_process.update_status(EPGProgress(EPGstatus.SAVE_CACHE, i / n_chunks))
-                    chunk = {k: channels[k] for k in islice(it, ChannelsCache.chunk_size)}
-                    pickle.dump(chunk, f)
+            n_chunks = math.ceil(len(channels) / ChannelsCache.chunk_size)
+            pickle.dump(compute_md5(xml), f)
+            pickle.dump(n_chunks, f)
+            it = iter(channels)
+
+            def handle_chunk() -> bool:
+                chunk = {k: channels[k] for k in islice(it, ChannelsCache.chunk_size)}
+                pickle.dump(chunk, f)
+                return True
+
+            if self.handle_chunks(n_chunks, handle_chunk, EPGstatus.SAVE_CACHE):
+                return True
         except pickle.PickleError:
-            pass
+            return False
+        return False
 
     def pickle_load(self, f: IO[bytes], xml: Path) -> Optional[ChannelsT]:
         try:
             self.epg_process.update_status(EPGProgress(EPGstatus.LOAD_CACHE))
             md5 = pickle.load(f)
             n_chunks = pickle.load(f)
-            if isinstance(md5, str) and md5 == compute_md5(xml) and n_chunks and isinstance(n_chunks, int):
+            if isinstance(md5, str) and md5 == compute_md5(xml) and isinstance(n_chunks, int):
                 channels = {}
-                for i in range(n_chunks):
-                    if self.epg_process.stopping():
-                        return None
-                    self.epg_process.update_status(EPGProgress(EPGstatus.LOAD_CACHE, i / n_chunks))
+
+                def handle_chunk() -> bool:
                     chunk = pickle.load(f)
                     if not isinstance(chunk, dict):
-                        return None
+                        return False
                     channels.update(chunk)
-                return channels
+                    return True
+
+                if self.handle_chunks(n_chunks, handle_chunk, EPGstatus.LOAD_CACHE):
+                    return channels
         except (pickle.PickleError, EOFError):
             return None
         return None
+
+    def handle_chunks(self, n_chunks: int, handle_chunk: Callable[[], bool], status: EPGstatus) -> bool:
+        if not n_chunks:
+            return False
+        for i in range(n_chunks):
+            if self.epg_process.stopping():
+                return False
+            self.epg_process.update_status(EPGProgress(status, i / n_chunks))
+            if not handle_chunk():
+                return False
+        return True

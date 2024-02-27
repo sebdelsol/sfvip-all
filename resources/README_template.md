@@ -8,10 +8,10 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x64}-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white" height="{h_download}"><img src="https://img.shields.io/badge/x64-informational.svg?logo=Windows10&logoColor=lightblue" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white" height="{h_download}">]({exe_x64_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x64}-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="{h_download}"><img src="https://img.shields.io/badge/x64-informational.svg?logo=Windows10&logoColor=lightblue&style=flat-square" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="{h_download}">]({exe_x64_release})
 <sup><sup>_by MS Defender • {exe_x64_engine} • {exe_x64_signature}_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x86}-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white" height="{h_download}"><img src="https://img.shields.io/badge/x86-informational.svg?logo=Windows10&logoColor=lightblue" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white" height="{h_download}">]({exe_x86_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x86}-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="{h_download}"><img src="https://img.shields.io/badge/x86-informational.svg?logo=Windows10&logoColor=lightblue&style=flat-square" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="{h_download}">]({exe_x86_release})
 <sup><sup>_by MS Defender • {exe_x86_engine} • {exe_x86_signature}_</sup></sup>
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
