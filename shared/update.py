@@ -45,10 +45,10 @@ class AppUpdate(NamedTuple):
 class AppLatestUpdate:
     def __init__(self, build: BuildDir, github: Github) -> None:
         self._build_dir = build.dir
-        self._github_dir = f"https://github.com/{github.owner}/{github.repo}/raw/master"
+        self._github_dir = f"https://raw.githubusercontent.com/{github.owner}/{github.repo}/master"
 
     def _file(self, bitness: BitnessT) -> Path:
-        return Path(f"{self._build_dir}/update_{bitness}.json")
+        return Path(self._build_dir) / f"update_{bitness}.json"
 
     def _url(self, bitness: BitnessT) -> str:
         return f"{self._github_dir}/{self._file(bitness).as_posix()}"

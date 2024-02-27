@@ -212,9 +212,10 @@ def _epg_status(epg_status: EPGProgress) -> Style:
     return _epg_status_styles(progress).get(epg_status.status, _InfoStyle.app("").grey)
 
 
-def set_tooltip(msg: str, *widgets: tk.Widget) -> None:
+def set_tooltip(msg: str, *widgets: tk.Widget, offset: tuple[int, int] = (15, 15)) -> None:
+    dx, dy = offset
     for widget in widgets:
-        ToolTip(widget, msg=msg, delay=0, bg=_InfoTheme.bg_interact, fg="grey", follow=True)
+        ToolTip(widget, msg=msg, bg=_InfoTheme.bg_interact, fg="grey", delay=-1, x_offset=dx, y_offset=dy)
 
 
 # pylint: disable=too-many-instance-attributes
@@ -318,7 +319,7 @@ class _ProxiesWindow(StickyWindow):
         self._fade.fade(fade_duration_ms=250, out=False)
 
     def hide(self) -> None:
-        self._fade.fade(fade_duration_ms=250, out=True, wait_ms=250)
+        self._fade.fade(fade_duration_ms=500, out=True, wait_ms=500)
 
 
 class InfosWindow(_ProxiesWindow):

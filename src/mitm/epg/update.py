@@ -168,7 +168,14 @@ class EPGupdate(NamedTuple):
                     epg_process.update_status(EPGProgress(EPGstatus.SAVE_CACHE))
                     cache.save(xml, url, channels)
                     return channels
-        except (requests.RequestException, gzip.BadGzipFile, ET.ParseError, EOFError, BufferError) as error:
+        except (
+            requests.RequestException,
+            ConnectionError,
+            gzip.BadGzipFile,
+            ET.ParseError,
+            EOFError,
+            BufferError,
+        ) as error:
             logger.error("%s: %s", error.__class__.__name__, error)
         return None
 

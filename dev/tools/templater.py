@@ -9,6 +9,7 @@ from .nsis import MakeNSIS
 from .publisher import Publisher
 from .scanner.file import ScanFile
 from .utils.color import Low, Ok, Title, Warn
+from .utils.dist import repr_size
 from .utils.protocols import (
     CfgBuild,
     CfgEnvironments,
@@ -54,11 +55,10 @@ def _get_exe_kwargs(name: str, python_envs: PythonEnvs, publisher: Publisher) ->
         bitness = python_env.bitness
         local_version = local_versions.get(bitness)
         scan = ScanFile(local_version.exe) if local_version else ScanFile
-        print(
-            Ok(f". {name} {local_version.version} {bitness}")
-            if local_version
-            else Warn(f". No {name} {bitness} version")
-        )
+        if local_version:
+            print(Ok(f". {name} {local_version.version} {bitness}"), Low(f"- {repr_size(local_version.exe)}"))
+        else:
+            print(Warn(f". No {name} {bitness} version"))
         kwargs |= {
             f"version_{bitness}": local_version.version if local_version else "0",
             f"exe_{bitness}_release": local_version.url if local_version else "",
@@ -86,7 +86,7 @@ class Templater:
         mitmproxy_version = _version_of(python_envs, "mitmproxy")
         pyinstaller_version = _version_of(python_envs, "PyInstaller")
         if python_version and nuitka_version and mitmproxy_version and pyinstaller_version:
-            print(Title("Build"), Ok("template for"))
+            print(Title("Build"), Ok("template"))
             self.template_format = dict(
                 **_get_exe_kwargs(build.name, python_envs, publisher),
                 py_major_version=str(PythonVersion(python_version).major),
