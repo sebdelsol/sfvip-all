@@ -14,7 +14,6 @@ from translations.loc import LOC
 from ..ui.window import ProgressWindow
 
 logger = logging.getLogger(__name__)
-
 TPercentFunc = Callable[[float], None]
 TUnpackFunc = Callable[[Path, Path, TPercentFunc], None]
 exceptions = (

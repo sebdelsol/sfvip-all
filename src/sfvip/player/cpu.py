@@ -7,7 +7,6 @@ from typing import NamedTuple, Optional
 from cpuinfo.cpuinfo import _get_cpu_info_from_cpuid
 
 logger = logging.getLogger(__name__)
-
 _MACHINE_I386 = 332
 _MACHINE_AMD64 = 34404
 

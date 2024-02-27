@@ -103,12 +103,14 @@ class Publisher:
                 return
         print(Warn("Publish update failed"), Ok(exe_str))
 
-    def publish_all(self) -> None:
+    def publish_all(self) -> bool:
         args = Args().parse_args()
         if not args.info:
             version = args.version if args.version else self.build.version
             for python_env in PythonEnvs(self.environments, args).asked:
                 self.publish(python_env, version)
+            return True
+        return False
 
     def get_local_version(self, python_env: PythonEnv) -> Optional[Published]:
         if update := self.app_latest_update.local_load(python_env.bitness):

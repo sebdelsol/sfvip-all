@@ -17,8 +17,6 @@ from .utils.guardian import ThreadGuardian
 from .utils.scheduler import Scheduler
 
 logger = logging.getLogger(__name__)
-
-
 AltLastRegisterT = Callable[[Callable[[], None]], None]
 
 

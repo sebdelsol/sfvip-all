@@ -4,7 +4,6 @@ import threading
 from typing import Callable, Generic, Iterator, Optional, TypeVar
 
 T = TypeVar("T")
-
 logger = logging.getLogger(__name__)
 
 

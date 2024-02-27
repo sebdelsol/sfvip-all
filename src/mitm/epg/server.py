@@ -9,8 +9,6 @@ from ipytv.exceptions import IPyTVException
 from ..utils import APItype
 
 logger = logging.getLogger(__name__)
-
-
 T = TypeVar("T")
 
 

@@ -7,9 +7,10 @@ from .tools.utils.protocols import CfgBuild, CfgEnvironments, CfgTemplates
 
 def do_publish(build: CfgBuild, environments: CfgEnvironments, templates: CfgTemplates) -> None:
     publisher = Publisher(build, environments, Github)
-    publisher.publish_all()
+    published = publisher.publish_all()
     publisher.show_versions()
-    Templater(build, environments, Github, publisher).create_all(templates)
+    if published:
+        Templater(build, environments, Github, publisher).create_all(templates)
 
 
 if __name__ == "__main__":
