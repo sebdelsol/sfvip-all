@@ -19,7 +19,7 @@ Treturn = TypeVar("Treturn")
 
 class _Theme:
     text = Style().font("Calibri").font_size(10).max_width(30).no_truncate.white
-    wait = text.copy().bigger(6)
+    wait = text().bigger(6)
     bg = "#2A2A2A"
     border = Border(bg="#808080", size=1, relief="")
     space = 30
@@ -38,7 +38,7 @@ def _get_bar_style() -> str:
 class _Title:
     bg = "#242424"
     quit = _Theme.text("x").bigger(5)
-    title = _Theme.text.copy().bigger(10)
+    title = _Theme.text().bigger(10)
     button = dict(bg=bg, mouseover="red")
     pad = 10
 
@@ -47,7 +47,7 @@ class _Ask:
     bg = _Theme.bg
     button = dict(bg="#1F1E1D", border=Border(bg="#3F3F41", size=0, relief="groove"))
     button_pad = 7
-    text = _Theme.text.copy().bigger(5)
+    text = _Theme.text().bigger(5)
     space = 20
 
 

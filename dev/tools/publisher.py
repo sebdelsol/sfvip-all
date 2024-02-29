@@ -77,7 +77,7 @@ class Published(NamedTuple):
         )
 
     def __eq__(self, other: Self) -> bool:
-        fields = self._fields  # pylint: disable=no-member
+        fields = Published._fields
         return all(getattr(self, field) == getattr(other, field) for field in fields if field != "exe")
 
 

@@ -90,12 +90,13 @@ class _InfoTheme:
 class _InfoStyle:
     stl = Style().font("Calibri").font_size(12).max_width(30)
     arrow = stl("⇨").color("#555555").bigger(4)
-    upstream = stl.copy().color("#A0A0A0").smaller(2)
-    proxy = stl.copy().color("#C0C0C0").smaller(2)
-    name = stl.copy().color("#A0A0A0")
+    upstream = stl().color("#A0A0A0").smaller(2)
+    proxy = stl().color("#C0C0C0").smaller(2)
+    name = stl().color("#A0A0A0")
     blank = stl("")
-    app_warn = stl.copy().smaller(2).no_truncate
-    app = stl.copy().smaller(2)
+    app_warn = stl().smaller(2).no_truncate
+    app = stl().smaller(2)
+    tooltip = stl().smaller(3).no_truncate.grey
 
 
 def _get_infos_headers(app_name: str) -> Sequence[Style]:
@@ -177,9 +178,9 @@ def _epg_url() -> Style:
     return _InfoStyle.app("").smaller(2).no_truncate.grey
 
 
-def epg_confidence_tooltip() -> str:
+def epg_confidence_tooltip() -> Style:
     msg = "".join((f"\n\n • {text}" for text in (LOC.TooltipConfidence0, LOC.TooltipConfidence100)))
-    return f"{LOC.EpgConfidence}:{msg}"
+    return _InfoStyle.tooltip(f"{LOC.EpgConfidence}:{msg}")
 
 
 def _epg_confidence_label() -> Style:
@@ -212,10 +213,12 @@ def _epg_status(epg_status: EPGProgress) -> Style:
     return _epg_status_styles(progress).get(epg_status.status, _InfoStyle.app("").grey)
 
 
-def set_tooltip(msg: str, *widgets: tk.Widget, offset: tuple[int, int] = (15, 15)) -> None:
+def set_tooltip(msg: Style, *widgets: tk.Widget, offset: tuple[int, int] = (15, 15)) -> None:
     dx, dy = offset
+    to_tk = msg.to_tk
+    msg = to_tk.pop("text")
     for widget in widgets:
-        ToolTip(widget, msg=msg, bg=_InfoTheme.bg_interact, fg="grey", delay=-1, x_offset=dx, y_offset=dy)
+        ToolTip(widget, msg=msg, bg=_InfoTheme.bg_interact, delay=-1, x_offset=dx, y_offset=dy, **to_tk)
 
 
 # pylint: disable=too-many-instance-attributes

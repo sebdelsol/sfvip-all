@@ -17,27 +17,28 @@ class Style(str):
 
     _known_font_styles = "bold", "italic", "overstrike"
 
-    def __init__(self, _="") -> None:
-        self._fg = "white"
-        self._font = "Calibri"
-        self._font_size = 10
-        self._font_styles: set[str] = set()
-        self._wrap: Optional[int] = None
-        self._max_width: Optional[int] = None
+    def __new__(cls, string: str = "", _: Optional[Self] = None) -> Self:
+        instance = super().__new__(cls, string)
+        return instance
 
-    def __call__(self, text: str) -> Self:
-        return self.copy(text)
+    def __init__(self, _: str = "", style: Optional[Self] = None) -> None:
+        if style is None:
+            self._fg: str = "white"
+            self._font: str = "Calibri"
+            self._font_size: int = 10
+            self._font_styles: set[str] = set()
+            self._wrap: Optional[int] = None
+            self._max_width: Optional[int] = None
+        else:
+            self._fg: str = style._fg
+            self._font: str = style._font
+            self._font_size: int = style._font_size
+            self._font_styles: set[str] = set(style._font_styles)
+            self._wrap: Optional[int] = style._wrap
+            self._max_width: Optional[int] = style._max_width
 
-    def copy(self, text: Optional[str] = None) -> Self:
-        a_copy = self.__class__(str(self) if text is None else text)
-        # pylint: disable=protected-access
-        a_copy._fg = self._fg
-        a_copy._font = self._font
-        a_copy._font_size = self._font_size
-        a_copy._font_styles = set(self._font_styles)
-        a_copy._wrap = self._wrap
-        a_copy._max_width = self._max_width
-        return a_copy
+    def __call__(self, text: Optional[str] = None) -> Self:
+        return self.__class__(str(self) if text is None else text, self)
 
     @property
     def no_truncate(self) -> Self:
