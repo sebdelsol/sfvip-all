@@ -20,10 +20,7 @@
     // type checking (pylance)
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "workspace",
-    // black
-    "black-formatter.args": [
-        "--line-length=115"
-    ],
+    "ruff.format.args": ["--line-length=115"],
     // isort 
     "isort.args": [
         "--profile",
@@ -31,10 +28,11 @@
     ],
     "[python]": {
         "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit",            
         },
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.rulers": [
             {
                 "column": 89,

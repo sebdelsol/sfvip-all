@@ -5,7 +5,7 @@ watchdog>=3.0.0
 # for downloading the player and libmpv
 feedparser>=6.0.10
 py-cpuinfo>=9.0.0
-py7zr>=0.20.6
+py7zr>=0.21.0  # https://github.com/miurahr/py7zr/pull/558
 requests>=2.31.0
 # for EPG
 keyboard>=0.13.5

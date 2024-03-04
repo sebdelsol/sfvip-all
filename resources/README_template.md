@@ -8,14 +8,14 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x64}-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="{h_download}"><img src="https://img.shields.io/badge/x64-informational.svg?logo=Windows10&logoColor=lightblue&style=flat-square" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="{h_download}">]({exe_x64_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x64}-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="{h_download}"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x64_clean}?logo=shield-check&logoColor=white&style=flat-square" height="{h_download}">]({exe_x64_release})
 <sup><sup>_by MS Defender • {exe_x64_engine} • {exe_x64_signature}_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x86}-informational.svg?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="{h_download}"><img src="https://img.shields.io/badge/x86-informational.svg?logo=Windows10&logoColor=lightblue&style=flat-square" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}.svg?logo=shield-check&logoColor=white&style=flat-square" height="{h_download}">]({exe_x86_release})
+[<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x86}-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="{h_download}"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}?logo=shield-check&logoColor=white&style=flat-square" height="{h_download}">]({exe_x86_release})
 <sup><sup>_by MS Defender • {exe_x86_engine} • {exe_x86_signature}_</sup></sup>
 
-[![download](https://img.shields.io/github/downloads/{github_path}/total?color=informational)](https://tooomm.github.io/github-release-stats/?username={github_owner}&repository={github_repo})
-[![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
+[![download](https://img.shields.io/github/downloads/{github_path}/total?color=informational&logo=github&labelColor=informational)](https://tooomm.github.io/github-release-stats/?username={github_owner}&repository={github_repo})
+[![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
 
 
 Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
@@ -32,13 +32,13 @@ The logs are to be found in the app folder:
 <kbd><img src="resources/logs.png"  width="400"></kbd>  
 
 # Build
-[![Python](https://img.shields.io/badge/Python-{py_version}-fbdf79?logo=python&logoColor=fbdf79)](https://www.python.org/downloads/release/python-{py_version_compact}/)
-[![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy-{mitmproxy_version}-informational.svg?logo=mitmproxy)](https://mitmproxy.org/)
-[![Style](https://custom-icon-badges.demolab.com/badge/Style-Black-000000.svg?logo=file-code&logoColor=a0a0a0)](https://black.readthedocs.io/en/stable/)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc-{sloc}-000000.svg?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github={github_path})
-[![Nsis](https://img.shields.io/badge/Nsis-{nsis_version}-informational?logo=NSIS&logoColor=fbdf79)](https://nsis.sourceforge.io/Download)
-[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka-{nuitka_version}-informational.svg?logo=tools&logoColor=61dafb)](https://nuitka.net/)
-[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller-{pyinstaller_version}-informational.svg?logo=tools&logoColor=61dafb)](https://pyinstaller.org/en/stable/)
+[![Python](https://custom-icon-badges.demolab.com/badge/Python%20{py_version}-white?logo=python-color)](https://www.python.org/downloads/release/python-{py_version_compact}/)
+[![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://github.com/astral-sh/ruff)
+[![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%20{mitmproxy_version}-informational?logo=mitmproxy)](https://mitmproxy.org/)
+[![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%20{nsis_version}-informational?logo=nsis-color)](https://nsis.sourceforge.io/Download)
+[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%20{nuitka_version}-informational?logo=nuitka)](https://nuitka.net/)
+[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%20{pyinstaller_version}-informational?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%20{sloc}-black?logo=file-code&logoColor=a0a0a0)](https://api.codetabs.com/v1/loc/?github={github_path})
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).

@@ -213,4 +213,3 @@ class ProgressWindow(_TitleBarWindow):
             self._progressbar["value"] = max(0, min(percent, 100))
 
         yield set_progress
-        self._set_progress_mode(ProgressMode.UNKNOWN)

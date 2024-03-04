@@ -1,3 +1,7 @@
+## 1.4.12.34
+* Bump _Nuitka_ to 2.0.6.
+* Fix libmpv update UI.
+
 ## 1.4.12.33
 * Info window stays longer.
 * Bump _Nuitka_ to 2.0.5.
