@@ -64,7 +64,7 @@ class ReleaseCreator:
         existing_assets = {Path(url := asset.browser_download_url).name: url for asset in release.get_assets()}
         if url := existing_assets.get(exe.name):
             print(Warn(". Already exists"), Low(str(exe.name)))
-            return url
+            return None
         try:
             asset = release.upload_asset(path=str(exe.resolve()), name=exe.name)
             print(Title(". Add"), Ok(str(exe.name)), Low(repr_size(exe)))
