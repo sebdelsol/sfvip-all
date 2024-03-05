@@ -15,17 +15,21 @@ class Translations:
     path: ClassVar = "translations"
 
 
+class Changelog:
+    path: ClassVar = "build/changelog.md"
+
+
 class Build:
     ico: ClassVar = "resources/Sfvip All.png"
     main: ClassVar = "sfvip_all.py"
     company: ClassVar = "sebdelsol"
     name: ClassVar = "Sfvip All"
-    version: ClassVar = "1.4.12.34"
+    version: ClassVar = "1.4.12.35"
     dir: ClassVar = "build"
     enable_console: ClassVar = False
     logs_dir: ClassVar = "../logs"
     excluded: ClassVar = ("numpy",)
-    files: ClassVar = Splash, Logo, Translations
+    files: ClassVar = Splash, Logo, Translations, Changelog
     install_finish_page: ClassVar = True
     install_cmd: ClassVar = ()
     uninstall_cmd: ClassVar = ()
