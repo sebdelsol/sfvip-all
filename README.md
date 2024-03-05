@@ -32,13 +32,14 @@ The logs are to be found in the app folder:
 <kbd><img src="resources/logs.png"  width="400"></kbd>  
 
 # Build
+[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.35-ghostwhite?logo=github&logoColor=black)](/build_config.py#L27)
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-ghostwhite?logo=python-color)](https://www.python.org/downloads/release/python-3118/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%2010.2.2-ghostwhite?logo=mitmproxy-black)](https://mitmproxy.org/)
 [![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%203.09-ghostwhite?logo=nsis-color)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%202.1-ghostwhite?logo=nuitka)](https://nuitka.net/)
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%206.4.0-ghostwhite?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-ghostwhite?logo=ruff-color)](https://github.com/astral-sh/ruff)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%207997-ghostwhite?logo=file-code&logoColor=909090)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208008-ghostwhite?logo=file-code&logoColor=909090)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).

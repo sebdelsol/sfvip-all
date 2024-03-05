@@ -16,6 +16,7 @@ _Remove it:_
 <sup><sup>_by MS Defender • {exe_x86_engine} • {exe_x86_signature}_</sup></sup>
 
 # Build
+[![version](https://custom-icon-badges.demolab.com/badge/Build%20{build_version}-ghostwhite?logo=github&logoColor=black)]({build_version_link})
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%20{py_version}-ghostwhite?logo=python-color)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%20{nsis_version}-ghostwhite?logo=nsis-color)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%20{nuitka_version}-ghostwhite?logo=nuitka)](https://nuitka.net/)

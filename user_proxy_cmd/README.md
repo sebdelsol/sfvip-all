@@ -16,6 +16,7 @@ SfvipUserProxy --remove
 <sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.651.0_</sup></sup>
 
 # Build
+[![version](https://custom-icon-badges.demolab.com/badge/Build%200.4-ghostwhite?logo=github&logoColor=black)](/user_proxy_cmd/cmd_build_config.py#L12)
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-ghostwhite?logo=python-color)](https://www.python.org/downloads/release/python-3118/)
 [![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%203.09-ghostwhite?logo=nsis-color)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%202.1-ghostwhite?logo=nuitka)](https://nuitka.net/)

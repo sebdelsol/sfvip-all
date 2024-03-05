@@ -32,6 +32,7 @@ The logs are to be found in the app folder:
 <kbd><img src="resources/logs.png"  width="400"></kbd>  
 
 # Build
+[![version](https://custom-icon-badges.demolab.com/badge/Build%20{build_version}-ghostwhite?logo=github&logoColor=black)]({build_version_link})
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%20{py_version}-ghostwhite?logo=python-color)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%20{mitmproxy_version}-ghostwhite?logo=mitmproxy-black)](https://mitmproxy.org/)
 [![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%20{nsis_version}-ghostwhite?logo=nsis-color)](https://nsis.sourceforge.io/Download)
