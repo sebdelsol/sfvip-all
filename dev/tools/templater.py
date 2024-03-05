@@ -1,6 +1,9 @@
+import ast
+import inspect
 import subprocess
+import textwrap
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import quote
 
 from .env.envs import PythonEnvs
@@ -9,7 +12,7 @@ from .nsis import MakeNSIS
 from .publisher import Publisher
 from .scanner.file import ScanFile
 from .utils.color import Low, Ok, Title, Warn
-from .utils.dist import repr_size
+from .utils.dist import human_format, repr_size
 from .utils.protocols import (
     CfgBuild,
     CfgEnvironments,
@@ -33,7 +36,7 @@ def _version_of(python_envs: PythonEnvs, name: str) -> Optional[str]:
     return versions.pop()
 
 
-def _get_sloc(path: Path) -> int:
+def _get_sloc(path: Path) -> str:
     get_py_files = f"git ls-files -- '{path}/*.py'"
     count_non_blank_lines = "%{ ((Get-Content -Path $_) -notmatch '^\\s*$').Length }"
     sloc = subprocess.run(
@@ -43,9 +46,18 @@ def _get_sloc(path: Path) -> int:
         capture_output=True,
     )
     try:
-        return int(sloc.stdout)
+        return human_format(int(sloc.stdout))
     except ValueError:
-        return 0
+        return "unknown"
+
+
+def _get_attr_link(obj: Any, attr: str) -> str:
+    lines, start = inspect.getsourcelines(obj)
+    for node in ast.walk(ast.parse(textwrap.dedent("".join(lines)))):
+        if isinstance(node, ast.AnnAssign) and isinstance(target := node.target, ast.Name) and target.id == attr:
+            path = inspect.getfile(obj).replace(str(Path().resolve()), "").replace("\\", "/")
+            return f"{path}#L{node.lineno + start - 1}"
+    return ""
 
 
 def _get_exe_kwargs(name: str, python_envs: PythonEnvs, publisher: Publisher) -> dict[str, str]:
@@ -88,8 +100,9 @@ class Templater:
         if python_version and nuitka_version and mitmproxy_version and pyinstaller_version:
             print(Title("Build"), Ok("template"))
             self.template_format = dict(
-                **_get_exe_kwargs(build.name, python_envs, publisher),
                 py_major_version=str(PythonVersion(python_version).major),
+                **_get_exe_kwargs(build.name, python_envs, publisher),
+                build_version_link=_get_attr_link(build, "version"),
                 py_version_compact=python_version.replace(".", ""),
                 github_path=f"{github.owner}/{github.repo}",
                 pyinstaller_version=pyinstaller_version,
@@ -101,6 +114,7 @@ class Templater:
                 env_x64=environments.X64.path,
                 env_x86=environments.X86.path,
                 nuitka_version=nuitka_version,
+                build_version=build.version,
                 py_version=python_version,
                 ico_link=quote(build.ico),
                 github_owner=github.owner,

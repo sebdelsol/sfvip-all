@@ -10,6 +10,16 @@ def to_ico(img_file: str) -> str:
     return str(Path(img_file).with_suffix(".ico").as_posix())
 
 
+def human_format(number: float) -> str:
+    magnitudes = "", "k", "m", "b"
+    magnitude = 0
+    while abs(number) >= 1000:
+        magnitude += 1
+        number /= 1000.0
+    number_str = f"{number:.1f}".rstrip("0").rstrip(".")
+    return f"{number_str}{magnitudes[magnitude]}"
+
+
 def repr_size(file: Path) -> str:
     if file.is_file():
         size = file.stat().st_size / 1024

@@ -16,12 +16,15 @@ SfvipUserProxy --remove
 <sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.651.0_</sup></sup>
 
 # Build
-[![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-ghostwhite?logo=python-color)](https://www.python.org/downloads/release/python-3118/)
-[![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%203.09-ghostwhite?logo=nsis-color)](https://nsis.sourceforge.io/Download)
-[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%202.1-ghostwhite?logo=nuitka)](https://nuitka.net/)
-[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%206.4.0-ghostwhite?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
-[![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-ghostwhite?logo=ruff-color)](https://github.com/astral-sh/ruff)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%20207-ghostwhite?logo=file-code&logoColor=909090)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![version](https://custom-icon-badges.demolab.com/badge/Build%200.4-informational?logo=github)](/user_proxy_cmd/cmd_build_config.py#L12)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%20207-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://github.com/astral-sh/ruff)
+<sup><sub>with</sup></sub>
+[![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-linen?logo=python-color)](https://www.python.org/downloads/release/python-3118/)
+[![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%203.09-linen?logo=nsis-color)](https://nsis.sourceforge.io/Download)
+[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%202.1-linen?logo=nuitka)](https://nuitka.net/)
+<sup><sub>or</sup></sub>
+[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%206.4.0-linen?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
 
 ```console
 python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--publish]

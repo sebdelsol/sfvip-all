@@ -40,6 +40,7 @@ class AppInfo(NamedTuple):
     config: AppConfig
     logo: Path
     splash: Path
+    changelog: Path
     translations: Path
     logs_dir: Path
     current_dir: Path
@@ -59,6 +60,7 @@ class AppInfo(NamedTuple):
             config=AppConfig(roaming),
             logo=files["Logo"],
             splash=files["Splash"],
+            changelog=files["Changelog"],
             translations=files["Translations"],
             logs_dir=current_dir / build.logs_dir,
             current_dir=current_dir,

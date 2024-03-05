@@ -1,3 +1,4 @@
+import re
 import tkinter as tk
 from typing import Any, Callable, NamedTuple, Optional, Sequence
 
@@ -129,6 +130,36 @@ def _get_proxies_button(on: bool) -> Style:
 
 def _get_app_version(app_info: AppInfo) -> Style:
     return _InfoStyle.app(f"{app_info.name} v{app_info.version} {app_info.bitness}").grey
+
+
+def app_version_tooltip(app_info: AppInfo, max_versions: int = 5) -> Style:
+    lines = [f"{app_info.name} changelog:"]
+    re_spaces = re.compile(r"\s+")
+    n_versions = 0
+    try:
+        with app_info.changelog.open("r") as f:
+            for line in f.readlines():
+                line = line.strip()
+                try:
+                    first, text = line.split(maxsplit=1)
+                    for char in "[]_*":
+                        text = text.replace(char, " ")
+                    text = re_spaces.sub(" ", text)
+                    match first:
+                        case "##":
+                            n_versions += 1
+                            if n_versions > max_versions:
+                                break
+                            lines.extend(("", text, ""))
+                        case "*":
+                            lines.append(f" • {text}")
+                except ValueError:
+                    if line:
+                        lines.append(f"    {line}")
+
+    except (PermissionError, FileNotFoundError, OSError):
+        pass
+    return _InfoStyle.tooltip("\n".join(lines))
 
 
 def _get_app_warn(app_info: AppInfo) -> Style:
@@ -432,6 +463,7 @@ class InfosWindow(_ProxiesWindow):
         super()._layout(row=row)
         frame.columnconfigure(2, weight=1)
         # tooltips
+        set_tooltip(app_version_tooltip(app_info), app_version)
         set_tooltip(epg_confidence_tooltip(), epg_confidence_label)
 
     def set_epg_url_update(self, epg_url: Optional[str], callback: Callable[[str], None]) -> None:

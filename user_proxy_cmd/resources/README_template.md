@@ -16,12 +16,15 @@ _Remove it:_
 <sup><sup>_by MS Defender • {exe_x86_engine} • {exe_x86_signature}_</sup></sup>
 
 # Build
-[![Python](https://custom-icon-badges.demolab.com/badge/Python%20{py_version}-ghostwhite?logo=python-color)](https://www.python.org/downloads/release/python-{py_version_compact}/)
-[![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%20{nsis_version}-ghostwhite?logo=nsis-color)](https://nsis.sourceforge.io/Download)
-[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%20{nuitka_version}-ghostwhite?logo=nuitka)](https://nuitka.net/)
-[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%20{pyinstaller_version}-ghostwhite?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
-[![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-ghostwhite?logo=ruff-color)](https://github.com/astral-sh/ruff)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%20{sloc}-ghostwhite?logo=file-code&logoColor=909090)](https://api.codetabs.com/v1/loc/?github={github_path})
+[![version](https://custom-icon-badges.demolab.com/badge/Build%20{build_version}-informational?logo=github)]({build_version_link})
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%20{sloc}-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github={github_path})
+[![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://github.com/astral-sh/ruff)
+<sup><sub>with</sup></sub>
+[![Python](https://custom-icon-badges.demolab.com/badge/Python%20{py_version}-linen?logo=python-color)](https://www.python.org/downloads/release/python-{py_version_compact}/)
+[![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%20{nsis_version}-linen?logo=nsis-color)](https://nsis.sourceforge.io/Download)
+[![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%20{nuitka_version}-linen?logo=nuitka)](https://nuitka.net/)
+<sup><sub>or</sup></sub>
+[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%20{pyinstaller_version}-linen?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
 
 ```console
 python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--publish]
