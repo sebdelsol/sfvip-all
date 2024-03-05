@@ -39,7 +39,7 @@ The logs are to be found in the app folder:
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%202.1-ghostwhite?logo=nuitka)](https://nuitka.net/)
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%206.4.0-ghostwhite?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-ghostwhite?logo=ruff-color)](https://github.com/astral-sh/ruff)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208008-ghostwhite?logo=file-code&logoColor=909090)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208k-ghostwhite?logo=file-code&logoColor=909090)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 
 [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 Check the [***build config***](build_config.py).

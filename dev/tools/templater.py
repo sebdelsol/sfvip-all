@@ -12,7 +12,7 @@ from .nsis import MakeNSIS
 from .publisher import Publisher
 from .scanner.file import ScanFile
 from .utils.color import Low, Ok, Title, Warn
-from .utils.dist import repr_size
+from .utils.dist import human_format, repr_size
 from .utils.protocols import (
     CfgBuild,
     CfgEnvironments,
@@ -36,7 +36,7 @@ def _version_of(python_envs: PythonEnvs, name: str) -> Optional[str]:
     return versions.pop()
 
 
-def _get_sloc(path: Path) -> int:
+def _get_sloc(path: Path) -> str:
     get_py_files = f"git ls-files -- '{path}/*.py'"
     count_non_blank_lines = "%{ ((Get-Content -Path $_) -notmatch '^\\s*$').Length }"
     sloc = subprocess.run(
@@ -46,9 +46,9 @@ def _get_sloc(path: Path) -> int:
         capture_output=True,
     )
     try:
-        return int(sloc.stdout)
+        return human_format(int(sloc.stdout))
     except ValueError:
-        return 0
+        return "unknown"
 
 
 def _get_attr_link(obj: Any, attr: str) -> str:
