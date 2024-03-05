@@ -95,7 +95,7 @@ class Publisher:
     def publish(self, python_env: PythonEnv, version: str) -> None:
         exe = self.dist.installer_exe(python_env, version)
         exe_str = str(exe.as_posix())
-        version = self.build.version
+        version = version or self.build.version
         if url := self.release.create(python_env, version):
             if update := AppUpdate.from_exe(url, exe, version):
                 self.app_latest_update.local_save(update, python_env.bitness)

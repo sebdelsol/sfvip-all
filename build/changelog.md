@@ -1,5 +1,8 @@
+## 1.4.12.36
+* Add Sfvip Player Changelog tooltip.
+
 ## 1.4.12.35
-* Add Changelog tooltip.
+* Add Sfvip All Changelog tooltip.
 * Bump _Nuitka_ to 2.1.
 
 ## 1.4.12.34

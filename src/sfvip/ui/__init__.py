@@ -16,7 +16,7 @@ from .window import AskWindow, MessageWindow, Window
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes, too-many-public-methods
 class UI(tk.Tk):
     """basic UI with a tk mainloop, the app has to run in a thread"""
 
@@ -51,6 +51,9 @@ class UI(tk.Tk):
     def set_infos(self, infos: Sequence[Info], player_relaunch: Optional[Callable[[int], None]] = None) -> None:
         ok = self._infos.set(infos, player_relaunch)
         self._logo.set_pulse(ok=ok, reason=PulseReason.RESTART_FOR_PROXIES)
+
+    def set_changelog_callback(self, changelog_callback: Callable[[], str]):
+        self._infos.set_changelog_callback(changelog_callback)
 
     def set_epg_url_update(self, epg_url: Optional[str], callback: Callable[[str], None]) -> None:
         self._infos.set_epg_url_update(epg_url, callback)
