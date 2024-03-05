@@ -23,26 +23,41 @@ logger = logging.getLogger(__name__)
 
 class PlayerLatestUpdate:
     _url = "https://raw.githubusercontent.com/K4L4Uz/SFVIP-Player/main/Update.json"
+    _changelong_title = "Sfvip Player changelog:"
     _re_version = re.compile(r"^v([\d\.]+)")
     _key_version = "tag_name"
 
-    @staticmethod
-    def get_version(timeout: int) -> Optional[Version]:
+    def __init__(self, ui: UI) -> None:
+        self._changelogs: list[str] = []
+        ui.set_changelog_callback(self.get_changelog)
+
+    def get_changelog(self) -> str:
+        return "\n\n".join(
+            (
+                PlayerLatestUpdate._changelong_title,
+                *(f" • {changelog}" for changelog in self._changelogs),
+            )
+        )
+
+    def get_version(self, timeout: int) -> Optional[Version]:
         try:
             with requests.get(PlayerLatestUpdate._url, timeout=timeout) as response:
                 response.raise_for_status()
-                name = response.json()[PlayerLatestUpdate._key_version]
-                version = PlayerLatestUpdate._re_version.findall(name)[0]
+                changelog = response.json()[PlayerLatestUpdate._key_version]
+                if changelog not in self._changelogs:
+                    self._changelogs.append(changelog)
+                version = PlayerLatestUpdate._re_version.findall(changelog)[0]
                 return Version(version)
         except (requests.RequestException, KeyError, IndexError):
             return None
 
 
 class PlayerUpdater:
-    def __init__(self, player_exe: PlayerExe, app_config: AppConfig) -> None:
+    def __init__(self, player_exe: PlayerExe, app_config: AppConfig, ui: UI) -> None:
         self._timeout = app_config.Player.requests_timeout
         self._player_exe = player_exe
         self._current = player_exe.found
+        self._player_latest_update = PlayerLatestUpdate(ui)
 
     def is_new(self, version: Version) -> bool:
         return version > self._current.version
@@ -52,7 +67,7 @@ class PlayerUpdater:
 
     def get_latest_version(self) -> Optional[Version]:
         logger.info("Check latest Sfvip Player version")
-        if version := PlayerLatestUpdate().get_version(self._timeout):
+        if version := self._player_latest_update.get_version(self._timeout):
             logger.info("Found update Sfvip Player %s", version)
             return version
         logger.warning("Check latest Sfvip Player failed")
@@ -103,7 +118,7 @@ class PlayerAutoUpdater:
     def __init__(
         self, player_exe: PlayerExe, app_config: AppConfig, ui: UI, relaunch_player: SetRelaunchT
     ) -> None:
-        self._player_updater = PlayerUpdater(player_exe, app_config)
+        self._player_updater = PlayerUpdater(player_exe, app_config, ui)
         self._relaunch_player = relaunch_player
         self._scheduler = Scheduler()
         self._app_config = app_config

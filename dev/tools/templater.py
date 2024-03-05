@@ -60,7 +60,7 @@ def _get_attr_link(obj: Any, attr: str) -> str:
     return ""
 
 
-def _get_exe_kwargs(name: str, python_envs: PythonEnvs, publisher: Publisher) -> dict[str, str]:
+def _get_exe_kwargs(build: CfgBuild, python_envs: PythonEnvs, publisher: Publisher) -> dict[str, str]:
     kwargs = {}
     local_versions = {local_version.bitness: local_version for local_version in publisher.get_local_versions()}
     for python_env in python_envs.all:
@@ -68,9 +68,14 @@ def _get_exe_kwargs(name: str, python_envs: PythonEnvs, publisher: Publisher) ->
         local_version = local_versions.get(bitness)
         scan = ScanFile(local_version.exe) if local_version else ScanFile
         if local_version:
-            print(Ok(f". {name} {local_version.version} {bitness}"), Low(f"- {repr_size(local_version.exe)}"))
+            version_color = Ok if local_version.version == build.version else Warn
+            print(
+                Ok(f". {build.name}"),
+                version_color(f"{local_version.version} {bitness}"),
+                Low(f"- {repr_size(local_version.exe)}"),
+            )
         else:
-            print(Warn(f". No {name} {bitness} version"))
+            print(Warn(f". No {build.name} {bitness} version"))
         kwargs |= {
             f"version_{bitness}": local_version.version if local_version else "0",
             f"exe_{bitness}_release": local_version.url if local_version else "",
@@ -101,7 +106,7 @@ class Templater:
             print(Title("Build"), Ok("template"))
             self.template_format = dict(
                 py_major_version=str(PythonVersion(python_version).major),
-                **_get_exe_kwargs(build.name, python_envs, publisher),
+                **_get_exe_kwargs(build, python_envs, publisher),
                 build_version_link=_get_attr_link(build, "version"),
                 py_version_compact=python_version.replace(".", ""),
                 github_path=f"{github.owner}/{github.repo}",

@@ -32,8 +32,8 @@ The logs are to be found in the app folder:
 <kbd><img src="resources/logs.png"  width="400"></kbd>  
 
 # Build
-[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.35-informational?logo=github)](/build_config.py#L27)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.36-informational?logo=github)](/build_config.py#L27)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208.1k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://github.com/astral-sh/ruff)
 <sup><sub>with</sup></sub>
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-linen?logo=python-color)](https://www.python.org/downloads/release/python-3118/)

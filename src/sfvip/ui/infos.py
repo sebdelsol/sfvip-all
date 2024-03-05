@@ -132,7 +132,7 @@ def _get_app_version(app_info: AppInfo) -> Style:
     return _InfoStyle.app(f"{app_info.name} v{app_info.version} {app_info.bitness}").grey
 
 
-def app_version_tooltip(app_info: AppInfo, max_versions: int = 5) -> Style:
+def _app_version_tooltip(app_info: AppInfo, max_versions: int = 5) -> Style:
     lines = [f"{app_info.name} changelog:"]
     re_spaces = re.compile(r"\s+")
     n_versions = 0
@@ -209,7 +209,7 @@ def _epg_url() -> Style:
     return _InfoStyle.app("").smaller(2).no_truncate.grey
 
 
-def epg_confidence_tooltip() -> Style:
+def _epg_confidence_tooltip() -> Style:
     msg = "".join((f"\n\n • {text}" for text in (LOC.TooltipConfidence0, LOC.TooltipConfidence100)))
     return _InfoStyle.tooltip(f"{LOC.EpgConfidence}:{msg}")
 
@@ -244,12 +244,30 @@ def _epg_status(epg_status: EPGProgress) -> Style:
     return _epg_status_styles(progress).get(epg_status.status, _InfoStyle.app("").grey)
 
 
-def set_tooltip(msg: Style, *widgets: tk.Widget, offset: tuple[int, int] = (15, 15)) -> None:
+def _player_changelog_tooltip() -> Style:
+    return _InfoStyle.tooltip()
+
+
+def set_tooltip(
+    msg: Style,
+    *widgets: tk.Widget,
+    msg_refresh: Optional[Callable[[], str]] = None,
+    offset: tuple[int, int] = (15, 15),
+) -> None:
     dx, dy = offset
     to_tk = msg.to_tk
-    msg = to_tk.pop("text")
+    text = to_tk.pop("text")
     for widget in widgets:
-        ToolTip(widget, msg=msg, bg=_InfoTheme.bg_interact, delay=-1, x_offset=dx, y_offset=dy, **to_tk)
+        ToolTip(
+            widget,
+            msg=msg_refresh or text,
+            bg=_InfoTheme.bg_interact,
+            delay=-1,  # fix no show
+            x_offset=dx,
+            y_offset=dy,
+            **to_tk,
+            aspect=1000,  # fix correct width
+        )
 
 
 # pylint: disable=too-many-instance-attributes
@@ -463,8 +481,16 @@ class InfosWindow(_ProxiesWindow):
         super()._layout(row=row)
         frame.columnconfigure(2, weight=1)
         # tooltips
-        set_tooltip(app_version_tooltip(app_info), app_version)
-        set_tooltip(epg_confidence_tooltip(), epg_confidence_label)
+        self._changelog_callback: Optional[Callable[[], str]] = None
+        set_tooltip(_player_changelog_tooltip(), self._player_version, msg_refresh=self.get_changelog)
+        set_tooltip(_app_version_tooltip(app_info), app_version)
+        set_tooltip(_epg_confidence_tooltip(), epg_confidence_label)
+
+    def get_changelog(self) -> str:
+        return self._changelog_callback() if self._changelog_callback else ""
+
+    def set_changelog_callback(self, changelog_callback: Callable[[], str]):
+        self._changelog_callback = changelog_callback
 
     def set_epg_url_update(self, epg_url: Optional[str], callback: Callable[[str], None]) -> None:
         self._epg_url.delete(0, tk.END)
