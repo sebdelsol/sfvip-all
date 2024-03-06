@@ -8,11 +8,11 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.36-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.36/Install.Sfvip.All.1.4.12.36.x64.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1102.0_</sup></sup>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.37-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.37/Install.Sfvip.All.1.4.12.37.x64.exe)
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1152.0_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.36-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.36/Install.Sfvip.All.1.4.12.36.x86.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1102.0_</sup></sup>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.37-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.37/Install.Sfvip.All.1.4.12.37.x86.exe)
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1152.0_</sup></sup>
 
 [![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=informational&logo=github&labelColor=informational)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all)
 [![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
@@ -38,8 +38,8 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 Color & pulse | Meaning
 :--- | :---
-<kbd><img src="resources/readme/logo_green.png"></kbd> slow pulse | Everything is fine
-<kbd><img src="resources/readme/logo_red.png"></kbd>  quick pulse | _Sfvip All_ needs your attention
+<kbd><img src="resources/readme/logo_green.png" width="25"></kbd> <sub>slow pulse | <sub>Everything is fine
+<kbd><img src="resources/readme/logo_red.png" width="25"></kbd>  <sub>quick pulse | <sub>_Sfvip All_ needs your attention
 
 # Logs
 * The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
@@ -126,3 +126,10 @@ python -m dev.scan [--x86 | --x64 | --both]
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```
+### Nuitka vs. Pyinstaller
+| | _Nuitka_  | _Pyinstaller_|
+| :- | :- | :- |
+| _AV false positives_ | <sub>✅ lower| <sub>❌ higher |
+| _Run time speed_ | <sub>✅ faster | <sub>❌ slower |
+| _Distribution size_ | <sub>❌ bigger  | <sub>✅ smaller |
+| _Build time_ | <sub>❌slower| <sub>✅ faster|

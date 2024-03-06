@@ -38,8 +38,8 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 Color & pulse | Meaning
 :--- | :---
-<kbd><img src="resources/readme/logo_green.png"></kbd> slow pulse | Everything is fine
-<kbd><img src="resources/readme/logo_red.png"></kbd>  quick pulse | _{name}_ needs your attention
+<kbd><img src="resources/readme/logo_green.png" width="25"></kbd> <sub>slow pulse | <sub>Everything is fine
+<kbd><img src="resources/readme/logo_red.png" width="25"></kbd>  <sub>quick pulse | <sub>_{name}_ needs your attention
 
 # Logs
 * The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
@@ -126,3 +126,10 @@ python -m dev.scan [--x86 | --x64 | --both]
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```
+### Nuitka vs. Pyinstaller
+| | _Nuitka_  | _Pyinstaller_|
+| :- | :- | :- |
+| _AV false positives_ | <sub>✅ lower| <sub>❌ higher |
+| _Run time speed_ | <sub>✅ faster | <sub>❌ slower |
+| _Distribution size_ | <sub>❌ bigger  | <sub>✅ smaller |
+| _Build time_ | <sub>❌slower| <sub>✅ faster|
