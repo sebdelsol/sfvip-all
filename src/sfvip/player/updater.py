@@ -34,9 +34,9 @@ class PlayerChangelogs(ConfigLoader):
     def load(self) -> None:
         super().load()
         self._changelogs = {
-            Version(version): text
-            for version, text in self.all.items()
-            if isinstance(version, str) and isinstance(text, str)
+            version: text
+            for str_version, text in self.all.items()
+            if isinstance(text, str) and isinstance(str_version, str) and (version := Version(str_version))
         }
 
     def save_all(self) -> None:
@@ -59,6 +59,8 @@ class PlayerChangelogs(ConfigLoader):
                 ),
             )
         )
+
+    __repr__ = __str__
 
 
 class PlayerLatestUpdate:

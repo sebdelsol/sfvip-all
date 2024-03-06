@@ -58,10 +58,11 @@ class Texts:
     UpdatedDaysAgo: str = "Updated %s days ago"
     UpdateAllSeries: str = "Update All series"
     UpdateAllMovies: str = "Update All movies"
-    TooltipConfidence0: str = "0 %: You don't trust the EPG, so you'll have far fewer matches with TV channels"
-    TooltipConfidence100: str = (
-        "100 %: You trust the EPG completely and you'll always get a match, sometimes of poor quality"
-    )
+    Confidence0: str = "0 %: You don't trust the EPG and you'll only get an exact match and often none"
+    # fmt: off
+    # pylint: disable=line-too-long
+    Confidence100: str = "100 %: You completely trust the EPG and you'll always get a match even one of poor quality"
+    # fmt: on
 
     def as_dict(self) -> dict[str, str]:
         return dataclasses.asdict(self)

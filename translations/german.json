@@ -21,7 +21,7 @@
   "PleaseWait": "Bitte warten",
   "CheckLastestLibmpv": "Letzte libmpv-Aktualisierung prüfen",
   "RestartInstall": "Möchten Sie neu starten, um %s zu installieren?",
-  "SearchOrDownload": "Möchten Sie es suchen oder herunterladen?",
+  "SearchOrDownload": "Möchten Sie es suchen oder herunterladen ?",
   "NoSocketPort": "Kein Socket-Port verfügbar !",
   "CantStartProxies": "Lokale Proxys können nicht gestartet werden !",
   "NotFound": "%s nicht gefunden",
@@ -49,6 +49,6 @@
   "UpdatedDaysAgo": "Aktualisiert vor %s Tagen",
   "UpdateAllSeries": "Alle Serien aktualisieren",
   "UpdateAllMovies": "Alle Filme aktualisieren",
-  "TooltipConfidence0": "0 %: Sie vertrauen dem EPG nicht und haben daher viel weniger Übereinstimmungen mit Fernsehsendern",
-  "TooltipConfidence100": "100 %: Sie vertrauen dem EPG voll und ganz und erhalten immer einen Treffer, wenn auch manchmal in schlechter Qualität"
+  "Confidence0": "0 %: Sie vertrauen dem EPG nicht und erhalten nur eine exakte Übereinstimmung und oft keine",
+  "Confidence100": "100 %: Sie vertrauen dem EPG voll und ganz und erhalten immer einen Treffer, auch wenn er von schlechter Qualität ist"
 }

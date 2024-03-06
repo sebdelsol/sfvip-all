@@ -1,3 +1,7 @@
+## 1.4.12.38
+* Bump _mitmproxy_ to 10.2.3: upgrade proxy security.
+* Better translations.
+
 ## 1.4.12.37
 * Cache _Sfvip Player_ Changelog.
 

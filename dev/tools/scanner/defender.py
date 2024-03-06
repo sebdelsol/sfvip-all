@@ -12,12 +12,14 @@ class DefenderScan(NamedTuple):
     is_clean: bool
     has_failed: bool
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         if self.has_failed:
             return Warn("Failed")
         if self.is_clean:
             return Ok("Clean")
         return f"{Warn('Detected:')} {Low(','.join(self.threats))}"
+
+    __repr__ = __str__
 
     @staticmethod
     def get_threats(stdout: str) -> Iterator[str]:

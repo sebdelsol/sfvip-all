@@ -1,4 +1,4 @@
-# <kbd><img src="{ico_link}" width="40" align="center"></kbd> {name}
+# <kbd><img src="{ico_link}" width="45"></kbd> {name}
 ***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 * Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
@@ -77,10 +77,16 @@ GITHUB_TOKEN=your_github_token
 DEEPL_KEY=your_deepl_api_key
 ```
 
-### Activate the _x64_ environment
+### Activate an environment
+The [x64 environment]({x64_env_link}):
 ```console
 {env_x64}\scripts\activate
 ```
+Or the [x86 environment]({x86_env_link}):
+```console
+{env_x86}\scripts\activate
+```
+
 ### Run locally
 ```console
 python -m {script_main}
@@ -108,10 +114,6 @@ You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/downlo
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]
 ```
-### Publish a release
-```console
-python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
-```
 ### Upgrade dependencies
 It checks for _Nsis_, _Python minor update_ and all _packages dependencies_:
 ```console
@@ -126,10 +128,14 @@ python -m dev.scan [--x86 | --x64 | --both]
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```
+### Publish a release
+```console
+python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
+```
 ### Nuitka vs. Pyinstaller
 | | _Nuitka_  | _Pyinstaller_|
 | :- | :- | :- |
 | _AV false positives_ | <sub>✅ lower| <sub>❌ higher |
 | _Run time speed_ | <sub>✅ faster | <sub>❌ slower |
 | _Distribution size_ | <sub>❌ bigger  | <sub>✅ smaller |
-| _Build time_ | <sub>❌slower| <sub>✅ faster|
+| _Build time_ | <sub>❌ slower| <sub>✅ faster|
