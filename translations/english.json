@@ -43,6 +43,7 @@
   "InvalidUrl": "Invalid url",
   "EpgConfidence": "EPG confidence level",
   "EPGFoundConfidence": "%s found in the external EPG with %s confidence",
+  "ChangeLog": "Change log for %s",
   "UpdatedToday": "Updated today",
   "Updated1DayAgo": "Updated 1 day ago",
   "UpdatedDaysAgo": "Updated %s days ago",

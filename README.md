@@ -29,10 +29,10 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
 The logs are to be found in the app folder:
 
-<kbd><img src="resources/logs.png"  width="400"></kbd>  
+<kbd><img src="resources/logs.png"></kbd>  
 
 # Build
-[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.36-informational?logo=github)](/build_config.py#L27)
+[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.37-informational?logo=github)](/build_config.py#L27)
 [![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208.1k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://github.com/astral-sh/ruff)
 <sup><sub>with</sup></sub>

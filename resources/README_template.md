@@ -29,7 +29,7 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
 The logs are to be found in the app folder:
 
-<kbd><img src="resources/logs.png"  width="400"></kbd>  
+<kbd><img src="resources/logs.png"></kbd>  
 
 # Build
 [![version](https://custom-icon-badges.demolab.com/badge/Build%20{build_version}-informational?logo=github)]({build_version_link})

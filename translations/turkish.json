@@ -43,6 +43,7 @@
   "InvalidUrl": "Geçersiz url",
   "EpgConfidence": "EPG güven seviyesi",
   "EPGFoundConfidence": "%s güvenle harici EPG'de %s bulundu",
+  "ChangeLog": "%s için değişiklik günlüğü",
   "UpdatedToday": "Bugün güncellendi",
   "Updated1DayAgo": "1 gün önce güncellendi",
   "UpdatedDaysAgo": "%s gün önce güncellendi",

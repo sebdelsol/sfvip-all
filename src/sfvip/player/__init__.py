@@ -127,7 +127,7 @@ class Player:
     def __init__(self, app_info: AppInfo, ui: UI) -> None:
         self._player_exe = PlayerExe(app_info, ui)
         self._libmpv_updater = PlayerLibmpvAutoUpdater(self._player_exe.exe, app_info.config, ui, self.relaunch)
-        self._player_updater = PlayerAutoUpdater(self._player_exe, app_info.config, ui, self.relaunch)
+        self._player_updater = PlayerAutoUpdater(self._player_exe, app_info, ui, self.relaunch)
         self._window_watcher = _PlayerWindowWatcher()
         self._rect_loader = _PlayerRectLoader()
         self._process: Optional[subprocess.Popen[bytes]] = None

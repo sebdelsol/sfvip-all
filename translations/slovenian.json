@@ -43,6 +43,7 @@
   "InvalidUrl": "Nepravilen url",
   "EpgConfidence": "Stopnja zaupanja EPG",
   "EPGFoundConfidence": "%s najdenih v zunanjem EPG s stopnjo zaupanja %s",
+  "ChangeLog": "Dnevnik sprememb za %s",
   "UpdatedToday": "Posodobljeno danes",
   "Updated1DayAgo": "Posodobljeno pred 1 dnem",
   "UpdatedDaysAgo": "Posodobljeno pred %s dnevi",

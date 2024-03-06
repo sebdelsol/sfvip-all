@@ -1,3 +1,6 @@
+## 1.4.12.37
+* Cache _Sfvip Player_ Changelog.
+
 ## 1.4.12.36
 * Add Sfvip Player Changelog tooltip.
 
