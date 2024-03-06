@@ -43,6 +43,7 @@
   "InvalidUrl": "Неверный url",
   "EpgConfidence": "Уровень доверия к EPG",
   "EPGFoundConfidence": "%s найдено во внешнем EPG с уверенностью %s",
+  "ChangeLog": "Журнал изменений для %s",
   "UpdatedToday": "Обновлено сегодня",
   "Updated1DayAgo": "Обновлено 1 день назад",
   "UpdatedDaysAgo": "Обновлено %s дней назад",

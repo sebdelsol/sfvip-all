@@ -43,11 +43,12 @@
   "InvalidUrl": "Nieprawidłowy adres url",
   "EpgConfidence": "Poziom ufności EPG",
   "EPGFoundConfidence": "%s znaleziono w zewnętrznym EPG z poziomem ufności %s",
+  "ChangeLog": "Dziennik zmian dla %s",
   "UpdatedToday": "Zaktualizowano dzisiaj",
   "Updated1DayAgo": "Zaktualizowano 1 dzień temu",
-  "UpdatedDaysAgo": "Zaktualizowano %s dni temu",
+  "UpdatedDaysAgo": "Aktualizacja %s dni temu",
   "UpdateAllSeries": "Aktualizacja wszystkich seriali",
-  "UpdateAllMovies": "Zaktualizuj wszystkie filmy",
+  "UpdateAllMovies": "Aktualizacja wszystkich filmów",
   "TooltipConfidence0": "0%: Nie ufasz EPG, więc będziesz mieć znacznie mniej dopasowań do kanałów telewizyjnych.",
   "TooltipConfidence100": "100%: Całkowicie ufasz EPG i zawsze uzyskasz dopasowanie, czasami o niskiej jakości."
 }

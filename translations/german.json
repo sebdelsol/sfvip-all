@@ -42,12 +42,13 @@
   "EpgUrl": "Externer EPG",
   "InvalidUrl": "Ungültige Url",
   "EpgConfidence": "EPG-Konfidenzniveau",
-  "EPGFoundConfidence": "%s gefunden im externen EPG mit einer Vertrauenswürdigkeit von %s",
+  "EPGFoundConfidence": "%s im externen EPG gefunden mit einer Sicherheit von %s",
+  "ChangeLog": "Änderungsprotokoll für %s",
   "UpdatedToday": "Heute aktualisiert",
   "Updated1DayAgo": "Aktualisiert vor 1 Tag",
   "UpdatedDaysAgo": "Aktualisiert vor %s Tagen",
   "UpdateAllSeries": "Alle Serien aktualisieren",
   "UpdateAllMovies": "Alle Filme aktualisieren",
-  "TooltipConfidence0": "0 %: Sie haben kein Vertrauen in den EPG und erhalten daher viel weniger Übereinstimmungen mit Fernsehsendern",
+  "TooltipConfidence0": "0 %: Sie vertrauen dem EPG nicht und haben daher viel weniger Übereinstimmungen mit Fernsehsendern",
   "TooltipConfidence100": "100 %: Sie vertrauen dem EPG voll und ganz und erhalten immer einen Treffer, wenn auch manchmal in schlechter Qualität"
 }

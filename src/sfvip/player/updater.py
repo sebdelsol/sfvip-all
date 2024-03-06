@@ -8,9 +8,10 @@ import requests
 
 from shared import get_bitness_str
 from shared.version import Version
+from src.config_loader import ConfigLoader
 from translations.loc import LOC
 
-from ..app_info import AppConfig
+from ..app_info import AppInfo
 from ..ui import UI
 from ..ui.window import AskWindow
 from ..utils.guardian import ThreadGuardian
@@ -21,43 +22,76 @@ from .find_exe import PlayerExe
 logger = logging.getLogger(__name__)
 
 
+class PlayerChangelogs(ConfigLoader):
+    all: dict = {}
+    _max_versions = 5
+    _changelong_title = "Sfvip Player Changelog:"
+
+    def __init__(self, app_roaming: Path) -> None:
+        super().__init__(app_roaming / "cache" / "PlayerChangelog.json", check_newer=False)
+        self._changelogs: dict[Version, str] = {}
+
+    def load(self) -> None:
+        super().load()
+        self._changelogs = {
+            Version(version): text
+            for version, text in self.all.items()
+            if isinstance(version, str) and isinstance(text, str)
+        }
+
+    def save_all(self) -> None:
+        self.all = {str(version): text for version, text in self._changelogs.items()}
+
+    def set_version(self, version: Version, text: str) -> None:
+        if version and self._changelogs.get(version) != text:
+            self._changelogs[version] = text
+            self._changelogs = dict(sorted(self._changelogs.items(), reverse=True))
+            self.save_all()
+
+    def __str__(self) -> str:
+        return "\n\n".join(
+            (
+                LOC.ChangeLog % "Sfvip Player",
+                *(
+                    f"• v{version} - {text.capitalize()}"
+                    for i, (version, text) in enumerate(self._changelogs.items())
+                    if i < PlayerChangelogs._max_versions
+                ),
+            )
+        )
+
+
 class PlayerLatestUpdate:
     _url = "https://raw.githubusercontent.com/K4L4Uz/SFVIP-Player/main/Update.json"
-    _changelong_title = "Sfvip Player changelog:"
     _re_version = re.compile(r"^v([\d\.]+)")
     _key_version = "tag_name"
 
-    def __init__(self, ui: UI) -> None:
-        self._changelogs: list[str] = []
+    def __init__(self, app_roaming: Path, ui: UI) -> None:
+        self._changelogs = PlayerChangelogs(app_roaming).update()
         ui.set_changelog_callback(self.get_changelog)
 
     def get_changelog(self) -> str:
-        return "\n\n".join(
-            (
-                PlayerLatestUpdate._changelong_title,
-                *(f" • {changelog}" for changelog in self._changelogs),
-            )
-        )
+        return str(self._changelogs)
 
     def get_version(self, timeout: int) -> Optional[Version]:
         try:
             with requests.get(PlayerLatestUpdate._url, timeout=timeout) as response:
                 response.raise_for_status()
                 changelog = response.json()[PlayerLatestUpdate._key_version]
-                if changelog not in self._changelogs:
-                    self._changelogs.append(changelog)
-                version = PlayerLatestUpdate._re_version.findall(changelog)[0]
-                return Version(version)
+                version = Version(PlayerLatestUpdate._re_version.findall(changelog)[0])
+                text = PlayerLatestUpdate._re_version.sub("", changelog).strip()
+                self._changelogs.set_version(version, text)
+                return version
         except (requests.RequestException, KeyError, IndexError):
             return None
 
 
 class PlayerUpdater:
-    def __init__(self, player_exe: PlayerExe, app_config: AppConfig, ui: UI) -> None:
-        self._timeout = app_config.Player.requests_timeout
+    def __init__(self, player_exe: PlayerExe, app_info: AppInfo, ui: UI) -> None:
+        self._timeout = app_info.config.Player.requests_timeout
         self._player_exe = player_exe
         self._current = player_exe.found
-        self._player_latest_update = PlayerLatestUpdate(ui)
+        self._player_latest_update = PlayerLatestUpdate(app_info.roaming, ui)
 
     def is_new(self, version: Version) -> bool:
         return version > self._current.version
@@ -115,13 +149,11 @@ class SetRelaunchT(Protocol):
 
 
 class PlayerAutoUpdater:
-    def __init__(
-        self, player_exe: PlayerExe, app_config: AppConfig, ui: UI, relaunch_player: SetRelaunchT
-    ) -> None:
-        self._player_updater = PlayerUpdater(player_exe, app_config, ui)
+    def __init__(self, player_exe: PlayerExe, app_info: AppInfo, ui: UI, relaunch_player: SetRelaunchT) -> None:
+        self._player_updater = PlayerUpdater(player_exe, app_info, ui)
+        self._app_config = app_info.config
         self._relaunch_player = relaunch_player
         self._scheduler = Scheduler()
-        self._app_config = app_config
         self._ui = ui
 
     def __enter__(self) -> Self:

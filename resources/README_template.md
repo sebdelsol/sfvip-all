@@ -4,7 +4,7 @@
 * Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
 * Support an **external EPG**[^1].
 
-<kbd><img src="resources/all.png"></kbd>
+<kbd><img src="resources/readme/all.png"></kbd>
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
@@ -18,18 +18,34 @@
 [![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
 
 
-Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
-[***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
-Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
+* Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
+* [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
+* Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
 
 [^2]:_**{name}** will ask you for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
 
-# Logs
-The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
-The logs are to be found in the app folder:
+# Settings
+* Hover your mouse over the ***{name}*** logo:
 
-<kbd><img src="resources/logs.png"  width="400"></kbd>  
+<kbd><img src="resources/readme/logo_arrow.png"></kbd>  
+
+* To open the settings:
+
+<kbd><img src="resources/readme/settings.png"></kbd>  
+
+* Logo behavior meaning:
+
+Color & pulse | Meaning
+:--- | :---
+<kbd><img src="resources/readme/logo_green.png" width="25"></kbd> <sub>slow pulse | <sub>Everything is fine
+<kbd><img src="resources/readme/logo_red.png" width="25"></kbd>  <sub>quick pulse | <sub>_{name}_ needs your attention
+
+# Logs
+* The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
+* The logs are to be found in the app folder:
+
+<kbd><img src="resources/readme/logs.png"></kbd>  
 
 # Build
 [![version](https://custom-icon-badges.demolab.com/badge/Build%20{build_version}-informational?logo=github)]({build_version_link})
@@ -43,8 +59,8 @@ The logs are to be found in the app folder:
 <sup><sub>or</sup></sub>
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%20{pyinstaller_version}-linen?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
 
-[***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
-Check the [***build config***](build_config.py).
+* [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
+* Check the [***build config***](build_config.py).
 
 ### Create the environments
 You need [***Rust***](https://www.rust-lang.org/fr), [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) & [***x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe):
@@ -84,9 +100,9 @@ It's the _recommended option:_
 ```console
 python -m dev.build
 ```
-You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/.vsconfig):
+You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) with those [**components**](resources/readme/.vsconfig):
 
-<kbd><img src="resources/VS.png"></kbd>
+<kbd><img src="resources/readme/VS.png"></kbd>
 
 ### Build a specific version
 ```console
@@ -110,3 +126,10 @@ python -m dev.scan [--x86 | --x64 | --both]
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```
+### Nuitka vs. Pyinstaller
+| | _Nuitka_  | _Pyinstaller_|
+| :- | :- | :- |
+| _AV false positives_ | <sub>✅ lower| <sub>❌ higher |
+| _Run time speed_ | <sub>✅ faster | <sub>❌ slower |
+| _Distribution size_ | <sub>❌ bigger  | <sub>✅ smaller |
+| _Build time_ | <sub>❌slower| <sub>✅ faster|

@@ -133,7 +133,7 @@ def _get_app_version(app_info: AppInfo) -> Style:
 
 
 def _app_version_tooltip(app_info: AppInfo, max_versions: int = 5) -> Style:
-    lines = [f"{app_info.name} changelog:"]
+    lines = [f"{LOC.ChangeLog % app_info.name}:"]
     re_spaces = re.compile(r"\s+")
     n_versions = 0
     try:
@@ -150,9 +150,9 @@ def _app_version_tooltip(app_info: AppInfo, max_versions: int = 5) -> Style:
                             n_versions += 1
                             if n_versions > max_versions:
                                 break
-                            lines.extend(("", text, ""))
+                            lines.extend(("", f"• v{text}"))
                         case "*":
-                            lines.append(f" • {text}")
+                            lines.append(f"  - {text}")
                 except ValueError:
                     if line:
                         lines.append(f"    {line}")

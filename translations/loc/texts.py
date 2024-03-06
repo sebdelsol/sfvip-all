@@ -52,6 +52,7 @@ class Texts:
     InvalidUrl: str = "Invalid url"
     EpgConfidence: str = "EPG confidence level"
     EPGFoundConfidence: str = "%s found in the external EPG with %s confidence"
+    ChangeLog: str = "Change log for %s"
     UpdatedToday: str = "Updated today"
     Updated1DayAgo: str = "Updated 1 day ago"
     UpdatedDaysAgo: str = "Updated %s days ago"
