@@ -210,7 +210,7 @@ def _epg_url() -> Style:
 
 
 def _epg_confidence_tooltip() -> Style:
-    msg = "".join((f"\n\n • {text}" for text in (LOC.TooltipConfidence0, LOC.TooltipConfidence100)))
+    msg = "".join((f"\n\n • {text}" for text in (LOC.Confidence0, LOC.Confidence100)))
     return _InfoStyle.tooltip(f"{LOC.EpgConfidence}:{msg}")
 
 

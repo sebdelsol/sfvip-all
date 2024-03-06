@@ -86,29 +86,36 @@ def _get_exe_kwargs(build: CfgBuild, python_envs: PythonEnvs, publisher: Publish
     return kwargs
 
 
+def get_env_kwargs(python_envs: PythonEnvs) -> dict[str, str]:
+    kwargs = {}
+    for bitness, environment in python_envs.declarations.items():
+        kwargs |= {
+            f"{bitness}_env_link": _get_attr_link(environment, "path"),
+            f"env_{bitness}": environment.path,
+        }
+    return kwargs
+
+
 class Templater:
     encoding = "utf-8"
     h_download = 28
 
     def __init__(
-        self,
-        build: CfgBuild,
-        environments: CfgEnvironments,
-        github: CfgGithub,
-        publisher: Publisher,
+        self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub, publisher: Publisher
     ) -> None:
         python_envs = PythonEnvs(environments)
-        python_version = _version_of(python_envs, "Python")
-        nuitka_version = _version_of(python_envs, "Nuitka")
-        mitmproxy_version = _version_of(python_envs, "mitmproxy")
-        pyinstaller_version = _version_of(python_envs, "PyInstaller")
-        if python_version and nuitka_version and mitmproxy_version and pyinstaller_version:
+        if (
+            (python_version := _version_of(python_envs, "Python"))
+            and (nuitka_version := _version_of(python_envs, "Nuitka"))
+            and (mitmproxy_version := _version_of(python_envs, "mitmproxy"))
+            and (pyinstaller_version := _version_of(python_envs, "PyInstaller"))
+        ):
             print(Title("Build"), Ok("template"))
             self.template_format = dict(
                 py_major_version=str(PythonVersion(python_version).major),
-                **_get_exe_kwargs(build, python_envs, publisher),
                 build_version_link=_get_attr_link(build, "version"),
                 py_version_compact=python_version.replace(".", ""),
+                **_get_exe_kwargs(build, python_envs, publisher),
                 github_path=f"{github.owner}/{github.repo}",
                 pyinstaller_version=pyinstaller_version,
                 sloc=_get_sloc(Path(build.main).parent),
@@ -116,8 +123,7 @@ class Templater:
                 mitmproxy_version=mitmproxy_version,
                 script_main=Path(build.main).stem,
                 h_download=Templater.h_download,
-                env_x64=environments.X64.path,
-                env_x86=environments.X86.path,
+                **get_env_kwargs(python_envs),
                 nuitka_version=nuitka_version,
                 build_version=build.version,
                 py_version=python_version,

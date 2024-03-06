@@ -109,7 +109,7 @@ class PythonEnv:
             return False
         return True
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return "".join(
             (
                 Title("In "),
@@ -122,6 +122,8 @@ class PythonEnv:
                 Ok(str(self._env_path.name)),
             )
         )
+
+    __repr__ = __str__
 
     def clean_old_exe(self) -> Path:
         old_exe = self.exe.with_suffix(".exe.old")

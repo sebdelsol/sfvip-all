@@ -29,12 +29,12 @@ _Remove it:_
 ```console
 python -m user_proxy_cmd.dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--publish]
 ```
-### Publish a release
-```console
-python -m user_proxy_cmd.dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
-```
 ### Virus scan
 It updates _Microsoft Defender_ engine and signatures before scanning:
 ```console
 python -m user_proxy_cmd.dev.scan [--x86 | --x64 | --both]
+```
+### Publish a release
+```console
+python -m user_proxy_cmd.dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
 ```

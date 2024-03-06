@@ -93,8 +93,10 @@ class _Key(NamedTuple):
     path: str
     name: str
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return rf"{_hkey_constant_names[self.hkey]}\{self.path}\{self.name}"
+
+    __repr__ = __str__
 
 
 class RegistryWatcher(StartStopContextManager):

@@ -1,4 +1,4 @@
-# <kbd><img src="resources/Sfvip%20All.png" width="40" align="center"></kbd> Sfvip All
+# <kbd><img src="resources/Sfvip%20All.png" width="45"></kbd> Sfvip All
 ***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 * Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
@@ -8,14 +8,14 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.37-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.37/Install.Sfvip.All.1.4.12.37.x64.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1152.0_</sup></sup>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.38-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.38/Install.Sfvip.All.1.4.12.38.x64.exe)
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1170.0_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.37-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.37/Install.Sfvip.All.1.4.12.37.x86.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1152.0_</sup></sup>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.38-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.38/Install.Sfvip.All.1.4.12.38.x86.exe)
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1170.0_</sup></sup>
 
-[![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=informational&logo=github&labelColor=informational)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all)
-[![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
+[![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=informational&logo=github&labelColor=informational&style=for-the-badge)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all)
+[![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success&style=for-the-badge)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
 
 
 * Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
@@ -48,12 +48,12 @@ Color & pulse | Meaning
 <kbd><img src="resources/readme/logs.png"></kbd>  
 
 # Build
-[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.37-informational?logo=github)](/build_config.py#L27)
+[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.38-informational?logo=github)](/build_config.py#L27)
 [![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208.1k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://github.com/astral-sh/ruff)
 <sup><sub>with</sup></sub>
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-linen?logo=python-color)](https://www.python.org/downloads/release/python-3118/)
-[![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%2010.2.2-linen?logo=mitmproxy-black)](https://mitmproxy.org/)
+[![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%2010.2.3-linen?logo=mitmproxy-black)](https://mitmproxy.org/)
 [![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%203.09-linen?logo=nsis-color)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%202.1-linen?logo=nuitka)](https://nuitka.net/)
 <sup><sub>or</sup></sub>
@@ -77,10 +77,16 @@ GITHUB_TOKEN=your_github_token
 DEEPL_KEY=your_deepl_api_key
 ```
 
-### Activate the _x64_ environment
+### Activate an environment
+The [x64 environment](/build_config.py#L43):
 ```console
 .sfvip64\scripts\activate
 ```
+Or the [x86 environment](/build_config.py#L47):
+```console
+.sfvip86\scripts\activate
+```
+
 ### Run locally
 ```console
 python -m sfvip_all
@@ -108,10 +114,6 @@ You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/downlo
 ```console
 python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]
 ```
-### Publish a release
-```console
-python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
-```
 ### Upgrade dependencies
 It checks for _Nsis_, _Python minor update_ and all _packages dependencies_:
 ```console
@@ -126,10 +128,14 @@ python -m dev.scan [--x86 | --x64 | --both]
 ```console
 python -m dev.translate [--force] [--language LANGUAGE]
 ```
+### Publish a release
+```console
+python -m dev.publish [--x86 | --x64 | --both] [--version VERSION] [--info]
+```
 ### Nuitka vs. Pyinstaller
 | | _Nuitka_  | _Pyinstaller_|
 | :- | :- | :- |
 | _AV false positives_ | <sub>✅ lower| <sub>❌ higher |
 | _Run time speed_ | <sub>✅ faster | <sub>❌ slower |
 | _Distribution size_ | <sub>❌ bigger  | <sub>✅ smaller |
-| _Build time_ | <sub>❌slower| <sub>✅ faster|
+| _Build time_ | <sub>❌ slower| <sub>✅ faster|

@@ -16,8 +16,10 @@ class Version:
         if length:
             self._digits = *self._digits[:length], *((0,) * (length - len(self._digits)))
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return ".".join(str(digit).replace(".", "") for digit in self._digits)
+
+    __repr__ = __str__
 
     def __eq__(self, other: Self) -> bool:
         return tuple.__eq__(*zip(*zip_longest(self._digits, other._digits, fillvalue=0)))
@@ -26,4 +28,4 @@ class Version:
         return tuple.__gt__(*zip(*zip_longest(self._digits, other._digits, fillvalue=0)))
 
     def __hash__(self) -> int:
-        return hash(self.__repr__())
+        return hash(str(self))

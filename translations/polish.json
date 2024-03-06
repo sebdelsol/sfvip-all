@@ -49,6 +49,6 @@
   "UpdatedDaysAgo": "Aktualizacja %s dni temu",
   "UpdateAllSeries": "Aktualizacja wszystkich seriali",
   "UpdateAllMovies": "Aktualizacja wszystkich filmów",
-  "TooltipConfidence0": "0%: Nie ufasz EPG, więc będziesz mieć znacznie mniej dopasowań do kanałów telewizyjnych.",
-  "TooltipConfidence100": "100%: Całkowicie ufasz EPG i zawsze uzyskasz dopasowanie, czasami o niskiej jakości."
+  "Confidence0": "0%: Nie ufasz EPG i otrzymasz tylko dokładne dopasowanie, a często żadnego.",
+  "Confidence100": "100%: Całkowicie ufasz EPG i zawsze otrzymasz dopasowanie, nawet słabej jakości."
 }

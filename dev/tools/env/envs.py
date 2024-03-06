@@ -35,3 +35,4 @@ class PythonEnvs:
         self.all = [PythonEnv(environments, bitness) for bitness in (True, False)]
         self.x64 = PythonEnv(environments, True)
         self.x86 = PythonEnv(environments, False)
+        self.declarations = dict(x64=environments.X64, x86=environments.X86)
