@@ -92,24 +92,24 @@ class Publisher:
         self.all_python_envs = PythonEnvs(environments).all
         self.environments = environments
 
-    def publish(self, python_env: PythonEnv, version: str) -> None:
+    def publish(self, python_env: PythonEnv, version: str) -> bool:
         exe = self.dist.installer_exe(python_env, version)
-        exe_str = str(exe.as_posix())
         version = version or self.build.version
         if url := self.release.create(python_env, version):
             if update := AppUpdate.from_exe(url, exe, version):
                 self.app_latest_update.local_save(update, python_env.bitness)
-                print(Title("Publish update"), Ok(exe_str), Low(update.md5))
-                return
-        print(Warn("Publish update failed"), Ok(exe_str))
+                print(Title("Release"), Ok(exe.name), Low("-"), Low(update.md5), Low("-"), Low(repr_size(exe)))
+                return True
+        return False
 
     def publish_all(self) -> bool:
         args = Args().parse_args()
         if not args.info:
             version = args.version if args.version else self.build.version
+            published = True
             for python_env in PythonEnvs(self.environments, args).asked:
-                self.publish(python_env, version)
-            return True
+                published &= self.publish(python_env, version)
+            return published
         return False
 
     def get_local_version(self, python_env: PythonEnv) -> Optional[Published]:
@@ -151,7 +151,7 @@ class Publisher:
         return all_publisheds
 
     def show_versions(self) -> None:
-        print(Title("Online"), Ok("published updates"))
+        print(Title("Online"), Ok("published releases"))
         online_versions = self._show_versions(self.get_online_versions())
-        print(Title("Locally"), Ok("published updates"))
+        print(Title("Locally"), Ok("published releases"))
         self._show_versions(self.get_local_versions(), online_versions)
