@@ -104,11 +104,12 @@ class Templater:
         self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub, publisher: Publisher
     ) -> None:
         python_envs = PythonEnvs(environments)
-        python_version = _version_of(python_envs, "Python")
-        nuitka_version = _version_of(python_envs, "Nuitka")
-        mitmproxy_version = _version_of(python_envs, "mitmproxy")
-        pyinstaller_version = _version_of(python_envs, "PyInstaller")
-        if python_version and nuitka_version and mitmproxy_version and pyinstaller_version:
+        if (
+            (python_version := _version_of(python_envs, "Python"))
+            and (nuitka_version := _version_of(python_envs, "Nuitka"))
+            and (mitmproxy_version := _version_of(python_envs, "mitmproxy"))
+            and (pyinstaller_version := _version_of(python_envs, "PyInstaller"))
+        ):
             print(Title("Build"), Ok("template"))
             self.template_format = dict(
                 py_major_version=str(PythonVersion(python_version).major),

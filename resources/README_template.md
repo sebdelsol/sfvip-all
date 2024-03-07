@@ -14,8 +14,8 @@
 [<img src="https://custom-icon-badges.demolab.com/badge/{name} v{version_x86}-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="{h_download}"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="{h_download}"><img src="https://custom-icon-badges.demolab.com/badge/{exe_x86_clean}?logo=shield-check&logoColor=white&style=flat-square" height="{h_download}">]({exe_x86_release})
 <sup><sup>_by MS Defender • {exe_x86_engine} • {exe_x86_signature}_</sup></sup>
 
-[![download](https://img.shields.io/github/downloads/{github_path}/total?color=informational&logo=github&labelColor=informational)](https://tooomm.github.io/github-release-stats/?username={github_owner}&repository={github_repo})
-[![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
+[![download](https://img.shields.io/github/downloads/{github_path}/total?color=informational&logo=github&labelColor=informational&style=for-the-badge)](https://tooomm.github.io/github-release-stats/?username={github_owner}&repository={github_repo})
+[![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success&style=for-the-badge)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
 
 
 * Check the [***changelog***](build/changelog.md) and ***notes***[^2].  

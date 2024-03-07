@@ -8,14 +8,14 @@
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.37-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.37/Install.Sfvip.All.1.4.12.37.x64.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1152.0_</sup></sup>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.38-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.38/Install.Sfvip.All.1.4.12.38.x64.exe)
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1170.0_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.37-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.37/Install.Sfvip.All.1.4.12.37.x86.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1152.0_</sup></sup>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.38-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.38/Install.Sfvip.All.1.4.12.38.x86.exe)
+<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1170.0_</sup></sup>
 
-[![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=informational&logo=github&labelColor=informational)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all)
-[![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
+[![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=informational&logo=github&labelColor=informational&style=for-the-badge)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all)
+[![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success&style=for-the-badge)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
 
 
 * Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
