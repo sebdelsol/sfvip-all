@@ -20,12 +20,8 @@
     // type checking (pylance)
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "workspace",
+    // formatter & import sort
     "ruff.format.args": ["--line-length=115"],
-    // isort 
-    "isort.args": [
-        "--profile",
-        "black"
-    ],
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit",

@@ -7,6 +7,7 @@ class AppDefaultConfig(ConfigLoader):
         retry_minutes: int = 10
         requests_timeout: int = 3
         show_proxies: bool = False
+        n_logs_showed: int = 5
 
     class Player:
         exe: str | None = None

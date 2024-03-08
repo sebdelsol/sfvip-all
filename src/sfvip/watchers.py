@@ -147,8 +147,6 @@ class _CallbackWindowWatcher(NamedTuple):
 
 
 class WindowWatcher(StartStopContextManager):
-    _min_dt = 1.0 / 120.0  # reduce load
-
     def __init__(self, pid: int) -> None:
         self._pid = pid
         self._searching = threading.Event()
@@ -169,7 +167,7 @@ class WindowWatcher(StartStopContextManager):
                     is_foreground,
                 )
                 self._callback(state)
-                time.sleep(WindowWatcher._min_dt)
+                # time.sleep(0) # reduce load
 
     def _hook(self) -> None:
         while self._searching:

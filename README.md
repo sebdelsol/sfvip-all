@@ -1,63 +1,56 @@
 # <kbd><img src="resources/Sfvip%20All.png" width="45"></kbd> Sfvip All
 ***Sfvip All*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
+<kbd><img src="resources/readme/all.png"></kbd>
 * Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
 * Support an **external EPG**[^1].
 
-<kbd><img src="resources/readme/all.png"></kbd>
-
 [^1]: External EPG doesn't work with **local** m3u accounts.
-# Download
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.38-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.38/Install.Sfvip.All.1.4.12.38.x64.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1170.0_</sup></sup>
+# Downloads
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.39-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="35"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="35"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="35">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.39/Install.Sfvip.All.1.4.12.39.x64.exe)
+<sup><sup>_by MS Defender • 1.1.24020.9 • 1.407.102.0_</sup></sup>
 
-[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.38-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="28"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="28"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="28">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.38/Install.Sfvip.All.1.4.12.38.x86.exe)
-<sup><sup>_by MS Defender • 1.1.24010.10 • 1.405.1170.0_</sup></sup>
+[<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.39-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="35"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="35"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="35">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.39/Install.Sfvip.All.1.4.12.39.x86.exe)
+<sup><sup>_by MS Defender • 1.1.24020.9 • 1.407.102.0_</sup></sup>
 
-[![download](https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=informational&logo=github&labelColor=informational&style=for-the-badge)](https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all)
-[![issues](https://img.shields.io/github/issues/sebdelsol/sfvip-all?logo=github&labelColor=success&style=for-the-badge)](https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen)
-
+[<a href="https://tooomm.github.io/github-release-stats/?username=sebdelsol&repository=sfvip-all"><img src="https://img.shields.io/github/downloads/sebdelsol/sfvip-all/total?color=informational&logo=github&labelColor=informational&style=flat-square" height="25"></a><a href="https://github.com/sebdelsol/sfvip-all/issues?q=is%3Aopen"><img src="https://img.shields.io/github/issues/sebdelsol/sfvip-all?labelColor=success&style=flat-square" height="25"></a>]()
 
 * Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
 * [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
-* Please use [***SfvipUserProxy***](user_proxy_cmd) if you need to add or remove an user proxy for ***all users*** in ***Sfvip Player*** database.
+* Please use [***SfvipUserProxy***](user_proxy_cmd) to add or remove a proxy for ***all users*** in ***Sfvip Player*** database.
 
-[^2]:_**Sfvip All** will ask you for network connection its first run because it relies on local proxies to do its magic._  
+[^2]:_**Sfvip All** will ask for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
 
 # Settings
-* Hover your mouse over the ***Sfvip All*** logo:
+* Hover your mouse over the ***Sfvip All*** logo:  
+  <kbd><img src="resources/readme/logo_arrow.png"></kbd>  
 
-<kbd><img src="resources/readme/logo_arrow.png"></kbd>  
+* To open the settings:  
+  <kbd><img src="resources/readme/settings.png"></kbd>  
 
-* To open the settings:
-
-<kbd><img src="resources/readme/settings.png"></kbd>  
-
-* Logo behavior meaning:
-
-Color & pulse | Meaning
-:--- | :---
-<kbd><img src="resources/readme/logo_green.png" width="25"></kbd> <sub>slow pulse | <sub>Everything is fine
-<kbd><img src="resources/readme/logo_red.png" width="25"></kbd>  <sub>quick pulse | <sub>_Sfvip All_ needs your attention
+* Logo pulse meaning:  
+  Color & pulse | Meaning
+  :--- | :---
+  <kbd><img src="resources/readme/logo_green.png" width="25"></kbd> <sub>slow pulse | <sub>Everything is fine
+  <kbd><img src="resources/readme/logo_red.png" width="25"></kbd>  <sub>quick pulse | <sub>_Sfvip All_ needs your attention
 
 # Logs
-* The logs go **in pairs**: one for the _main_ process and one for the _mitmproxy_ process.  
-* The logs are to be found in the app folder:
+The logs go **in pairs** (one for each process: ***main*** & ***mitmproxy***) and they are in the app folder:
 
 <kbd><img src="resources/readme/logs.png"></kbd>  
 
 # Build
-[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.38-informational?logo=github)](/build_config.py#L27)
+[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.39-informational?logo=github)](/build_config.py#L27)
 [![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208.1k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
-[![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://github.com/astral-sh/ruff)
+[![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://docs.astral.sh/ruff/)
 <sup><sub>with</sup></sub>
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-linen?logo=python-color)](https://www.python.org/downloads/release/python-3118/)
-[![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%2010.2.3-linen?logo=mitmproxy-black)](https://mitmproxy.org/)
+[![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%2010.2.4-linen?logo=mitmproxy-black)](https://mitmproxy.org/)
 [![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%203.09-linen?logo=nsis-color)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%202.1-linen?logo=nuitka)](https://nuitka.net/)
 <sup><sub>or</sup></sub>
-[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%206.4.0-linen?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
+[![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%206.5.0-linen?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
 
 * [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
 * Check the [***build config***](build_config.py).
@@ -69,8 +62,7 @@ rustup target add i686-pc-windows-msvc
 py -3.11-64 -m dev.create
 py -3.11-32 -m dev.create
 ```
-Get a [***Github token***](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#personal-access-tokens-classic) and a [***DeepL API key***](https://www.deepl.com/en/docs-api/).  
-Store those in `api_keys.py`:
+Get a [***Github token***](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#personal-access-tokens-classic) & a [***DeepL API key***](https://www.deepl.com/en/docs-api/) and store those in `api_keys.py`:
 ```python3
 # api_keys.py
 GITHUB_TOKEN=your_github_token

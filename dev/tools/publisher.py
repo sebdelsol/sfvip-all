@@ -140,7 +140,7 @@ class Publisher:
             print(
                 Ok(f". {self.build.name}"),
                 version_color(f"v{published.version}"),
-                Ok(published.bitness),
+                version_color(published.bitness),
                 Low(f"- {published.md5} - {published.size}"),
                 Ok(f" {published.valid}"),
                 (Ok(" Already published") if published in old else Title(" New")) if old else "",

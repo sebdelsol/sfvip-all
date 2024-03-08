@@ -98,7 +98,8 @@ def get_env_kwargs(python_envs: PythonEnvs) -> dict[str, str]:
 
 class Templater:
     encoding = "utf-8"
-    h_download = 28
+    h_download = 35
+    h_github = 25
 
     def __init__(
         self, build: CfgBuild, environments: CfgEnvironments, github: CfgGithub, publisher: Publisher
@@ -123,6 +124,7 @@ class Templater:
                 mitmproxy_version=mitmproxy_version,
                 script_main=Path(build.main).stem,
                 h_download=Templater.h_download,
+                h_github=Templater.h_github,
                 **get_env_kwargs(python_envs),
                 nuitka_version=nuitka_version,
                 build_version=build.version,

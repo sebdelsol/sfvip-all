@@ -23,13 +23,24 @@ logger = logging.getLogger(__name__)
 
 
 class PlayerChangelogs(ConfigLoader):
-    all: dict = {}
+    all: dict = {
+        "1.2.7.72": "fixed picture-in-picture...",
+        "1.2.7.71": "fixed command line arguments...",
+        "1.2.7.70": "fake virus warnings...",
+        "1.2.7.69": "fixed updater...",
+        "1.2.7.68": "fixed XC server...",
+        "1.2.7.67": "fixed the subdomain...",
+        "1.2.7.66": "fixed HTTPS server protocol...",
+        "1.2.7.65": "Bugfix - Context menu...",
+    }
+    _prefix = "• v"
+    _tab = " " * len(_prefix)
     _max_versions = 5
-    _changelong_title = "Sfvip Player Changelog:"
 
-    def __init__(self, app_roaming: Path) -> None:
+    def __init__(self, app_roaming: Path, n_logs_showed: int) -> None:
         super().__init__(app_roaming / "cache" / "PlayerChangelog.json", check_newer=False)
         self._changelogs: dict[Version, str] = {}
+        self._n_logs_showed = n_logs_showed
 
     def load(self) -> None:
         super().load()
@@ -53,9 +64,10 @@ class PlayerChangelogs(ConfigLoader):
             (
                 LOC.ChangeLog % "Sfvip Player",
                 *(
-                    f"• v{version} - {text.capitalize()}"
+                    f"{PlayerChangelogs._prefix}{version}:\n"
+                    f"{PlayerChangelogs._tab}{text.capitalize().replace('...', '.')}"
                     for i, (version, text) in enumerate(self._changelogs.items())
-                    if i < PlayerChangelogs._max_versions
+                    if i < self._n_logs_showed
                 ),
             )
         )
@@ -68,8 +80,8 @@ class PlayerLatestUpdate:
     _re_version = re.compile(r"^v([\d\.]+)")
     _key_version = "tag_name"
 
-    def __init__(self, app_roaming: Path, ui: UI) -> None:
-        self._changelogs = PlayerChangelogs(app_roaming).update()
+    def __init__(self, app_roaming: Path, n_logs_showed: int, ui: UI) -> None:
+        self._changelogs = PlayerChangelogs(app_roaming, n_logs_showed).update()
         ui.set_changelog_callback(self.get_changelog)
 
     def get_changelog(self) -> str:
@@ -93,7 +105,7 @@ class PlayerUpdater:
         self._timeout = app_info.config.Player.requests_timeout
         self._player_exe = player_exe
         self._current = player_exe.found
-        self._player_latest_update = PlayerLatestUpdate(app_info.roaming, ui)
+        self._player_latest_update = PlayerLatestUpdate(app_info.roaming, app_info.config.App.n_logs_showed, ui)
 
     def is_new(self, version: Version) -> bool:
         return version > self._current.version

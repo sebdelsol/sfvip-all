@@ -1,10 +1,9 @@
 import dataclasses
-from dataclasses import dataclass
 from typing import ClassVar
 
 
 # pylint: disable=too-many-instance-attributes, invalid-name
-@dataclass
+@dataclasses.dataclass
 class Texts:
     language: ClassVar[str] = "english"
 
