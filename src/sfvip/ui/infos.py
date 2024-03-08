@@ -1,4 +1,3 @@
-import re
 import tkinter as tk
 from typing import Any, Callable, NamedTuple, Optional, Sequence
 
@@ -132,10 +131,12 @@ def _get_app_version(app_info: AppInfo) -> Style:
     return _InfoStyle.app(f"{app_info.name} v{app_info.version} {app_info.bitness}").grey
 
 
-def _app_version_tooltip(app_info: AppInfo, max_versions: int = 5) -> Style:
-    lines = [f"{LOC.ChangeLog % app_info.name}:"]
-    re_spaces = re.compile(r"\s+")
-    n_versions = 0
+def _app_version_tooltip(app_info: AppInfo) -> Style:
+    n_logs_showed = app_info.config.App.n_logs_showed
+    lines = [LOC.ChangeLog % app_info.name]
+    prefix = "• v"
+    tab = " " * len(prefix)
+    n_logs = 0
     try:
         with app_info.changelog.open("r") as f:
             for line in f.readlines():
@@ -143,19 +144,18 @@ def _app_version_tooltip(app_info: AppInfo, max_versions: int = 5) -> Style:
                 try:
                     first, text = line.split(maxsplit=1)
                     for char in "[]_*":
-                        text = text.replace(char, " ")
-                    text = re_spaces.sub(" ", text)
+                        text = text.replace(char, "")
                     match first:
                         case "##":
-                            n_versions += 1
-                            if n_versions > max_versions:
+                            n_logs += 1
+                            if n_logs > n_logs_showed:
                                 break
-                            lines.extend(("", f"• v{text}"))
+                            lines.extend(("", f"{prefix}{text}:"))
                         case "*":
-                            lines.append(f"  - {text}")
+                            lines.append(f"{tab}{text}")
                 except ValueError:
                     if line:
-                        lines.append(f"    {line}")
+                        lines.append(f"{tab}{line}")
 
     except (PermissionError, FileNotFoundError, OSError):
         pass
