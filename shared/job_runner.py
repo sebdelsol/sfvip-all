@@ -5,10 +5,11 @@ from typing import Callable, Generic, Iterator, Optional, TypeVar
 
 T = TypeVar("T")
 logger = logging.getLogger(__name__)
+CheckNewsT = bool | Callable[[T, T | None], bool]
 
 
 class _Jobs(Generic[T]):
-    def __init__(self, name: str, check_new: bool) -> None:
+    def __init__(self, name: str, check_new: CheckNewsT) -> None:
         self._objs: "multiprocessing.SimpleQueue[T | None]" = multiprocessing.SimpleQueue()
         self._stopping = multiprocessing.Event()
         self._running = multiprocessing.Event()
@@ -19,7 +20,11 @@ class _Jobs(Generic[T]):
     def add_job(self, obj: T) -> None:
         if self._running.is_set():
             # check it's a different job
-            if not self._check_new or obj != self._last_obj:
+            if (
+                (callable(self._check_new) and self._check_new(obj, self._last_obj))
+                or not self._check_new
+                or obj != self._last_obj
+            ):
                 # stop last job
                 self._stopping.set()
                 self._last_obj = obj
@@ -58,7 +63,7 @@ class JobRunner(Generic[T]):
     all following methods should be called from the same process EXCEPT add_job & wait_running
     """
 
-    def __init__(self, job: Callable[[T], None], name: str, check_new: bool = True) -> None:
+    def __init__(self, job: Callable[[T], None], name: str, check_new: CheckNewsT = True) -> None:
         self._job = job
         self._jobs = _Jobs[T](name, check_new)
         self._jobs_runner = None

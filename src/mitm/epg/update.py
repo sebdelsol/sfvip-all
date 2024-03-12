@@ -17,11 +17,13 @@ from shared.job_runner import JobRunner
 
 from ..utils import ProgressStep
 from .cache import (
+    ChannelProgrammes,
     ChannelsCache,
     ChannelsT,
     EPGProcess,
     EPGProgress,
     EPGstatus,
+    ProgrammesT,
     UpdateStatusT,
 )
 from .programme import InternalProgramme
@@ -90,7 +92,7 @@ def parse_programme(
 
 
 class FoundProgammes(NamedTuple):
-    list: list[InternalProgramme]
+    list: ProgrammesT
     confidence: int
 
 
@@ -98,12 +100,15 @@ class EPGupdate(NamedTuple):
     _chunk_size = 1024 * 128
     url: str
     status: EPGstatus
-    channels: ChannelsT = {}
+    programmes: Optional[ChannelProgrammes] = None
 
     @contextmanager
     @staticmethod
     def _load_xml(url: str, epg_process: EPGProcess, timeout: int) -> Iterator[Optional[Path]]:
         epg_process.update_status(EPGProgress(EPGstatus.LOADING))
+        if (xml := Path(url)).is_file():  # for debug purpose
+            yield xml
+            return
         with tempfile.TemporaryDirectory() as temp_dir:
             with requests.get(url, stream=True, timeout=timeout) as response:
                 response.raise_for_status()
@@ -153,21 +158,20 @@ class EPGupdate(NamedTuple):
             return channels
 
     @classmethod
-    def _get(cls, url: str, cache: ChannelsCache, epg_process: EPGProcess, timeout: int) -> Optional[ChannelsT]:
+    def _get(
+        cls, url: str, cache: ChannelsCache, epg_process: EPGProcess, timeout: int
+    ) -> Optional[ChannelProgrammes]:
         try:
-            if Path(url).is_file():  # for debug purpose
-                return cls._process(Path(url), url, epg_process)
             with cls._load_xml(url, epg_process, timeout) as xml:
                 if not xml:
                     return None
                 epg_process.update_status(EPGProgress(EPGstatus.LOAD_CACHE))
-                if channels := cache.load(xml, url):
+                if programmes := cache.load(xml, url):
                     logger.info("Epg channels from '%s' found in cache", url)
-                    return channels
+                    return programmes
                 if channels := cls._process(xml, url, epg_process):
                     epg_process.update_status(EPGProgress(EPGstatus.SAVE_CACHE))
-                    cache.save(xml, url, channels)
-                    return channels
+                    return cache.save(xml, url, channels)
         except (
             requests.RequestException,
             ConnectionError,
@@ -195,23 +199,23 @@ class EPGupdate(NamedTuple):
         return cls(url, EPGstatus.NO_EPG)
 
     def get_programmes(self, epg_id: str, confidence: int) -> Optional[FoundProgammes]:
-        if self.channels:
+        if self.programmes:
             normalized_epg_id = _normalize(epg_id)
             if result := process.extractOne(
                 normalized_epg_id,
-                self.channels.keys(),
+                self.programmes.all_names,
                 scorer=fuzz.token_sort_ratio,
                 score_cutoff=100 - confidence,
             ):
                 normalized_epg_id, score = result[:2]
-                logger.info(
-                    "Found Epg %s for %s with confidence %s%% (cut off @%s%%)",
-                    normalized_epg_id,
-                    epg_id,
-                    score,
-                    100 - confidence,
-                )
-                if programmes := self.channels.get(normalized_epg_id):
+                if programmes := self.programmes.get_programmes(normalized_epg_id):
+                    logger.info(
+                        "Found Epg %s for %s with confidence %s%% (cut off @%s%%)",
+                        normalized_epg_id,
+                        epg_id,
+                        score,
+                        100 - confidence,
+                    )
                     return FoundProgammes(programmes, int(score))
         return None
 
@@ -223,16 +227,17 @@ class EPGupdater(JobRunner[str]):
         self._update_lock = multiprocessing.Lock()
         self._update: Optional[EPGupdate] = None
         self._timeout = timeout
-        super().__init__(self._updating, "Epg updater", check_new=False)
+        super().__init__(self._updating, "Epg updater", check_new=self._check_new)
 
-    def _updating(self, url: str) -> None:
+    def _check_new(self, url: str, last_url: Optional[str]) -> bool:
         with self._update_lock:
             current_update = self._update
-        # update only if url is different or last update failed
-        if not current_update or current_update.url != url or current_update.status == EPGstatus.FAILED:
-            if update := EPGupdate.from_url(url, self._cache, self.epg_process, self._timeout):
-                with self._update_lock:
-                    self._update = update
+        return last_url != url or bool(current_update and current_update.status == EPGstatus.FAILED)
+
+    def _updating(self, url: str) -> None:
+        if update := EPGupdate.from_url(url, self._cache, self.epg_process, self._timeout):
+            with self._update_lock:
+                self._update = update
 
     @property
     def update(self) -> Optional[EPGupdate]:

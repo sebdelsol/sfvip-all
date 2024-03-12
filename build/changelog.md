@@ -1,3 +1,7 @@
+## 1.4.12.40
+* Reduce Epg cache size: faster & less memory usage.
+* Fix EPG that sometimes restarted.
+
 ## 1.4.12.39
 * Bump _mitmproxy_ to 10.2.4.
 * _Sfvip All_ windows smoothly follow _Sfvip Player_.

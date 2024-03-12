@@ -36,7 +36,7 @@ class MACQuery(NamedTuple):
         if (
             (media_type := get_query_key(flow, "type"))
             and media_type in MediaTypes
-            and ((server := flow.request.host_header))
+            and (server := flow.request.host_header)
         ):
             return cls(
                 server=server,
@@ -148,7 +148,7 @@ class MACCache(CacheCleaner):
         self.contents: dict[str, MACContent] = {}
         self.update_progress = update_progress
         self.all_updated = all_updated
-        super().__init__(roaming)
+        super().__init__(roaming, MACCache.clean_after_days, *MACCache.suffixes)
 
     def file_path(self, query: MACQuery) -> Path:
         return self.cache_dir / sanitize_filename(f"{query.server}.{query.type}")
