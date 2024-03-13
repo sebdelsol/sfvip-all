@@ -1,6 +1,7 @@
 ## 1.4.12.40
-* Reduce Epg cache size: faster & less memory usage.
-* Fix EPG that sometimes restarted.
+* Fix EPG channels with wrong programmes.
+* Fix EPG processing restarting when closing the UI.
+* Faster EPG processing and loading that use less memory.
 
 ## 1.4.12.39
 * Bump _mitmproxy_ to 10.2.4.

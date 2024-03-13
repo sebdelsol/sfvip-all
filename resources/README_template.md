@@ -44,12 +44,10 @@ The logs go **in pairs** (one for each process: ***main*** & ***mitmproxy***) an
 [![version](https://custom-icon-badges.demolab.com/badge/Build%20{build_version}-informational?logo=github)]({build_version_link})
 [![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%20{sloc}-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github={github_path})
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://docs.astral.sh/ruff/)
-<sup><sub>with</sup></sub>
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%20{py_version}-linen?logo=python-color)](https://www.python.org/downloads/release/python-{py_version_compact}/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%20{mitmproxy_version}-linen?logo=mitmproxy-black)](https://mitmproxy.org/)
 [![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%20{nsis_version}-linen?logo=nsis-color)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%20{nuitka_version}-linen?logo=nuitka)](https://nuitka.net/)
-<sup><sub>or</sup></sub>
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%20{pyinstaller_version}-linen?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
 
 * [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  

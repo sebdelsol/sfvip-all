@@ -26,6 +26,7 @@ class Schedule(NamedTuple):
                 return cls(start, end)
         return None
 
+    # TODO check time (CNN bug)
     @staticmethod
     def _get_timestamp(date: str) -> Optional[int]:
         try:

@@ -10,7 +10,6 @@ from .utils.retry import RetryIfException
 logger = logging.getLogger(__name__)
 
 
-# TODO check it can't create false proxies ?!
 class SharedProxiesToRestore(dict[str, dict[str, str]]):
     """dict of proxies to restore by pid, shared by all instances of the app"""
 

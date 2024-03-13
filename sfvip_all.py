@@ -1,6 +1,5 @@
 # nuitka-project: --include-module=mitmproxy_windows
 # nuitka-project: --enable-plugin=tk-inter
-# nuitka-project: --enable-plugin=anti-bloat
 
 from src import at_very_last, set_logging_and_exclude
 

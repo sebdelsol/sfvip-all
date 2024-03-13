@@ -41,6 +41,7 @@ class CfgGithub(Protocol):
 
 
 class CfgTemplate(Protocol):
+    __name__: str
     src: str
     dst: str
 

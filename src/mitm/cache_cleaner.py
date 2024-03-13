@@ -13,7 +13,6 @@ class CacheCleaner(ABC):
     def __init__(self, roaming: Path, clean_after_days: int, *suffixes: str) -> None:
         self.cache_dir = Path(roaming) / "cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        logger.info("%s is in '%s'", self.__class__.__name__, self.cache_dir)
         self.clean(clean_after_days, *suffixes)
 
     def clean(self, clean_after_days: int, *suffixes: str):

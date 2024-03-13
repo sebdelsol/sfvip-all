@@ -5,6 +5,7 @@ import multiprocessing
 import re
 import tempfile
 from contextlib import contextmanager
+from enum import Enum, auto
 from pathlib import Path
 from typing import IO, Callable, Iterator, NamedTuple, Optional, Self
 from urllib.parse import urlparse
@@ -16,19 +17,35 @@ from thefuzz import fuzz, process
 from shared.job_runner import JobRunner
 
 from ..utils import ProgressStep
-from .cache import (
-    ChannelProgrammes,
-    ChannelsCache,
-    ChannelsT,
-    EPGProcess,
-    EPGProgress,
-    EPGstatus,
-    ProgrammesT,
-    UpdateStatusT,
-)
+from .cache import ChannelProgrammes, ChannelsCache, NamedProgrammes, ProgrammesT
 from .programme import InternalProgramme
 
 logger = logging.getLogger(__name__)
+
+
+class EPGstatus(Enum):
+    LOADING = auto()
+    LOAD_CACHE = auto()
+    SAVE_CACHE = auto()
+    PROCESSING = auto()
+    READY = auto()
+    FAILED = auto()
+    NO_EPG = auto()
+    INVALID_URL = auto()
+
+
+class EPGProgress(NamedTuple):
+    status: EPGstatus
+    progress: Optional[float] = None
+
+
+UpdateStatusT = Callable[[EPGProgress], None]
+StoppingT = Callable[[], bool]
+
+
+class EPGProcess(NamedTuple):
+    update_status: UpdateStatusT
+    stopping: StoppingT
 
 
 def _normalize(name: str) -> str:
@@ -46,49 +63,48 @@ def _valid_url(url: str) -> bool:
         return False
 
 
-def parse_programme(
-    file_obj: IO[bytes] | gzip.GzipFile,
-    handle_channel: Callable[[str, str], None],
-    handle_programme: Callable[[str, InternalProgramme], None],
-) -> Iterator[None]:
-    display_name: Optional[str] = None
+def parse_programme(file_obj: IO[bytes] | gzip.GzipFile, epg_process: EPGProcess) -> Iterator[NamedProgrammes]:
+    current_programmes: dict[InternalProgramme, bool] = {}
+    current_channel_id: Optional[str] = None
+    progress_step = ProgressStep()
     elem: ET.ElementBase
     title: str = ""
     desc: str = ""
     for _, elem in ET.iterparse(
         file_obj,
         events=("end",),
-        tag=("channel", "display-name", "programme", "title", "desc"),
+        tag=("channel", "programme", "title", "desc"),
         remove_blank_text=True,
         remove_comments=True,
         remove_pis=True,
     ):
         match elem.tag:
-            case "display-name":  # child of <channel>
-                display_name = elem.text
             case "channel":
-                if display_name and (channel_id := elem.get("id", None)):
-                    handle_channel(channel_id, display_name)
-                display_name = None
+                if channel_id := elem.get("id", None):
+                    progress_step.increment_total(1)
             case "title":  # child of <programme>
                 title = elem.text or ""
             case "desc":  # child of <programme>
                 desc = elem.text or ""
             case "programme":
                 if channel_id := elem.get("channel", None):
-                    handle_programme(
-                        channel_id,
-                        InternalProgramme(
-                            start=elem.get("start", ""),
-                            stop=elem.get("stop", ""),
-                            title=title or "",
-                            desc=desc or "",
-                        ),
-                    )
+                    channel_id = _normalize(channel_id)
+                    if channel_id != current_channel_id:
+                        if current_channel_id and current_programmes:
+                            yield NamedProgrammes(tuple(current_programmes), current_channel_id)
+                        current_programmes = {}
+                        current_channel_id = channel_id
+                        if progress := progress_step.increment_progress(1):
+                            epg_process.update_status(EPGProgress(EPGstatus.PROCESSING, progress))
+                    start = elem.get("start", "")
+                    stop = elem.get("stop", "")
+                    programme = InternalProgramme(start=start, stop=stop, title=title, desc=desc)
+                    current_programmes[programme] = True
                 title = ""
                 desc = ""
         elem.clear(False)
-        yield
+    if current_channel_id and current_programmes:
+        yield NamedProgrammes(tuple(current_programmes), current_channel_id)
 
 
 class FoundProgammes(NamedTuple):
@@ -126,36 +142,17 @@ class EPGupdate(NamedTuple):
                 yield xml
 
     @classmethod
-    def _process(cls, xml: Path, url: str, epg_process: EPGProcess) -> Optional[ChannelsT]:
+    def _process(cls, xml: Path, url: str, epg_process: EPGProcess) -> Iterator[Optional[NamedProgrammes]]:
+        stopped = False
         epg_process.update_status(EPGProgress(EPGstatus.PROCESSING))
         with gzip.GzipFile(xml) if url.endswith(".gz") else xml.open("rb") as f:
-            channels: ChannelsT = {}
-            display_names: dict[str, str] = {}
-            normalized: dict[str, str] = {}
-            progress_step = ProgressStep()
-
-            def handle_channel(channel_id: str, display_name: str) -> None:
-                progress_step.increment_total(1)
-                display_names[channel_id] = display_name
-
-            def handle_programme(channel_id: str, programme: InternalProgramme) -> None:
-                if channel_id not in normalized:
-                    normalized[channel_id] = _normalize(channel_id)
-                channel = normalized[channel_id]
-                if channel not in channels:
-                    channels[channel] = []
-                    if display_name := display_names.get(channel_id):
-                        if display_name not in channels:
-                            channels[_normalize(display_name)] = channels[channel]
-                    if progress := progress_step.increment_progress(1):
-                        epg_process.update_status(EPGProgress(EPGstatus.PROCESSING, progress))
-                channels[channel].append(programme)
-
-            for _ in parse_programme(f, handle_channel, handle_programme):
+            for named_programmes in parse_programme(f, epg_process):
                 if epg_process.stopping():
-                    return None
-            logger.info("%s Epg channels found from '%s'", progress_step.total, url)
-            return channels
+                    stopped = True
+                    break
+                yield named_programmes
+        if stopped:
+            yield None  # we're sure xml is freed before yielding the stop
 
     @classmethod
     def _get(
@@ -167,11 +164,13 @@ class EPGupdate(NamedTuple):
                     return None
                 epg_process.update_status(EPGProgress(EPGstatus.LOAD_CACHE))
                 if programmes := cache.load(xml, url):
-                    logger.info("Epg channels from '%s' found in cache", url)
+                    logger.info("%s Epg channels from '%s' loaded in cache", programmes.number, url)
                     return programmes
                 if channels := cls._process(xml, url, epg_process):
                     epg_process.update_status(EPGProgress(EPGstatus.SAVE_CACHE))
-                    return cache.save(xml, url, channels)
+                    if programmes := cache.save(xml, url, channels):
+                        logger.info("%s Epg channels from '%s' saved in cache", programmes.number, url)
+                        return programmes
         except (
             requests.RequestException,
             ConnectionError,
@@ -188,9 +187,9 @@ class EPGupdate(NamedTuple):
         if url:
             if _valid_url(url) or Path(url).is_file():
                 logger.info("Load epg channels from '%s'", url)
-                if (channels := cls._get(url, cache, epg_process, timeout)) is not None:
+                if (programmes := cls._get(url, cache, epg_process, timeout)) is not None:
                     epg_process.update_status(EPGProgress(EPGstatus.READY))
-                    return cls(url, EPGstatus.READY, channels)
+                    return cls(url, EPGstatus.READY, programmes)
                 epg_process.update_status(EPGProgress(EPGstatus.FAILED))
                 return cls(url, EPGstatus.FAILED)
             epg_process.update_status(EPGProgress(EPGstatus.INVALID_URL))
@@ -223,21 +222,26 @@ class EPGupdate(NamedTuple):
 class EPGupdater(JobRunner[str]):
     def __init__(self, roaming: Path, update_status: UpdateStatusT, timeout: int) -> None:
         self.epg_process = EPGProcess(update_status, self.stopping)
-        self._cache = ChannelsCache(roaming, self.epg_process)
+        self._update_has_failed = multiprocessing.Event()
         self._update_lock = multiprocessing.Lock()
         self._update: Optional[EPGupdate] = None
+        self._cache = ChannelsCache(roaming)
         self._timeout = timeout
         super().__init__(self._updating, "Epg updater", check_new=self._check_new)
 
     def _check_new(self, url: str, last_url: Optional[str]) -> bool:
         with self._update_lock:
-            current_update = self._update
-        return last_url != url or bool(current_update and current_update.status == EPGstatus.FAILED)
+            return last_url != url or self._update_has_failed.is_set()
 
     def _updating(self, url: str) -> None:
+        self._update_has_failed.clear()
         if update := EPGupdate.from_url(url, self._cache, self.epg_process, self._timeout):
             with self._update_lock:
                 self._update = update
+                if update.status == EPGstatus.FAILED:
+                    self._update_has_failed.set()
+                else:
+                    self._update_has_failed.clear()
 
     @property
     def update(self) -> Optional[EPGupdate]:
