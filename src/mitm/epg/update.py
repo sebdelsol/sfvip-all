@@ -5,9 +5,17 @@ import multiprocessing
 import re
 import tempfile
 from contextlib import contextmanager
-from enum import Enum, auto
+from enum import Enum, auto, member
 from pathlib import Path
-from typing import IO, Callable, Iterator, NamedTuple, Optional, Self
+from typing import (
+    IO,
+    Callable,
+    Container,
+    Iterator,
+    NamedTuple,
+    Optional,
+    Self,
+)
 from urllib.parse import urlparse
 
 import lxml.etree as ET
@@ -50,8 +58,11 @@ class EPGProcess(NamedTuple):
 
 def _normalize(name: str) -> str:
     name = re.sub(r"(\.)([\d]+)", r"\2", name)  # turn channel.2 into channel2
-    for sub, repl in (".+", "plus"), ("+", "plus"), ("*", "star"):
+    for sub, repl in ("+", "plus"), ("*", "star"):
         name = name.replace(sub, repl)
+    for char in ".|()[]-":
+        name = name.replace(char, " ")
+    name = re.sub(r"\s+", " ", name).strip()  # remove extra white spaces
     return name
 
 
@@ -66,6 +77,7 @@ def _valid_url(url: str) -> bool:
 def parse_programme(file_obj: IO[bytes] | gzip.GzipFile, epg_process: EPGProcess) -> Iterator[NamedProgrammes]:
     current_programmes: dict[InternalProgramme, bool] = {}
     current_channel_id: Optional[str] = None
+    normalized: dict[str, str] = {}
     progress_step = ProgressStep()
     elem: ET.ElementBase
     title: str = ""
@@ -88,12 +100,13 @@ def parse_programme(file_obj: IO[bytes] | gzip.GzipFile, epg_process: EPGProcess
                 desc = elem.text or ""
             case "programme":
                 if channel_id := elem.get("channel", None):
-                    channel_id = _normalize(channel_id)
-                    if channel_id != current_channel_id:
+                    if not (norm_channel_id := normalized.get(channel_id)):
+                        norm_channel_id = normalized[channel_id] = _normalize(channel_id)
+                    if norm_channel_id != current_channel_id:
                         if current_channel_id and current_programmes:
                             yield NamedProgrammes(tuple(current_programmes), current_channel_id)
                         current_programmes = {}
-                        current_channel_id = channel_id
+                        current_channel_id = norm_channel_id
                         if progress := progress_step.increment_progress(1):
                             epg_process.update_status(EPGProgress(EPGstatus.PROCESSING, progress))
                     start = elem.get("start", "")
@@ -110,6 +123,74 @@ def parse_programme(file_obj: IO[bytes] | gzip.GzipFile, epg_process: EPGProcess
 class FoundProgammes(NamedTuple):
     list: ProgrammesT
     confidence: int
+
+
+class FuzzResult(NamedTuple):
+    name: str
+    score: float
+
+    @classmethod
+    def from_result(cls, result: tuple) -> Self:
+        return cls(*result[:2])
+
+
+class Scorer(Enum):
+    RATIO = member(fuzz.ratio)
+    PARTIAL_RATIO = member(fuzz.partial_ratio)
+    TOKEN_SET_RATIO = member(fuzz.token_set_ratio)
+    TOKEN_SORT_RATIO = member(fuzz.token_sort_ratio)
+    PARTIAL_TOKEN_SET_RATIO = member(fuzz.partial_token_set_ratio)
+    PARTIAL_TOKEN_SORT_RATIO = member(fuzz.partial_token_sort_ratio)
+
+
+class FuzzBest:
+    _scorers = (
+        # used for cuttoff and overall score
+        (Scorer.TOKEN_SET_RATIO, 0.5),
+        # used overal score
+        (Scorer.TOKEN_SORT_RATIO, 1),
+        (Scorer.PARTIAL_TOKEN_SORT_RATIO, 0.5),
+        (Scorer.RATIO, 1),
+    )
+    _limit = 5
+
+    def __init__(self, choices: Container[str]) -> None:
+        self._choices = choices
+
+    @staticmethod
+    def _extract(query: str, choices: Container[str], scorer: Scorer, cutoff: int = 0) -> list[FuzzResult]:
+        results = process.extractBests(
+            query, choices, limit=FuzzBest._limit, scorer=scorer.value, score_cutoff=cutoff
+        )
+        return [FuzzResult.from_result(result) for result in results]
+
+    def _best(self, query: str, confidence: int) -> Optional[FuzzResult]:
+        # cutoff using the 1st scorer
+        scorer, weight = FuzzBest._scorers[0]
+        if results := self._extract(query, self._choices, scorer=scorer, cutoff=100 - confidence):
+            # print(f"{query=}")
+            # print("found", results)
+            if len(results) == 1:
+                return results[0]
+            # get the accumulated score with weight
+            scores = {result.name: result.score for result in results}
+            accumulated_scores = {name: score * weight for name, score in scores.items()}
+            for scorer, weight in FuzzBest._scorers[1:]:
+                for result in self._extract(query, scores.keys(), scorer=scorer):
+                    accumulated_scores[result.name] += result.score * weight
+            # print(accumulated_scores)
+            best = sorted(
+                (FuzzResult(name, score) for name, score in accumulated_scores.items()),
+                key=lambda result: result.score,
+                reverse=True,
+            )[0]
+            return FuzzResult(best.name, scores[best.name])
+        return None
+
+    def get(self, query: str, confidence: int) -> Optional[FuzzResult]:
+        if query in self._choices:
+            return FuzzResult(query, 100)
+        return self._best(query, confidence)
 
 
 class EPGupdate(NamedTuple):
@@ -199,23 +280,16 @@ class EPGupdate(NamedTuple):
 
     def get_programmes(self, epg_id: str, confidence: int) -> Optional[FoundProgammes]:
         if self.programmes:
-            normalized_epg_id = _normalize(epg_id)
-            if result := process.extractOne(
-                normalized_epg_id,
-                self.programmes.all_names,
-                scorer=fuzz.token_sort_ratio,
-                score_cutoff=100 - confidence,
-            ):
-                normalized_epg_id, score = result[:2]
-                if programmes := self.programmes.get_programmes(normalized_epg_id):
+            if found := FuzzBest(self.programmes.all_names).get(_normalize(epg_id), confidence):
+                if programmes := self.programmes.get_programmes(found.name):
                     logger.info(
-                        "Found Epg %s for %s with confidence %s%% (cut off @%s%%)",
-                        normalized_epg_id,
+                        "Found Epg '%s' for %s with confidence %s%% (cut off @%s%%)",
+                        found.name,
                         epg_id,
-                        score,
+                        found.score,
                         100 - confidence,
                     )
-                    return FoundProgammes(programmes, int(score))
+                    return FoundProgammes(programmes, int(found.score))
         return None
 
 

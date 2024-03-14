@@ -50,5 +50,10 @@
   "UpdateAllSeries": "Tüm serileri güncelle",
   "UpdateAllMovies": "Tüm filmleri güncelle",
   "Confidence0": "0 %: EPG'ye güvenmiyorsunuz ve yalnızca tam bir eşleşme elde edeceksiniz ve genellikle hiçbir eşleşme elde edemeyeceksiniz",
-  "Confidence100": "100: EPG'ye tamamen güvenirsiniz ve düşük kalitede bile olsa her zaman bir eşleşme elde edersiniz"
+  "Confidence100": "100: EPG'ye tamamen güvenirsiniz ve düşük kalitede bile olsa her zaman bir eşleşme elde edersiniz",
+  "EPGPrefer": "Önce IPTV sağlayıcısını arayın",
+  "Yes": "Evet",
+  "No": "Hayır",
+  "EPGPreferYes": "Evet: Önce IPTV sağlayıcısı EPG'sini arayın. Harici EPG'yi yalnızca başarısız olduğunda kullanın.",
+  "EPGPreferNo": "Hayır: Önce harici EPG'yi arayın. IPTV sağlayıcısı EPG'sini yalnızca başarısız olduğunda kullanın."
 }

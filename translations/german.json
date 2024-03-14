@@ -21,7 +21,7 @@
   "PleaseWait": "Bitte warten",
   "CheckLastestLibmpv": "Letzte libmpv-Aktualisierung prüfen",
   "RestartInstall": "Möchten Sie neu starten, um %s zu installieren?",
-  "SearchOrDownload": "Möchten Sie es suchen oder herunterladen ?",
+  "SearchOrDownload": "Möchten Sie es suchen oder herunterladen?",
   "NoSocketPort": "Kein Socket-Port verfügbar !",
   "CantStartProxies": "Lokale Proxys können nicht gestartet werden !",
   "NotFound": "%s nicht gefunden",
@@ -50,5 +50,10 @@
   "UpdateAllSeries": "Alle Serien aktualisieren",
   "UpdateAllMovies": "Alle Filme aktualisieren",
   "Confidence0": "0 %: Sie vertrauen dem EPG nicht und erhalten nur eine exakte Übereinstimmung und oft keine",
-  "Confidence100": "100 %: Sie vertrauen dem EPG voll und ganz und erhalten immer einen Treffer, auch wenn er von schlechter Qualität ist"
+  "Confidence100": "100 %: Sie vertrauen dem EPG voll und ganz und erhalten immer einen Treffer, auch wenn er von schlechter Qualität ist",
+  "EPGPrefer": "Suchen Sie zuerst den IPTV-Anbieter",
+  "Yes": "Ja",
+  "No": "Nein",
+  "EPGPreferYes": "Ja: Suchen Sie zuerst im EPG des IPTV-Anbieters. Verwenden Sie den externen EPG nur, wenn er nicht funktioniert.",
+  "EPGPreferNo": "Nein: Zuerst im externen EPG suchen. Verwenden Sie den EPG des IPTV-Anbieters nur, wenn dieser nicht funktioniert."
 }

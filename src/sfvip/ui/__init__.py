@@ -64,6 +64,9 @@ class UI(tk.Tk):
     def set_epg_confidence_update(self, confidence: int, callback: Callable[[int], None]) -> None:
         self._infos.set_epg_confidence_update(confidence, callback)
 
+    def set_epg_prefer_update(self, prefer_external: bool, callback: Callable[[bool], None]) -> None:
+        self._infos.set_epg_prefer_update(prefer_external, callback)
+
     def set_app_auto_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
         self._infos.set_app_auto_update(is_checked, callback)
 

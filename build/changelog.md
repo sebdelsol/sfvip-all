@@ -1,7 +1,8 @@
 ## 1.4.12.40
-* Fix EPG channels with wrong programmes.
-* Fix EPG processing restarting when closing the UI.
+* Option to prefer the IPTV provider EPG over external EPG.
 * Faster EPG processing and loading that use less memory.
+* Fix EPG processing restarting when closing the UI.
+* Better fuzzy match for external EPG.
 
 ## 1.4.12.39
 * Bump _mitmproxy_ to 10.2.4.

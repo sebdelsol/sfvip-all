@@ -50,5 +50,10 @@
   "UpdateAllSeries": "Actualizar todas las series",
   "UpdateAllMovies": "Actualizar todas las películas",
   "Confidence0": "0 %: No confías en la EPG y sólo obtendrás una coincidencia exacta y a menudo ninguna",
-  "Confidence100": "100 %: Confías plenamente en la EPG y siempre obtendrás una coincidencia, aunque sea de mala calidad."
+  "Confidence100": "100 %: Confías plenamente en la EPG y siempre obtendrás una coincidencia, aunque sea de mala calidad.",
+  "EPGPrefer": "Busca primero en el proveedor de IPTV",
+  "Yes": "Sí",
+  "No": "No",
+  "EPGPreferYes": "Sí: Busca primero en la EPG del proveedor de IPTV. Utiliza la EPG externa sólo cuando falle.",
+  "EPGPreferNo": "No: Buscar primero en la EPG externa. Utiliza la EPG del proveedor de IPTV sólo cuando falla."
 }

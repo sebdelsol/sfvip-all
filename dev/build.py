@@ -12,6 +12,7 @@ def do_build(build: CfgBuild, environments: CfgEnvironments, templates: CfgTempl
     publisher = Publisher(build, environments, Github)
     if Builder(build, environments, LOC, publisher).build_all():
         publisher.show_versions()
+        print()
     Templater(build, environments, Github, publisher).create_all(templates)
 
 

@@ -1,5 +1,5 @@
 import time
-from typing import Callable
+from typing import Callable, NamedTuple
 
 from shared.job_runner import JobRunner
 from translations.loc import LOC
@@ -48,15 +48,15 @@ class HoverEPG:
                     self.ui.hover_message.hide()
 
 
+class EPGUpdates(NamedTuple):
+    confidence: Callable[[int], None]
+    prefer: Callable[[bool], None]
+    url: Callable[[str], None]
+
+
 class EpgUpdater:
     # pylint: disable=too-many-instance-attributes
-    def __init__(
-        self,
-        config: AppConfig,
-        epg_update: Callable[[str], None],
-        epg_confidence_update: Callable[[int], None],
-        ui: UI,
-    ) -> None:
+    def __init__(self, config: AppConfig, epg_updates: EPGUpdates, ui: UI) -> None:
         self.hover_epg = HoverEPG(ui)
         self.keyboard_watcher = KeyboardWatcher("e", self.hover_epg.on_key_pressed)
         self.show_epg_job = JobRunner[ShowEpg](self.hover_epg.show_epg, "Show epg job", check_new=False)
@@ -64,8 +64,7 @@ class EpgUpdater:
             self.hover_epg.show_channel, "Show channel job", check_new=False
         )
         self.status_job = JobRunner[EPGProgress](ui.set_epg_status, "Epg status job")
-        self.epg_confidence_update = epg_confidence_update
-        self.epg_update = epg_update
+        self.epg_updates = epg_updates
         self.config = config
         self.ui = ui
 
@@ -87,9 +86,11 @@ class EpgUpdater:
         self.show_epg_job.start()
         self.show_channel_job.start()
         self.ui.set_epg_url_update(self.config.EPG.url, self.on_epg_url_changed)
-        self.epg_update(self.config.EPG.url or "")
+        self.epg_updates.url(self.config.EPG.url or "")
         self.ui.set_epg_confidence_update(self.config.EPG.confidence, self.on_epg_confidence_changed)
-        self.epg_confidence_update(self.config.EPG.confidence)
+        self.epg_updates.confidence(self.config.EPG.confidence)
+        self.ui.set_epg_prefer_update(self.config.EPG.prefer_internal, self.on_epg_prefer_changed)
+        self.epg_updates.prefer(self.config.EPG.prefer_internal)
 
     def stop(self) -> None:
         self.show_channel_job.stop()
@@ -99,8 +100,12 @@ class EpgUpdater:
 
     def on_epg_url_changed(self, epg_url: str) -> None:
         self.config.EPG.url = epg_url if epg_url else None
-        self.epg_update(epg_url)
+        self.epg_updates.url(epg_url)
 
     def on_epg_confidence_changed(self, epg_confidence: int) -> None:
         self.config.EPG.confidence = epg_confidence
-        self.epg_confidence_update(epg_confidence)
+        self.epg_updates.confidence(epg_confidence)
+
+    def on_epg_prefer_changed(self, prefer_internal: bool) -> None:
+        self.config.EPG.prefer_internal = prefer_internal
+        self.epg_updates.prefer(prefer_internal)
