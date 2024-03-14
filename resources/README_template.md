@@ -2,8 +2,8 @@
 ***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 <kbd><img src="resources/readme/all.png"></kbd>
-* Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
-* Translated in all ***Sfvip Player*** languages.
+* Update ***[Mpv](https://mpv.io/)*** and **Sfvip Player** so you can enjoy their latest features. 
+* Translated in all **Sfvip Player** languages.
 * Support an **external EPG**[^1].
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
@@ -17,27 +17,28 @@
 [<a href="https://tooomm.github.io/github-release-stats/?username={github_owner}&repository={github_repo}"><img src="https://img.shields.io/github/downloads/{github_path}/total?color=informational&logo=github&labelColor=informational&style=flat-square" height="{h_github}"></a><a href="https://github.com/{github_path}/issues?q=is%3Aopen"><img src="https://img.shields.io/github/issues/{github_path}?labelColor=success&style=flat-square" height="{h_github}"></a>]()
 
 * Check the [***changelog***](build/changelog.md) and ***notes***[^2].  
-* [***Sfvip Player***](https://github.com/K4L4Uz/SFVIP-Player/tree/master) will be automatically installed if missing.  
-* Please use [***SfvipUserProxy***](user_proxy_cmd) to add or remove a proxy for ***all users*** in ***Sfvip Player*** database.
+* **Sfvip Player** will be automatically installed if missing.  
+* Please use [***SfvipUserProxy***](user_proxy_cmd) to add or remove a proxy for **all users** in **Sfvip Player** database.
 
 [^2]:_**{name}** will ask for network connection its first run because it relies on local proxies to do its magic._  
 _On **old systems** you might need to install [**vc redist**](https://learn.microsoft.com/en-GB/cpp/windows/latest-supported-vc-redist) for [**x86**](https://aka.ms/vs/17/release/vc_redist.x86.exe) or [**x64**](https://aka.ms/vs/17/release/vc_redist.x64.exe)._  
 
 # Settings
-* Hover your mouse over the ***{name}*** logo:  
-  <kbd><img src="resources/readme/logo_arrow.png"></kbd>  
+Hover your mouse over the ***{name}*** logo:  
+<kbd><img src="resources/readme/logo_arrow.png"></kbd>  
 
-* To open the settings:  
-  <kbd><img src="resources/readme/settings.png"></kbd>  
+To open the settings:  
+<kbd><img src="resources/readme/settings.png"></kbd>  
 
-* Logo pulse meaning:  
-  Color & pulse | Meaning
-  :--- | :---
-  <kbd><img src="resources/readme/logo_green.png" width="25"></kbd> <sub>slow pulse | <sub>Everything is fine
-  <kbd><img src="resources/readme/logo_red.png" width="25"></kbd>  <sub>quick pulse | <sub>_{name}_ needs your attention
+Logo color & pulse meaning:  
+Color & pulse | Meaning
+:--- | :---
+<kbd><img src="resources/readme/logo_green.png" width="25"></kbd> <sub>Green slow pulse | <sub>Everything is fine
+<kbd><img src="resources/readme/logo_red.png" width="25"></kbd>  <sub>Red quick pulse | <sub>_{name}_ needs your attention
 
 # Logs
-The logs go **in pairs** (one for each process: ***main*** & ***mitmproxy***) and they are in the app folder:
+The logs go **in pairs**: one for each process (***main*** & ***mitmproxy***).  
+You'll find them in the app folder:  
 
 <kbd><img src="resources/readme/logs.png"></kbd>  
 

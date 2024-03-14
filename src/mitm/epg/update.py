@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class EPGstatus(Enum):
-    LOADING = auto()
+    DOWNLOADING = auto()
     LOAD_CACHE = auto()
     SAVE_CACHE = auto()
     PROCESSING = auto()
@@ -202,7 +202,7 @@ class EPGupdate(NamedTuple):
     @contextmanager
     @staticmethod
     def _load_xml(url: str, epg_process: EPGProcess, timeout: int) -> Iterator[Optional[Path]]:
-        epg_process.update_status(EPGProgress(EPGstatus.LOADING))
+        epg_process.update_status(EPGProgress(EPGstatus.DOWNLOADING))
         if (xml := Path(url)).is_file():  # for debug purpose
             yield xml
             return
@@ -218,7 +218,7 @@ class EPGupdate(NamedTuple):
                             yield None
                             return
                         if progress_step and (progress := progress_step.progress(i * EPGupdate._chunk_size)):
-                            epg_process.update_status(EPGProgress(EPGstatus.LOADING, progress))
+                            epg_process.update_status(EPGProgress(EPGstatus.DOWNLOADING, progress))
                         f.write(chunk)
                 yield xml
 

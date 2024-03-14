@@ -59,13 +59,17 @@ class PlayerChangelogs(ConfigLoader):
             self._changelogs = dict(sorted(self._changelogs.items(), reverse=True))
             self.save_all()
 
+    @staticmethod
+    def _sanitize(text: str) -> str:
+        text = re.sub(r"^\s?\-", "", text)
+        return text.replace("...", ".").strip().capitalize()
+
     def __str__(self) -> str:
         return "\n\n".join(
             (
                 LOC.ChangeLog % "Sfvip Player",
                 *(
-                    f"{PlayerChangelogs._prefix}{version}:\n"
-                    f"{PlayerChangelogs._tab}{text.capitalize().replace('...', '.')}"
+                    f"{PlayerChangelogs._prefix}{version}:\n" f"{PlayerChangelogs._tab}- {self._sanitize(text)}"
                     for i, (version, text) in enumerate(self._changelogs.items())
                     if i < self._n_logs_showed
                 ),

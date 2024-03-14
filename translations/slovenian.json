@@ -34,7 +34,7 @@
   "UpgradeFailed": "Nadgradnja različice %s ni uspela. Ali želite ponoviti poskus ?",
   "LoadCache": "Nalaganje predpomnilnika",
   "SaveCache": "Shranjevanje predpomnilnika",
-  "Loading": "Nalaganje predpomnilnika",
+  "Downloading": "Prenašanje spletne strani",
   "Processing": "Obdelava",
   "Ready": "Pripravljen",
   "Failed": "Neuspešno",
@@ -55,5 +55,7 @@
   "Yes": "Da",
   "No": "Ne",
   "EPGPreferYes": "Da: najprej poiščete EPG ponudnika IPTV. Zunanji program EPG uporabite le, kadar ta ne uspe.",
-  "EPGPreferNo": "Ne: Najprej poiščite zunanji EPG. EPG ponudnika IPTV uporabite le, če je neuspešen."
+  "EPGPreferNo": "Ne: Najprej poiščite zunanji EPG. EPG ponudnika IPTV uporabite le, če je neuspešen.",
+  "EPGUrlTip": "Vnesite URL zunanjega EPG, ki se mora končati z 'xml' ali 'xml.gz'.",
+  "LibmpvTip": "Libmpv dekodira in upodablja zvok in video. omogočite posodobitev, da dobite zadnjo različico, optimizirano za vaš računalnik."
 }

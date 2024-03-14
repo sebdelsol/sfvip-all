@@ -34,7 +34,7 @@
   "UpgradeFailed": "%s Upgrade fehlgeschlagen. Möchten Sie es erneut versuchen?",
   "LoadCache": "Cache laden",
   "SaveCache": "Cache speichern",
-  "Loading": "Laden von",
+  "Downloading": "Herunterladen von",
   "Processing": "Verarbeiten",
   "Ready": "Bereit",
   "Failed": "Fehlgeschlagen",
@@ -55,5 +55,7 @@
   "Yes": "Ja",
   "No": "Nein",
   "EPGPreferYes": "Ja: Suchen Sie zuerst im EPG des IPTV-Anbieters. Verwenden Sie den externen EPG nur, wenn er nicht funktioniert.",
-  "EPGPreferNo": "Nein: Zuerst im externen EPG suchen. Verwenden Sie den EPG des IPTV-Anbieters nur, wenn dieser nicht funktioniert."
+  "EPGPreferNo": "Nein: Zuerst im externen EPG suchen. Verwenden Sie den EPG des IPTV-Anbieters nur, wenn er nicht funktioniert.",
+  "EPGUrlTip": "Geben Sie die URL des externen EPGs ein, sie sollte mit 'xml' oder 'xml.gz' enden.",
+  "LibmpvTip": "Libmpv dekodiert und rendert Audio und Video. Aktivieren Sie das Update, um die letzte für Ihren Computer optimierte Version zu erhalten."
 }

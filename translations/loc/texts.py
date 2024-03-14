@@ -42,7 +42,7 @@ class Texts:
     UpgradeFailed: str = "%s upgrade failed. Do you want to retry ?"
     LoadCache: str = "Loading cache"
     SaveCache: str = "Saving cache"
-    Loading: str = "Loading"
+    Downloading: str = "Downloading"
     Processing: str = "Processing"
     Ready: str = "Ready"
     Failed: str = "Failed"
@@ -66,6 +66,11 @@ class Texts:
     No: str = "No"
     EPGPreferYes: str = "Yes: Search the IPTV provider EPG first. Use the external EPG only when it fails."
     EPGPreferNo: str = "No: Search the external EPG first. Use the IPTV provider EPG only when it fails."
+    EPGUrlTip: str = "Enter the URL of the external EPG, it should end up with 'xml' or 'xml.gz'"
+    LibmpvTip: str = (
+        "Libmpv decodes & renders audio and video."
+        "Enable the update to get the last version optimized for your computer."
+    )
 
     def as_dict(self) -> dict[str, str]:
         return dataclasses.asdict(self)

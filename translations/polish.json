@@ -34,7 +34,7 @@
   "UpgradeFailed": "Aktualizacja %s nie powiodła się. Czy chcesz ponowić próbę?",
   "LoadCache": "Ładowanie pamięci podręcznej",
   "SaveCache": "Zapisywanie pamięci podręcznej",
-  "Loading": "Ładowanie",
+  "Downloading": "Pobieranie",
   "Processing": "Przetwarzanie",
   "Ready": "Gotowe",
   "Failed": "Nie powiodło się",
@@ -55,5 +55,7 @@
   "Yes": "Tak",
   "No": "Nie",
   "EPGPreferYes": "Tak: Najpierw należy przeszukać EPG dostawcy IPTV. Używaj zewnętrznego EPG tylko wtedy, gdy zawiedzie.",
-  "EPGPreferNo": "Nie: Najpierw należy przeszukać zewnętrzne EPG. Użyj EPG dostawcy IPTV tylko w przypadku niepowodzenia."
+  "EPGPreferNo": "Nie: Najpierw należy przeszukać zewnętrzne EPG. Użyj EPG dostawcy IPTV tylko w przypadku niepowodzenia.",
+  "EPGUrlTip": "Wprowadź adres URL zewnętrznego EPG, powinien on kończyć się na \"xml\" lub \"xml.gz\".",
+  "LibmpvTip": "Libmpv dekoduje i renderuje audio i wideo. Włącz aktualizację, aby uzyskać ostatnią wersję zoptymalizowaną dla twojego komputera."
 }

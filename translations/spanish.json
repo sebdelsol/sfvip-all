@@ -34,7 +34,7 @@
   "UpgradeFailed": "La actualización de %s ha fallado. ¿Desea reintentarlo?",
   "LoadCache": "Cargando caché",
   "SaveCache": "Guardando caché",
-  "Loading": "Cargando",
+  "Downloading": "Descargando",
   "Processing": "Procesando",
   "Ready": "Listo",
   "Failed": "Fallo",
@@ -55,5 +55,7 @@
   "Yes": "Sí",
   "No": "No",
   "EPGPreferYes": "Sí: Busca primero en la EPG del proveedor de IPTV. Utiliza la EPG externa sólo cuando falle.",
-  "EPGPreferNo": "No: Buscar primero en la EPG externa. Utiliza la EPG del proveedor de IPTV sólo cuando falla."
+  "EPGPreferNo": "No: Buscar primero en la EPG externa. Utilice la EPG del proveedor de IPTV sólo cuando falle.",
+  "EPGUrlTip": "Introduce la URL de la EPG externa, debería terminar con 'xml' o 'xml.gz'.",
+  "LibmpvTip": "Libmpv decodifica y renderiza audio y video.Activa la actualización para obtener la última versión optimizada para tu ordenador."
 }

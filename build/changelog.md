@@ -1,3 +1,6 @@
+## 1.4.12.41
+* Tooltips added.
+
 ## 1.4.12.40
 * Option to prefer the IPTV provider EPG over external EPG.
 * Faster EPG processing and loading that use less memory.

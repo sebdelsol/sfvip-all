@@ -152,7 +152,7 @@ def _app_version_tooltip(app_info: AppInfo) -> Style:
                                 break
                             lines.extend(("", f"{prefix}{text}:"))
                         case "*":
-                            lines.append(f"{tab}{text}")
+                            lines.append(f"{tab}- {text}")
                 except ValueError:
                     if line:
                         lines.append(f"{tab}{line}")
@@ -228,7 +228,7 @@ def _epg_confidence_percent() -> Style:
 
 def _epg_status_styles(progress: str) -> dict[EPGstatus | None, Style]:
     return {
-        EPGstatus.LOADING: _InfoStyle.app(f"{LOC.Loading}{progress}").white,
+        EPGstatus.DOWNLOADING: _InfoStyle.app(f"{LOC.Downloading}{progress}").white,
         EPGstatus.PROCESSING: _InfoStyle.app(f"{LOC.Processing}{progress}").white,
         EPGstatus.LOAD_CACHE: _InfoStyle.app(f"{LOC.LoadCache}{progress}").white,
         EPGstatus.SAVE_CACHE: _InfoStyle.app(f"{LOC.SaveCache}{progress}").white,
@@ -250,6 +250,14 @@ def _get_epg_prefer_update(on: bool = True) -> Style:
 
 def _get_epg_prefer_label() -> Style:
     return _InfoStyle.app(LOC.EPGPrefer).grey.no_truncate
+
+
+def _epg_url_tooltip() -> Style:
+    return _InfoStyle.app(LOC.EPGUrlTip).grey.no_truncate
+
+
+def _epg_libmpv_tooltip() -> Style:
+    return _InfoStyle.app(LOC.LibmpvTip).grey.no_truncate
 
 
 def _epg_prefer_tooltip() -> Style:
@@ -508,6 +516,8 @@ class InfosWindow(_ProxiesWindow):
         set_tooltip(_app_version_tooltip(app_info), app_version)
         set_tooltip(_epg_confidence_tooltip(), epg_confidence_label)
         set_tooltip(_epg_prefer_tooltip(), epg_prefer_label)
+        set_tooltip(_epg_url_tooltip(), epg_label)
+        set_tooltip(_epg_libmpv_tooltip(), self._libmpv_version)
 
     def get_changelog(self) -> str:
         return self._changelog_callback() if self._changelog_callback else ""
@@ -528,7 +538,7 @@ class InfosWindow(_ProxiesWindow):
         self._epg_url.bind("<FocusOut>", _callback)
 
     def set_epg_status(self, epg_status: EPGProgress) -> None:
-        self._epg_url.config(state=tk.DISABLED if epg_status.status is EPGstatus.LOADING else tk.NORMAL)
+        self._epg_url.config(state=tk.DISABLED if epg_status.status is EPGstatus.DOWNLOADING else tk.NORMAL)
         self._epg_status.config(**_epg_status(epg_status).to_tk)
 
     def set_epg_confidence_update(self, confidence: int, callback: Callable[[int], None]) -> None:

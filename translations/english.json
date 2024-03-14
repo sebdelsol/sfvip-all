@@ -34,7 +34,7 @@
   "UpgradeFailed": "%s upgrade failed. Do you want to retry ?",
   "LoadCache": "Loading cache",
   "SaveCache": "Saving cache",
-  "Loading": "Loading",
+  "Downloading": "Downloading",
   "Processing": "Processing",
   "Ready": "Ready",
   "Failed": "Failed",
@@ -55,5 +55,7 @@
   "Yes": "Yes",
   "No": "No",
   "EPGPreferYes": "Yes: Search the IPTV provider EPG first. Use the external EPG only when it fails.",
-  "EPGPreferNo": "No: Search the external EPG first. Use the IPTV provider EPG only when it fails."
+  "EPGPreferNo": "No: Search the external EPG first. Use the IPTV provider EPG only when it fails.",
+  "EPGUrlTip": "Enter the URL of the external EPG, it should end up with 'xml' or 'xml.gz'",
+  "LibmpvTip": "Libmpv decodes & renders audio and video.Enable the update to get the last version optimized for your computer."
 }

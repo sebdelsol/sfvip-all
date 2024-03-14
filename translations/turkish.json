@@ -34,7 +34,7 @@
   "UpgradeFailed": "%s yükseltmesi başarısız oldu. Yeniden denemek ister misiniz?",
   "LoadCache": "Önbellek yükleniyor",
   "SaveCache": "Önbelleği kaydetme",
-  "Loading": "Yükleniyor",
+  "Downloading": "İndirme",
   "Processing": "İşleme",
   "Ready": "Hazır",
   "Failed": "Başarısız",
@@ -55,5 +55,7 @@
   "Yes": "Evet",
   "No": "Hayır",
   "EPGPreferYes": "Evet: Önce IPTV sağlayıcısı EPG'sini arayın. Harici EPG'yi yalnızca başarısız olduğunda kullanın.",
-  "EPGPreferNo": "Hayır: Önce harici EPG'yi arayın. IPTV sağlayıcısı EPG'sini yalnızca başarısız olduğunda kullanın."
+  "EPGPreferNo": "Hayır: Önce harici EPG'yi arayın. IPTV sağlayıcısı EPG'sini yalnızca başarısız olduğunda kullanın.",
+  "EPGUrlTip": "Harici EPG'nin URL'sini girin, 'xml' veya 'xml.gz' ile bitmelidir",
+  "LibmpvTip": "Libmpv ses ve videonun kodunu çözer ve işler Bilgisayarınız için optimize edilmiş son sürümü almak için güncellemeyi etkinleştirin."
 }
