@@ -50,5 +50,10 @@
   "UpdateAllSeries": "Posodobitev vseh serij",
   "UpdateAllMovies": "Posodobitev vseh filmov",
   "Confidence0": "0 %: Ne zaupate EPG in dobite le natančno ujemanje, pogosto pa nobenega.",
-  "Confidence100": "100 %: popolnoma zaupate EPG in vedno dobite ujemanje, tudi če je slabe kakovosti"
+  "Confidence100": "100 %: popolnoma zaupate EPG in vedno dobite ujemanje, tudi če je slabe kakovosti",
+  "EPGPrefer": "Najprej poiščite ponudnika IPTV",
+  "Yes": "Da",
+  "No": "Ne",
+  "EPGPreferYes": "Da: najprej poiščete EPG ponudnika IPTV. Zunanji program EPG uporabite le, kadar ta ne uspe.",
+  "EPGPreferNo": "Ne: Najprej poiščite zunanji EPG. EPG ponudnika IPTV uporabite le, če je neuspešen."
 }

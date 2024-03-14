@@ -3,6 +3,7 @@
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 <kbd><img src="resources/readme/all.png"></kbd>
 * Update ***[Mpv](https://mpv.io/)*** and ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** so you can enjoy their latest features. 
+* Translated in all ***Sfvip Player*** languages.
 * Support an **external EPG**[^1].
 
 [^1]: External EPG doesn't work with **local** m3u accounts.

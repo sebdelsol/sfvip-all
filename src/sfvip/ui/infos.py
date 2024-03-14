@@ -244,6 +244,19 @@ def _epg_status(epg_status: EPGProgress) -> Style:
     return _epg_status_styles(progress).get(epg_status.status, _InfoStyle.app("").grey)
 
 
+def _get_epg_prefer_update(on: bool = True) -> Style:
+    return _InfoStyle.app(LOC.Yes).grey if on else _InfoStyle.app(LOC.No).grey
+
+
+def _get_epg_prefer_label() -> Style:
+    return _InfoStyle.app(LOC.EPGPrefer).grey.no_truncate
+
+
+def _epg_prefer_tooltip() -> Style:
+    msg = "".join((f"\n\n • {text}" for text in (LOC.EPGPreferYes, LOC.EPGPreferNo)))
+    return _InfoStyle.tooltip(f"{LOC.EPGPrefer}:{msg}")
+
+
 def _player_changelog_tooltip() -> Style:
     return _InfoStyle.tooltip()
 
@@ -434,6 +447,11 @@ class InfosWindow(_ProxiesWindow):
             bg=_InfoTheme.bg_rows,
             **_InfoTheme.confidence_slider,  # type:ignore
         )
+        epg_prefer_frame = tk.Frame(frame, bg=_InfoTheme.bg_rows)
+        epg_prefer_label = tk.Label(epg_prefer_frame, bg=_InfoTheme.bg_rows, **_get_epg_prefer_label().to_tk)
+        self._epg_prefer_check = CheckBox(
+            epg_prefer_frame, bg=_InfoTheme.bg_rows, **_InfoTheme.checkbox, **_get_epg_prefer_update().to_tk
+        )
         separator5 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
         pad = _InfoTheme.pad
@@ -470,11 +488,15 @@ class InfosWindow(_ProxiesWindow):
         self._epg_url.pack(side=tk.LEFT, padx=pad, fill=tk.X, expand=True)
         self._epg_status.pack(side=tk.LEFT)
         row += 1
-        epg_confidence_frame.grid(row=row, columnspan=3, padx=pad, pady=(0, pad), sticky=tk.NSEW)
+        epg_confidence_frame.grid(row=row, columnspan=3, padx=pad, pady=0, sticky=tk.NSEW)
         epg_confidence_label.pack(side=tk.LEFT)
         self._epg_confidence.pack(side=tk.LEFT)
         epg_confidence_percent.pack(side=tk.LEFT)
         self._epg_confidence_slider.pack(padx=(pad, 0), side=tk.LEFT, fill=tk.X, expand=True)
+        row += 1
+        epg_prefer_frame.grid(row=row, columnspan=3, padx=pad, pady=pad, sticky=tk.NSEW)
+        epg_prefer_label.pack(side=tk.LEFT)
+        self._epg_prefer_check.pack(side=tk.LEFT)
         row += 1
         separator5.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
@@ -485,6 +507,7 @@ class InfosWindow(_ProxiesWindow):
         set_tooltip(_player_changelog_tooltip(), self._player_version, msg_refresh=self.get_changelog)
         set_tooltip(_app_version_tooltip(app_info), app_version)
         set_tooltip(_epg_confidence_tooltip(), epg_confidence_label)
+        set_tooltip(_epg_prefer_tooltip(), epg_prefer_label)
 
     def get_changelog(self) -> str:
         return self._changelog_callback() if self._changelog_callback else ""
@@ -549,6 +572,9 @@ class InfosWindow(_ProxiesWindow):
         self._epg_confidence_slider.bind("<ButtonRelease-1>", _callback_slider)
         self._epg_confidence_slider.bind("<B1-Motion>", _callback_slider)
         self._epg_confidence.bind("<FocusOut>", _callback_entry)
+
+    def set_epg_prefer_update(self, is_checked: bool, callback: Callable[[bool], None]) -> None:
+        self._epg_prefer_check.set_callback(is_checked, callback, _get_epg_prefer_update)
 
     def set_app_update(
         self,

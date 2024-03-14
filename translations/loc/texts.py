@@ -58,10 +58,14 @@ class Texts:
     UpdateAllSeries: str = "Update All series"
     UpdateAllMovies: str = "Update All movies"
     Confidence0: str = "0 %: You don't trust the EPG and you'll only get an exact match and often none"
-    # fmt: off
-    # pylint: disable=line-too-long
-    Confidence100: str = "100 %: You completely trust the EPG and you'll always get a match even one of poor quality"
-    # fmt: on
+    Confidence100: str = (
+        "100 %: You completely trust the EPG and you'll always get a match even one of poor quality"
+    )
+    EPGPrefer: str = "Search the IPTV provider first"
+    Yes: str = "Yes"
+    No: str = "No"
+    EPGPreferYes: str = "Yes: Search the IPTV provider EPG first. Use the external EPG only when it fails."
+    EPGPreferNo: str = "No: Search the external EPG first. Use the IPTV provider EPG only when it fails."
 
     def as_dict(self) -> dict[str, str]:
         return dataclasses.asdict(self)

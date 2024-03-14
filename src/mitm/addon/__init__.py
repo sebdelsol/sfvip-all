@@ -35,6 +35,10 @@ def get_short_epg(flow: http.HTTPFlow, epg: EPG, api: APItype) -> None:
     if response := flow.response:
 
         def set_response(stream_id: str, limit: str, programmes: str) -> None:
+            # already an epg ?
+            if epg.prefer_updater.prefer_internal and (json_response := response_json(flow.response)):
+                if isinstance(json_response, dict) and json_response.get(programmes):
+                    return
             server = flow.request.host_header
             if _id := get_query_key(flow, stream_id):
                 _limit = get_query_key(flow, limit)
@@ -153,11 +157,14 @@ class SfVipAddOn:
         self.m3u_stream = M3UStream(self.epg)
         self.panels = AllPanels(all_config.all_name)
 
-    def epg_update(self, url: str):
+    def epg_update(self, url: str) -> None:
         self.epg.ask_update(url)
 
-    def epg_confidence_update(self, confidence: int):
+    def epg_confidence_update(self, confidence: int) -> None:
         self.epg.update_confidence(confidence)
+
+    def epg_prefer_update(self, prefer_internal: bool) -> None:
+        self.epg.update_prefer(prefer_internal)
 
     def running(self) -> None:
         self.epg.start()

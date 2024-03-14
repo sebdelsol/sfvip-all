@@ -54,6 +54,23 @@ class ConfidenceUpdater(JobRunner[int]):
             return self._confidence
 
 
+class PreferUpdater(JobRunner[bool]):
+    def __init__(self) -> None:
+        self._prefer_internal_lock = multiprocessing.Lock()
+        self._prefer_internal: Optional[bool] = None
+        super().__init__(self._updating, "Epg prefer internal updater")
+
+    def _updating(self, prefer_internal: bool) -> None:
+        with self._prefer_internal_lock:
+            self._prefer_internal = prefer_internal
+
+    @property
+    def prefer_internal(self) -> Optional[bool]:
+        with self._prefer_internal_lock:
+            return self._prefer_internal
+
+
+# pylint: disable=too-many-instance-attributes
 class EPG:
     _programme_type = {APItype.XC: EPGprogrammeXC, APItype.MAC: EPGprogrammeMAC, APItype.M3U: EPGprogrammeM3U}
     _m3u_server = "m3u.server"
@@ -63,6 +80,7 @@ class EPG:
         self.servers: dict[str, EPGserverChannels] = {}
         self.updater = EPGupdater(roaming, callbacks.update_status, timeout)
         self.confidence_updater = ConfidenceUpdater()
+        self.prefer_updater = PreferUpdater()
         self.show_channel = callbacks.show_channel
         self.channel_shown = False
         self.show_epg = callbacks.show_epg
@@ -74,15 +92,20 @@ class EPG:
     def update_confidence(self, confidence: int) -> None:
         self.confidence_updater.add_job(confidence)
 
+    def update_prefer(self, prefer_internal: bool) -> None:
+        self.prefer_updater.add_job(prefer_internal)
+
     def wait_running(self, timeout: int) -> bool:
         return self.updater.wait_running(timeout)
 
     def start(self) -> None:
         self.confidence_updater.start()
+        self.prefer_updater.start()
         self.updater.start()
 
     def stop(self) -> None:
         self.updater.stop()
+        self.prefer_updater.stop()
         self.confidence_updater.stop()
 
     def set_server_channels(self, server: Optional[str], channels: Any, api: APItype) -> None:

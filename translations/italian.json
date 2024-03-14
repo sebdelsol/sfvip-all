@@ -50,5 +50,10 @@
   "UpdateAllSeries": "Aggiorna tutte le serie",
   "UpdateAllMovies": "Aggiorna tutti i film",
   "Confidence0": "0 %: Non ci si fida dell'EPG e si ottiene solo una corrispondenza esatta e spesso nessuna.",
-  "Confidence100": "100 %: Ci si fida completamente dell'EPG e si ottiene sempre una corrispondenza, anche se di scarsa qualità."
+  "Confidence100": "100 %: ci si fida completamente dell'EPG e si ottiene sempre una corrispondenza, anche se di scarsa qualità.",
+  "EPGPrefer": "Cercare prima il provider IPTV",
+  "Yes": "Si",
+  "No": "No",
+  "EPGPreferYes": "Sì: cercate prima l'EPG del provider IPTV. Utilizzare l'EPG esterno solo in caso di errore.",
+  "EPGPreferNo": "No: Cerca prima l'EPG esterno. Utilizzare l'EPG del provider IPTV solo in caso di errore."
 }

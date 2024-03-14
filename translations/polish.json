@@ -50,5 +50,10 @@
   "UpdateAllSeries": "Aktualizacja wszystkich seriali",
   "UpdateAllMovies": "Aktualizacja wszystkich filmów",
   "Confidence0": "0%: Nie ufasz EPG i otrzymasz tylko dokładne dopasowanie, a często żadnego.",
-  "Confidence100": "100%: Całkowicie ufasz EPG i zawsze otrzymasz dopasowanie, nawet słabej jakości."
+  "Confidence100": "100%: Całkowicie ufasz EPG i zawsze otrzymasz dopasowanie, nawet słabej jakości.",
+  "EPGPrefer": "Najpierw wyszukaj dostawcę IPTV",
+  "Yes": "Tak",
+  "No": "Nie",
+  "EPGPreferYes": "Tak: Najpierw należy przeszukać EPG dostawcy IPTV. Używaj zewnętrznego EPG tylko wtedy, gdy zawiedzie.",
+  "EPGPreferNo": "Nie: Najpierw należy przeszukać zewnętrzne EPG. Użyj EPG dostawcy IPTV tylko w przypadku niepowodzenia."
 }

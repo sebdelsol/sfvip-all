@@ -12,7 +12,7 @@ from ..winapi import mutex
 from .accounts import AccountsProxies
 from .app_info import AppInfo
 from .cache import CacheProgressListener
-from .epg import EpgUpdater
+from .epg import EpgUpdater, EPGUpdates
 from .exceptions import LocalproxyError
 from .ui import UI
 
@@ -76,7 +76,15 @@ class LocalProxies:
     _find_ports_retry = 10
 
     def __init__(self, app_info: AppInfo, inject_in_live: bool, accounts_proxies: AccountsProxies, ui: UI) -> None:
-        self._epg_updater = EpgUpdater(app_info.config, self.epg_update, self.epg_confidence_update, ui)
+        self._epg_updater = EpgUpdater(
+            app_info.config,
+            EPGUpdates(
+                self.epg_confidence_update,
+                self.epg_prefer_update,
+                self.epg_update,
+            ),
+            ui,
+        )
         self._cache_progress = CacheProgressListener(ui)
         self._addon = SfVipAddOn(
             accounts_proxies.urls,
@@ -104,6 +112,9 @@ class LocalProxies:
 
     def epg_confidence_update(self, confidence: int) -> None:
         self._addon.epg_confidence_update(confidence)
+
+    def epg_prefer_update(self, prefer_internal: bool) -> None:
+        self._addon.epg_prefer_update(prefer_internal)
 
     def __enter__(self) -> Self:
         with self._bind_free_ports:
