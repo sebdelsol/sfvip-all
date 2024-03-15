@@ -54,8 +54,10 @@
   "EPGPrefer": "Cercare prima il provider IPTV",
   "Yes": "Si",
   "No": "No",
-  "EPGPreferYes": "Sì: cercate prima l'EPG del provider IPTV. Utilizzare l'EPG esterno solo in caso di errore.",
+  "EPGPreferYes": "Sì: cerca prima l'EPG del provider IPTV. Utilizzare l'EPG esterno solo in caso di errore.",
   "EPGPreferNo": "No: Cerca prima l'EPG esterno. Utilizzare l'EPG del provider IPTV solo in caso di errore.",
-  "EPGUrlTip": "Inserite l'URL dell'EPG esterno, che dovrebbe finire con 'xml' o 'xml.gz'.",
-  "LibmpvTip": "Libmpv decodifica e rende audio e video. Attivare l'aggiornamento per ottenere l'ultima versione ottimizzata per il proprio computer."
+  "EPGUrlTip": "Immettere l'URL dell'EPG esterno, che dovrebbe finire con '%s' o '%s'.",
+  "LibmpvTip": "Libmpv decodifica e rende audio e video. Attivare gli aggiornamenti per ottenere l'ultima versione ottimizzata per il proprio computer.",
+  "ProxyTip": "%s utilizza un proxy locale per intercettare tutte le richieste al provider IPTV e iniettare le categorie 'all' e l'EPG esterno.",
+  "UserProxyTip": "Proxy utente effettivo, se esiste"
 }

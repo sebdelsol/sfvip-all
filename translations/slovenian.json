@@ -56,6 +56,8 @@
   "No": "Ne",
   "EPGPreferYes": "Da: najprej poiščete EPG ponudnika IPTV. Zunanji program EPG uporabite le, kadar ta ne uspe.",
   "EPGPreferNo": "Ne: Najprej poiščite zunanji EPG. EPG ponudnika IPTV uporabite le, če je neuspešen.",
-  "EPGUrlTip": "Vnesite URL zunanjega EPG, ki se mora končati z 'xml' ali 'xml.gz'.",
-  "LibmpvTip": "Libmpv dekodira in upodablja zvok in video. omogočite posodobitev, da dobite zadnjo različico, optimizirano za vaš računalnik."
+  "EPGUrlTip": "Vnesite URL zunanjega EPG, ki se mora končati z \"%s\" ali \"%s\".",
+  "LibmpvTip": "Libmpv dekodira in prikazuje zvok in video. Omogočite posodobitve, da dobite zadnjo različico, optimizirano za vaš računalnik.",
+  "ProxyTip": "%s uporablja lokalni posrednik za prestrezanje vseh zahtevkov ponudniku IPTV in vnašanje kategorij 'all' ter zunanjega EPG",
+  "UserProxyTip": "Dejanski uporabniški proxy, če obstaja"
 }

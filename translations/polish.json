@@ -56,6 +56,8 @@
   "No": "Nie",
   "EPGPreferYes": "Tak: Najpierw należy przeszukać EPG dostawcy IPTV. Używaj zewnętrznego EPG tylko wtedy, gdy zawiedzie.",
   "EPGPreferNo": "Nie: Najpierw należy przeszukać zewnętrzne EPG. Użyj EPG dostawcy IPTV tylko w przypadku niepowodzenia.",
-  "EPGUrlTip": "Wprowadź adres URL zewnętrznego EPG, powinien on kończyć się na \"xml\" lub \"xml.gz\".",
-  "LibmpvTip": "Libmpv dekoduje i renderuje audio i wideo. Włącz aktualizację, aby uzyskać ostatnią wersję zoptymalizowaną dla twojego komputera."
+  "EPGUrlTip": "Wprowadź adres URL zewnętrznego EPG, powinien on kończyć się na \"%s\" lub \"%s\".",
+  "LibmpvTip": "Libmpv dekoduje i renderuje audio i wideo. Włącz aktualizacje, aby uzyskać ostatnią wersję zoptymalizowaną dla twojego komputera.",
+  "ProxyTip": "%s używa lokalnego proxy do przechwytywania wszystkich żądań do dostawcy IPTV i wstrzykiwania kategorii \"all\" i zewnętrznego EPG.",
+  "UserProxyTip": "Rzeczywiste proxy użytkownika, jeśli istnieje"
 }

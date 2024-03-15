@@ -66,11 +66,16 @@ class Texts:
     No: str = "No"
     EPGPreferYes: str = "Yes: Search the IPTV provider EPG first. Use the external EPG only when it fails."
     EPGPreferNo: str = "No: Search the external EPG first. Use the IPTV provider EPG only when it fails."
-    EPGUrlTip: str = "Enter the URL of the external EPG, it should end up with 'xml' or 'xml.gz'"
+    EPGUrlTip: str = "Enter the URL of the external EPG, it should end up with '%s' or '%s'"
     LibmpvTip: str = (
-        "Libmpv decodes & renders audio and video."
-        "Enable the update to get the last version optimized for your computer."
+        "Libmpv decodes & renders audio and video. "
+        "Enable the updates to get the last version optimized for your computer."
     )
+    ProxyTip: str = (
+        "%s uses a local proxy to intercept all requests to the IPTV provider "
+        "and inject the 'all' categories and the external EPG"
+    )
+    UserProxyTip: str = "Actual user proxy if it exists"
 
     def as_dict(self) -> dict[str, str]:
         return dataclasses.asdict(self)

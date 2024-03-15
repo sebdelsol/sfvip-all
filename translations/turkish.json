@@ -56,6 +56,8 @@
   "No": "Hayır",
   "EPGPreferYes": "Evet: Önce IPTV sağlayıcısı EPG'sini arayın. Harici EPG'yi yalnızca başarısız olduğunda kullanın.",
   "EPGPreferNo": "Hayır: Önce harici EPG'yi arayın. IPTV sağlayıcısı EPG'sini yalnızca başarısız olduğunda kullanın.",
-  "EPGUrlTip": "Harici EPG'nin URL'sini girin, 'xml' veya 'xml.gz' ile bitmelidir",
-  "LibmpvTip": "Libmpv ses ve videonun kodunu çözer ve işler Bilgisayarınız için optimize edilmiş son sürümü almak için güncellemeyi etkinleştirin."
+  "EPGUrlTip": "Harici EPG'nin URL'sini girin, '%s' veya '%s' ile bitmelidir",
+  "LibmpvTip": "Libmpv ses ve videonun kodunu çözer ve işler. Bilgisayarınız için optimize edilmiş son sürümü almak için güncellemeleri etkinleştirin.",
+  "ProxyTip": "%s, IPTV sağlayıcısına yapılan tüm istekleri kesmek ve 'tüm' kategorileri ve harici EPG'yi enjekte etmek için yerel bir proxy kullanır",
+  "UserProxyTip": "Varsa gerçek kullanıcı proxy'si"
 }

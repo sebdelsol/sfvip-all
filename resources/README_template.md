@@ -25,21 +25,20 @@ _On **old systems** you might need to install [**vc redist**](https://learn.micr
 
 # Settings
 Hover your mouse over the ***{name}*** logo:  
-<kbd><img src="resources/readme/logo_arrow.png"></kbd>  
+<kbd><img src="resources/readme/arrow.png"></kbd>  
 
 To open the settings:  
 <kbd><img src="resources/readme/settings.png"></kbd>  
 
-Logo color & pulse meaning:  
+# Logo
 Color & pulse | Meaning
 :--- | :---
 <kbd><img src="resources/readme/logo_green.png" width="25"></kbd> <sub>Green slow pulse | <sub>Everything is fine
 <kbd><img src="resources/readme/logo_red.png" width="25"></kbd>  <sub>Red quick pulse | <sub>_{name}_ needs your attention
 
 # Logs
-The logs go **in pairs**: one for each process (***main*** & ***mitmproxy***).  
+The logs go **in pairs**, one for each process (***main*** & ***mitmproxy***).  
 You'll find them in the app folder:  
-
 <kbd><img src="resources/readme/logs.png"></kbd>  
 
 # Build

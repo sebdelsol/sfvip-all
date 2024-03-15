@@ -172,7 +172,7 @@ class ListView(tk.Frame):
     Note: set_headers should be called before set_rows
     """
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments, too-many-instance-attributes
     def __init__(
         self,
         master: tk.BaseWidget,
@@ -200,6 +200,7 @@ class ListView(tk.Frame):
         self._bg_separator = bg_separator
         self._pad = pad
         self._widths = []
+        self._headers = []
 
     @staticmethod
     def _clear(what: tk.BaseWidget) -> None:
@@ -215,7 +216,12 @@ class ListView(tk.Frame):
             label = tk.Label(self._frame_headers, bg=self._bg_headers, **text.to_tk)
             label.grid(row=0, column=column, ipadx=pad, ipady=pad, sticky=tk.NSEW)
             self._widths[column] = max(label.winfo_reqwidth() + pad * 2, self._widths[column])
+            self._headers.append(label)
         self.set_column_widths()
+
+    @property
+    def headers(self) -> list[tk.Label]:
+        return self._headers
 
     def set_rows(self, rows: Sequence[Collection[Style]]) -> None:
         self._clear(self._frame_rows)
@@ -225,7 +231,7 @@ class ListView(tk.Frame):
             assert len(row_content) == n_column
             for column, text in enumerate(row_content):
                 label = tk.Label(self._frame_rows, bg=self._bg_rows, **text.to_tk)
-                label.grid(row=row * 2, column=column, ipadx=pad, ipady=pad, sticky=tk.NSEW)
+                label.grid(row=row * 2, column=column, ipadx=pad, ipady=0, sticky=tk.NSEW)
                 self._widths[column] = max(label.winfo_reqwidth() + pad * 2, self._widths[column])
                 # row separator
                 if row != len(rows) - 1:

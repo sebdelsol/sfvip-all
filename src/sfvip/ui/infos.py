@@ -37,7 +37,7 @@ class _InfoTheme:
     bg_interact = "#1F1F1F"
     bg_headers = "#242424"
     bg_rows = "#2A2A2A"
-    separator = "#303030"
+    separator = "#353535"
     border = Border(
         bg="#808080",
         size=1,
@@ -253,7 +253,7 @@ def _get_epg_prefer_label() -> Style:
 
 
 def _epg_url_tooltip() -> Style:
-    return _InfoStyle.app(LOC.EPGUrlTip).grey.no_truncate
+    return _InfoStyle.app(LOC.EPGUrlTip % ("xml", "xml.gz")).grey.no_truncate
 
 
 def _epg_libmpv_tooltip() -> Style:
@@ -263,6 +263,14 @@ def _epg_libmpv_tooltip() -> Style:
 def _epg_prefer_tooltip() -> Style:
     msg = "".join((f"\n\n • {text}" for text in (LOC.EPGPreferYes, LOC.EPGPreferNo)))
     return _InfoStyle.tooltip(f"{LOC.EPGPrefer}:{msg}")
+
+
+def _proxy_tooltip(app_info: AppInfo) -> Style:
+    return _InfoStyle.app(LOC.ProxyTip % app_info.name).grey.no_truncate
+
+
+def _user_proxy_tooltip() -> Style:
+    return _InfoStyle.app(LOC.UserProxyTip).grey.no_truncate
 
 
 def _player_changelog_tooltip() -> Style:
@@ -326,6 +334,9 @@ class _ProxiesWindow(StickyWindow):
         self.separator = tk.Frame(self._frame, bg=_InfoTheme.separator)
         self._proxies.set_headers(_get_infos_headers(app_info.name))
         self._proxies_button.bind("<Button-1>", self.show_proxies)
+        # tooltips
+        set_tooltip(_proxy_tooltip(app_info), self._proxies.headers[2])
+        set_tooltip(_user_proxy_tooltip(), self._proxies.headers[4])
 
     def show_proxies(self, _) -> None:
         proxies_shown = self.config.App.show_proxies = not self.config.App.show_proxies
@@ -409,19 +420,17 @@ class InfosWindow(_ProxiesWindow):
         self._app_update = CheckBox(
             frame, bg=_InfoTheme.bg_rows, **_InfoTheme.checkbox, **_get_auto_update().to_tk
         )
-        separator2 = tk.Frame(frame, bg=_InfoTheme.separator)
         self._player_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_player_version().to_tk)
         self._player_update = CheckBox(
             frame, bg=_InfoTheme.bg_rows, **_InfoTheme.checkbox, **_get_auto_update().to_tk
         )
         self._player_button = Button(frame, **_InfoTheme.button)  # type: ignore
-        separator3 = tk.Frame(frame, bg=_InfoTheme.separator)
         self._libmpv_version = tk.Label(frame, bg=_InfoTheme.bg_rows, **_get_libmpv_version().to_tk)
         self._libmpv_update = CheckBox(
             frame, bg=_InfoTheme.bg_rows, **_InfoTheme.checkbox, **_get_auto_update().to_tk
         )
         self._libmpv_button = Button(frame, **_InfoTheme.button)  # type: ignore
-        separator4 = tk.Frame(frame, bg=_InfoTheme.separator)
+        separator2 = tk.Frame(frame, bg=_InfoTheme.separator)
         epg_frame = tk.Frame(frame, bg=_InfoTheme.bg_rows)
         epg_label = tk.Label(epg_frame, bg=_InfoTheme.bg_rows, **_epg().to_tk)
         self._epg_url = tk.Entry(
@@ -460,7 +469,7 @@ class InfosWindow(_ProxiesWindow):
         self._epg_prefer_check = CheckBox(
             epg_prefer_frame, bg=_InfoTheme.bg_rows, **_InfoTheme.checkbox, **_get_epg_prefer_update().to_tk
         )
-        separator5 = tk.Frame(frame, bg=_InfoTheme.separator)
+        separator3 = tk.Frame(frame, bg=_InfoTheme.separator)
         # layout
         pad = _InfoTheme.pad
         button_pad = _InfoTheme.button_pad
@@ -475,21 +484,17 @@ class InfosWindow(_ProxiesWindow):
         self._app_button.grid(row=row, column=2, padx=button_pad, pady=button_pad, sticky=tk.EW)
         self._app_button.grid_remove()
         row += 1
-        separator2.grid(row=row, columnspan=3, sticky=tk.EW)
-        row += 1
-        self._player_version.grid(row=row, column=0, padx=pad, pady=pad, sticky=tk.W)
+        self._player_version.grid(row=row, column=0, padx=pad, pady=0, sticky=tk.W)
         self._player_update.grid(row=row, column=1, padx=pad, sticky=tk.EW)
         self._player_button.grid(row=row, column=2, padx=button_pad, pady=button_pad, sticky=tk.EW)
         self._player_button.grid_remove()
-        row += 1
-        separator3.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
         self._libmpv_version.grid(row=row, column=0, padx=pad, pady=pad, sticky=tk.W)
         self._libmpv_update.grid(row=row, column=1, padx=pad, sticky=tk.EW)
         self._libmpv_button.grid(row=row, column=2, padx=button_pad, pady=button_pad, sticky=tk.EW)
         self._libmpv_button.grid_remove()
         row += 1
-        separator4.grid(row=row, columnspan=3, sticky=tk.EW)
+        separator2.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
         epg_frame.grid(row=row, columnspan=3, padx=pad, pady=pad, sticky=tk.NSEW)
         epg_label.pack(side=tk.LEFT)
@@ -506,7 +511,7 @@ class InfosWindow(_ProxiesWindow):
         epg_prefer_label.pack(side=tk.LEFT)
         self._epg_prefer_check.pack(side=tk.LEFT)
         row += 1
-        separator5.grid(row=row, columnspan=3, sticky=tk.EW)
+        separator3.grid(row=row, columnspan=3, sticky=tk.EW)
         row += 1
         super()._layout(row=row)
         frame.columnconfigure(2, weight=1)
