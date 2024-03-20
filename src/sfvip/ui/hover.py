@@ -9,14 +9,7 @@ from ...winapi import win
 from .fx import Fade
 from .sticky import Offset, StickyWindow, sticky_windows
 from .style import Style
-from .widgets import (
-    Border,
-    Button,
-    GetWidgetT,
-    HorizontalProgressBar,
-    RoundedBox,
-    RoundedBoxScroll,
-)
+from .widgets import Border, Button, GetWidgetT, HorizontalProgressBar, RoundedBox, RoundedBoxScroll
 
 # TODO check max width & height
 

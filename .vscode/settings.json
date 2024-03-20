@@ -22,6 +22,7 @@
     "python.analysis.diagnosticMode": "workspace",
     // formatter & import sort
     "ruff.format.args": ["--line-length=115"],
+    "ruff.lint.args": ["--line-length=115"],
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit",

@@ -1,6 +1,8 @@
 import dataclasses
 from typing import ClassVar
 
+# TODO force IPTV no translate
+
 
 # pylint: disable=too-many-instance-attributes, invalid-name
 @dataclasses.dataclass
@@ -55,8 +57,6 @@ class Texts:
     UpdatedToday: str = "Updated today"
     Updated1DayAgo: str = "Updated 1 day ago"
     UpdatedDaysAgo: str = "Updated %s days ago"
-    UpdateAllSeries: str = "Update All series"
-    UpdateAllMovies: str = "Update All movies"
     Confidence0: str = "0 %: You don't trust the EPG and you'll only get an exact match and often none"
     Confidence100: str = (
         "100 %: You completely trust the EPG and you'll always get a match even one of poor quality"
@@ -76,6 +76,8 @@ class Texts:
         "and inject the 'all' categories and the external EPG"
     )
     UserProxyTip: str = "Actual user proxy if it exists"
+    Missing: str = "%s missing"
+    Complete: str = "Complete"
 
     def as_dict(self) -> dict[str, str]:
         return dataclasses.asdict(self)

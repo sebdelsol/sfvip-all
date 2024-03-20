@@ -10,7 +10,7 @@ from ..app_info import AppInfo
 from ..ui import UI, sticky
 from ..watchers import RegistryWatcher, WindowWatcher
 from .config import PlayerConfig, PlayerConfigDirSettingWatcher
-from .find_exe import PlayerExe
+from .find_exe import PlayerCapabilities, PlayerExe
 from .libmpv_updater import PlayerLibmpvAutoUpdater
 from .updater import PlayerAutoUpdater
 
@@ -135,8 +135,8 @@ class Player:
         self._launcher = _Launcher()
 
     @property
-    def has_all_channels(self) -> bool:
-        return self._player_exe.has_all_channels
+    def capabilities(self) -> PlayerCapabilities:
+        return self._player_exe.capabilities
 
     def want_to_launch(self) -> bool:
         if self._launcher.want_to_launch():

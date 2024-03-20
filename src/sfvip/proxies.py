@@ -6,7 +6,7 @@ from urllib.parse import urlparse, urlsplit, urlunsplit
 from translations.loc import LOC
 
 from ..mitm.addon import AddonAllConfig, AllCategoryName, EpgCallbacks, SfVipAddOn
-from ..mitm.cache import AllUpdated
+from ..mitm.cache import AllCached
 from ..mitm.proxies import MitmLocalProxy, Mode, validate_upstream
 from ..winapi import mutex
 from .accounts import AccountsProxies
@@ -14,6 +14,7 @@ from .app_info import AppInfo
 from .cache import CacheProgressListener
 from .epg import EpgUpdater, EPGUpdates
 from .exceptions import LocalproxyError
+from .player import PlayerCapabilities
 from .ui import UI
 
 logger = logging.getLogger(__name__)
@@ -50,20 +51,21 @@ def _fix_upstream(url: str) -> Optional[str]:
     return None
 
 
-def get_all_config(inject_in_live: bool) -> AddonAllConfig:
+def get_all_config(player_capabilities: PlayerCapabilities) -> AddonAllConfig:
     return AddonAllConfig(
         AllCategoryName(
-            live=LOC.AllChannels if inject_in_live else None,
-            series=LOC.AllSeries,
-            vod=LOC.AllMovies,
+            live=None if player_capabilities.has_all_channels else LOC.AllChannels,
+            series=None if player_capabilities.has_all_categories else LOC.AllSeries,
+            vod=None if player_capabilities.has_all_categories else LOC.AllMovies,
         ),
-        AllUpdated(
+        AllCached(
+            missing=LOC.Missing,
+            complete=LOC.Complete,
             today=LOC.UpdatedToday,
             one_day=LOC.Updated1DayAgo,
             several_days=LOC.UpdatedDaysAgo,
             fast_cached=LOC.FastCached,
             all_names={"vod": LOC.AllMovies, "series": LOC.AllSeries},
-            all_updates={"vod": LOC.UpdateAllMovies, "series": LOC.UpdateAllSeries},
         ),
     )
 
@@ -75,7 +77,9 @@ class LocalProxies:
     _mitmproxy_start_timeout = 10
     _find_ports_retry = 10
 
-    def __init__(self, app_info: AppInfo, inject_in_live: bool, accounts_proxies: AccountsProxies, ui: UI) -> None:
+    def __init__(
+        self, app_info: AppInfo, player_capabilities: PlayerCapabilities, accounts_proxies: AccountsProxies, ui: UI
+    ) -> None:
         self._epg_updater = EpgUpdater(
             app_info.config,
             EPGUpdates(
@@ -88,7 +92,7 @@ class LocalProxies:
         self._cache_progress = CacheProgressListener(ui)
         self._addon = SfVipAddOn(
             accounts_proxies.urls,
-            get_all_config(inject_in_live),
+            get_all_config(player_capabilities),
             app_info.roaming,
             EpgCallbacks(
                 self._epg_updater.update_status,

@@ -3,6 +3,7 @@
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 <kbd><img src="resources/readme/all.png"></kbd>
 * Update ***[Mpv](https://mpv.io/)*** and **Sfvip Player** so you can enjoy their latest features. 
+* Cache MAC acccounts all categories to access it faster.
 * Translated in all **Sfvip Player** languages.
 * Support an **external EPG**[^1].
 

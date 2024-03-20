@@ -10,15 +10,7 @@ from ..app_info import AppInfo
 from .fx import Fade
 from .sticky import Offset, StickyWindow
 from .style import Style
-from .widgets import (
-    Border,
-    Button,
-    CheckBox,
-    HorizontalScale,
-    ListView,
-    ScrollBar,
-    get_border,
-)
+from .widgets import Border, Button, CheckBox, HorizontalScale, ListView, ScrollBar, get_border
 
 
 class Info(NamedTuple):

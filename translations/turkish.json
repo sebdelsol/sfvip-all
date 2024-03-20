@@ -47,8 +47,6 @@
   "UpdatedToday": "Bugün güncellendi",
   "Updated1DayAgo": "1 gün önce güncellendi",
   "UpdatedDaysAgo": "%s gün önce güncellendi",
-  "UpdateAllSeries": "Tüm serileri güncelle",
-  "UpdateAllMovies": "Tüm filmleri güncelle",
   "Confidence0": "0 %: EPG'ye güvenmiyorsunuz ve yalnızca tam bir eşleşme elde edeceksiniz ve genellikle hiçbir eşleşme elde edemeyeceksiniz",
   "Confidence100": "100: EPG'ye tamamen güvenirsiniz ve düşük kalitede bile olsa her zaman bir eşleşme elde edersiniz",
   "EPGPrefer": "Önce IPTV sağlayıcısını arayın",
@@ -59,5 +57,7 @@
   "EPGUrlTip": "Harici EPG'nin URL'sini girin, '%s' veya '%s' ile bitmelidir",
   "LibmpvTip": "Libmpv ses ve videonun kodunu çözer ve işler. Bilgisayarınız için optimize edilmiş son sürümü almak için güncellemeleri etkinleştirin.",
   "ProxyTip": "%s, IPTV sağlayıcısına yapılan tüm istekleri kesmek ve 'tüm' kategorileri ve harici EPG'yi enjekte etmek için yerel bir proxy kullanır",
-  "UserProxyTip": "Varsa gerçek kullanıcı proxy'si"
+  "UserProxyTip": "Varsa gerçek kullanıcı proxy'si",
+  "Missing": "%s kayıp",
+  "Complete": "Tamamlandı"
 }

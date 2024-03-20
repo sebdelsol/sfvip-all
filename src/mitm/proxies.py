@@ -2,39 +2,35 @@
 import asyncio
 import logging
 import multiprocessing
+import socket
 import threading
 from typing import Any, NamedTuple, Optional, Sequence
 
 from mitmproxy import options
-from mitmproxy.addons import (
-    core,
-    disable_h2c,
-    dns_resolver,
-    next_layer,
-    proxyserver,
-    tlsconfig,
-)
+from mitmproxy.addons import core, next_layer, proxyserver, tlsconfig
 from mitmproxy.master import Master
 from mitmproxy.net import server_spec
 
 from shared import LogProcess
 
+from ..winapi.process import set_current_process_high_priority
 from .addon import SfVipAddOn
 
 logger = logging.getLogger(__name__)
 
 
 # use only the needed addons,
-# Note: use addons.default_addons() instead if any issues
-def _minimum_addons() -> Sequence[Any]:
+def _minimum_addons(user_addon: SfVipAddOn) -> Sequence[Any]:
     return (
         core.Core(),
-        disable_h2c.DisableH2C(),
         proxyserver.Proxyserver(),
-        dns_resolver.DnsResolver(),
+        user_addon,
         next_layer.NextLayer(),
         tlsconfig.TlsConfig(),
     )
+    # if any issues:
+    # from mitmproxy.addons import default_addons, script
+    # return [user_addon if isinstance(addon, script.ScriptLoader) else addon for addon in default_addons()]
 
 
 class Mode(NamedTuple):
@@ -66,17 +62,20 @@ class MitmLocalProxy(multiprocessing.Process):
         super().__init__()
 
     def run(self) -> None:
+        socket.setdefaulttimeout(0)  # is it better ??
         with LogProcess(logger, "Mitmproxy"):
+            if set_current_process_high_priority():
+                logger.info("Set process to high priority")
             threading.Thread(target=self._wait_for_stop).start()
             if self._modes:
                 # launch one proxy per mode
                 modes = [mode.to_mitm() for mode in self._modes]
-                # do not verify upstream server SSL/TLS certificates
-                opts = options.Options(ssl_insecure=True, mode=modes)
                 loop = asyncio.get_event_loop()
                 with self._master_lock:
-                    self._master = Master(opts, event_loop=loop)
-                    self._master.addons.add(self._addon, *_minimum_addons())
+                    self._master = Master(options.Options(), event_loop=loop)
+                    self._master.addons.add(*_minimum_addons(self._addon))
+                    # do not verify upstream server SSL/TLS certificates
+                    self._master.options.update(ssl_insecure=True, mode=modes)
                 loop.run_until_complete(self._master.run())
             else:
                 self._addon.running()

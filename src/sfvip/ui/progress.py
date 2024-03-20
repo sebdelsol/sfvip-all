@@ -19,6 +19,7 @@ def _get_bar_style(bg: str) -> str:
     return bar_style_name
 
 
+# TODO add % label
 class ProgressBar(StickyWindow):
     _bg = "#1c1b1a"
     _height = 10

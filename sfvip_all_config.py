@@ -25,6 +25,3 @@ class AppDefaultConfig(ConfigLoader):
         confidence: int = 30
         requests_timeout: int = 5
         prefer_internal: bool = True
-
-    class AllCategory:
-        inject_in_live: bool = False

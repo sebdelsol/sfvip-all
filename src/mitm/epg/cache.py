@@ -3,15 +3,7 @@ import os
 import pickle
 from contextlib import contextmanager
 from pathlib import Path
-from typing import (
-    IO,
-    Iterator,
-    KeysView,
-    Literal,
-    NamedTuple,
-    Optional,
-    Sequence,
-)
+from typing import IO, Iterator, KeysView, Literal, NamedTuple, Optional, Sequence
 
 from shared.md5 import compute_md5
 
@@ -85,7 +77,7 @@ class ChannelProgrammes:
             try:
                 with self.cache_file.open("rb") as f:
                     if f:
-                        all_programmes = []
+                        all_programmes: list[InternalProgramme] = []
                         for position in positions:
                             f.seek(position.seek)
                             pickle_str = f.read(position.length)

@@ -47,9 +47,7 @@
   "UpdatedToday": "Aggiornato oggi",
   "Updated1DayAgo": "Aggiornato 1 giorno fa",
   "UpdatedDaysAgo": "Aggiornato %s giorni fa",
-  "UpdateAllSeries": "Aggiorna tutte le serie",
-  "UpdateAllMovies": "Aggiorna tutti i film",
-  "Confidence0": "0 %: Non ci si fida dell'EPG e si ottiene solo una corrispondenza esatta e spesso nessuna.",
+  "Confidence0": "0 %: non ci si fida dell'EPG e si ottiene solo una corrispondenza esatta e spesso nessuna.",
   "Confidence100": "100 %: ci si fida completamente dell'EPG e si ottiene sempre una corrispondenza, anche se di scarsa qualità.",
   "EPGPrefer": "Cercare prima il provider IPTV",
   "Yes": "Si",
@@ -59,5 +57,7 @@
   "EPGUrlTip": "Immettere l'URL dell'EPG esterno, che dovrebbe finire con '%s' o '%s'.",
   "LibmpvTip": "Libmpv decodifica e rende audio e video. Attivare gli aggiornamenti per ottenere l'ultima versione ottimizzata per il proprio computer.",
   "ProxyTip": "%s utilizza un proxy locale per intercettare tutte le richieste al provider IPTV e iniettare le categorie 'all' e l'EPG esterno.",
-  "UserProxyTip": "Proxy utente effettivo, se esiste"
+  "UserProxyTip": "Proxy utente effettivo, se esiste",
+  "Missing": "%s mancante",
+  "Complete": "Completo"
 }

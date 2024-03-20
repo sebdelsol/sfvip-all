@@ -13,13 +13,7 @@ from .publisher import Publisher
 from .scanner.file import ScanFile
 from .utils.color import Low, Ok, Title, Warn
 from .utils.dist import human_format, repr_size
-from .utils.protocols import (
-    CfgBuild,
-    CfgEnvironments,
-    CfgGithub,
-    CfgTemplate,
-    CfgTemplates,
-)
+from .utils.protocols import CfgBuild, CfgEnvironments, CfgGithub, CfgTemplate, CfgTemplates
 
 
 def _version_of(python_envs: PythonEnvs, name: str) -> Optional[str]:

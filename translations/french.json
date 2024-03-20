@@ -7,7 +7,7 @@
   "HideProxies": "Cacher les proxies",
   "RestartFixProxy": "Redémarrer pour corriger les proxies",
   "ShouldUseVersion": "Vous devriez utiliser la version %s",
-  "SearchWholeCatalog": "Rechercher dans tout votre catalogue",
+  "SearchWholeCatalog": "Rechercher dans l'ensemble de votre catalogue",
   "Download": "Télécharger",
   "Install": "Installer",
   "Extract": "Extraire",
@@ -46,12 +46,10 @@
   "ChangeLog": "Journal des modifications pour %s",
   "UpdatedToday": "Mis à jour aujourd'hui",
   "Updated1DayAgo": "Mis à jour il y a 1 jour",
-  "UpdatedDaysAgo": "Mis à jour il y a %s jours",
-  "UpdateAllSeries": "Mise à jour de toutes les séries",
-  "UpdateAllMovies": "Mise à jour de tous les films",
+  "UpdatedDaysAgo": "Mise à jour il y a %s jours",
   "Confidence0": "0 % : Vous ne faites pas confiance à l'EPG et vous n'obtiendrez qu'une correspondance exacte et souvent aucune.",
   "Confidence100": "100 % : Vous faites entièrement confiance à l'EPG et vous obtiendrez toujours une correspondance, même de mauvaise qualité.",
-  "EPGPrefer": "Chercher d'abord chez le fournisseur IPTV",
+  "EPGPrefer": "Chercher d'abord chez le fournisseur de TVIP",
   "Yes": "Oui",
   "No": "Non",
   "EPGPreferYes": "Oui : Recherchez d'abord dans l'EPG du fournisseur de télévision par internet. N'utilisez l'EPG externe qu'en cas d'échec.",
@@ -59,5 +57,7 @@
   "EPGUrlTip": "Entrez l'URL de l'EPG externe, qui devrait se terminer par '%s' ou '%s'.",
   "LibmpvTip": "Libmpv décode et rend l'audio et la vidéo. Activez les mises à jour pour obtenir la dernière version optimisée pour votre ordinateur.",
   "ProxyTip": "%s utilise un proxy local pour intercepter toutes les requêtes adressées au fournisseur IPTV et injecter les catégories 'all' et l'EPG externe.",
-  "UserProxyTip": "Proxy de l'utilisateur actuel s'il existe"
+  "UserProxyTip": "Proxy utilisateur réel s'il existe",
+  "Missing": "%s manquant",
+  "Complete": "Complète"
 }
