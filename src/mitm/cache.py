@@ -80,9 +80,8 @@ def sanitize_filename(filename: str) -> str:
 
 class MACCacheFile:
     def __init__(self, cache_dir: Path, query: MacQuery) -> None:
-        self.cache_dir = cache_dir
         self.query = query
-        self.file_path = self.cache_dir / sanitize_filename(str(self.query))
+        self.file_path = cache_dir / sanitize_filename(str(self.query))
         self.mutex = mutex.SystemWideMutex(f"file lock for {self.file_path}")
 
     def open_and_do(
@@ -126,7 +125,7 @@ class MacCacheLoad(MACCacheFile):
 
     @property
     def valid(self) -> bool:
-        return bool(self.total)
+        return bool(self.total and self.actual and self.content)
 
     @property
     def missing_percent(self) -> float:
@@ -167,40 +166,35 @@ class MacCacheSave(MACCacheFile):
                 self.valid = False
                 return False
         self.contents.append(content)
-        # if page != len(self.contents):
-        #     logger.warning("Wrong page count for %s cache", str(self.query))
-        #     self.valid = False
-        #     return False
         if progress := self.progress_step.progress(page):
             self.update_progress(CacheProgress(CacheProgressEvent.SHOW, progress))
         return page >= self.max_pages
 
     @staticmethod
-    def update_with_loaded(loaded: MacCacheLoad, all_data: list[dict]) -> list[dict]:
+    def update_with_loaded(data: list[dict], loaded: MacCacheLoad) -> list[dict]:
         if (
             (js := get_js(loaded.content, dict))
             and (loaded_data := js.get("data"))
             and isinstance(loaded_data, list)
-            and len(loaded_data) > len(all_data)
+            and len(loaded_data) > len(data)
         ):
-            loaded_ids = {id_: data for data in loaded_data if isinstance(data, dict) and (id_ := data.get("id"))}
-            all_ids = {id_: data for data in all_data if isinstance(data, dict) and (id_ := data.get("id"))}
-            loaded_ids |= all_ids
-            return list(loaded_ids.values())
-        return all_data
+            ids = {id_: data for data in loaded_data if isinstance(data, dict) and (id_ := data.get("id"))}
+            ids |= {id_: data for data in data if isinstance(data, dict) and (id_ := data.get("id"))}
+            data = list(ids.values())
+        return data
 
-    def save(self, loaded: Optional[MacCacheLoad]) -> bool:
+    def save(self, loaded: Optional[MacCacheLoad]) -> Optional[bool]:
         def _save(file: IO[bytes]) -> bool:
             if self.valid and self.total:
-                all_data: list[dict] = []
+                data_to_save: list[dict] = []
                 for content in self.contents:
                     if (js := get_js(content, dict)) and (data := js.get("data")) and isinstance(data, list):
-                        all_data.extend(data)
+                        data_to_save.extend(data)
                 # update with loaded if not complete
-                if self.total != len(all_data) and loaded and loaded.valid:
-                    all_data = self.update_with_loaded(loaded, all_data)
-                actual = len(all_data)
-                js = set_js(dict(max_page_items=actual, total_items=actual, data=all_data))
+                if self.total != len(data_to_save) and loaded and loaded.valid:
+                    data_to_save = self.update_with_loaded(data_to_save, loaded)
+                actual = len(data_to_save)
+                js = set_js(dict(max_page_items=actual, total_items=actual, data=data_to_save))
                 content = json_encoder.encode(js)
                 pickle.dump(self.total, file)
                 pickle.dump(actual, file)
@@ -210,7 +204,7 @@ class MacCacheSave(MACCacheFile):
             return False
 
         self.update_progress(CacheProgress(CacheProgressEvent.STOP))
-        return bool(self.open_and_do("wb", _save, pickle.PickleError, TypeError))
+        return self.open_and_do("wb", _save, pickle.PickleError, TypeError)
 
 
 class AllCached(NamedTuple):
@@ -247,12 +241,12 @@ class AllCached(NamedTuple):
 
 
 class MACCache(CacheCleaner):
-    cached_marker = "ListCached"
-    cached_marker_bytes = cached_marker.encode()
     cached_all_category = "cached_all_category"
-    all_category = "*"
+    cached_header = "ListCached"
+    cached_header_bytes = cached_header.encode()
     clean_after_days = 15
     suffixes = MediaTypes
+    all_category = "*"
 
     def __init__(self, roaming: Path, update_progress: UpdateCacheProgressT, all_cached: AllCached) -> None:
         super().__init__(roaming, MACCache.clean_after_days, *MACCache.suffixes)
@@ -266,7 +260,7 @@ class MACCache(CacheCleaner):
             (response := flow.response)
             and get_query_key(flow, "category") == MACCache.all_category
             and (page := get_int(get_query_key(flow, "p")))
-            and MACCache.cached_marker_bytes not in response.headers
+            and MACCache.cached_header_bytes not in response.headers
             and (query := MacQuery.get_from(flow))
         ):
             if query not in self.saved_queries:
@@ -297,7 +291,7 @@ class MACCache(CacheCleaner):
                 content=loaded.content,
                 headers={
                     "Content-Type": "application/json",
-                    MACCache.cached_marker: "",
+                    MACCache.cached_header: "",
                 },
             )
 

@@ -70,7 +70,7 @@ DEEPL_KEY=your_deepl_api_key
 ```
 
 ### Activate an environment
-The [x64 environment]({x64_env_link}):
+Activate the [x64 environment]({x64_env_link}):
 ```console
 {env_x64}\scripts\activate
 ```

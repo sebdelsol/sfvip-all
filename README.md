@@ -43,7 +43,7 @@ You'll find them in the app folder:
 <kbd><img src="resources/readme/logs.png"></kbd>  
 
 # Build
-[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.41-informational?logo=github)](/build_config.py#L27)
+[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.42-informational?logo=github)](/build_config.py#L27)
 [![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208.4k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://docs.astral.sh/ruff/)
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-linen?logo=python-color)](https://www.python.org/downloads/release/python-3118/)
@@ -70,7 +70,7 @@ DEEPL_KEY=your_deepl_api_key
 ```
 
 ### Activate an environment
-The [x64 environment](/build_config.py#L43):
+Activate the [x64 environment](/build_config.py#L43):
 ```console
 .sfvip64\scripts\activate
 ```
