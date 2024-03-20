@@ -7,15 +7,7 @@ import tempfile
 from contextlib import contextmanager
 from enum import Enum, auto, member
 from pathlib import Path
-from typing import (
-    IO,
-    Callable,
-    Container,
-    Iterator,
-    NamedTuple,
-    Optional,
-    Self,
-)
+from typing import IO, Callable, Container, Iterator, NamedTuple, Optional, Self
 from urllib.parse import urlparse
 
 import lxml.etree as ET
@@ -57,12 +49,16 @@ class EPGProcess(NamedTuple):
 
 
 def _normalize(name: str) -> str:
-    name = re.sub(r"(\.)([\d]+)", r"\2", name)  # turn channel.2 into channel2
+    # turn channel.2 into channel2
+    name = re.sub(r"(\.)([\d]+)", r"\2", name)
     for sub, repl in ("+", "plus"), ("*", "star"):
         name = name.replace(sub, repl)
     for char in ".|()[]-":
         name = name.replace(char, " ")
-    name = re.sub(r"\s+", " ", name).strip()  # remove extra white spaces
+    # insert space if uppercase letter is preceded and followed by one lowercase letter
+    # name = re.sub(r"([A-Z][a-z]+)([A-Z][a-z]+)", r"\1 \2", name)
+    # remove extra white spaces
+    name = re.sub(r"\s+", " ", name).strip()
     return name
 
 
@@ -75,7 +71,7 @@ def _valid_url(url: str) -> bool:
 
 
 def parse_programme(file_obj: IO[bytes] | gzip.GzipFile, epg_process: EPGProcess) -> Iterator[NamedProgrammes]:
-    current_programmes: dict[InternalProgramme, bool] = {}
+    current_programmes: list[InternalProgramme] = []
     current_channel_id: Optional[str] = None
     normalized: dict[str, str] = {}
     progress_step = ProgressStep()
@@ -94,25 +90,24 @@ def parse_programme(file_obj: IO[bytes] | gzip.GzipFile, epg_process: EPGProcess
             case "channel":
                 if channel_id := elem.get("id", None):
                     progress_step.increment_total(1)
+                    normalized[channel_id] = _normalize(channel_id)
             case "title":  # child of <programme>
                 title = elem.text or ""
             case "desc":  # child of <programme>
                 desc = elem.text or ""
             case "programme":
-                if channel_id := elem.get("channel", None):
-                    if not (norm_channel_id := normalized.get(channel_id)):
-                        norm_channel_id = normalized[channel_id] = _normalize(channel_id)
+                if norm_channel_id := normalized.get(elem.get("channel", None)):
                     if norm_channel_id != current_channel_id:
                         if current_channel_id and current_programmes:
                             yield NamedProgrammes(tuple(current_programmes), current_channel_id)
-                        current_programmes = {}
+                        current_programmes = []
                         current_channel_id = norm_channel_id
                         if progress := progress_step.increment_progress(1):
                             epg_process.update_status(EPGProgress(EPGstatus.PROCESSING, progress))
                     start = elem.get("start", "")
                     stop = elem.get("stop", "")
                     programme = InternalProgramme(start=start, stop=stop, title=title, desc=desc)
-                    current_programmes[programme] = True
+                    current_programmes.append(programme)
                 title = ""
                 desc = ""
         elem.clear(False)

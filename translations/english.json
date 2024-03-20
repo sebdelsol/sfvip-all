@@ -47,8 +47,6 @@
   "UpdatedToday": "Updated today",
   "Updated1DayAgo": "Updated 1 day ago",
   "UpdatedDaysAgo": "Updated %s days ago",
-  "UpdateAllSeries": "Update All series",
-  "UpdateAllMovies": "Update All movies",
   "Confidence0": "0 %: You don't trust the EPG and you'll only get an exact match and often none",
   "Confidence100": "100 %: You completely trust the EPG and you'll always get a match even one of poor quality",
   "EPGPrefer": "Search the IPTV provider first",
@@ -59,5 +57,7 @@
   "EPGUrlTip": "Enter the URL of the external EPG, it should end up with '%s' or '%s'",
   "LibmpvTip": "Libmpv decodes & renders audio and video. Enable the updates to get the last version optimized for your computer.",
   "ProxyTip": "%s uses a local proxy to intercept all requests to the IPTV provider and inject the 'all' categories and the external EPG",
-  "UserProxyTip": "Actual user proxy if it exists"
+  "UserProxyTip": "Actual user proxy if it exists",
+  "Missing": "%s missing",
+  "Complete": "Complete"
 }

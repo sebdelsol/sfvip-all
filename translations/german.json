@@ -47,10 +47,8 @@
   "UpdatedToday": "Heute aktualisiert",
   "Updated1DayAgo": "Aktualisiert vor 1 Tag",
   "UpdatedDaysAgo": "Aktualisiert vor %s Tagen",
-  "UpdateAllSeries": "Alle Serien aktualisieren",
-  "UpdateAllMovies": "Alle Filme aktualisieren",
-  "Confidence0": "0 %: Sie vertrauen dem EPG nicht und erhalten nur eine exakte Übereinstimmung und oft keine",
-  "Confidence100": "100 %: Sie vertrauen dem EPG voll und ganz und erhalten immer einen Treffer, auch wenn er von schlechter Qualität ist",
+  "Confidence0": "0 %: Sie trauen dem EPG nicht und erhalten nur eine exakte Übereinstimmung und oft keine",
+  "Confidence100": "100 %: Sie vertrauen dem EPG voll und ganz und erhalten immer eine Übereinstimmung, auch wenn diese von schlechter Qualität ist.",
   "EPGPrefer": "Suchen Sie zuerst den IPTV-Anbieter",
   "Yes": "Ja",
   "No": "Nein",
@@ -59,5 +57,7 @@
   "EPGUrlTip": "Geben Sie die URL des externen EPGs ein, sie sollte mit '%s' oder '%s' enden.",
   "LibmpvTip": "Libmpv dekodiert und rendert Audio und Video. Aktivieren Sie die Updates, um die letzte für Ihren Computer optimierte Version zu erhalten.",
   "ProxyTip": "%s verwendet einen lokalen Proxy, um alle Anfragen an den IPTV-Anbieter abzufangen und die 'all'-Kategorien und den externen EPG zu injizieren",
-  "UserProxyTip": "Tatsächlicher Benutzer-Proxy, wenn er existiert"
+  "UserProxyTip": "Tatsächlicher Benutzer-Proxy, wenn er existiert",
+  "Missing": "%s fehlt",
+  "Complete": "Vollständig"
 }

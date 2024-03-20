@@ -166,6 +166,7 @@ class AccountsProxies:
         def restore_proxies() -> None:
             self._set_proxies(proxies_to_restore.all, "restore")
 
+        # TODO new account !!!!!!!!!!!!!!
         def restore_after_being_read(player_relaunch: Callable[[int], None]) -> None:
             def on_modified(last_modified: float) -> None:
                 # to prevent recursion check it occured after any modification done by any instance

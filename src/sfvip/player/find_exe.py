@@ -57,6 +57,11 @@ class FoundExe(NamedTuple):
         return self.__class__.from_exe(self.exe)
 
 
+class PlayerCapabilities(NamedTuple):
+    has_all_channels: bool
+    has_all_categories: bool
+
+
 class PlayerExe:
     """find the player exe"""
 
@@ -64,6 +69,7 @@ class PlayerExe:
     _pattern = "*sf*vip*player*.exe"
     _min_version = "1.2.5.7"
     _version_without_all_channels = "1.2.5.7"
+    _version_without_all_categories = "1.2.7.72"
 
     def __init__(self, app_info: AppInfo, ui: UI) -> None:
         self._ui = ui
@@ -83,8 +89,12 @@ class PlayerExe:
         return self._found.exe
 
     @property
-    def has_all_channels(self) -> bool:
-        return self._found.version > Version(PlayerExe._version_without_all_channels)
+    def capabilities(self) -> PlayerCapabilities:
+        self._found = self._found.update()
+        return PlayerCapabilities(
+            has_all_channels=self._found.version > Version(PlayerExe._version_without_all_channels),
+            has_all_categories=self._found.version > Version(PlayerExe._version_without_all_categories),
+        )
 
     @property
     def found(self) -> FoundExe:

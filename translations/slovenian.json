@@ -47,9 +47,7 @@
   "UpdatedToday": "Posodobljeno danes",
   "Updated1DayAgo": "Posodobljeno pred 1 dnem",
   "UpdatedDaysAgo": "Posodobljeno pred %s dnevi",
-  "UpdateAllSeries": "Posodobitev vseh serij",
-  "UpdateAllMovies": "Posodobitev vseh filmov",
-  "Confidence0": "0 %: Ne zaupate EPG in dobite le natančno ujemanje, pogosto pa nobenega.",
+  "Confidence0": "0 %: ne zaupate EPG in dobite le natančno ujemanje, pogosto pa nobenega.",
   "Confidence100": "100 %: popolnoma zaupate EPG in vedno dobite ujemanje, tudi če je slabe kakovosti",
   "EPGPrefer": "Najprej poiščite ponudnika IPTV",
   "Yes": "Da",
@@ -59,5 +57,7 @@
   "EPGUrlTip": "Vnesite URL zunanjega EPG, ki se mora končati z \"%s\" ali \"%s\".",
   "LibmpvTip": "Libmpv dekodira in prikazuje zvok in video. Omogočite posodobitve, da dobite zadnjo različico, optimizirano za vaš računalnik.",
   "ProxyTip": "%s uporablja lokalni posrednik za prestrezanje vseh zahtevkov ponudniku IPTV in vnašanje kategorij 'all' ter zunanjega EPG",
-  "UserProxyTip": "Dejanski uporabniški proxy, če obstaja"
+  "UserProxyTip": "Dejanski uporabniški proxy, če obstaja",
+  "Missing": "%s manjka",
+  "Complete": "Popolna"
 }

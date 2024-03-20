@@ -1,13 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from github import (
-    Auth,
-    BadCredentialsException,
-    Github,
-    GithubException,
-    UnknownObjectException,
-)
+from github import Auth, BadCredentialsException, Github, GithubException, UnknownObjectException
 from github.GitRelease import GitRelease
 
 from api_keys import GITHUB_TOKEN

@@ -44,7 +44,10 @@ def get_version_string(filename: str, what: str, language: Optional[str] = None)
         # the following arbitrarily gets the first language and codepage from
         # the list
         ret = windll.version.VerQueryValueW(
-            buffer, r"\VarFileInfo\Translation", byref(value), byref(value_size)  # type: ignore
+            buffer,
+            r"\VarFileInfo\Translation",
+            byref(value),
+            byref(value_size),  # type: ignore
         )
 
         if ret == 0:

@@ -1,4 +1,7 @@
 ## 1.4.12.41
+* Faster MAC accounts cache for all categories.
+* MAC accounts cache handles partial update.
+* All categories are added only when needed.
 * Tooltips added.
 
 ## 1.4.12.40

@@ -1,9 +1,12 @@
-import json
 from enum import Enum, auto
 from typing import Any, Optional
 
+import msgspec
 from mitmproxy import http
 from mitmproxy.coretypes.multidict import MultiDictView
+
+json_decoder = msgspec.json.Decoder()
+json_encoder = msgspec.json.Encoder()
 
 
 class APItype(Enum):
@@ -13,7 +16,7 @@ class APItype(Enum):
 
 
 def _query(request: http.Request) -> MultiDictView[str, str]:
-    return getattr(request, "urlencoded_form" if request.method == "POST" else "query")
+    return request.urlencoded_form if request.method == "POST" else request.query
 
 
 def del_query_key(flow: http.HTTPFlow, key: str) -> None:
@@ -24,22 +27,22 @@ def get_query_key(flow: http.HTTPFlow, key: str) -> Optional[str]:
     return _query(flow.request).get(key)
 
 
-def response_json(response: Optional[http.Response]) -> Any:
+def content_json(content: Optional[bytes]) -> Any:
     try:
-        if (
-            response
-            and (content := response.text)
-            # could be other types like javascript
-            # and "application/json" in response.headers.get("content-type", "")
-            and (content_json := json.loads(content))
-        ):
-            return content_json
-    except json.JSONDecodeError:
+        if content and (json_ := json_decoder.decode(content)):
+            return json_
+    except msgspec.MsgspecError:
         pass
     return None
 
 
-def get_int(text: Optional[str]) -> Optional[int]:
+def response_json(response: Optional[http.Response]) -> Any:
+    if response and (json_ := content_json(response.content)):
+        return json_
+    return None
+
+
+def get_int(text: Optional[str | int]) -> Optional[int]:
     try:
         if text:
             return int(text)

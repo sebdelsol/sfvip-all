@@ -3,6 +3,7 @@
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 <kbd><img src="resources/readme/all.png"></kbd>
 * Update ***[Mpv](https://mpv.io/)*** and **Sfvip Player** so you can enjoy their latest features. 
+* Cache MAC acccounts all categories to access it faster.
 * Translated in all **Sfvip Player** languages.
 * Support an **external EPG**[^1].
 
@@ -43,7 +44,7 @@ You'll find them in the app folder:
 
 # Build
 [![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.41-informational?logo=github)](/build_config.py#L27)
-[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208.3k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
+[![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208.4k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://docs.astral.sh/ruff/)
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-linen?logo=python-color)](https://www.python.org/downloads/release/python-3118/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%2010.2.4-linen?logo=mitmproxy-black)](https://mitmproxy.org/)

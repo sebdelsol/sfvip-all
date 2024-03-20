@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 class AllCategoryName(NamedTuple):
     live: Optional[str]
-    series: str
-    vod: str
+    series: Optional[str]
+    vod: Optional[str]
 
 
 @dataclass
@@ -56,10 +56,11 @@ def _log(verb: str, panel: Panel, action: str) -> None:
 
 class AllPanels:
     def __init__(self, all_name: AllCategoryName) -> None:
-        panels = [
-            _get_panel(PanelType.VOD, all_name.vod),
-            _get_panel(PanelType.SERIES, all_name.series, streams=False),
-        ]
+        panels = []
+        if all_name.series:
+            panels.append(_get_panel(PanelType.SERIES, all_name.series, streams=False))
+        if all_name.vod:
+            panels.append(_get_panel(PanelType.VOD, all_name.vod))
         if all_name.live:
             panels.append(_get_panel(PanelType.LIVE, all_name.live))
         self.category_panel = {panel.get_category: panel for panel in panels}

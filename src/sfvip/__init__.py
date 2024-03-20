@@ -29,13 +29,12 @@ def run_app(at_last_register: AltLastRegisterT, app_info: AppInfo, keep_logs: in
 
         app_updater = AppUpdater(app_info, at_last_register)
         app_auto_updater = AppAutoUpdater(app_updater, app_config, ui, player.stop)
-        inject_in_live = app_config.AllCategory.inject_in_live if player.has_all_channels else True
 
         def run() -> None:
             while player.want_to_launch():
                 ui.splash.show(player.rect)
                 accounts_proxies = AccountsProxies(app_info.roaming, ui)
-                with LocalProxies(app_info, inject_in_live, accounts_proxies, ui) as local_proxies:
+                with LocalProxies(app_info, player.capabilities, accounts_proxies, ui) as local_proxies:
                     with accounts_proxies.set(local_proxies.by_upstreams) as restore_accounts_proxies:
                         with app_auto_updater:
                             with player.run():
