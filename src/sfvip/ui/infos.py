@@ -95,7 +95,7 @@ def _get_infos_headers(app_name: str) -> Sequence[Style]:
     return (
         _InfoStyle.name(LOC.User).bold,
         _InfoStyle.blank,
-        _InfoStyle.proxy(LOC.Proxy % app_name).bigger(2).bold,
+        _InfoStyle.proxy(LOC.Proxy.format(name=app_name)).bigger(2).bold,
         _InfoStyle.blank,
         _InfoStyle.upstream(LOC.UserProxy).bigger(2).bold,
     )
@@ -125,7 +125,7 @@ def _get_app_version(app_info: AppInfo) -> Style:
 
 def _app_version_tooltip(app_info: AppInfo) -> Style:
     n_logs_showed = app_info.config.App.n_logs_showed
-    lines = [LOC.ChangeLog % app_info.name]
+    lines = [LOC.ChangeLog.format(name=app_info.name)]
     prefix = "• v"
     tab = " " * len(prefix)
     n_logs = 0
@@ -156,7 +156,7 @@ def _app_version_tooltip(app_info: AppInfo) -> Style:
 
 def _get_app_warn(app_info: AppInfo) -> Style:
     if app_info.bitness != app_info.os_bitness:
-        warn = LOC.ShouldUseVersion % app_info.os_bitness
+        warn = LOC.ShouldUseVersion.format(version=app_info.os_bitness)
         return _InfoStyle.app_warn(warn).red
     warn = LOC.SearchWholeCatalog
     return _InfoStyle.app_warn(warn).lime_green
@@ -245,7 +245,7 @@ def _get_epg_prefer_label() -> Style:
 
 
 def _epg_url_tooltip() -> Style:
-    return _InfoStyle.app(LOC.EPGUrlTip % ("xml", "xml.gz")).grey.no_truncate
+    return _InfoStyle.app(LOC.EPGUrlTip).grey.no_truncate
 
 
 def _epg_libmpv_tooltip() -> Style:
@@ -258,7 +258,7 @@ def _epg_prefer_tooltip() -> Style:
 
 
 def _proxy_tooltip(app_info: AppInfo) -> Style:
-    return _InfoStyle.app(LOC.ProxyTip % app_info.name).grey.no_truncate
+    return _InfoStyle.app(LOC.ProxyTip.format(name=app_info.name)).grey.no_truncate
 
 
 def _user_proxy_tooltip() -> Style:

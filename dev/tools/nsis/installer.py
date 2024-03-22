@@ -32,7 +32,7 @@ def get_all_languages(loc: CfgLOC, app_name: str) -> Iterator[dict[str, str]]:
             retry=loc.Retry,
             upper=lang.upper(),
             name=lang.capitalize(),
-            already_running=loc.AlreadyRunning % app_name,
+            already_running=loc.AlreadyRunning.format(name=app_name),
         )
 
 

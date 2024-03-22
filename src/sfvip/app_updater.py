@@ -87,7 +87,7 @@ class AppUpdater:
 
         update_exe = self._update_exe(update)
         title = f"{LOC.Install} {self._app_info.name}"
-        ask_win = AskWindow(title, LOC.RestartInstall % f"v{update.version}", LOC.Restart, LOC.Cancel)
+        ask_win = AskWindow(title, LOC.RestartInstall.format(name=f"v{update.version}"), LOC.Restart, LOC.Cancel)
         return bool(ask_win.run_in_thread(ask_and_install, *exceptions))
 
 

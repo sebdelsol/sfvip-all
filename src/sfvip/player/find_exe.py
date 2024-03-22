@@ -116,11 +116,16 @@ class PlayerExe:
         if found := self._find_from(self._from_config, self._from_registry):
             if isinstance(found, FoundExe):
                 return found
-            self._ui.showinfo(LOC.PlayerTooOld % (PlayerExe._name.title(), PlayerExe._min_version))
+            self._ui.showinfo(
+                LOC.PlayerTooOld.format(
+                    name=PlayerExe._name.title(),
+                    version=PlayerExe._min_version,
+                )
+            )
         if found := self._find_from(self._from_file_or_download):
             if isinstance(found, FoundExe):
                 return found
-        raise PlayerNotFoundError(LOC.NotFound % PlayerExe._name.title())
+        raise PlayerNotFoundError(LOC.NotFound.format(name=PlayerExe._name.title()))
 
     def _from_config(self) -> Iterator[str]:
         if exe := self._app_config.Player.exe:
@@ -137,7 +142,7 @@ class PlayerExe:
     def _from_file_or_download(self) -> Iterator[str]:
         while True:
             ok = self._ui.ask(
-                f"{LOC.NotFound % PlayerExe._name.title()}\n{LOC.SearchOrDownload}",
+                f"{LOC.NotFound.format(name=PlayerExe._name.title())}\n{LOC.SearchOrDownload}",
                 LOC.Search,
                 LOC.Download,
             )

@@ -219,8 +219,8 @@ class AllCached(NamedTuple):
 
     def title(self, loaded: MacCacheLoad) -> str:
         if missing_percent := loaded.missing_percent:
-            missing_str = f"{max(1, min(round(missing_percent * 100), 99))}%"
-            missing_str = f"⚠️ {self.missing % missing_str}"
+            percent = max(1, min(round(missing_percent * 100), 99))
+            missing_str = f"⚠️ {self.missing.format(percent=percent)}"
         else:
             missing_str = f"✔ {self.complete}"
         return (
@@ -237,7 +237,7 @@ class AllCached(NamedTuple):
             case 1:
                 return self.one_day
             case _:
-                return self.several_days % days
+                return self.several_days.format(days=days)
 
 
 class MACCache(CacheCleaner):

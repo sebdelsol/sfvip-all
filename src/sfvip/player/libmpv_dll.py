@@ -152,7 +152,9 @@ class LibmpvDll:
             ask_win.wait_window()
             return bool(ask_win.ok)
 
-        ask_win = AskWindow(f"{LOC.Install} Libmpv", LOC.RestartInstall % "Libmpv", LOC.Restart, LOC.Cancel)
+        ask_win = AskWindow(
+            f"{LOC.Install} Libmpv", LOC.RestartInstall.format(name="Libmpv"), LOC.Restart, LOC.Cancel
+        )
         return bool(ask_win.run_in_thread(_ask_restart, *exceptions))
 
 

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from .sticky import Offset, Rect, StickyWindow, offset_centered
+from .style import Style
 
 
 def _get_bar_style(bg: str) -> str:
@@ -19,7 +20,9 @@ def _get_bar_style(bg: str) -> str:
     return bar_style_name
 
 
-# TODO add % label
+_PercentStyle = Style().font("Calibri").font_size(8).grey80
+
+
 class ProgressBar(StickyWindow):
     _bg = "#1c1b1a"
     _height = 10
@@ -29,24 +32,32 @@ class ProgressBar(StickyWindow):
     def __init__(self) -> None:
         super().__init__(ProgressBar._offset, bg=ProgressBar._bg, takefocus=0)
         self.hide()
+        self._percent = tk.Label(self, bg=ProgressBar._bg, width=len(self.progress_str(100)) - 1)
         self._progressbar = ttk.Progressbar(
             self,
             style=_get_bar_style(ProgressBar._bg),
             orient=tk.HORIZONTAL,
             mode="determinate",
         )
-        self._progressbar.pack(expand=True, fill=tk.BOTH)
+        self._percent.pack(anchor=tk.W, side=tk.LEFT)
+        self._progressbar.pack(expand=True, fill=tk.BOTH, side=tk.LEFT)
 
     def change_position(self, rect: Rect) -> None:
         w, h = round(rect.w * ProgressBar._width_ratio), ProgressBar._height
         rect = rect.position(self._offset, w, h)
         self.geometry(rect.to_geometry())
 
+    @staticmethod
+    def progress_str(progress: float) -> str:
+        return f"{progress:.1f}%"
+
     def set_progress(self, progress: float) -> None:
-        self._progressbar.config(value=max(0, min(progress * 100, 100)))
+        progress = max(0, min(progress * 100, 100))
+        self._percent.configure(**_PercentStyle(self.progress_str(progress)).to_tk)
+        self._progressbar.config(value=progress)
 
     def show(self) -> None:
-        self._progressbar["value"] = 0
+        self.set_progress(0)
         self.attributes("-alpha", 1.0)
         # self.deiconify()
 

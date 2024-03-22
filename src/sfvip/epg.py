@@ -20,7 +20,12 @@ class HoverEPG:
 
     def show_channel(self, channel: ShowChannel) -> None:
         if channel.show:
-            self.ui.hover_message.show(LOC.EPGFoundConfidence % (channel.name or "", f"{channel.confidence}%"))
+            self.ui.hover_message.show(
+                LOC.EPGFoundConfidence.format(
+                    channel=channel.name or "",
+                    confidence=f"{channel.confidence}%",
+                )
+            )
         else:
             self.ui.hover_message.hide()
 
