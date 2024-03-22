@@ -21,39 +21,43 @@ class Args(Tap):
 
 
 class Marker(NamedTuple):
-    original: str
+    marker: str
     replacement: str
     count: int
 
 
 class MarkedText:
+    var = "{}"
+    ignore = "[]"
+    replacement = "{:03}"
+
+    regex = "|".join(f"{re.escape(marker[0])}.*?{re.escape(marker[1])}" for marker in (var, ignore))
+    findall = re.compile(regex).findall
+
     def __init__(self, text: str) -> None:
         self.text = text
         self.markers: list[Marker] = []
 
     def prepare(self) -> Self:
-        all_markers: list[str] = re.findall(r"[{\[].*?[}\]]", self.text)
-        for i, marker in enumerate(all_markers):
-            replacement = f"{i:03}"
-            original = self.clean(marker) if marker.startswith("[") else marker
+        for i, marker in enumerate(MarkedText.findall(self.text)):
+            count = self.text.count(marker)
+            replacement = MarkedText.replacement.format(i)
             self.text = self.text.replace(marker, replacement)
-            self.markers.append(Marker(original, replacement, self.text.count(replacement)))
+            self.markers.append(Marker(marker, replacement, count))
         return self
 
     def finalize(self, translation: str) -> Optional[str]:
         for marker in self.markers:
             if marker.count != translation.count(marker.replacement):
                 return None
-            translation = translation.replace(marker.replacement, marker.original).strip()
-        return translation
+            translation = translation.replace(marker.replacement, marker.marker)
+        return self.ignored(translation).strip()
 
     @staticmethod
-    def clean(text: str) -> str:
-        return text.replace("[", "").replace("]", "")
-
-
-deepl_kwargs = dict(api_key=DEEPL_KEY, use_free_api=True)
-deepl_supported_langs = DeeplTranslator(**deepl_kwargs).get_supported_languages()  # type: ignore
+    def ignored(text: str) -> str:
+        for char in MarkedText.ignore:
+            text = text.replace(char, "")
+        return text
 
 
 class Translator:
@@ -61,6 +65,8 @@ class Translator:
 
     def __init__(self, source: str, target: str) -> None:
         """prefer DeepL if it supports those languages"""
+        deepl_kwargs = dict(api_key=DEEPL_KEY, use_free_api=True)
+        deepl_supported_langs = DeeplTranslator(**deepl_kwargs).get_supported_languages()  # type: ignore
         if source in deepl_supported_langs and target in deepl_supported_langs:
             self.translator = DeeplTranslator(source, target, **deepl_kwargs)  # type: ignore
         else:
@@ -70,27 +76,28 @@ class Translator:
     def name(self) -> str:
         return self.translator.__class__.__name__.replace("Translator", "")
 
+    @staticmethod
+    def no_translate(*texts: str) -> list[str]:
+        return [MarkedText.ignored(text) for text in texts]
+
     def translate(self, *texts: str) -> Optional[list[str]]:
-        """
-        translate all texts as a bundle to keep its context
-        keep {} and []
-        """
+        """translate all texts as a bundle to keep its context"""
         marked_texts = [MarkedText(text).prepare() for text in texts]
         bundle = Translator.separator.join(marked.text for marked in marked_texts)
         try:
-            translated_bundle: str = self.translator.translate(bundle)
+            translated = self.translator.translate(bundle)
         except ServerException:
             return None
-        if translated_bundle:
-            translations = translated_bundle.split(Translator.separator)
+        if translated:
+            translations = translated.split(Translator.separator)
+            # check markers are where they should be
+            translations = [
+                finalized_translation
+                for translation, marked in zip(translations, marked_texts)
+                if (finalized_translation := marked.finalize(translation))
+            ]
             if len(translations) == len(marked_texts):
-                # check markers are where they should be
-                finalized_translations = []
-                for translation, marked in zip(translations, marked_texts):
-                    if not (translation := marked.finalize(translation)):
-                        return None
-                    finalized_translations.append(translation)
-                return finalized_translations
+                return translations
         return None
 
 
@@ -113,7 +120,7 @@ def translate(texts: CfgTexts, all_languages: Sequence[str], translation_dir: Cf
         if args.force or is_newer_texts.than(json_file):
             texts_values = texts.as_dict().values()
             if target_language == texts.language:
-                texts_values = [MarkedText.clean(text) for text in texts_values]
+                texts_values = Translator.no_translate(*texts_values)
                 using = "already translated"
             else:
                 translator = Translator(texts.language, target_language)

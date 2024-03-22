@@ -141,9 +141,9 @@ class Publisher:
                 Ok(f". {self.build.name}"),
                 version_color(f"v{published.version}"),
                 version_color(published.bitness),
-                Low(f"- {published.md5} - {published.size}"),
-                Ok(f" {published.valid}"),
-                (Ok(" Already published") if published in old else Title(" New")) if old else "",
+                Low(f"• {published.md5} • {published.size} •"),
+                Ok(published.valid),
+                (Ok("• Already published") if published in old else Title("• New")) if old else "",
             )
             all_publisheds.append(published)
         if not all_publisheds:
