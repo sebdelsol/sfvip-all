@@ -98,14 +98,16 @@ class _Database:
         self._accessed_by_me = self._atime
 
     def save(self) -> None:
-        self._database.open_and_do("w", self.accounts.dump)
-        self._accessed_by_me = self._atime
-        self._shared_self_modified.set()
+        with self.lock:
+            self._database.open_and_do("w", self.accounts.dump)
+            self._accessed_by_me = self._atime
+            self._shared_self_modified.set()
 
     @property
     def shared_self_modified_time(self):
         # time when any instance have internally modified the database
-        return self._shared_self_modified.time
+        with self.lock:
+            return self._shared_self_modified.time
 
 
 class AccountsProxies:
@@ -144,10 +146,14 @@ class AccountsProxies:
                     logger.info("%s user %s proxy to '%s'", msg.capitalize(), account.Name, account.HttpProxy)
             self._database.save()
 
-    def _infos(self, proxies: dict[str, str]) -> Sequence[Info]:
+    def _infos(self, proxies_to_restore: dict[str, str]) -> Sequence[Info]:
         self._database.load()
         return tuple(
-            Info(account.Name, proxies.get(account.HttpProxy, ""), account.HttpProxy)
+            Info(
+                account.Name,
+                account.HttpProxy if proxies_to_restore.get(account.HttpProxy) is not None else "",
+                proxies_to_restore.get(account.HttpProxy, account.HttpProxy),
+            )
             for account in self._accounts_to_set
         )
 
@@ -156,24 +162,23 @@ class AccountsProxies:
         """set proxies, infos and provide a method to restore the proxies"""
 
         def set_infos(player_relaunch: Optional[Callable[[int], None]] = None) -> None:
-            infos = self._infos(proxies)
+            infos = self._infos(shared_proxies_to_restore.all)
             self._ui.set_infos(infos, player_relaunch)
 
         def set_proxies() -> None:
-            proxies_to_restore.add({v: k for k, v in proxies.items()})
+            shared_proxies_to_restore.add({v: k for k, v in proxies.items()})
             self._set_proxies(proxies, "set")
 
         def restore_proxies() -> None:
-            self._set_proxies(proxies_to_restore.all, "restore")
+            self._set_proxies(shared_proxies_to_restore.all, "restore")
 
-        # TODO new account !!!!!!!!!!!!!!
         def restore_after_being_read(player_relaunch: Callable[[int], None]) -> None:
             def on_modified(last_modified: float) -> None:
                 # to prevent recursion check it occured after any modification done by any instance
                 if last_modified > self._database.shared_self_modified_time:
                     logger.info("Accounts proxies file has been externaly modified")
-                    restore_proxies()
                     set_infos(player_relaunch)
+                    restore_proxies()
 
             self._database.wait_being_read()
             restore_proxies()
@@ -182,12 +187,12 @@ class AccountsProxies:
             self._database.watcher.add_callback(on_modified)
             self._database.watcher.start()
 
-        proxies_to_restore = SharedProxiesToRestore(self._app_roaming)
-        set_infos()
+        shared_proxies_to_restore = SharedProxiesToRestore(self._app_roaming)
         set_proxies()
+        set_infos()
         try:
             yield restore_after_being_read
         finally:
             self._database.watcher.stop()
             restore_proxies()
-            proxies_to_restore.clean()
+            shared_proxies_to_restore.clean()

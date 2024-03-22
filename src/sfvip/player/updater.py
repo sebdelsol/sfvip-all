@@ -67,7 +67,7 @@ class PlayerChangelogs(ConfigLoader):
     def __str__(self) -> str:
         return "\n\n".join(
             (
-                LOC.ChangeLog % "Sfvip Player",
+                LOC.ChangeLog.format(name="Sfvip Player"),
                 *(
                     f"{PlayerChangelogs._prefix}{version}:\n" f"{PlayerChangelogs._tab}- {self._sanitize(text)}"
                     for i, (version, text) in enumerate(self._changelogs.items())
@@ -151,7 +151,7 @@ class PlayerUpdater:
             ask_win.wait_window()
             return bool(ask_win.ok)
 
-        ask_win = AskWindow(f"{LOC.Install} {name}", message % name, ok, LOC.Cancel)
+        ask_win = AskWindow(f"{LOC.Install} {name}", message.format(name=name), ok, LOC.Cancel)
         return bool(ask_win.run_in_thread(_ask))
 
     def ask_install(self, version: Version) -> bool:

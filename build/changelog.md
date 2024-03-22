@@ -1,3 +1,9 @@
+## 1.4.12.42
+* Fix Minor bugs.
+* Better translations.
+* Better MAC accounts all categories progress.
+* Fix suggestion to restart when adding or modifying a User.
+
 ## 1.4.12.41
 * Faster MAC accounts cache for all categories.
 * MAC accounts cache handles partial update.

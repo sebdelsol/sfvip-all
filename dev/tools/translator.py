@@ -1,7 +1,8 @@
 import json
+import re
 import sys
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import NamedTuple, Optional, Self, Sequence
 
 from deep_translator import DeeplTranslator, GoogleTranslator
 from deep_translator.exceptions import ServerException
@@ -19,12 +20,43 @@ class Args(Tap):
     language: str = ""  # language to update, all by default
 
 
+class Marker(NamedTuple):
+    original: str
+    replacement: str
+    count: int
+
+
+class MarkedText:
+    def __init__(self, text: str) -> None:
+        self.text = text
+        self.markers: list[Marker] = []
+
+    def prepare(self) -> Self:
+        all_markers: list[str] = re.findall(r"[{\[].*?[}\]]", self.text)
+        for i, marker in enumerate(all_markers):
+            replacement = f"{i:03}"
+            original = self.clean(marker) if marker.startswith("[") else marker
+            self.text = self.text.replace(marker, replacement)
+            self.markers.append(Marker(original, replacement, self.text.count(replacement)))
+        return self
+
+    def finalize(self, translation: str) -> Optional[str]:
+        for marker in self.markers:
+            if marker.count != translation.count(marker.replacement):
+                return None
+            translation = translation.replace(marker.replacement, marker.original).strip()
+        return translation
+
+    @staticmethod
+    def clean(text: str) -> str:
+        return text.replace("[", "").replace("]", "")
+
+
 deepl_kwargs = dict(api_key=DEEPL_KEY, use_free_api=True)
 deepl_supported_langs = DeeplTranslator(**deepl_kwargs).get_supported_languages()  # type: ignore
 
 
 class Translator:
-    marker_replace = "%s", "000"
     separator = "\n"  # DO NOT use it in the texts (best separator found)
 
     def __init__(self, source: str, target: str) -> None:
@@ -41,24 +73,24 @@ class Translator:
     def translate(self, *texts: str) -> Optional[list[str]]:
         """
         translate all texts as a bundle to keep its context
-        replace %s with our own non translated marker
+        keep {} and []
         """
-        marker, marker_replacement = Translator.marker_replace
-        # save where markers are
-        is_markers = [marker in text for text in texts]
-        bundle = Translator.separator.join(texts).replace(marker, marker_replacement)
+        marked_texts = [MarkedText(text).prepare() for text in texts]
+        bundle = Translator.separator.join(marked.text for marked in marked_texts)
         try:
-            translation: str = self.translator.translate(bundle)
+            translated_bundle: str = self.translator.translate(bundle)
         except ServerException:
             return None
-        if translation:
-            translation = translation.replace(marker_replacement, marker)
-            translated_texts = (text.strip() for text in translation.split(Translator.separator))
-            translated_texts = list(filter(None, translated_texts))
-            if len(translated_texts) == len(texts):
+        if translated_bundle:
+            translations = translated_bundle.split(Translator.separator)
+            if len(translations) == len(marked_texts):
                 # check markers are where they should be
-                if all((marker in text) == is_marker for text, is_marker in zip(translated_texts, is_markers)):
-                    return translated_texts
+                finalized_translations = []
+                for translation, marked in zip(translations, marked_texts):
+                    if not (translation := marked.finalize(translation)):
+                        return None
+                    finalized_translations.append(translation)
+                return finalized_translations
         return None
 
 
@@ -81,6 +113,7 @@ def translate(texts: CfgTexts, all_languages: Sequence[str], translation_dir: Cf
         if args.force or is_newer_texts.than(json_file):
             texts_values = texts.as_dict().values()
             if target_language == texts.language:
+                texts_values = [MarkedText.clean(text) for text in texts_values]
                 using = "already translated"
             else:
                 translator = Translator(texts.language, target_language)

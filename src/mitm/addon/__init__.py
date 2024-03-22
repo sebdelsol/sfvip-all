@@ -75,7 +75,7 @@ class ApiRequest:
 
     async def __call__(self, flow: http.HTTPFlow) -> Optional[APItype]:
         request = flow.request
-        if api := ApiRequest._api.get(request.path_components[0]):
+        if (components := request.path_components) and (api := ApiRequest._api.get(components[0])):
             return api
         return APItype.M3U if request.url in self.accounts_urls else None
 
