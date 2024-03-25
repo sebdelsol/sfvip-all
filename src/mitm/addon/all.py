@@ -56,7 +56,7 @@ def _log(verb: str, panel: Panel, action: str) -> None:
 
 class AllPanels:
     def __init__(self, all_name: AllCategoryName) -> None:
-        panels = []
+        panels: list[Panel] = []
         if all_name.series:
             panels.append(_get_panel(PanelType.SERIES, all_name.series, streams=False))
         if all_name.vod:

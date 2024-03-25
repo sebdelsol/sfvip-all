@@ -104,7 +104,7 @@ class _Database:
             self._shared_self_modified.set()
 
     @property
-    def shared_self_modified_time(self):
+    def shared_self_modified_time(self) -> float:
         # time when any instance have internally modified the database
         with self.lock:
             return self._shared_self_modified.time

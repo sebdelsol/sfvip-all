@@ -171,17 +171,17 @@ class MacCacheSave(MACCacheFile):
         return page >= self.max_pages
 
     @staticmethod
-    def update_with_loaded(data: list[dict], loaded: MacCacheLoad) -> list[dict]:
+    def update_with_loaded(data_to_update: list[dict], loaded: MacCacheLoad) -> list[dict]:
         if (
             (js := get_js(loaded.content, dict))
             and (loaded_data := js.get("data"))
             and isinstance(loaded_data, list)
-            and len(loaded_data) > len(data)
+            and len(loaded_data) > len(data_to_update)
         ):
             ids = {id_: data for data in loaded_data if isinstance(data, dict) and (id_ := data.get("id"))}
-            ids |= {id_: data for data in data if isinstance(data, dict) and (id_ := data.get("id"))}
-            data = list(ids.values())
-        return data
+            ids |= {id_: data for data in data_to_update if isinstance(data, dict) and (id_ := data.get("id"))}
+            return list(ids.values())
+        return data_to_update
 
     def save(self, loaded: Optional[MacCacheLoad]) -> Optional[bool]:
         def _save(file: IO[bytes]) -> bool:
@@ -295,7 +295,7 @@ class MACCache(CacheCleaner):
                 },
             )
 
-    def inject_all_cached_category(self, flow: http.HTTPFlow):
+    def inject_all_cached_category(self, flow: http.HTTPFlow) -> None:
         # pylint: disable=too-many-boolean-expressions
         if (
             (response := flow.response)

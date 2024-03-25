@@ -23,7 +23,7 @@ class Args(Tap):
 class Marker(NamedTuple):
     marker: str
     replacement: str
-    count: int
+    n_marker: int
 
 
 class MarkedText:
@@ -40,15 +40,15 @@ class MarkedText:
 
     def prepare(self) -> Self:
         for i, marker in enumerate(MarkedText.findall(self.text)):
-            count = self.text.count(marker)
+            n_marker = self.text.count(marker)
             replacement = MarkedText.replacement.format(i)
             self.text = self.text.replace(marker, replacement)
-            self.markers.append(Marker(marker, replacement, count))
+            self.markers.append(Marker(marker, replacement, n_marker))
         return self
 
     def finalize(self, translation: str) -> Optional[str]:
         for marker in self.markers:
-            if marker.count != translation.count(marker.replacement):
+            if marker.n_marker != translation.count(marker.replacement):
                 return None
             translation = translation.replace(marker.replacement, marker.marker)
         return self.ignored(translation).strip()

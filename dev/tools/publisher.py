@@ -76,7 +76,7 @@ class Published(NamedTuple):
             size=repr_size(exe),
         )
 
-    def __eq__(self, other: Self) -> bool:
+    def __eq__(self, other: object) -> bool:
         fields = Published._fields
         return all(getattr(self, field) == getattr(other, field) for field in fields if field != "exe")
 

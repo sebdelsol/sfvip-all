@@ -200,7 +200,7 @@ class ListView(tk.Frame):
         self._bg_separator = bg_separator
         self._pad = pad
         self._widths = []
-        self._headers = []
+        self._headers: list[tk.Label] = []
 
     @staticmethod
     def _clear(what: tk.BaseWidget) -> None:

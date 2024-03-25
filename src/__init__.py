@@ -38,11 +38,11 @@ def set_logging_and_exclude(*log_polluters: str) -> None:
         from build_config import Build
 
         class StreamToLogger:
-            def __init__(self, logger_write: Callable[[str], None]):
+            def __init__(self, logger_write: Callable[[str], None]) -> None:
                 self.logger_write = logger_write
                 self.buf: list[str] = []
 
-            def write(self, msg: str):
+            def write(self, msg: str) -> None:
                 if msg.endswith("\n"):
                     self.buf.append(msg.removesuffix("\n"))
                     self.logger_write("".join(self.buf))
@@ -50,7 +50,7 @@ def set_logging_and_exclude(*log_polluters: str) -> None:
                 else:
                     self.buf.append(msg)
 
-            def flush(self):
+            def flush(self) -> None:
                 pass
 
         def excepthook(_type: type[BaseException], _value: BaseException, _traceback: TracebackType) -> NoReturn:

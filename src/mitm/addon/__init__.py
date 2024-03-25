@@ -227,7 +227,7 @@ class SfVipAddOn:
             self.mac_cache.stop_all()
 
     # TODO progress for MAC Cache not hiding !! nee to call self.mac_cache.stop_all(), but where?
-    async def error(self, flow: http.HTTPFlow):
+    async def error(self, flow: http.HTTPFlow) -> None:
         # logger.debug("ERROR %s", flow.request.pretty_url)
         if not self.m3u_stream.stop(flow):
             if api := await self.api_request(flow):

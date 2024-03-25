@@ -9,7 +9,7 @@ CheckNewsT = bool | Callable[[T, T | None], bool]
 
 
 class _Jobs(Generic[T]):
-    def __init__(self, name: str, check_new: CheckNewsT) -> None:
+    def __init__(self, name: str, check_new: CheckNewsT[T]) -> None:
         self._objs: "multiprocessing.SimpleQueue[T | None]" = multiprocessing.SimpleQueue()
         self._stopping = multiprocessing.Event()
         self._running = multiprocessing.Event()
@@ -63,7 +63,7 @@ class JobRunner(Generic[T]):
     all following methods should be called from the same process EXCEPT add_job & wait_running
     """
 
-    def __init__(self, job: Callable[[T], None], name: str, check_new: CheckNewsT = True) -> None:
+    def __init__(self, job: Callable[[T], None], name: str, check_new: CheckNewsT[T] = True) -> None:
         self._job = job
         self._jobs = _Jobs[T](name, check_new)
         self._jobs_runner = None

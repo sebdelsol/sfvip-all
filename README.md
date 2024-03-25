@@ -109,7 +109,7 @@ You need [**Visual Studio**](https://www.visualstudio.com/en-us/downloads/downlo
 python -m dev.build [--x86 | --x64 | --both] [--pyinstaller | --mingw] [--nobuild | --noinstaller | --readme] [--upgrade] [--publish]
 ```
 ### Upgrade dependencies
-It checks for _Nsis_, _Python minor update_ and all _packages dependencies_:
+It checks for _Nsis_, _Python minor updates_ and all _packages dependencies_:
 ```console
 python -m dev.upgrade [--x86 | --x64 | --both] [--noeager] [--clean] [--force]
 ```

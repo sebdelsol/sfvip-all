@@ -55,7 +55,7 @@ def _get_attr_link(obj: Any, attr: str) -> str:
 
 
 def _get_exe_kwargs(build: CfgBuild, python_envs: PythonEnvs, publisher: Publisher) -> dict[str, str]:
-    kwargs = {}
+    kwargs: dict[str, str] = {}
     local_versions = {local_version.bitness: local_version for local_version in publisher.get_local_versions()}
     for python_env in python_envs.all:
         bitness = python_env.bitness
@@ -81,7 +81,7 @@ def _get_exe_kwargs(build: CfgBuild, python_envs: PythonEnvs, publisher: Publish
 
 
 def get_env_kwargs(python_envs: PythonEnvs) -> dict[str, str]:
-    kwargs = {}
+    kwargs: dict[str, str] = {}
     for bitness, environment in python_envs.declarations.items():
         kwargs |= {
             f"{bitness}_env_link": _get_attr_link(environment, "path"),
