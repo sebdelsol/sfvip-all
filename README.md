@@ -10,7 +10,7 @@
 [^1]: External EPG doesn't work with **local** m3u accounts.
 # Downloads
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.42-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="35"><img src="https://img.shields.io/badge/x64-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="35"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="35">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.42/Install.Sfvip.All.1.4.12.42.x64.exe)
-<sup><sup>_by MS Defender • 1.1.24020.9 • 1.407.627.0_</sup></sup>
+<sup><sup>_by MS Defender • 1.1.24020.9 • 1.407.703.0_</sup></sup>
 
 [<img src="https://custom-icon-badges.demolab.com/badge/Sfvip All v1.4.12.42-informational?logo=download-cloud&logoSource=feather&logoColor=white&style=flat-square" height="35"><img src="https://img.shields.io/badge/x86-informational?logo=Windows10&logoColor=lightblue&style=flat-square" height="35"><img src="https://custom-icon-badges.demolab.com/badge/clean-brightgreen?logo=shield-check&logoColor=white&style=flat-square" height="35">](https://github.com/sebdelsol/sfvip-all/releases/download/Sfvip.All.1.4.12.42/Install.Sfvip.All.1.4.12.42.x86.exe)
 <sup><sup>_by MS Defender • 1.1.24020.9 • 1.407.627.0_</sup></sup>
@@ -43,7 +43,7 @@ You'll find them in the app folder:
 <kbd><img src="resources/readme/logs.png"></kbd>  
 
 # Build
-[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.42-informational?logo=github)](/build_config.py#L27)
+[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.43-informational?logo=github)](/build_config.py#L27)
 [![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208.5k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://docs.astral.sh/ruff/)
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-linen?logo=python-color)](https://www.python.org/downloads/release/python-3118/)

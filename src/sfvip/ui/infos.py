@@ -145,9 +145,12 @@ def _app_version_tooltip(app_info: AppInfo) -> Style:
                             lines.extend(("", f"{prefix}{text}:"))
                         case "*":
                             lines.append(f"{tab}- {text}")
+                        case _:
+                            line = f"{first} {text}"
+                            raise ValueError
                 except ValueError:
                     if line:
-                        lines.append(f"{tab}{line}")
+                        lines.append(f"{tab}  {line}")
 
     except (PermissionError, FileNotFoundError, OSError):
         pass
