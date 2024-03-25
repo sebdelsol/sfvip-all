@@ -1,5 +1,5 @@
 # <kbd><img src="{ico_link}" width="45"></kbd> {name}
-***{name}*** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
+**{name}** wraps ***[Sfvip Player](https://github.com/K4L4Uz/SFVIP-Player/tree/master)*** to add new features: 
 * Insert an _All_ category when missing so you can easily **search your entire catalog**.  
 <kbd><img src="resources/readme/all.png"></kbd>
 * Update ***[Mpv](https://mpv.io/)*** and **Sfvip Player** so you can enjoy their latest features. 
@@ -39,8 +39,10 @@ Color & pulse | Meaning
 
 # Logs
 The logs go **in pairs**, one for each process (***main*** & ***mitmproxy***).  
-You'll find them in the app folder:  
+You'll find them in the app folder[^3]:  
 <kbd><img src="resources/readme/logs.png"></kbd>  
+
+[^3]:The app is installed by default in `%LocalAppData%\Programs\{name} x64`, `%LocalAppData%\Programs\{name} x86` or the installation directory you've specified during the installation.
 
 # Build
 [![version](https://custom-icon-badges.demolab.com/badge/Build%20{build_version}-informational?logo=github)]({build_version_link})
@@ -56,7 +58,7 @@ You'll find them in the app folder:
 * Check the [***build config***](build_config.py).
 
 ### Create the environments
-You need [***Rust***](https://www.rust-lang.org/fr), [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) & [***x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe):
+You need [***Rust***](https://www.rust-lang.org/fr) and [***Python {py_major_version} x64***](https://www.python.org/ftp/python/{py_version}/python-{py_version}-amd64.exe) & [***x86***](https://www.python.org/ftp/python/{py_version}/python-{py_version}.exe):
 ```console
 rustup target add i686-pc-windows-msvc
 py -{py_major_version}-64 -m dev.create

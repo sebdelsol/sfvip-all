@@ -5,6 +5,7 @@ VIAddVersionKey "ProductName" "{{name}}"
 VIAddVersionKey "CompanyName" "{{company}}"
 
 !include "MUI2.nsh" ; modern UI
+!include "FileFunc.nsh" ; GetParameters and GetOptions
 Name "{{name}} {{version}} {{bitness}}"
 OutFile "{{installer}}"
 RequestExecutionLevel user
@@ -19,24 +20,46 @@ ShowUninstDetails hide
 !define MUI_UNICON "{{dist}}\{{ico}}"
 
 ; -------------
+; directory page
+; -------------
+!define MUI_PAGE_CUSTOMFUNCTION_PRE "SetInstDir"
+!insertmacro MUI_PAGE_DIRECTORY
+
+; -------------
 ; install pages
 ; -------------
+!define MUI_PAGE_CUSTOMFUNCTION_PRE "UninstallOldVersionIfNeeded"
 Page Custom AppRunningPage AppRunningPageFinalize
 !insertmacro MUI_PAGE_INSTFILES
 
+; -------------
+; finish pages
+; -------------
 {% if finish_page %}
 Function RunApp
     SetOutPath "$InstDir\{{dist}}" ; exe working directory
     Exec "$InstDir\{{dist}}\{{name}}.exe"
 FunctionEnd
 
+Function AbortFinishPage
+    ; Abort if /AUTORUN=yes
+    ${GetParameters} $0
+    ${GetOptions} $0 "/AUTORUN=" $1
+    ClearErrors
+    ${If} $1 == "yes"
+        Call RunApp
+        Abort
+    ${Endif}
+FunctionEnd
+
+!define MUI_PAGE_CUSTOMFUNCTION_PRE "AbortFinishPage"
 !define MUI_FINISHPAGE_RUN 
 !define MUI_FINISHPAGE_RUN_FUNCTION "RunApp"
 !insertmacro MUI_PAGE_FINISH
 {% endif %}
 
 ; ---------------
-; uninstall pages
+; uninstall page
 ; ---------------
 UninstPage Custom un.AppRunningPage un.AppRunningPageFinalize
 !insertmacro MUI_UNPAGE_INSTFILES 
@@ -56,7 +79,6 @@ LangString retry ${LANG_{{lang.upper}}} "{{lang.retry}}"
 {% endfor %}
 
 ; Cmd argument /LANG= to force the language (case insensitive)
-!include "FileFunc.nsh" ; GetParameters and GetOptions
 !include "StrFunc.nsh" ; StrCase
 ${Using:StrFunc} StrCase
 
@@ -195,3 +217,37 @@ Section "Uninstall"
     Delete "$InstDir\uninstall.exe"
     Delete "$SMPROGRAMS\{{name}} {{bitness}}.lnk"
 SectionEnd
+
+; --------------
+; Set install directory if in the registry
+; --------------
+Function SetInstDir
+    ; check in the registry for already installed version
+    ReadRegStr $0 HKCU "${UNINSTALL_KEY}" "InstallLocation"
+    ${If} ${Errors}
+        ClearErrors
+    ${Else}
+        StrCpy $InstDir $0
+    ${Endif}
+    ; no directory page if /AUTOINSTDIR=yes
+    ${GetParameters} $0
+    ${GetOptions} $0 "/AUTOINSTDIR=" $1
+    ClearErrors
+    ${If} $1 == "yes"
+        Abort
+    ${Endif}
+FunctionEnd
+
+; --------------
+; Uninstall version stored in the registry if different from instdir
+; --------------
+Function UninstallOldVersionIfNeeded
+    ReadRegStr $0 HKCU "${UNINSTALL_KEY}" "InstallLocation"
+    ${If} ${Errors}
+        ClearErrors
+    ${ElseIf} $InstDir != $0
+        ${If} ${FileExists} "$0\uninstall.exe"
+            ExecWait "$0\uninstall.exe /S"
+        ${EndIf}
+    ${Endif}
+FunctionEnd
