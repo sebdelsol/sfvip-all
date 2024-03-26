@@ -1,3 +1,6 @@
+## 1.4.12.44
+* Fix minor bugs.
+
 ## 1.4.12.43
 * Option to modify _Sfvip All_ install directory.
 * When updating the Install directory won't be asked again

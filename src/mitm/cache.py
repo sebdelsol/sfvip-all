@@ -16,6 +16,10 @@ MediaTypes = "vod", "series"
 ValidMediaTypes = Literal["vod", "series"]
 
 
+def _in_beetween(value: float, min_value: float, max_value: float) -> float:
+    return max(min_value, min(value, max_value))
+
+
 class MacQuery(NamedTuple):
     server: str
     type: ValidMediaTypes
@@ -129,7 +133,7 @@ class MacCacheLoad(MACCacheFile):
 
     @property
     def missing_percent(self) -> float:
-        return ((self.total - self.actual) / self.total) if self.total else 1
+        return _in_beetween((self.total - self.actual) / self.total, 0, 100) if self.total else 1
 
 
 class MacCacheSave(MACCacheFile):
@@ -219,7 +223,7 @@ class AllCached(NamedTuple):
 
     def title(self, loaded: MacCacheLoad) -> str:
         if missing_percent := loaded.missing_percent:
-            percent = max(1, min(round(missing_percent * 100), 99))
+            percent = _in_beetween(round(missing_percent * 100), 1, 99)
             missing_str = f"⚠️ {self.missing.format(percent=percent)}"
         else:
             missing_str = f"✔ {self.complete}"
@@ -244,7 +248,7 @@ class MACCache(CacheCleaner):
     cached_all_category = "cached_all_category"
     cached_header = "ListCached"
     cached_header_bytes = cached_header.encode()
-    clean_after_days = 15
+    clean_after_days = 30
     suffixes = MediaTypes
     all_category = "*"
 

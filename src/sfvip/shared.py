@@ -4,7 +4,9 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from ..winapi import mutex, pids
+import psutil
+
+from ..winapi import mutex
 from .utils.retry import RetryIfException
 
 logger = logging.getLogger(__name__)
@@ -30,7 +32,7 @@ class SharedProxiesToRestore(dict[str, dict[str, str]]):
             json.dump(self, f, indent=2)
 
     def _clean_pids(self, pid_to_remove: Optional[str]) -> None:
-        clean_pids = [pid for pid in self if not pids.exists(int(pid)) or pid == pid_to_remove]
+        clean_pids = [pid for pid in self if not psutil.pid_exists(int(pid)) or pid == pid_to_remove]
         for pid in clean_pids:
             del self[pid]
 
