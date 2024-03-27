@@ -29,6 +29,7 @@ ShowUninstDetails hide
 ; install pages
 ; -------------
 !define MUI_PAGE_CUSTOMFUNCTION_PRE "UninstallOldVersionIfNeeded"
+Page Custom old.AppRunningPage old.AppRunningPageFinalize
 Page Custom AppRunningPage AppRunningPageFinalize
 !insertmacro MUI_PAGE_INSTFILES
 
@@ -105,12 +106,18 @@ FunctionEnd
 {% endif %}
 !define PowerShell "$Windir\${System}\WindowsPowerShell\v1.0\powershell.exe"
 !define GetProcess "Get-Process '{{name}}' -ErrorAction SilentlyContinue"
-!define CheckPath "Where-Object {$_.Path -eq '$InstDir\{{dist}}\{{name}}.exe'}"
 
 var NbAppRunning
+var OldInstDir
 
-!macro GetNbAppRunning
-    nsExec::ExecToStack "${PowerShell} exit (${GetProcess} | ${CheckPath}).Count"
+!macro GetNbAppRunning old
+    ; MessageBox MB_OK "old=`${old}`"
+    !if `${old}` == "old."
+        StrCpy $0 "Where-Object {$_.Path -eq '$OldInstDir\{{dist}}\{{name}}.exe'}"
+    !else
+        StrCpy $0 "Where-Object {$_.Path -eq '$InstDir\{{dist}}\{{name}}.exe'}"
+    !endif
+    nsExec::ExecToStack "${PowerShell} exit (${GetProcess} | $0).Count"
     Pop $0
     StrCpy $NbAppRunning $0
 !macroend
@@ -129,9 +136,9 @@ var NextButton
     EnableWindow $NextButton ${enable}
 !macroend
 
-!macro AppRunningPageMacro un
-    Function ${un}AppRunningPage
-        !insertmacro GetNbAppRunning
+!macro AppRunningPageMacro un old
+    Function ${un}${old}AppRunningPage
+        !insertmacro GetNbAppRunning `${old}`
         ${If} $NbAppRunning > 0
             nsDialogs::Create 1018
             ; next button
@@ -150,28 +157,29 @@ var NextButton
         ${EndIf}
     FunctionEnd
 
-    Function ${un}AppRunningPageFinalize
-        ${NSD_CreateTimer} ${un}FlashAlreadyRunningBegin 1
-        !insertmacro GetNbAppRunning
+    Function ${un}${old}AppRunningPageFinalize
+        ${NSD_CreateTimer} ${un}${old}FlashAlreadyRunningBegin 1
+        !insertmacro GetNbAppRunning `${old}`
         ${If} $NbAppRunning > 0
             Abort ; stay on the page if running
         ${EndIf}
     FunctionEnd
 
-    Function ${un}FlashAlreadyRunningBegin
-        ${NSD_KillTimer} ${un}FlashAlreadyRunningBegin
+    Function ${un}${old}FlashAlreadyRunningBegin
+        ${NSD_KillTimer} ${un}${old}FlashAlreadyRunningBegin
         !insertmacro AlreadyRunningAndNext ${LABEL_COLOR_FLASH} 0
-        ${NSD_CreateTimer} ${un}FlashAlreadyRunningEnd ${FLASH_DELAY}
+        ${NSD_CreateTimer} ${un}${old}FlashAlreadyRunningEnd ${FLASH_DELAY}
     FunctionEnd
 
-    Function ${un}FlashAlreadyRunningEnd
-        ${NSD_KillTimer} ${un}FlashAlreadyRunningEnd
+    Function ${un}${old}FlashAlreadyRunningEnd
+        ${NSD_KillTimer} ${un}${old}FlashAlreadyRunningEnd
         !insertmacro AlreadyRunningAndNext ${LABEL_COLOR} 1
     FunctionEnd
 !macroend
 
-!insertmacro AppRunningPageMacro ""
-!insertmacro AppRunningPageMacro "un."
+!insertmacro AppRunningPageMacro "" "old."
+!insertmacro AppRunningPageMacro "" ""
+!insertmacro AppRunningPageMacro "un." ""
 
 ; ------------
 ; Install Page
@@ -229,6 +237,8 @@ Function SetInstDir
     ${Else}
         StrCpy $InstDir $0
     ${Endif}
+    ; save $InstDir
+    StrCpy $OldInstDir $InstDir
     ; no directory page if /AUTOINSTDIR=yes
     ${GetParameters} $0
     ${GetOptions} $0 "/AUTOINSTDIR=" $1

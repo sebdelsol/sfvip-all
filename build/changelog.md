@@ -1,5 +1,6 @@
 ## 1.4.12.44
-* Fix minor bugs.
+* Fix UI minor bug when launching several _Sfvip All_.
+* Fix uninstall old version if the installation folder differs.
 
 ## 1.4.12.43
 * Option to modify _Sfvip All_ install directory.
