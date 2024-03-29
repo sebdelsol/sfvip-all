@@ -1,3 +1,8 @@
+## 1.4.12.45
+* Bump _Nuitka_ to 2.1.4.
+* Fix MAC account update info.
+* Fix MAC account progress not correctly hiding.
+
 ## 1.4.12.44
 * Fix UI minor bug when launching several _Sfvip All_.
 * Fix uninstall old version if the installation folder differs.

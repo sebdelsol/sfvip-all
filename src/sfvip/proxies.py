@@ -59,7 +59,6 @@ def get_all_config(player_capabilities: PlayerCapabilities) -> AddonAllConfig:
             vod=None if player_capabilities.has_all_categories else LOC.AllMovies,
         ),
         AllCached(
-            missing=LOC.Missing,
             complete=LOC.Complete,
             today=LOC.UpdatedToday,
             one_day=LOC.Updated1DayAgo,
@@ -89,7 +88,7 @@ class LocalProxies:
             ),
             ui,
         )
-        self._cache_progress = CacheProgressListener(ui)
+        self._cache_progress = CacheProgressListener(ui, self.cache_stop_all)
         self._addon = SfVipAddOn(
             accounts_proxies.urls,
             get_all_config(player_capabilities),
@@ -110,6 +109,9 @@ class LocalProxies:
     @property
     def by_upstreams(self) -> dict[str, str]:
         return self._by_upstreams
+
+    def cache_stop_all(self) -> None:
+        self._addon.cache_stop_all()
 
     def epg_update(self, url: str) -> None:
         self._addon.epg_update(url)

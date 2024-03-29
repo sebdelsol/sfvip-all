@@ -57,7 +57,6 @@
   "EPGUrlTip": "Geben Sie die URL des externen EPGs ein, sie sollte mit \"xml\" oder \"xml.gz\" enden.",
   "LibmpvTip": "Libmpv dekodiert und rendert Audio und Video. Aktivieren Sie die Updates, um die letzte für Ihren Computer optimierte Version zu erhalten.",
   "ProxyTip": "{name} verwendet einen lokalen Proxy, um alle Anfragen an den Anbieter IPTV abzufangen und die 'all'-Kategorien und den externen EPG zu injizieren",
-  "UserProxyTip": "Tatsächlicher Benutzer-Proxy, wenn er existiert",
-  "Missing": "{percent}% fehlt",
-  "Complete": "100% vollständig"
+  "UserProxyTip": "Aktueller Benutzer-Proxy, falls vorhanden",
+  "Complete": "{percent}% Vollständig"
 }

@@ -62,7 +62,7 @@ class MitmLocalProxy(multiprocessing.Process):
         super().__init__()
 
     def run(self) -> None:
-        socket.setdefaulttimeout(0)  # TODO is it better ??
+        socket.setdefaulttimeout(0)  # faster proxy ?!
         with LogProcess(logger, "Mitmproxy"):
             if set_current_process_high_priority():
                 logger.info("Set process to high priority")

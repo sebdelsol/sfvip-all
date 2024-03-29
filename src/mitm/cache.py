@@ -1,4 +1,5 @@
 import logging
+import multiprocessing
 import pickle
 import time
 from enum import Enum, auto
@@ -6,6 +7,8 @@ from pathlib import Path
 from typing import IO, Any, Callable, Literal, NamedTuple, Optional, Self, TypeVar
 
 from mitmproxy import http
+
+from shared.job_runner import JobRunner
 
 from ..winapi import mutex
 from .cache_cleaner import CacheCleaner
@@ -82,29 +85,29 @@ def sanitize_filename(filename: str) -> str:
     return filename
 
 
-class MACCacheFile:
+class MacCacheFile:
     def __init__(self, cache_dir: Path, query: MacQuery) -> None:
         self.query = query
         self.file_path = cache_dir / sanitize_filename(str(self.query))
         self.mutex = mutex.SystemWideMutex(f"file lock for {self.file_path}")
 
     def open_and_do(
-        self, mode: Literal["rb", "wb"], do: Callable[[IO[bytes]], T], *exceptions: type[Exception]
-    ) -> Optional[T]:
+        self, mode: Literal["rb", "wb"], do: Callable[[IO[bytes]], None], *exceptions: type[Exception]
+    ) -> None:
         with self.mutex:
             try:
                 with self.file_path.open(mode) as file:
                     if file:
-                        return do(file)
+                        do(file)
             except (*exceptions, PermissionError, FileNotFoundError, OSError):
                 pass
-            return None
 
 
-class MacCacheLoad(MACCacheFile):
+class MacCacheLoad(MacCacheFile):
     def __init__(self, cache_dir: Path, query: MacQuery) -> None:
         self.total: int = 0
         self.actual: int = 0
+        self.timestamp: float = 0
         self.content: bytes = b""
         super().__init__(cache_dir, query)
         self._load()
@@ -117,11 +120,14 @@ class MacCacheLoad(MACCacheFile):
                 and isinstance(total, int)
                 and (actual := pickle.load(file))
                 and isinstance(actual, int)
+                and (timestamp := pickle.load(file))
+                and isinstance(timestamp, float)
                 and (content := pickle.load(file))
                 and isinstance(content, bytes)
             ):
                 self.total = total
                 self.actual = actual
+                self.timestamp = timestamp
                 self.content = content
                 logger.info("Load Cache from '%s' (%s out of %s)", file.name, self.actual, self.total)
 
@@ -129,20 +135,21 @@ class MacCacheLoad(MACCacheFile):
 
     @property
     def valid(self) -> bool:
-        return bool(self.total and self.actual and self.content)
+        return bool(self.total and self.actual and self.timestamp and self.content)
 
     @property
-    def missing_percent(self) -> float:
-        return _in_beetween((self.total - self.actual) / self.total, 0, 100) if self.total else 1
+    def complete(self) -> float:
+        return _in_beetween(self.actual / self.total, 0, 1) if self.total else 0
 
 
-class MacCacheSave(MACCacheFile):
+class MacCacheSave(MacCacheFile):
     def __init__(self, cache_dir: Path, query: MacQuery, update_progress: UpdateCacheProgressT) -> None:
         self.total: int = 0
         self.valid: bool = True
         self.contents: list[bytes] = []
         self.max_pages: float = 0
-        self.progress_step = ProgressStep(step=0.0005)
+        # update the progress as often as we can to avoid the progress watchdog timeout
+        self.progress_step = ProgressStep(step=0)
         self.update_progress = update_progress
         logger.info("Start creating Cache for %s.%s", query.server, query.type)
         super().__init__(cache_dir, query)
@@ -165,10 +172,11 @@ class MacCacheSave(MACCacheFile):
                 self.max_pages = total / max_page_items
                 self.progress_step.set_total(self.max_pages)
                 self.update_progress(CacheProgress(CacheProgressEvent.START))
-            else:
-                logger.warning("Wrong 1st page for %s cache", str(self.query))
-                self.valid = False
-                return False
+        if not self.max_pages:
+            logger.warning("Missing 1st page for %s cache", str(self.query))
+            self.valid = False
+            return False
+        # logger.info("Page %s - total %s", page, self.max_pages)
         self.contents.append(content)
         if progress := self.progress_step.progress(page):
             self.update_progress(CacheProgress(CacheProgressEvent.SHOW, progress))
@@ -187,33 +195,35 @@ class MacCacheSave(MACCacheFile):
             return list(ids.values())
         return data_to_update
 
-    def save(self, loaded: Optional[MacCacheLoad]) -> Optional[bool]:
-        def _save(file: IO[bytes]) -> bool:
-            if self.valid and self.total:
-                data_to_save: list[dict] = []
-                for content in self.contents:
-                    if (js := get_js(content, dict)) and (data := js.get("data")) and isinstance(data, list):
-                        data_to_save.extend(data)
-                # update with loaded if not complete
-                if self.total != len(data_to_save) and loaded and loaded.valid:
-                    data_to_save = self.update_with_loaded(data_to_save, loaded)
-                actual = len(data_to_save)
-                js = set_js(dict(max_page_items=actual, total_items=actual, data=data_to_save))
-                content = json_encoder.encode(js)
-                pickle.dump(self.total, file)
-                pickle.dump(actual, file)
-                pickle.dump(content, file)
-                logger.info("Save Cache to '%s' (%s out of %s)", file.name, actual, self.total)
-                return True
-            return False
+    def save(self, loaded: Optional[MacCacheLoad]) -> None:
+        def _save(file: IO[bytes]) -> None:
+            data_to_save: list[dict] = []
+            for content in self.contents:
+                if (js := get_js(content, dict)) and (data := js.get("data")) and isinstance(data, list):
+                    data_to_save.extend(data)
+            # update with loaded if not complete
+            not_complete = len(data_to_save) < self.total
+            if not_complete and loaded and loaded.valid:
+                data_to_save = self.update_with_loaded(data_to_save, loaded)
+                timestamp = loaded.timestamp
+            else:
+                timestamp = time.time()
+            actual = len(data_to_save)
+            js = set_js(dict(max_page_items=actual, total_items=actual, data=data_to_save))
+            content = json_encoder.encode(js)
+            pickle.dump(self.total, file)
+            pickle.dump(actual, file)
+            pickle.dump(timestamp, file)
+            pickle.dump(content, file)
+            logger.info("Save Cache to '%s' (%s out of %s)", file.name, actual, self.total)
 
         self.update_progress(CacheProgress(CacheProgressEvent.STOP))
-        return self.open_and_do("wb", _save, pickle.PickleError, TypeError)
+        if self.valid and self.total:
+            self.open_and_do("wb", _save, pickle.PickleError, TypeError)
 
 
 class AllCached(NamedTuple):
     complete: str
-    missing: str
     today: str
     one_day: str
     several_days: str
@@ -222,18 +232,17 @@ class AllCached(NamedTuple):
     all_updates: dict[ValidMediaTypes, str] = {}
 
     def title(self, loaded: MacCacheLoad) -> str:
-        if missing_percent := loaded.missing_percent:
-            percent = _in_beetween(round(missing_percent * 100), 1, 99)
-            missing_str = f"⚠️ {self.missing.format(percent=percent)}"
+        if loaded.complete < 1:
+            percent = _in_beetween(round(loaded.complete * 100), 1, 99)
+            missing_str = f"⚠️ {self.complete.format(percent=percent)}"
         else:
-            missing_str = f"✔ {self.complete}"
+            missing_str = f"✔ {self.complete.format(percent=100)}"
         return (
             f"{self.all_names.get(loaded.query.type, '')} - {self.fast_cached.capitalize()}"
-            f"\n{self._days_ago(loaded.file_path)} {missing_str}"
+            f"\n{self._days_ago(loaded.timestamp)} {missing_str}"
         )
 
-    def _days_ago(self, path: Path) -> str:
-        timestamp = path.stat().st_mtime
+    def _days_ago(self, timestamp: float) -> str:
         days = int((time.time() - timestamp) / (3600 * 24))
         match days:
             case 0:
@@ -244,7 +253,7 @@ class AllCached(NamedTuple):
                 return self.several_days.format(days=days)
 
 
-class MACCache(CacheCleaner):
+class MacCache(CacheCleaner):
     cached_all_category = "cached_all_category"
     cached_header = "ListCached"
     cached_header_bytes = cached_header.encode()
@@ -253,7 +262,9 @@ class MACCache(CacheCleaner):
     all_category = "*"
 
     def __init__(self, roaming: Path, update_progress: UpdateCacheProgressT, all_cached: AllCached) -> None:
-        super().__init__(roaming, MACCache.clean_after_days, *MACCache.suffixes)
+        super().__init__(roaming, MacCache.clean_after_days, *MacCache.suffixes)
+        self._stop_all_job = JobRunner[bool](self._done_all, "Cache stop all job")
+        self.saved_queries_lock = multiprocessing.Lock()
         self.saved_queries: dict[MacQuery, MacCacheSave] = {}
         self.loaded_queries: dict[MacQuery, MacCacheLoad] = {}
         self.update_progress = update_progress
@@ -262,31 +273,45 @@ class MACCache(CacheCleaner):
     async def save_response(self, flow: http.HTTPFlow) -> None:
         if (
             (response := flow.response)
-            and get_query_key(flow, "category") == MACCache.all_category
+            and get_query_key(flow, "category") == MacCache.all_category
             and (page := get_int(get_query_key(flow, "p")))
-            and MACCache.cached_header_bytes not in response.headers
+            and MacCache.cached_header_bytes not in response.headers
             and (query := MacQuery.get_from(flow))
         ):
-            if query not in self.saved_queries:
-                self.saved_queries[query] = MacCacheSave(self.cache_dir, query, self.update_progress)
-            if await self.saved_queries[query].update(flow.response, page):
-                self.save(query)
+            with self.saved_queries_lock:
+                if query not in self.saved_queries:
+                    self.saved_queries[query] = MacCacheSave(self.cache_dir, query, self.update_progress)
+                if await self.saved_queries[query].update(response, page):
+                    self._save(query)
 
-    def save(self, query: MacQuery) -> None:
+    def _save(self, query: MacQuery) -> None:
         self.saved_queries[query].save(self.loaded_queries.get(query))
         del self.saved_queries[query]
 
-    def stop(self, flow: http.HTTPFlow) -> None:
-        if (query := MacQuery.get_from(flow)) in self.saved_queries:
-            self.save(query)
+    def done(self, flow: http.HTTPFlow) -> None:
+        with self.saved_queries_lock:
+            if (query := MacQuery.get_from(flow)) in self.saved_queries:
+                logger.info("Stop creating Cache for %s", str(query))
+                self._save(query)
+
+    def _done_all(self, _) -> None:
+        with self.saved_queries_lock:
+            logger.info("Stop creating all Caches")
+            for query in self.saved_queries.copy():
+                self._save(query)
 
     def stop_all(self) -> None:
-        for query in self.saved_queries.copy():
-            self.save(query)
+        self._stop_all_job.add_job(True)
+
+    def start(self) -> None:
+        self._stop_all_job.start()
+
+    def stop(self) -> None:
+        self._stop_all_job.stop()
 
     async def load_response(self, flow: http.HTTPFlow) -> None:
         if (
-            get_query_key(flow, "category") == MACCache.cached_all_category
+            get_query_key(flow, "category") == MacCache.cached_all_category
             and (query := MacQuery.get_from(flow))
             and (loaded := self.loaded_queries[query])
             and (loaded.valid)
@@ -295,7 +320,7 @@ class MACCache(CacheCleaner):
                 content=loaded.content,
                 headers={
                     "Content-Type": "application/json",
-                    MACCache.cached_header: "",
+                    MacCache.cached_header: "",
                 },
             )
 
@@ -307,7 +332,7 @@ class MACCache(CacheCleaner):
             and (categories := get_reponse_js(response, list))
             and (all_category := categories[0])
             and isinstance(all_category, dict)
-            and (all_category.get("id") == MACCache.all_category)
+            and (all_category.get("id") == MacCache.all_category)
         ):
             # clean queries for other servers
             for existing_query in self.loaded_queries.copy():
@@ -318,8 +343,8 @@ class MACCache(CacheCleaner):
             if loaded.valid:
                 cached_all_category = dict(
                     censored=0,
-                    alias=MACCache.all_category,
-                    id=MACCache.cached_all_category,
+                    alias=MacCache.all_category,
+                    id=MacCache.cached_all_category,
                     title=self.all_cached.title(loaded),
                 )
                 categories.insert(1, cached_all_category)

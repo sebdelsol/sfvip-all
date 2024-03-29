@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from mitmproxy import http
 from mitmproxy.proxy.server_hooks import ServerConnectionHookData
 
-from ..cache import AllCached, MACCache, UpdateCacheProgressT
+from ..cache import AllCached, MacCache, UpdateCacheProgressT
 from ..epg import EPG, EpgCallbacks
 from ..utils import APItype, get_query_key, response_json
 from .all import AllCategoryName, AllPanels
@@ -156,10 +156,13 @@ class SfVipAddOn:
         timeout: int,
     ) -> None:
         self.api_request = ApiRequest(accounts_urls)
-        self.mac_cache = MACCache(roaming, update_progress, all_config.all_cached)
+        self.mac_cache = MacCache(roaming, update_progress, all_config.all_cached)
         self.epg = EPG(roaming, epg_callbacks, timeout)
         self.m3u_stream = M3UStream(self.epg)
         self.panels = AllPanels(all_config.all_name)
+
+    def cache_stop_all(self) -> None:
+        self.mac_cache.stop_all()
 
     def epg_update(self, url: str) -> None:
         self.epg.ask_update(url)
@@ -171,10 +174,12 @@ class SfVipAddOn:
         self.epg.update_prefer(prefer_internal)
 
     def running(self) -> None:
+        self.mac_cache.start()
         self.epg.start()
 
     def done(self) -> None:
         self.epg.stop()
+        self.mac_cache.stop()
 
     def wait_running(self, timeout: int) -> bool:
         return self.epg.wait_running(timeout)
@@ -185,8 +190,6 @@ class SfVipAddOn:
             match api, get_query_key(flow, "action"):
                 case APItype.MAC, "get_ordered_list":
                     await self.mac_cache.load_response(flow)
-                case APItype.MAC, _:
-                    self.mac_cache.stop(flow)
                 case APItype.XC, action if action:
                     self.panels.serve_all(flow, action)
 
@@ -224,16 +227,14 @@ class SfVipAddOn:
                         set_epg_server(flow, self.epg, api)
         else:
             self.m3u_stream.start(flow)
-            self.mac_cache.stop_all()
 
-    # TODO progress for MAC Cache not hiding !! nee to call self.mac_cache.stop_all(), but where?
     async def error(self, flow: http.HTTPFlow) -> None:
         # logger.debug("ERROR %s", flow.request.pretty_url)
         if not self.m3u_stream.stop(flow):
             if api := await self.api_request(flow):
                 match api, get_query_key(flow, "action"):
                     case APItype.MAC, "get_ordered_list":
-                        self.mac_cache.stop(flow)
+                        self.mac_cache.done(flow)
 
     def server_disconnected(self, data: ServerConnectionHookData) -> None:
         # logger.debug("DISCONNECT %s %s", data.server.peername, data.server.transport_protocol)
