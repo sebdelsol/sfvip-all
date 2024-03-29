@@ -58,6 +58,5 @@
   "LibmpvTip": "Libmpv ses ve videonun kodunu çözer ve işler. Bilgisayarınız için optimize edilmiş son sürümü almak için güncellemeleri etkinleştirin.",
   "ProxyTip": "{name}, IPTV sağlayıcısına yapılan tüm istekleri engellemek ve 'tüm' kategorileri ve harici EPG'yi enjekte etmek için yerel bir proxy kullanır",
   "UserProxyTip": "Varsa gerçek kullanıcı proxy'si",
-  "Missing": "{percent}% kayıp",
-  "Complete": "100 Tamamlandı"
+  "Complete": "{percent}% Tamamlandı"
 }

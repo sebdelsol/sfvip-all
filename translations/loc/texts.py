@@ -80,8 +80,7 @@ class Texts:
         "and inject the 'all' categories and the external EPG"
     )
     UserProxyTip: str = "Actual user proxy if it exists"
-    Missing: str = "{percent}% missing"
-    Complete: str = "100% Complete"
+    Complete: str = "{percent}% Complete"
 
     def as_dict(self) -> dict[str, str]:
         return dataclasses.asdict(self)

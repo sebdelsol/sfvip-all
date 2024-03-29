@@ -58,6 +58,5 @@
   "LibmpvTip": "Libmpv dekodira in prikazuje zvok in video. Omogočite posodobitve, da dobite zadnjo različico, optimizirano za vaš računalnik.",
   "ProxyTip": "{name} uporablja lokalni posrednik za prestrezanje vseh zahtev do ponudnika IPTV in vnašanje kategorij 'all' in zunanjega EPG",
   "UserProxyTip": "Dejanski uporabniški posrednik, če obstaja",
-  "Missing": "{percent}% manjka",
-  "Complete": "100 % Popolno"
+  "Complete": "{percent}% dokončano"
 }

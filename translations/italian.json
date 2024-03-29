@@ -58,6 +58,5 @@
   "LibmpvTip": "Libmpv decodifica e rende audio e video. Attivare gli aggiornamenti per ottenere l'ultima versione ottimizzata per il proprio computer.",
   "ProxyTip": "{name} utilizza un proxy locale per intercettare tutte le richieste al provider IPTV e iniettare le categorie 'all' e l'EPG esterno.",
   "UserProxyTip": "Proxy utente effettivo, se esiste",
-  "Missing": "{percent}% mancante",
-  "Complete": "100% Completo"
+  "Complete": "{percent}% Completo"
 }

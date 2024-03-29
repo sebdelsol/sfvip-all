@@ -18,12 +18,35 @@ ShowUninstDetails hide
 
 !define MUI_ICON "{{dist}}\{{ico}}"
 !define MUI_UNICON "{{dist}}\{{ico}}"
+!define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{name}} {{bitness}}"
 
 ; -------------
 ; directory page
 ; -------------
 !define MUI_PAGE_CUSTOMFUNCTION_PRE "SetInstDir"
 !insertmacro MUI_PAGE_DIRECTORY
+
+var OldInstDir
+
+; Set install directory if in the registry
+Function SetInstDir
+    ; check in the registry for already installed version
+    ReadRegStr $0 HKCU "${UNINSTALL_KEY}" "InstallLocation"
+    ${If} ${Errors}
+        ClearErrors
+    ${Else}
+        StrCpy $InstDir $0
+    ${Endif}
+    ; save $InstDir
+    StrCpy $OldInstDir $InstDir
+    ; no directory page if /AUTOINSTDIR=yes
+    ${GetParameters} $0
+    ${GetOptions} $0 "/AUTOINSTDIR=" $1
+    ClearErrors
+    ${If} $1 == "yes"
+        Abort
+    ${Endif}
+FunctionEnd
 
 ; -------------
 ; install pages
@@ -32,6 +55,18 @@ ShowUninstDetails hide
 Page Custom old.AppRunningPage old.AppRunningPageFinalize
 Page Custom AppRunningPage AppRunningPageFinalize
 !insertmacro MUI_PAGE_INSTFILES
+
+; Uninstall version stored in the registry if different from instdir
+Function UninstallOldVersionIfNeeded
+    ReadRegStr $0 HKCU "${UNINSTALL_KEY}" "InstallLocation"
+    ${If} ${Errors}
+        ClearErrors
+    ${ElseIf} $InstDir != $0
+        ${If} ${FileExists} "$0\uninstall.exe"
+            ExecWait "$0\uninstall.exe /S"
+        ${EndIf}
+    ${Endif}
+FunctionEnd
 
 ; -------------
 ; finish pages
@@ -108,7 +143,6 @@ FunctionEnd
 !define GetProcess "Get-Process '{{name}}' -ErrorAction SilentlyContinue"
 
 var NbAppRunning
-var OldInstDir
 
 !macro GetNbAppRunning old
     ; MessageBox MB_OK "old=`${old}`"
@@ -184,7 +218,6 @@ var NextButton
 ; ------------
 ; Install Page
 ; ------------
-!define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{name}} {{bitness}}"
 
 Section "Install"
     SectionIn RO ; Read-only
@@ -225,39 +258,3 @@ Section "Uninstall"
     Delete "$InstDir\uninstall.exe"
     Delete "$SMPROGRAMS\{{name}} {{bitness}}.lnk"
 SectionEnd
-
-; --------------
-; Set install directory if in the registry
-; --------------
-Function SetInstDir
-    ; check in the registry for already installed version
-    ReadRegStr $0 HKCU "${UNINSTALL_KEY}" "InstallLocation"
-    ${If} ${Errors}
-        ClearErrors
-    ${Else}
-        StrCpy $InstDir $0
-    ${Endif}
-    ; save $InstDir
-    StrCpy $OldInstDir $InstDir
-    ; no directory page if /AUTOINSTDIR=yes
-    ${GetParameters} $0
-    ${GetOptions} $0 "/AUTOINSTDIR=" $1
-    ClearErrors
-    ${If} $1 == "yes"
-        Abort
-    ${Endif}
-FunctionEnd
-
-; --------------
-; Uninstall version stored in the registry if different from instdir
-; --------------
-Function UninstallOldVersionIfNeeded
-    ReadRegStr $0 HKCU "${UNINSTALL_KEY}" "InstallLocation"
-    ${If} ${Errors}
-        ClearErrors
-    ${ElseIf} $InstDir != $0
-        ${If} ${FileExists} "$0\uninstall.exe"
-            ExecWait "$0\uninstall.exe /S"
-        ${EndIf}
-    ${Endif}
-FunctionEnd
