@@ -63,7 +63,7 @@ class EpgUpdater:
     # pylint: disable=too-many-instance-attributes
     def __init__(self, config: AppConfig, epg_updates: EPGUpdates, ui: UI) -> None:
         self.hover_epg = HoverEPG(ui)
-        self.keyboard_watcher = KeyboardWatcher("e", self.hover_epg.on_key_pressed)
+        self.keyboard_watcher = KeyboardWatcher("eE", self.hover_epg.on_key_pressed)
         self.show_epg_job = JobRunner[ShowEpg](self.hover_epg.show_epg, "Show epg job", check_new=False)
         self.show_channel_job = JobRunner[ShowChannel](
             self.hover_epg.show_channel, "Show channel job", check_new=False

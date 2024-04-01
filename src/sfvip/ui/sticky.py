@@ -95,6 +95,8 @@ class StickyWindows:
         for sticky in self._instances:
             if border or sticky.show_when_no_border:
                 sticky.change_position(rect)
+        if self._instances:
+            self._instances[0].update_idletasks()
 
     def bring_to_front_all(self, is_topmost: bool, is_foreground: bool, border: bool) -> None:
         for sticky in self._instances:
@@ -122,10 +124,6 @@ class StickyWindows:
                 if state.rect != self._current_rect:
                     self._current_rect = state.rect
                     self.change_position_all(Maximized.fix(state.rect), not state.no_border)
-
-    def update_position(self, window: StickyWindow) -> None:
-        if rect := self._current_rect:
-            window.change_position(rect)
 
     def has_focus(self) -> bool:
         return win.is_foreground(self._followed_pid) if self._followed_pid else False

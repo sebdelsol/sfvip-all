@@ -396,20 +396,12 @@ class RoundedBox(tk.Canvas):
     _rounded_box_tag = "canvas"
     minimum_steps = 10  # lower values give pixelated corners
 
-    # pylint: disable=too-many-arguments
     def __init__(
-        self,
-        master: tk.BaseWidget,
-        radius: int,
-        box_color: str,
-        get_widget: GetWidgetT,
-        max_height: Optional[int] = None,
-        **kwargs: Any,
+        self, master: tk.BaseWidget, radius: int, box_color: str, get_widget: GetWidgetT, **kwargs: Any
     ) -> None:
         super().__init__(master, bd=0, highlightthickness=0, **kwargs)
         self.radius = radius
         self.box_color = box_color
-        self.max_height = max_height
         self.widget = get_widget(self)
         self.cos_sin_r = tuple(self.get_cos_sin())
         self.create_window(radius, radius, window=self.widget, anchor=tk.NW)
@@ -435,10 +427,10 @@ class RoundedBox(tk.Canvas):
         self.delete(self._rounded_box_tag)
         self.create_polygon(points, fill=color, tags=self._rounded_box_tag)
 
-    def update_widget(self) -> None:
+    def update_widget(self, max_height: Optional[float]) -> None:
         self.widget.update_idletasks()
         w, h = self.widget.winfo_reqwidth(), self.widget.winfo_reqheight()
-        box_h = min(h, self.max_height) if self.max_height else h
+        box_h = round(min(h, max_height) if max_height else h)
         w_box, h_box = w + 2 * self.radius, box_h + 2 * self.radius
         self.create_rounded_box(0, 0, w_box, h_box, color=self.box_color)
         self.config(width=w_box, height=h_box)
@@ -454,23 +446,22 @@ class RoundedBoxScroll(RoundedBox):
         box_color: str,
         get_widget: GetWidgetT,
         get_scrolling_widget: GetWidgetT,
-        max_height: Optional[int] = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__(master, radius, box_color, get_widget, max_height, **kwargs)
+        super().__init__(master, radius, box_color, get_widget, **kwargs)
         self.scroll = tk.Canvas(self, bg=self.box_color, bd=0, highlightthickness=0)
         self.scrolling_widget = get_scrolling_widget(self.scroll)
         self.scroll.create_window(0, 0, window=self.scrolling_widget, anchor=tk.NW)
         self.scroll_id = self.create_window(0, 0, window=self.scroll, anchor=tk.NW)
         self.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
 
-    def update_widget(self) -> None:
+    def update_widget(self, max_height: Optional[float]) -> None:
         self.widget.update_idletasks()
         w, h = self.widget.winfo_reqwidth(), self.widget.winfo_reqheight()
 
         self.scrolling_widget.update_idletasks()
         ws, hs = self.scrolling_widget.winfo_reqwidth(), self.scrolling_widget.winfo_reqheight()
-        box_h = min(hs, self.max_height) if self.max_height else hs
+        box_h = round(min(hs, max_height) if max_height else hs)
         w_box, h_box = max(w, ws) + 2 * self.radius, h + box_h + 2 * self.radius
 
         self.scroll.config(scrollregion=(0, 0, w_box, hs), width=w_box, height=box_h)
