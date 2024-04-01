@@ -54,7 +54,7 @@ You'll find them in the app folder[^3]:
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%20{nuitka_version}-linen?logo=nuitka)](https://nuitka.net/)
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%20{pyinstaller_version}-linen?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
 
-* [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
+* [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing when [upgrading dependencies](#upgrade-dependencies).  
 * Check the [***build config***](build_config.py).
 
 ### Create the environments

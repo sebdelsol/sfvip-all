@@ -24,7 +24,7 @@ def _minimum_addons(user_addon: SfVipAddOn) -> Sequence[Any]:
     return (
         core.Core(),
         proxyserver.Proxyserver(),
-        user_addon,
+        user_addon,  # user addon @ its right place
         next_layer.NextLayer(),
         tlsconfig.TlsConfig(),
     )

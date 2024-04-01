@@ -45,16 +45,16 @@ You'll find them in the app folder[^3]:
 [^3]:The app is installed by default in `%LocalAppData%\Programs\Sfvip All x64`, `%LocalAppData%\Programs\Sfvip All x86` or the installation directory you've specified during the installation.
 
 # Build
-[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.45-informational?logo=github)](/build_config.py#L27)
+[![version](https://custom-icon-badges.demolab.com/badge/Build%201.4.12.46-informational?logo=github)](/build_config.py#L27)
 [![Sloc](https://custom-icon-badges.demolab.com/badge/Sloc%208.5k-informational?logo=file-code)](https://api.codetabs.com/v1/loc/?github=sebdelsol/sfvip-all)
 [![Ruff](https://custom-icon-badges.demolab.com/badge/Ruff-informational?logo=ruff-color)](https://docs.astral.sh/ruff/)
 [![Python](https://custom-icon-badges.demolab.com/badge/Python%203.11.8-linen?logo=python-color)](https://www.python.org/downloads/release/python-3118/)
 [![mitmproxy](https://custom-icon-badges.demolab.com/badge/Mitmproxy%2010.2.4-linen?logo=mitmproxy-black)](https://mitmproxy.org/)
-[![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%203.09-linen?logo=nsis-color)](https://nsis.sourceforge.io/Download)
+[![Nsis](https://custom-icon-badges.demolab.com/badge/Nsis%203.10-linen?logo=nsis-color)](https://nsis.sourceforge.io/Download)
 [![Nuitka](https://custom-icon-badges.demolab.com/badge/Nuitka%202.1.4-linen?logo=nuitka)](https://nuitka.net/)
 [![PyInstaller](https://custom-icon-badges.demolab.com/badge/PyInstaller%206.5.0-linen?logo=pyinstaller-windowed)](https://pyinstaller.org/en/stable/)
 
-* [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing.  
+* [***NSIS***](https://nsis.sourceforge.io/Download) will be automatically installed if missing when [upgrading dependencies](#upgrade-dependencies).  
 * Check the [***build config***](build_config.py).
 
 ### Create the environments

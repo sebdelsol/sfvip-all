@@ -7,18 +7,14 @@ from src.mitm.epg import ShowEpg
 from ...mitm.epg.programme import EPGprogrammeM3U
 from ...winapi import win
 from .fx import Fade
-from .sticky import Offset, StickyWindow, sticky_windows
+from .sticky import Offset, Rect, StickyWindow, sticky_windows
 from .style import Style
 from .widgets import Border, Button, GetWidgetT, HorizontalProgressBar, RoundedBox, RoundedBoxScroll
-
-# TODO check max width & height
 
 
 class _HoverWindow(StickyWindow):
     show_when_no_border = True
     click_through = True
-    max_height = None
-
     offset: Offset
     bg = "black"
     alpha = 0.9
@@ -43,7 +39,6 @@ class _HoverWindow(StickyWindow):
                 box_color=self.box_color,
                 get_widget=get_widget,
                 get_scrolling_widget=get_scrolling_widget,
-                max_height=self.max_height,
             )
         else:
             self.box = RoundedBox(
@@ -52,23 +47,33 @@ class _HoverWindow(StickyWindow):
                 radius=self.radius,
                 box_color=self.box_color,
                 get_widget=get_widget,
-                max_height=self.max_height,
             )
         self.box.pack()
         self._fade = Fade(self)
+        self._size = None, None
 
     def update_and_show(self) -> None:
-        self.box.update_widget()
-        sticky_windows.update_position(self)
+        if rect := sticky_windows.get_rect():
+            self.change_position(rect, forced=True)
         if self.wait_before_fade is not None:
             self._fade.fade_in_and_out(
-                self.fade_duration,
-                self.auto_fade_out_duration,
-                self.wait_before_fade,
-                max_alpha=self.alpha,
+                self.fade_duration, self.auto_fade_out_duration, self.wait_before_fade, max_alpha=self.alpha
             )
         else:
             self._fade.fade(self.fade_duration, out=False, max_alpha=self.alpha)
+
+    def change_position(self, rect: Rect, forced: bool = False) -> None:
+        if forced or self.is_shown():
+            x, y = self.offset.regular
+            size = max(10, rect.w - (x + self.radius) * 2), max(10, rect.h - (y + self.radius) * 2)
+            if forced or size != self._size:
+                self.set_width(size[0])
+                self.box.update_widget(size[1])
+                self._size = size
+        super().change_position(rect)
+
+    def set_width(self, width: Optional[float]) -> None:
+        pass
 
     def hide(self) -> None:
         self._fade.fade(self.fade_duration, out=True)
@@ -94,12 +99,16 @@ class HoverMessage(_HoverWindow):
             self.label.config(**self.stl(message).to_tk)
             self.update_and_show()
 
+    def set_width(self, width: Optional[float]) -> None:
+        if width and self.label:
+            self.label.config(wraplength=width)
+
 
 class ProgrammeNow(tk.Frame):
     stl_title = Style().font("Calibri").font_size(12).bold
     stl_schedule = Style().font("Calibri").font_size(14).bold
-    stl_descr = Style().font("Calibri").font_size(14).wrap(100)
-    progress_bar = dict(bg="#606060", fg="#1c8cbc", height=10, length=400)
+    stl_descr = Style().font("Calibri").font_size(14)
+    progress_bar = dict(bg="#606060", fg="#1c8cbc", height=10)
 
     def __init__(self, master: tk.BaseWidget, bg: str, **kwargs: Any) -> None:
         super().__init__(master, bg=bg, **kwargs)
@@ -115,7 +124,7 @@ class ProgrammeNow(tk.Frame):
         self.label_descr.pack(anchor=tk.W)
 
     def set(self, name: Optional[str], prg: EPGprogrammeM3U, now: float) -> None:
-        if prg.start_timestamp <= now:  # check it's now
+        if prg.start_timestamp <= now and prg.duration:  # check it's now and lasts something
             name = f"{name} - " if name else ""
             self.label_title.config(**self.stl_title(f"{name}{prg.title}").to_tk)
             self.label_schedule.config(**self.stl_schedule(f"{prg.start}").to_tk)
@@ -125,6 +134,14 @@ class ProgrammeNow(tk.Frame):
                 self.label_descr.pack(anchor=tk.W)
             else:
                 self.label_descr.pack_forget()
+
+    def set_width(self, width: Optional[float]) -> None:
+        if width:
+            padx = sum(self.progressbar.pack_info()["padx"], 0)  # type: ignore
+            schedule_width = self.label_schedule.winfo_reqwidth() + padx
+            self.progressbar.config(length=max(10, width - schedule_width))
+            self.label_title.config(wraplength=width)
+            self.label_descr.config(wraplength=width)
 
 
 class HoverChannelEpg(_HoverWindow):
@@ -143,6 +160,10 @@ class HoverChannelEpg(_HoverWindow):
             self.programme.set(epg.name, epg.programmes[0], now)
             self.update_and_show()
 
+    def set_width(self, width: Optional[float]) -> None:
+        if self.programme:
+            self.programme.set_width(width)
+
 
 class Programme(tk.Frame):
     border_color = "#303030"
@@ -155,6 +176,7 @@ class Programme(tk.Frame):
         self.label_title.pack(anchor=tk.W)
         self.label_schedule.pack(anchor=tk.W)
         self.label_descr.pack(anchor=tk.W)
+        self.is_packed = False
 
     def set(self, prg: EPGprogrammeM3U) -> None:
         self.label_title.config(**ProgrammeNow.stl_title(prg.title).to_tk)
@@ -165,11 +187,23 @@ class Programme(tk.Frame):
         else:
             self.label_descr.pack_forget()
 
+    def set_width(self, width: Optional[float]) -> None:
+        if width:
+            self.label_title.config(wraplength=width)
+            self.label_descr.config(wraplength=width)
+
+    def pack(self, **kw: Any) -> None:
+        super().pack(**kw)
+        self.is_packed = True
+
+    def pack_forget(self) -> None:
+        super().pack_forget()
+        self.is_packed = False
+
 
 class HoverChannelProgrammes(_HoverWindow):
     wait_before_fade = None
     click_through = False
-    max_height = 600
     offset = HoverMessage.offset
     stl_channel = Style().font("Calibri").font_size(15).bold
     stl_button = Style().font("Calibri").font_size(10)
@@ -212,3 +246,9 @@ class HoverChannelProgrammes(_HoverWindow):
                 else:
                     shown_prg.pack_forget()
             self.update_and_show()
+
+    def set_width(self, width: Optional[float]) -> None:
+        if width and self.programmes:
+            for shown_prg in self.programmes:
+                if shown_prg.is_packed:
+                    shown_prg.set_width(width)

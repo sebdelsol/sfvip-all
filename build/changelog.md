@@ -1,3 +1,8 @@
+## 1.4.12.46
+* Bump _NSIS_ to 3.10.
+* Fix position & size of M3U account EPG.
+* Hit 'e' or 'E' for showing the M3U account EPG.
+
 ## 1.4.12.45
 * Bump _Nuitka_ to 2.1.4.
 * Fix MAC account update info.
