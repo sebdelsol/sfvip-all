@@ -23,6 +23,7 @@ class _HoverWindow(StickyWindow):
     fade_duration = 250
     box_color = "#101010"
     radius = 7
+    x_margin = 150
 
     def __init__(self, get_widget: GetWidgetT, get_scrolling_widget: Optional[GetWidgetT] = None) -> None:
         super().__init__(self.offset, bg=self.bg)
@@ -65,7 +66,10 @@ class _HoverWindow(StickyWindow):
     def change_position(self, rect: Rect, forced: bool = False) -> None:
         if forced or self.is_shown():
             x, y = self.offset.regular
-            size = max(10, rect.w - (x + self.radius) * 2), max(10, rect.h - (y + self.radius) * 2)
+            size = (
+                max(10, rect.w - (x + self.radius + _HoverWindow.x_margin) * 2),
+                max(10, rect.h - (y + self.radius) * 2),
+            )
             if forced or size != self._size:
                 self.set_width(size[0])
                 self.box.update_widget(size[1])
@@ -145,7 +149,7 @@ class ProgrammeNow(tk.Frame):
 
 
 class HoverChannelEpg(_HoverWindow):
-    offset = Offset(regular=(22, 0), center=(0, 0.75))
+    offset = Offset(regular=(22, 0), center=(0, 0.85))
 
     def __init__(self) -> None:
         self.programme = None

@@ -5,6 +5,7 @@
 * Update ***[Mpv](https://mpv.io/)*** and **Sfvip Player** so you can enjoy their latest features. 
 * Cache MAC acccounts all categories to access it faster.
 * Translated in all **Sfvip Player** languages.
+* Fix XC accounts [series' episodes list](https://github.com/K4L4Uz/SFVIP-Player/issues/12).
 * Support an **external EPG**[^1].
 
 [^1]: External EPG doesn't work with **local** m3u accounts.
