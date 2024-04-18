@@ -80,7 +80,7 @@ class PlayerChangelogs(ConfigLoader):
 
 
 class PlayerLatestUpdate:
-    _url = "https://raw.githubusercontent.com/K4L4Uz/SFVIP-Player/main/Update.json"
+    _url = "https://raw.githubusercontent.com/K4L4Uz/SFVIP-Player/master/Update.json"
     _re_version = re.compile(r"^v([\d\.]+)")
     _key_version = "tag_name"
 
